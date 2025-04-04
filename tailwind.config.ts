@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors for the budget app
+				'changed-row': '#FEF7CD', // Kuning muda
+				'new-row': '#F2FCE2',     // Hijau muda
+				'deleted-row': '#F1F0FB', // Abu-abu silang
+				'warning-box': '#ea384c', // Merah
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
