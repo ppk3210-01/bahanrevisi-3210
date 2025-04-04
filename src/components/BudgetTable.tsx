@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,36 +46,73 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     komponenOutput: komponenOutput
   });
 
-  const handleAddItem = () => {
-    if (!newItem.uraian) {
+  const validateItem = (item: Partial<BudgetItem>): boolean => {
+    // Check if all required fields are filled
+    if (!item.uraian || item.uraian.trim() === '') {
       toast.error('Uraian harus diisi');
+      return false;
+    }
+    
+    // Check for negative values
+    if ((item.volumeSemula && item.volumeSemula < 0) || 
+        (item.hargaSatuanSemula && item.hargaSatuanSemula < 0) ||
+        (item.volumeMenjadi && item.volumeMenjadi < 0) ||
+        (item.hargaSatuanMenjadi && item.hargaSatuanMenjadi < 0)) {
+      toast.error('Nilai volume dan harga satuan tidak boleh negatif');
+      return false;
+    }
+    
+    // Check if all numeric fields are filled
+    if (item.volumeSemula === undefined || item.volumeSemula === null || 
+        item.hargaSatuanSemula === undefined || item.hargaSatuanSemula === null ||
+        item.volumeMenjadi === undefined || item.volumeMenjadi === null ||
+        item.hargaSatuanMenjadi === undefined || item.hargaSatuanMenjadi === null) {
+      toast.error('Semua kolom harus diisi');
+      return false;
+    }
+    
+    // Check if satuan is selected
+    if (!item.satuanSemula || !item.satuanMenjadi) {
+      toast.error('Satuan harus dipilih');
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleAddItem = async () => {
+    if (!validateItem(newItem)) {
       return;
     }
 
-    onAdd({
-      uraian: newItem.uraian || '',
-      volumeSemula: newItem.volumeSemula || 0,
-      satuanSemula: newItem.satuanSemula || 'Paket',
-      hargaSatuanSemula: newItem.hargaSatuanSemula || 0,
-      volumeMenjadi: newItem.volumeMenjadi || 0,
-      satuanMenjadi: newItem.satuanMenjadi || 'Paket',
-      hargaSatuanMenjadi: newItem.hargaSatuanMenjadi || 0,
-      komponenOutput,
-      isApproved: false
-    });
+    try {
+      await onAdd({
+        uraian: newItem.uraian || '',
+        volumeSemula: newItem.volumeSemula || 0,
+        satuanSemula: newItem.satuanSemula || 'Paket',
+        hargaSatuanSemula: newItem.hargaSatuanSemula || 0,
+        volumeMenjadi: newItem.volumeMenjadi || 0,
+        satuanMenjadi: newItem.satuanMenjadi || 'Paket',
+        hargaSatuanMenjadi: newItem.hargaSatuanMenjadi || 0,
+        komponenOutput,
+        isApproved: false
+      });
 
-    setNewItem({
-      uraian: '',
-      volumeSemula: 0,
-      satuanSemula: 'Paket',
-      hargaSatuanSemula: 0,
-      volumeMenjadi: 0,
-      satuanMenjadi: 'Paket',
-      hargaSatuanMenjadi: 0,
-      komponenOutput
-    });
+      setNewItem({
+        uraian: '',
+        volumeSemula: 0,
+        satuanSemula: 'Paket',
+        hargaSatuanSemula: 0,
+        volumeMenjadi: 0,
+        satuanMenjadi: 'Paket',
+        hargaSatuanMenjadi: 0,
+        komponenOutput
+      });
 
-    toast.success('Item berhasil ditambahkan');
+      toast.success('Item berhasil ditambahkan');
+    } catch (error) {
+      console.error('Failed to add item:', error);
+    }
   };
 
   const startEditing = (item: BudgetItem) => {
@@ -87,11 +125,19 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
-    if (field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
+    // For numeric fields, ensure value is non-negative
+    if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || 
+        field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
       if (typeof value === 'string') {
         const numValue = Number(value.replace(/,/g, ''));
         if (isNaN(numValue)) return;
         value = numValue;
+      }
+      
+      // Prevent negative values
+      if (value < 0) {
+        toast.error('Nilai tidak boleh negatif');
+        return;
       }
     }
     
@@ -270,6 +316,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   placeholder="Tambah Uraian Baru" 
                   value={newItem.uraian || ''} 
                   onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
+                  required
                 />
               </td>
               <td className="number-cell">
@@ -278,12 +325,15 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   placeholder="0" 
                   value={newItem.volumeSemula || ''} 
                   onChange={(e) => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
+                  min="0"
+                  required
                 />
               </td>
               <td className="unit-cell">
                 <Select 
                   value={newItem.satuanSemula} 
                   onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Satuan" />
@@ -303,6 +353,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   placeholder="0" 
                   value={newItem.hargaSatuanSemula || ''} 
                   onChange={(e) => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
+                  min="0"
+                  required
                 />
               </td>
               <td className="number-cell">
@@ -314,12 +366,15 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   placeholder="0" 
                   value={newItem.volumeMenjadi || ''} 
                   onChange={(e) => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
+                  min="0"
+                  required
                 />
               </td>
               <td className="unit-cell">
                 <Select 
                   value={newItem.satuanMenjadi} 
                   onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Satuan" />
@@ -339,6 +394,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   placeholder="0" 
                   value={newItem.hargaSatuanMenjadi || ''} 
                   onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
+                  min="0"
+                  required
                 />
               </td>
               <td className="number-cell">
