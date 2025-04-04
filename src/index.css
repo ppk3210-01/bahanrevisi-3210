@@ -124,7 +124,7 @@
 }
 
 .warning-box {
-  @apply bg-warning-box text-white font-semibold p-4 rounded-md my-4;
+  @apply bg-red-500 text-white font-semibold p-4 rounded-md my-4;
 }
 
 .data-table th {
@@ -159,15 +159,18 @@
   background-color: #F0FDF4;
 }
 
+.bg-purple-100 {
+  background-color: #E9D5FF;
+}
+
+.bg-yellow-100 {
+  background-color: #FEF9C3;
+}
+
 .text-red-600 {
   color: #DC2626;
 }
 
 .text-green-600 {
   color: #16A34A;
-}
-
-/* Purple background for unapproved items */
-.bg-purple-100 {
-  background-color: #D6BCFA;
 }

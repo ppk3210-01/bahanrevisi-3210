@@ -42,16 +42,16 @@ const BudgetComparison: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Filters section */}
-      <BudgetFilter onFilterChange={handleFilterChange} />
-      
-      {/* Summary Box */}
-      {!loading && budgetItems.length > 0 && (
+      {/* Summary Box - Moved above filters */}
+      {!loading && (
         <BudgetSummaryBox 
           totalSemula={totalSemula}
           totalMenjadi={totalMenjadi}
         />
       )}
+      
+      {/* Filters section */}
+      <BudgetFilter onFilterChange={handleFilterChange} />
       
       {/* Budget table section */}
       <Card>
@@ -78,6 +78,12 @@ const BudgetComparison: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      
+      {totalSemula !== totalMenjadi && (
+        <div className="warning-box">
+          ⚠ PERINGATAN: Terjadi perbedaan total anggaran sebesar {formatCurrency(totalMenjadi - totalSemula)}
+        </div>
+      )}
     </div>
   );
 };

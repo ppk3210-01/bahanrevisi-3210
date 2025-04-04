@@ -23,20 +23,21 @@ const useBudgetData = (filters: FilterSelection) => {
           .from('budget_items')
           .select('*');
         
-        // Apply filtering logic based on selected filters
-        // Now supports filtering at any level, not just komponenOutput
-        if (filters.komponenOutput) {
-          query = query.eq('komponen_output', filters.komponenOutput);
-        } else if (filters.rincianOutput) {
-          // Filter by rincian_output if available in the future
-          // Currently, we'll need to modify the database schema to support this
-          // For now, this is a placeholder
-        } else if (filters.kegiatan) {
-          // Filter by kegiatan if available in the future
-          // Currently, we'll need to modify the database schema to support this
-        } else if (filters.programPembebanan) {
-          // Filter by program_pembebanan if available in the future
-          // Currently, we'll need to modify the database schema to support this
+        // Updated filtering logic to support all levels
+        if (filters.programPembebanan) {
+          query = query.eq('program_pembebanan', filters.programPembebanan);
+          
+          if (filters.kegiatan) {
+            query = query.eq('kegiatan', filters.kegiatan);
+            
+            if (filters.rincianOutput) {
+              query = query.eq('rincian_output', filters.rincianOutput);
+              
+              if (filters.komponenOutput) {
+                query = query.eq('komponen_output', filters.komponenOutput);
+              }
+            }
+          }
         }
 
         const { data, error: supabaseError } = await query;
@@ -61,7 +62,10 @@ const useBudgetData = (filters: FilterSelection) => {
             selisih: Number(item.selisih || 0),
             status: item.status as "unchanged" | "changed" | "new" | "deleted",
             isApproved: item.is_approved,
-            komponenOutput: item.komponen_output
+            komponenOutput: item.komponen_output,
+            programPembebanan: item.program_pembebanan,
+            kegiatan: item.kegiatan,
+            rincianOutput: item.rincian_output
           }));
 
           setBudgetItems(transformedData);
@@ -91,10 +95,16 @@ const useBudgetData = (filters: FilterSelection) => {
         volume_semula: item.volumeSemula,
         satuan_semula: item.satuanSemula,
         harga_satuan_semula: item.hargaSatuanSemula,
+        jumlah_semula: jumlahSemula,
         volume_menjadi: item.volumeMenjadi,
         satuan_menjadi: item.satuanMenjadi,
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
+        jumlah_menjadi: jumlahMenjadi,
+        selisih: selisih,
         komponen_output: item.komponenOutput,
+        program_pembebanan: filters.programPembebanan || '',
+        kegiatan: filters.kegiatan || '',
+        rincian_output: filters.rincianOutput || '',
         status: 'new',
         is_approved: false
       };
@@ -126,7 +136,10 @@ const useBudgetData = (filters: FilterSelection) => {
           selisih: Number(data.selisih || 0),
           status: data.status as "unchanged" | "changed" | "new" | "deleted",
           isApproved: data.is_approved,
-          komponenOutput: data.komponen_output
+          komponenOutput: data.komponen_output,
+          programPembebanan: data.program_pembebanan,
+          kegiatan: data.kegiatan,
+          rincianOutput: data.rincian_output
         };
 
         // Add to state
@@ -156,8 +169,13 @@ const useBudgetData = (filters: FilterSelection) => {
       if ('status' in updates) supabaseUpdates.status = updates.status;
       if ('isApproved' in updates) supabaseUpdates.is_approved = updates.isApproved;
       
+      // When updating any values, the approval status should be reset
+      if ('volumeMenjadi' in updates || 'satuanMenjadi' in updates || 'hargaSatuanMenjadi' in updates) {
+        supabaseUpdates.is_approved = false;
+      }
+      
       // Update status based on changes
-      if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates) {
+      if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates || 'satuanMenjadi' in updates) {
         // Find current item to calculate new status
         const currentItem = budgetItems.find(item => item.id === id);
         if (currentItem) {
@@ -182,7 +200,9 @@ const useBudgetData = (filters: FilterSelection) => {
         prev.map(item => {
           if (item.id === id) {
             const updatedItem = { ...item, ...updates };
-            if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates) {
+            if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates || 'satuanMenjadi' in updates) {
+              // Also reset approval status when any value changes
+              updatedItem.isApproved = false;
               return updateItemStatus(updatedItem);
             }
             return updatedItem;
@@ -232,10 +252,6 @@ const useBudgetData = (filters: FilterSelection) => {
       const { error: supabaseError } = await supabase
         .from('budget_items')
         .update({
-          volume_semula: item.volumeMenjadi,
-          satuan_semula: item.satuanMenjadi,
-          harga_satuan_semula: item.hargaSatuanMenjadi,
-          status: 'unchanged',
           is_approved: true
         })
         .eq('id', id);
@@ -250,12 +266,6 @@ const useBudgetData = (filters: FilterSelection) => {
           if (item.id === id) {
             return {
               ...item,
-              volumeSemula: item.volumeMenjadi,
-              satuanSemula: item.satuanMenjadi,
-              hargaSatuanSemula: item.hargaSatuanMenjadi,
-              jumlahSemula: item.jumlahMenjadi,
-              selisih: 0,
-              status: 'unchanged',
               isApproved: true
             };
           }
