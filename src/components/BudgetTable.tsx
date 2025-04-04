@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { BudgetItem } from '@/types/budget';
 import { UNIT_OPTIONS } from '@/lib/constants';
-import { getRowStyle, formatCurrency } from '@/utils/budgetCalculations';
+import { getRowStyle, formatCurrency, calculateAmount, calculateDifference } from '@/utils/budgetCalculations';
 import { toast } from '@/hooks/use-toast';
 
 interface BudgetTableProps {
@@ -44,6 +45,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     hargaSatuanMenjadi: 0,
     komponenOutput: komponenOutput
   });
+
+  // Calculate dynamic values for the new item being added
+  const newItemJumlahSemula = calculateAmount(newItem.volumeSemula || 0, newItem.hargaSatuanSemula || 0);
+  const newItemJumlahMenjadi = calculateAmount(newItem.volumeMenjadi || 0, newItem.hargaSatuanMenjadi || 0);
+  const newItemSelisih = calculateDifference(newItemJumlahSemula, newItemJumlahMenjadi);
 
   const validateItem = (item: Partial<BudgetItem>): boolean => {
     // Check if all required fields are filled
@@ -304,6 +310,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                    {/* Show approve button only if item is not approved and has changes */}
                     {!item.isApproved && item.status !== 'unchanged' && (
                       <Button 
                         variant="outline" 
@@ -371,7 +378,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 />
               </td>
               <td className="number-cell">
-                {formatCurrency((newItem.volumeSemula || 0) * (newItem.hargaSatuanSemula || 0))}
+                {formatCurrency(newItemJumlahSemula)}
               </td>
               <td className="number-cell">
                 <Input 
@@ -412,13 +419,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 />
               </td>
               <td className="number-cell">
-                {formatCurrency((newItem.volumeMenjadi || 0) * (newItem.hargaSatuanMenjadi || 0))}
+                {formatCurrency(newItemJumlahMenjadi)}
               </td>
               <td className="number-cell">
-                {formatCurrency(
-                  ((newItem.volumeMenjadi || 0) * (newItem.hargaSatuanMenjadi || 0)) - 
-                  ((newItem.volumeSemula || 0) * (newItem.hargaSatuanSemula || 0))
-                )}
+                {formatCurrency(newItemSelisih)}
               </td>
               <td>
                 <Button variant="outline" onClick={handleAddItem}>
@@ -438,13 +442,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
           </tbody>
         </table>
       </div>
-      
-      {totalSelisih !== 0 && (
-        <div className="warning-box m-4">
-          ⚠ PERINGATAN:
-          Terjadi perbedaan total anggaran sebesar {formatCurrency(totalSelisih)}
-        </div>
-      )}
     </div>
   );
 };

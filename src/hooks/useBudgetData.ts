@@ -23,20 +23,22 @@ const useBudgetData = (filters: FilterSelection) => {
           .from('budget_items')
           .select('*');
         
-        // Apply filtering logic based on selected filters
-        // Now supports filtering at any level, not just komponenOutput
+        // Apply filtering logic based on selected filters at any level
+        // This implements the improved filter logic
         if (filters.komponenOutput) {
           query = query.eq('komponen_output', filters.komponenOutput);
         } else if (filters.rincianOutput) {
-          // Filter by rincian_output if available in the future
-          // Currently, we'll need to modify the database schema to support this
-          // For now, this is a placeholder
+          // Filter by rincian_output
+          // Assuming you have a rincian_output column in your table
+          query = query.eq('rincian_output', filters.rincianOutput);
         } else if (filters.kegiatan) {
-          // Filter by kegiatan if available in the future
-          // Currently, we'll need to modify the database schema to support this
+          // Filter by kegiatan
+          // Assuming you have a kegiatan column in your table
+          query = query.eq('kegiatan', filters.kegiatan);
         } else if (filters.programPembebanan) {
-          // Filter by program_pembebanan if available in the future
-          // Currently, we'll need to modify the database schema to support this
+          // Filter by program_pembebanan
+          // Assuming you have a program_pembebanan column in your table
+          query = query.eq('program_pembebanan', filters.programPembebanan);
         }
 
         const { data, error: supabaseError } = await query;
@@ -61,7 +63,11 @@ const useBudgetData = (filters: FilterSelection) => {
             selisih: Number(item.selisih || 0),
             status: item.status as "unchanged" | "changed" | "new" | "deleted",
             isApproved: item.is_approved,
-            komponenOutput: item.komponen_output
+            komponenOutput: item.komponen_output,
+            // Add these fields if they exist in your database, otherwise set defaults
+            programPembebanan: item.program_pembebanan || '',
+            kegiatan: item.kegiatan || '',
+            rincianOutput: item.rincian_output || ''
           }));
 
           setBudgetItems(transformedData);
@@ -91,12 +97,19 @@ const useBudgetData = (filters: FilterSelection) => {
         volume_semula: item.volumeSemula,
         satuan_semula: item.satuanSemula,
         harga_satuan_semula: item.hargaSatuanSemula,
+        jumlah_semula: jumlahSemula,
         volume_menjadi: item.volumeMenjadi,
         satuan_menjadi: item.satuanMenjadi,
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
+        jumlah_menjadi: jumlahMenjadi,
+        selisih: selisih,
         komponen_output: item.komponenOutput,
         status: 'new',
-        is_approved: false
+        is_approved: false,
+        // Include filter values if they exist
+        program_pembebanan: filters.programPembebanan || null,
+        kegiatan: filters.kegiatan || null,
+        rincian_output: filters.rincianOutput || null
       };
       
       // Save to Supabase
@@ -126,7 +139,10 @@ const useBudgetData = (filters: FilterSelection) => {
           selisih: Number(data.selisih || 0),
           status: data.status as "unchanged" | "changed" | "new" | "deleted",
           isApproved: data.is_approved,
-          komponenOutput: data.komponen_output
+          komponenOutput: data.komponen_output,
+          programPembebanan: data.program_pembebanan || '',
+          kegiatan: data.kegiatan || '',
+          rincianOutput: data.rincian_output || ''
         };
 
         // Add to state
@@ -143,9 +159,16 @@ const useBudgetData = (filters: FilterSelection) => {
   // Update an existing budget item
   const updateBudgetItem = async (id: string, updates: Partial<BudgetItem>) => {
     try {
+      // Find the current item to use for calculations
+      const currentItem = budgetItems.find(item => item.id === id);
+      if (!currentItem) {
+        throw new Error('Item not found');
+      }
+      
       // Transform BudgetItem updates to Supabase format
       const supabaseUpdates: Record<string, any> = {};
       
+      // Handle direct field mappings
       if ('uraian' in updates) supabaseUpdates.uraian = updates.uraian;
       if ('volumeSemula' in updates) supabaseUpdates.volume_semula = updates.volumeSemula;
       if ('satuanSemula' in updates) supabaseUpdates.satuan_semula = updates.satuanSemula;
@@ -153,18 +176,50 @@ const useBudgetData = (filters: FilterSelection) => {
       if ('volumeMenjadi' in updates) supabaseUpdates.volume_menjadi = updates.volumeMenjadi;
       if ('satuanMenjadi' in updates) supabaseUpdates.satuan_menjadi = updates.satuanMenjadi;
       if ('hargaSatuanMenjadi' in updates) supabaseUpdates.harga_satuan_menjadi = updates.hargaSatuanMenjadi;
-      if ('status' in updates) supabaseUpdates.status = updates.status;
-      if ('isApproved' in updates) supabaseUpdates.is_approved = updates.isApproved;
       
-      // Update status based on changes
+      // Calculate derived values if relevant fields have been updated
+      let updatedItem = { ...currentItem, ...updates };
+      
+      // Calculate jumlah_menjadi if any of its components have changed
       if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates) {
-        // Find current item to calculate new status
-        const currentItem = budgetItems.find(item => item.id === id);
-        if (currentItem) {
-          const updatedItem = { ...currentItem, ...updates };
-          const statusUpdatedItem = updateItemStatus(updatedItem);
-          supabaseUpdates.status = statusUpdatedItem.status;
-        }
+        const jumlahMenjadi = calculateAmount(
+          updatedItem.volumeMenjadi, 
+          updatedItem.hargaSatuanMenjadi
+        );
+        supabaseUpdates.jumlah_menjadi = jumlahMenjadi;
+        updatedItem.jumlahMenjadi = jumlahMenjadi;
+        
+        // Calculate selisih based on the new jumlah_menjadi
+        const selisih = calculateDifference(updatedItem.jumlahSemula, jumlahMenjadi);
+        supabaseUpdates.selisih = selisih;
+        updatedItem.selisih = selisih;
+      }
+      
+      // Calculate jumlah_semula if any of its components have changed
+      if ('volumeSemula' in updates || 'hargaSatuanSemula' in updates) {
+        const jumlahSemula = calculateAmount(
+          updatedItem.volumeSemula, 
+          updatedItem.hargaSatuanSemula
+        );
+        supabaseUpdates.jumlah_semula = jumlahSemula;
+        updatedItem.jumlahSemula = jumlahSemula;
+        
+        // Recalculate selisih since jumlah_semula changed
+        const selisih = calculateDifference(jumlahSemula, updatedItem.jumlahMenjadi);
+        supabaseUpdates.selisih = selisih;
+        updatedItem.selisih = selisih;
+      }
+      
+      // Update status based on changes - item is not approved anymore if it was changed
+      if (Object.keys(updates).length > 0 && currentItem.isApproved) {
+        supabaseUpdates.is_approved = false;
+        supabaseUpdates.status = 'changed';
+        updatedItem.isApproved = false;
+        updatedItem.status = 'changed';
+      } else if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates || 'satuanMenjadi' in updates) {
+        // If value is edited, update the status
+        updatedItem = updateItemStatus(updatedItem);
+        supabaseUpdates.status = updatedItem.status;
       }
       
       // Update in Supabase
@@ -181,15 +236,13 @@ const useBudgetData = (filters: FilterSelection) => {
       setBudgetItems(prev => 
         prev.map(item => {
           if (item.id === id) {
-            const updatedItem = { ...item, ...updates };
-            if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates) {
-              return updateItemStatus(updatedItem);
-            }
             return updatedItem;
           }
           return item;
         })
       );
+      
+      return updatedItem;
     } catch (err) {
       console.error('Error updating budget item:', err);
       toast.error('Gagal mengupdate item. Silakan coba lagi.');
@@ -235,6 +288,8 @@ const useBudgetData = (filters: FilterSelection) => {
           volume_semula: item.volumeMenjadi,
           satuan_semula: item.satuanMenjadi,
           harga_satuan_semula: item.hargaSatuanMenjadi,
+          jumlah_semula: item.jumlahMenjadi,
+          selisih: 0,
           status: 'unchanged',
           is_approved: true
         })
