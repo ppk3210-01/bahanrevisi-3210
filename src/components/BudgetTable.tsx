@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -80,6 +79,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     return true;
   };
 
+  const getCellClass = (item: BudgetItem, isValueChange: boolean): string => {
+    if (!item.isApproved && isValueChange && item.status !== 'unchanged') {
+      return 'unapproved-change';
+    }
+    return '';
+  };
+
   const handleAddItem = async () => {
     if (!validateItem(newItem)) {
       return;
@@ -147,6 +153,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const renderItemField = (item: BudgetItem, field: keyof BudgetItem) => {
     const isEditing = editingId === item.id;
     
+    const isValueChange = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field as string);
+    const cellClass = getCellClass(item, isValueChange);
+    
     switch(field) {
       case 'uraian':
         return isEditing ? (
@@ -166,9 +175,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             value={item.volumeMenjadi} 
             onChange={(e) => handleEditChange(item.id, 'volumeMenjadi', e.target.value)}
             className="w-full"
+            min="0"
           />
         ) : (
-          <span>{item.volumeMenjadi}</span>
+          <span className={cellClass}>{item.volumeMenjadi}</span>
         );
       
       case 'satuanMenjadi':
@@ -189,7 +199,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             </SelectContent>
           </Select>
         ) : (
-          <span>{item.satuanMenjadi}</span>
+          <span className={cellClass}>{item.satuanMenjadi}</span>
         );
       
       case 'hargaSatuanMenjadi':
@@ -199,13 +209,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             value={item.hargaSatuanMenjadi} 
             onChange={(e) => handleEditChange(item.id, 'hargaSatuanMenjadi', e.target.value)}
             className="w-full"
+            min="0"
           />
         ) : (
-          <span>{formatCurrency(item.hargaSatuanMenjadi)}</span>
+          <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi)}</span>
         );
       
       case 'jumlahMenjadi':
-        return <span>{formatCurrency(item.jumlahMenjadi)}</span>;
+        return <span className={cellClass}>{formatCurrency(item.jumlahMenjadi)}</span>;
       
       case 'jumlahSemula':
         return <span>{formatCurrency(item.jumlahSemula)}</span>;
@@ -293,17 +304,19 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="text-green-600" 
-                      onClick={() => {
-                        onApprove(item.id);
-                        toast.success('Item disetujui oleh PPK');
-                      }}
-                    >
-                      <Check className="h-4 w-4" />
-                    </Button>
+                    {!item.isApproved && item.status !== 'unchanged' && (
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="text-green-600" 
+                        onClick={() => {
+                          onApprove(item.id);
+                          toast.success('Item disetujui oleh PPK');
+                        }}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>

@@ -35,6 +35,15 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
 
   // Function to export to Excel
   const exportToExcel = () => {
+    if (items.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Peringatan",
+        description: "Tidak ada data untuk diekspor"
+      });
+      return;
+    }
+
     try {
       const exportData = prepareExportData();
       const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -51,7 +60,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       ], {origin: -1});
       
       // Generate Excel file
-      XLSX.writeFile(workbook, `Anggaran_${komponenOutput.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
       
       toast({
         title: "Berhasil!",
@@ -69,6 +79,15 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
 
   // Function to export to PDF using jsPDF
   const exportToPDF = () => {
+    if (items.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Peringatan",
+        description: "Tidak ada data untuk diekspor"
+      });
+      return;
+    }
+
     try {
       const exportData = prepareExportData();
       const doc = new jsPDF('landscape', 'mm', 'a4') as any; // using any to avoid TypeScript issues with jsPDF-autotable
@@ -77,7 +96,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       doc.setFontSize(14);
       doc.text('Anggaran Semula vs Menjadi', 14, 10);
       doc.setFontSize(12);
-      doc.text(`Komponen Output: ${komponenOutput}`, 14, 18);
+      doc.text(`Komponen Output: ${komponenOutput || 'Semua Data'}`, 14, 18);
       
       // Create table structure for PDF
       const tableColumn = [
@@ -122,7 +141,9 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
         columnStyles: { 0: { cellWidth: 8 }, 1: { cellWidth: 40 } }
       });
       
-      doc.save(`Anggaran_${komponenOutput.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+      // Save the PDF with a filename
+      const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
       
       toast({
         title: "Berhasil!",

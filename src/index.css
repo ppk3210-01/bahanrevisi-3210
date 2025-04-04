@@ -118,6 +118,11 @@
   @apply bg-new-row;
 }
 
+/* Purple highlighting for unapproved changes */
+.unapproved-change {
+  @apply bg-purple-100;
+}
+
 .warning-box {
   @apply bg-warning-box text-white font-semibold p-4 rounded-md my-4;
 }
@@ -143,4 +148,26 @@
 /* Make the unit columns narrower */
 .unit-cell {
   @apply w-[80px];
+}
+
+/* Summary box styles */
+.bg-red-50 {
+  background-color: #FEF2F2;
+}
+
+.bg-green-50 {
+  background-color: #F0FDF4;
+}
+
+.text-red-600 {
+  color: #DC2626;
+}
+
+.text-green-600 {
+  color: #16A34A;
+}
+
+/* Purple background for unapproved items */
+.bg-purple-100 {
+  background-color: #D6BCFA;
 }

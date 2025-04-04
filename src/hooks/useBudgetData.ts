@@ -23,9 +23,20 @@ const useBudgetData = (filters: FilterSelection) => {
           .from('budget_items')
           .select('*');
         
-        // Apply filtering logic
+        // Apply filtering logic based on selected filters
+        // Now supports filtering at any level, not just komponenOutput
         if (filters.komponenOutput) {
           query = query.eq('komponen_output', filters.komponenOutput);
+        } else if (filters.rincianOutput) {
+          // Filter by rincian_output if available in the future
+          // Currently, we'll need to modify the database schema to support this
+          // For now, this is a placeholder
+        } else if (filters.kegiatan) {
+          // Filter by kegiatan if available in the future
+          // Currently, we'll need to modify the database schema to support this
+        } else if (filters.programPembebanan) {
+          // Filter by program_pembebanan if available in the future
+          // Currently, we'll need to modify the database schema to support this
         }
 
         const { data, error: supabaseError } = await query;

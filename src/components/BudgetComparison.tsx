@@ -5,6 +5,7 @@ import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
 import SummaryDialog from './SummaryDialog';
 import ExportOptions from './ExportOptions';
+import BudgetSummaryBox from './BudgetSummaryBox';
 import { FilterSelection } from '@/types/budget';
 import useBudgetData from '@/hooks/useBudgetData';
 
@@ -27,6 +28,10 @@ const BudgetComparison: React.FC = () => {
     approveBudgetItem
   } = useBudgetData(filters);
 
+  // Calculate totals for summary box
+  const totalSemula = budgetItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
+  const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+
   // Function to handle filter changes
   const handleFilterChange = (newFilters: FilterSelection) => {
     setFilters(newFilters);
@@ -39,6 +44,14 @@ const BudgetComparison: React.FC = () => {
     <div className="space-y-6">
       {/* Filters section */}
       <BudgetFilter onFilterChange={handleFilterChange} />
+      
+      {/* Summary Box */}
+      {!loading && budgetItems.length > 0 && (
+        <BudgetSummaryBox 
+          totalSemula={totalSemula}
+          totalMenjadi={totalMenjadi}
+        />
+      )}
       
       {/* Budget table section */}
       <Card>
