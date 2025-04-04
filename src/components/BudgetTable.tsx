@@ -47,7 +47,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const validateItem = (item: Partial<BudgetItem>): boolean => {
     if (!item.uraian || item.uraian.trim() === '') {
-      toast.error('Uraian harus diisi');
+      toast({
+        title: "Validasi gagal",
+        description: "Uraian harus diisi",
+        variant: "destructive"
+      });
       return false;
     }
     
@@ -55,7 +59,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         (item.hargaSatuanSemula && item.hargaSatuanSemula < 0) ||
         (item.volumeMenjadi && item.volumeMenjadi < 0) ||
         (item.hargaSatuanMenjadi && item.hargaSatuanMenjadi < 0)) {
-      toast.error('Nilai volume dan harga satuan tidak boleh negatif');
+      toast({
+        title: "Validasi gagal",
+        description: "Nilai volume dan harga satuan tidak boleh negatif",
+        variant: "destructive"
+      });
       return false;
     }
     
@@ -63,12 +71,20 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         item.hargaSatuanSemula === undefined || item.hargaSatuanSemula === null ||
         item.volumeMenjadi === undefined || item.volumeMenjadi === null ||
         item.hargaSatuanMenjadi === undefined || item.hargaSatuanMenjadi === null) {
-      toast.error('Semua kolom harus diisi');
+      toast({
+        title: "Validasi gagal",
+        description: "Semua kolom harus diisi",
+        variant: "destructive"
+      });
       return false;
     }
     
     if (!item.satuanSemula || !item.satuanMenjadi) {
-      toast.error('Satuan harus dipilih');
+      toast({
+        title: "Validasi gagal",
+        description: "Satuan harus dipilih",
+        variant: "destructive"
+      });
       return false;
     }
     
@@ -111,7 +127,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         komponenOutput
       });
 
-      toast.success('Item berhasil ditambahkan');
+      toast({
+        title: "Berhasil",
+        description: "Item berhasil ditambahkan",
+        variant: "default"
+      });
     } catch (error) {
       console.error('Failed to add item:', error);
     }
@@ -123,7 +143,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const saveEditing = (id: string) => {
     setEditingId(null);
-    toast.success('Perubahan berhasil disimpan');
+    toast({
+      title: "Berhasil",
+      description: "Perubahan berhasil disimpan",
+      variant: "default"
+    });
   };
 
   const handleEditChange = (id: string, field: string, value: string | number) => {

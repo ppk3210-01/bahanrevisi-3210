@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileSpreadsheet } from 'lucide-react';
@@ -13,7 +12,6 @@ interface ExportOptionsProps {
 }
 
 const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) => {
-  // Prepare data for export
   const prepareExportData = () => {
     return items.map((item, index) => ({
       'No': index + 1,
@@ -31,7 +29,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
     }));
   };
 
-  // Function to export to Excel
   const exportToExcel = () => {
     if (items.length === 0) {
       toast({
@@ -48,7 +45,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Budget");
       
-      // Add footer with totals
       const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
       const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
       const totalSelisih = totalMenjadi - totalSemula;
@@ -57,7 +53,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
         ["", "TOTAL", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
       ], {origin: -1});
       
-      // Generate Excel file
       const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
       
