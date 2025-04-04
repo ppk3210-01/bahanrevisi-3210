@@ -30,6 +30,12 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
   const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
   const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
 
+  // Determine color class for the summary section
+  const getSummaryColorClass = () => {
+    if (totalSelisih === 0) return "bg-green-50 text-green-800";
+    return "bg-red-100 text-red-800"; // For both positive and negative selisih
+  };
+
   // Function to export summary to Excel
   const exportSummaryToExcel = () => {
     if (items.length === 0) {
@@ -50,6 +56,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           'No': index + 1,
           'Uraian': item.uraian,
           'Pembebanan': item.komponenOutput,
+          'Sub Komponen': item.subKomponen || '-',
+          'Akun': item.akun || '-',
           'Volume Semula': item.volumeSemula,
           'Satuan Semula': item.satuanSemula,
           'Harga Satuan Semula': item.hargaSatuanSemula,
@@ -71,6 +79,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           'No': index + 1,
           'Uraian': item.uraian,
           'Pembebanan': item.komponenOutput,
+          'Sub Komponen': item.subKomponen || '-',
+          'Akun': item.akun || '-',
           'Volume': item.volumeMenjadi,
           'Satuan': item.satuanMenjadi,
           'Harga Satuan': item.hargaSatuanMenjadi,
@@ -87,6 +97,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           'No': index + 1,
           'Uraian': item.uraian,
           'Pembebanan': item.komponenOutput,
+          'Sub Komponen': item.subKomponen || '-',
+          'Akun': item.akun || '-',
           'Volume': item.volumeSemula,
           'Satuan': item.satuanSemula,
           'Harga Satuan': item.hargaSatuanSemula,
@@ -133,7 +145,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           Lihat Ringkasan Perubahan
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ringkasan Perubahan Anggaran</DialogTitle>
           <DialogDescription className="flex justify-between items-center">
@@ -156,6 +168,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Uraian</th>
                       <th className="border p-2 text-left">Pembebanan</th>
+                      <th className="border p-2 text-left">Sub Komponen</th>
+                      <th className="border p-2 text-left">Akun</th>
                       <th className="border p-2 text-left">Detail Perubahan</th>
                       <th className="border p-2 text-right">Jumlah Semula</th>
                       <th className="border p-2 text-right">Jumlah Menjadi</th>
@@ -167,6 +181,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="border p-2 text-left">{item.uraian}</td>
                         <td className="border p-2 text-left">{item.komponenOutput}</td>
+                        <td className="border p-2 text-left">{item.subKomponen || '-'}</td>
+                        <td className="border p-2 text-left">{item.akun || '-'}</td>
                         <td className="border p-2 text-left">
                           {item.volumeSemula !== item.volumeMenjadi && (
                             <div>
@@ -205,6 +221,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Uraian</th>
                       <th className="border p-2 text-left">Pembebanan</th>
+                      <th className="border p-2 text-left">Sub Komponen</th>
+                      <th className="border p-2 text-left">Akun</th>
                       <th className="border p-2 text-left">Volume</th>
                       <th className="border p-2 text-left">Satuan</th>
                       <th className="border p-2 text-right">Harga Satuan</th>
@@ -216,6 +234,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="border p-2 text-left">{item.uraian}</td>
                         <td className="border p-2 text-left">{item.komponenOutput}</td>
+                        <td className="border p-2 text-left">{item.subKomponen || '-'}</td>
+                        <td className="border p-2 text-left">{item.akun || '-'}</td>
                         <td className="border p-2 text-left">{item.volumeMenjadi}</td>
                         <td className="border p-2 text-left">{item.satuanMenjadi}</td>
                         <td className="border p-2 text-right">{formatCurrency(item.hargaSatuanMenjadi)}</td>
@@ -238,6 +258,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Uraian</th>
                       <th className="border p-2 text-left">Pembebanan</th>
+                      <th className="border p-2 text-left">Sub Komponen</th>
+                      <th className="border p-2 text-left">Akun</th>
                       <th className="border p-2 text-left">Volume</th>
                       <th className="border p-2 text-left">Satuan</th>
                       <th className="border p-2 text-right">Harga Satuan</th>
@@ -249,6 +271,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="border p-2 text-left">{item.uraian}</td>
                         <td className="border p-2 text-left">{item.komponenOutput}</td>
+                        <td className="border p-2 text-left">{item.subKomponen || '-'}</td>
+                        <td className="border p-2 text-left">{item.akun || '-'}</td>
                         <td className="border p-2 text-left">{item.volumeSemula}</td>
                         <td className="border p-2 text-left">{item.satuanSemula}</td>
                         <td className="border p-2 text-right">{formatCurrency(item.hargaSatuanSemula)}</td>
@@ -262,7 +286,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           )}
           
           {/* Summary section */}
-          <div className="bg-gray-50 p-4 rounded-md">
+          <div className={`p-4 rounded-md ${getSummaryColorClass()}`}>
             <h3 className="text-lg font-semibold mb-2">Kesimpulan</h3>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -275,7 +299,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
               </div>
               <div className="flex justify-between border-t pt-2 mt-2">
                 <span>Selisih:</span>
-                <span className={`font-semibold ${totalSelisih > 0 ? 'text-green-600' : totalSelisih < 0 ? 'text-red-600' : ''}`}>
+                <span className="font-semibold">
                   {formatCurrency(totalSelisih)}
                 </span>
               </div>
@@ -283,13 +307,11 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             
             {/* Warning message */}
             {totalSelisih !== 0 && (
-              <div className={`p-3 mt-4 rounded-md ${totalSelisih > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                <p className="font-semibold">
-                  {totalSelisih > 0 
-                    ? `Terdapat penambahan anggaran sebesar ${formatCurrency(totalSelisih)}`
-                    : `Terdapat pengurangan anggaran sebesar ${formatCurrency(Math.abs(totalSelisih))}`
-                  }
-                </p>
+              <div className="p-3 mt-4 rounded-md font-semibold">
+                {totalSelisih > 0 
+                  ? `Terdapat penambahan anggaran sebesar ${formatCurrency(totalSelisih)}`
+                  : `Terdapat pengurangan anggaran sebesar ${formatCurrency(Math.abs(totalSelisih))}`
+                }
               </div>
             )}
           </div>

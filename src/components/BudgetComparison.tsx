@@ -43,8 +43,20 @@ const BudgetComparison: React.FC = () => {
     setFilters(newFilters);
   };
 
-  // Get selected komponen output name for display
-  let selectedKomponenOutput = filters.komponenOutput;
+  // Check if all filters are set (not empty and not 'all')
+  const areFiltersComplete = 
+    filters.programPembebanan && 
+    filters.programPembebanan !== 'all' &&
+    filters.kegiatan && 
+    filters.kegiatan !== 'all' &&
+    filters.rincianOutput && 
+    filters.rincianOutput !== 'all' &&
+    filters.komponenOutput && 
+    filters.komponenOutput !== 'all' &&
+    filters.subKomponen && 
+    filters.subKomponen !== 'all' &&
+    filters.akun && 
+    filters.akun !== 'all';
 
   return (
     <div className="space-y-6">
@@ -52,6 +64,7 @@ const BudgetComparison: React.FC = () => {
       <BudgetSummaryBox 
         totalSemula={totalSemula}
         totalMenjadi={totalMenjadi}
+        totalSelisih={totalSelisih}
       />
       
       {/* Filters section */}
@@ -63,7 +76,7 @@ const BudgetComparison: React.FC = () => {
           <CardTitle>Perbandingan Anggaran Semula vs Menjadi</CardTitle>
           <div className="flex space-x-2">
             <SummaryDialog items={budgetItems} />
-            <ExportOptions items={budgetItems} komponenOutput={selectedKomponenOutput} />
+            <ExportOptions items={budgetItems} komponenOutput={filters.komponenOutput} />
           </div>
         </CardHeader>
         
@@ -82,12 +95,15 @@ const BudgetComparison: React.FC = () => {
           ) : (
             <BudgetTable
               items={budgetItems}
-              komponenOutput={selectedKomponenOutput}
+              komponenOutput={filters.komponenOutput}
               onAdd={addBudgetItem}
               onUpdate={updateBudgetItem}
               onDelete={deleteBudgetItem}
               onApprove={approveBudgetItem}
               isLoading={loading}
+              subKomponen={filters.subKomponen}
+              akun={filters.akun}
+              areFiltersComplete={areFiltersComplete}
             />
           )}
         </CardContent>

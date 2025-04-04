@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +22,9 @@ interface BudgetTableProps {
   onDelete: (id: string) => void;
   onApprove: (id: string) => void;
   isLoading: boolean;
+  subKomponen?: string;
+  akun?: string;
+  areFiltersComplete: boolean;
 }
 
 const BudgetTable: React.FC<BudgetTableProps> = ({
@@ -32,7 +34,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   onUpdate,
   onDelete,
   onApprove,
-  isLoading
+  isLoading,
+  subKomponen,
+  akun,
+  areFiltersComplete
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState<Partial<BudgetItem>>({
@@ -43,42 +48,64 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     volumeMenjadi: 0,
     satuanMenjadi: 'Paket',
     hargaSatuanMenjadi: 0,
-    komponenOutput: komponenOutput
+    komponenOutput,
+    subKomponen,
+    akun
   });
 
-  // Calculate dynamic values for the new item being added
+  useEffect(() => {
+    setNewItem(prev => ({
+      ...prev,
+      komponenOutput,
+      subKomponen,
+      akun
+    }));
+  }, [komponenOutput, subKomponen, akun]);
+
   const newItemJumlahSemula = calculateAmount(newItem.volumeSemula || 0, newItem.hargaSatuanSemula || 0);
   const newItemJumlahMenjadi = calculateAmount(newItem.volumeMenjadi || 0, newItem.hargaSatuanMenjadi || 0);
   const newItemSelisih = calculateDifference(newItemJumlahSemula, newItemJumlahMenjadi);
 
   const validateItem = (item: Partial<BudgetItem>): boolean => {
-    // Check if all required fields are filled
     if (!item.uraian || item.uraian.trim() === '') {
-      toast.error('Uraian harus diisi');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Uraian harus diisi'
+      });
       return false;
     }
     
-    // Check for negative values
     if ((item.volumeSemula && item.volumeSemula < 0) || 
         (item.hargaSatuanSemula && item.hargaSatuanSemula < 0) ||
         (item.volumeMenjadi && item.volumeMenjadi < 0) ||
         (item.hargaSatuanMenjadi && item.hargaSatuanMenjadi < 0)) {
-      toast.error('Nilai volume dan harga satuan tidak boleh negatif');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Nilai volume dan harga satuan tidak boleh negatif'
+      });
       return false;
     }
     
-    // Check if all numeric fields are filled
     if (item.volumeSemula === undefined || item.volumeSemula === null || 
         item.hargaSatuanSemula === undefined || item.hargaSatuanSemula === null ||
         item.volumeMenjadi === undefined || item.volumeMenjadi === null ||
         item.hargaSatuanMenjadi === undefined || item.hargaSatuanMenjadi === null) {
-      toast.error('Semua kolom harus diisi');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Semua kolom harus diisi'
+      });
       return false;
     }
     
-    // Check if satuan is selected
     if (!item.satuanSemula || !item.satuanMenjadi) {
-      toast.error('Satuan harus dipilih');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Satuan harus dipilih'
+      });
       return false;
     }
     
@@ -107,6 +134,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         satuanMenjadi: newItem.satuanMenjadi || 'Paket',
         hargaSatuanMenjadi: newItem.hargaSatuanMenjadi || 0,
         komponenOutput,
+        subKomponen: subKomponen || '',
+        akun: akun || '',
         isApproved: false
       });
 
@@ -118,12 +147,22 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         volumeMenjadi: 0,
         satuanMenjadi: 'Paket',
         hargaSatuanMenjadi: 0,
-        komponenOutput
+        komponenOutput,
+        subKomponen,
+        akun
       });
 
-      toast.success('Item berhasil ditambahkan');
+      toast({
+        title: "Berhasil",
+        description: 'Item berhasil ditambahkan'
+      });
     } catch (error) {
       console.error('Failed to add item:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal menambahkan item. Silakan coba lagi.'
+      });
     }
   };
 
@@ -137,7 +176,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
-    // For numeric fields, ensure value is non-negative
     if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || 
         field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
       if (typeof value === 'string') {
@@ -146,7 +184,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         value = numValue;
       }
       
-      // Prevent negative values
       if (value < 0) {
         toast.error('Nilai tidak boleh negatif');
         return;
@@ -251,7 +288,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   return (
     <div className="overflow-hidden rounded-md border border-gray-200">
       {komponenOutput && (
-        <div className="bg-gray-50 p-4 border-b border-gray-200">
+        <div className="bg-purple-100 p-4 border-b border-gray-200">
           <h3 className="font-medium">Komponen Output: {komponenOutput}</h3>
         </div>
       )}
@@ -305,12 +342,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                       size="icon" 
                       onClick={() => {
                         onDelete(item.id);
-                        toast.success('Item berhasil dihapus');
+                        toast({
+                          title: "Berhasil",
+                          description: 'Item berhasil dihapus'
+                        });
                       }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                    {/* Show approve button only if item is not approved and has changes */}
                     {!item.isApproved && item.status !== 'unchanged' && (
                       <Button 
                         variant="outline" 
@@ -318,7 +357,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                         className="text-green-600" 
                         onClick={() => {
                           onApprove(item.id);
-                          toast.success('Item disetujui oleh PPK');
+                          toast({
+                            title: "Berhasil",
+                            description: 'Item disetujui oleh PPK'
+                          });
                         }}
                       >
                         <Check className="h-4 w-4" />
@@ -425,7 +467,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 {formatCurrency(newItemSelisih)}
               </td>
               <td>
-                <Button variant="outline" onClick={handleAddItem}>
+                <Button 
+                  variant="outline" 
+                  onClick={handleAddItem} 
+                  disabled={!areFiltersComplete}
+                  title={!areFiltersComplete ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
+                >
                   <PlusCircle className="h-4 w-4 mr-2" /> Tambah
                 </Button>
               </td>

@@ -4,7 +4,6 @@ import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { BudgetItemRecord } from '@/types/supabase';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -52,28 +51,34 @@ const useBudgetData = (filters: FilterSelection) => {
 
         if (data) {
           // Transform data from Supabase format to our BudgetItem format
-          const transformedData: BudgetItem[] = data.map((item: any) => ({
-            id: item.id,
-            uraian: item.uraian,
-            volumeSemula: Number(item.volume_semula),
-            satuanSemula: item.satuan_semula,
-            hargaSatuanSemula: Number(item.harga_satuan_semula),
-            jumlahSemula: roundToThousands(Number(item.jumlah_semula || 0)),
-            volumeMenjadi: Number(item.volume_menjadi),
-            satuanMenjadi: item.satuan_menjadi,
-            hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
-            jumlahMenjadi: roundToThousands(Number(item.jumlah_menjadi || 0)),
-            selisih: roundToThousands(Number(item.selisih || 0)),
-            status: item.status as "unchanged" | "changed" | "new" | "deleted",
-            isApproved: item.is_approved,
-            komponenOutput: item.komponen_output,
-            // Add these fields if they exist in your database, otherwise set defaults
-            programPembebanan: item.program_pembebanan || '',
-            kegiatan: item.kegiatan || '',
-            rincianOutput: item.rincian_output || '',
-            subKomponen: item.sub_komponen || '',
-            akun: item.akun || ''
-          }));
+          const transformedData: BudgetItem[] = data.map((item: any) => {
+            const jumlahSemula = Number(item.jumlah_semula || 0);
+            const jumlahMenjadi = Number(item.jumlah_menjadi || 0);
+            // Calculate selisih as Jumlah Semula - Jumlah Menjadi
+            const calculatedSelisih = jumlahSemula - jumlahMenjadi;
+            
+            return {
+              id: item.id,
+              uraian: item.uraian,
+              volumeSemula: Number(item.volume_semula),
+              satuanSemula: item.satuan_semula,
+              hargaSatuanSemula: Number(item.harga_satuan_semula),
+              jumlahSemula: roundToThousands(jumlahSemula),
+              volumeMenjadi: Number(item.volume_menjadi),
+              satuanMenjadi: item.satuan_menjadi,
+              hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
+              jumlahMenjadi: roundToThousands(jumlahMenjadi),
+              selisih: roundToThousands(calculatedSelisih), // Use the calculated selisih
+              status: item.status as "unchanged" | "changed" | "new" | "deleted",
+              isApproved: item.is_approved,
+              komponenOutput: item.komponen_output,
+              programPembebanan: item.program_pembebanan || '',
+              kegiatan: item.kegiatan || '',
+              rincianOutput: item.rincian_output || '',
+              subKomponen: item.sub_komponen || '',
+              akun: item.akun || ''
+            };
+          });
 
           setBudgetItems(transformedData);
         }
@@ -94,7 +99,7 @@ const useBudgetData = (filters: FilterSelection) => {
       // Calculate derived values
       const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
       const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-      const selisih = roundToThousands(calculateDifference(jumlahSemula, jumlahMenjadi));
+      const selisih = roundToThousands(jumlahSemula - jumlahMenjadi); // Corrected: Jumlah Semula - Jumlah Menjadi
       
       // Create new item data for Supabase
       const newItemData = {
@@ -115,8 +120,8 @@ const useBudgetData = (filters: FilterSelection) => {
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
         kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
         rincian_output: filters.rincianOutput !== 'all' ? filters.rincianOutput : null,
-        sub_komponen: filters.subKomponen !== 'all' ? filters.subKomponen : null,
-        akun: filters.akun !== 'all' ? filters.akun : null
+        sub_komponen: item.subKomponen || null,
+        akun: item.akun || null
       };
       
       // Save to Supabase
@@ -205,7 +210,7 @@ const useBudgetData = (filters: FilterSelection) => {
         updatedItem.jumlahMenjadi = jumlahMenjadi;
         
         // Calculate selisih based on the new jumlah_menjadi
-        const selisih = calculateDifference(updatedItem.jumlahSemula, jumlahMenjadi);
+        const selisih = updatedItem.jumlahSemula - jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
         supabaseUpdates.selisih = selisih;
         updatedItem.selisih = selisih;
       }
@@ -220,7 +225,7 @@ const useBudgetData = (filters: FilterSelection) => {
         updatedItem.jumlahSemula = jumlahSemula;
         
         // Recalculate selisih since jumlah_semula changed
-        const selisih = calculateDifference(jumlahSemula, updatedItem.jumlahMenjadi);
+        const selisih = jumlahSemula - updatedItem.jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
         supabaseUpdates.selisih = selisih;
         updatedItem.selisih = selisih;
       }

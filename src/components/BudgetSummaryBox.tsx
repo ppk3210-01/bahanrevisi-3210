@@ -1,43 +1,50 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
+import { formatCurrency } from '@/utils/budgetCalculations';
 
 interface BudgetSummaryBoxProps {
   totalSemula: number;
   totalMenjadi: number;
+  totalSelisih: number;
 }
 
-const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({ totalSemula, totalMenjadi }) => {
-  // Apply rounding to the totals
-  const roundedTotalSemula = roundToThousands(totalSemula);
-  const roundedTotalMenjadi = roundToThousands(totalMenjadi);
-  const selisih = roundedTotalMenjadi - roundedTotalSemula;
-  const hasSelisih = selisih !== 0;
+const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({ 
+  totalSemula, 
+  totalMenjadi,
+  totalSelisih
+}) => {
+  // Determine the color based on selisih value
+  const getSelisihColor = () => {
+    if (totalSelisih === 0) return "bg-green-50 border-green-200";
+    return "bg-red-50 border-red-200"; // red for both positive and negative selisih
+  };
+
+  const getTextColor = () => {
+    if (totalSelisih === 0) return "text-green-600";
+    return totalSelisih > 0 ? "text-red-600" : "text-red-600";
+  };
 
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-purple-100 rounded-md">
-            <h3 className="text-sm font-medium text-gray-500 mb-1">PAGU Semula</h3>
-            <p className="text-2xl font-bold">{formatCurrency(roundedTotalSemula)}</p>
-          </div>
-          
-          <div className="p-4 bg-yellow-100 rounded-md">
-            <h3 className="text-sm font-medium text-gray-500 mb-1">PAGU Menjadi</h3>
-            <p className="text-2xl font-bold">{formatCurrency(roundedTotalMenjadi)}</p>
-          </div>
-          
-          <div className={`p-4 rounded-md ${hasSelisih ? 'bg-red-50' : 'bg-green-50'}`}>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">Selisih PAGU</h3>
-            <p className={`text-2xl font-bold ${hasSelisih ? 'text-red-600' : 'text-green-600'}`}>
-              {formatCurrency(selisih)}
-            </p>
-          </div>
+    <div className={`rounded-lg border ${getSelisihColor()} shadow-sm p-6`}>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700">Anggaran Semula</h3>
+          <p className="text-2xl font-bold">{formatCurrency(totalSemula)}</p>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700">Anggaran Menjadi</h3>
+          <p className="text-2xl font-bold">{formatCurrency(totalMenjadi)}</p>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700">Selisih</h3>
+          <p className={`text-2xl font-bold ${getTextColor()}`}>
+            {formatCurrency(totalSelisih)}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 
