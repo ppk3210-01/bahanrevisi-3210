@@ -4,9 +4,8 @@ import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { BudgetItemRecord, TemporaryDatabase } from '@/types/supabase';
+import { BudgetItemRecord } from '@/types/supabase';
 
-// Use our temporary type definitions until the Supabase generated types are available
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +44,7 @@ const useBudgetData = (filters: FilterSelection) => {
 
         if (data) {
           // Transform data from Supabase format to our BudgetItem format
-          const transformedData: BudgetItem[] = data.map((item: BudgetItemRecord) => ({
+          const transformedData: BudgetItem[] = data.map((item: any) => ({
             id: item.id,
             uraian: item.uraian,
             volumeSemula: Number(item.volume_semula),
