@@ -46,45 +46,33 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   });
 
   const validateItem = (item: Partial<BudgetItem>): boolean => {
+    // Check if all required fields are filled
     if (!item.uraian || item.uraian.trim() === '') {
-      toast({
-        title: "Validasi gagal",
-        description: "Uraian harus diisi",
-        variant: "destructive"
-      });
+      toast.error('Uraian harus diisi');
       return false;
     }
     
+    // Check for negative values
     if ((item.volumeSemula && item.volumeSemula < 0) || 
         (item.hargaSatuanSemula && item.hargaSatuanSemula < 0) ||
         (item.volumeMenjadi && item.volumeMenjadi < 0) ||
         (item.hargaSatuanMenjadi && item.hargaSatuanMenjadi < 0)) {
-      toast({
-        title: "Validasi gagal",
-        description: "Nilai volume dan harga satuan tidak boleh negatif",
-        variant: "destructive"
-      });
+      toast.error('Nilai volume dan harga satuan tidak boleh negatif');
       return false;
     }
     
+    // Check if all numeric fields are filled
     if (item.volumeSemula === undefined || item.volumeSemula === null || 
         item.hargaSatuanSemula === undefined || item.hargaSatuanSemula === null ||
         item.volumeMenjadi === undefined || item.volumeMenjadi === null ||
         item.hargaSatuanMenjadi === undefined || item.hargaSatuanMenjadi === null) {
-      toast({
-        title: "Validasi gagal",
-        description: "Semua kolom harus diisi",
-        variant: "destructive"
-      });
+      toast.error('Semua kolom harus diisi');
       return false;
     }
     
+    // Check if satuan is selected
     if (!item.satuanSemula || !item.satuanMenjadi) {
-      toast({
-        title: "Validasi gagal",
-        description: "Satuan harus dipilih",
-        variant: "destructive"
-      });
+      toast.error('Satuan harus dipilih');
       return false;
     }
     
@@ -127,11 +115,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         komponenOutput
       });
 
-      toast({
-        title: "Berhasil",
-        description: "Item berhasil ditambahkan",
-        variant: "default"
-      });
+      toast.success('Item berhasil ditambahkan');
     } catch (error) {
       console.error('Failed to add item:', error);
     }
@@ -143,14 +127,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const saveEditing = (id: string) => {
     setEditingId(null);
-    toast({
-      title: "Berhasil",
-      description: "Perubahan berhasil disimpan",
-      variant: "default"
-    });
+    toast.success('Perubahan berhasil disimpan');
   };
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
+    // For numeric fields, ensure value is non-negative
     if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || 
         field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
       if (typeof value === 'string') {
@@ -159,6 +140,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         value = numValue;
       }
       
+      // Prevent negative values
       if (value < 0) {
         toast.error('Nilai tidak boleh negatif');
         return;
@@ -456,6 +438,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
           </tbody>
         </table>
       </div>
+      
+      {totalSelisih !== 0 && (
+        <div className="warning-box m-4">
+          ⚠ PERINGATAN:
+          Terjadi perbedaan total anggaran sebesar {formatCurrency(totalSelisih)}
+        </div>
+      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@ import BudgetComparison from '@/components/BudgetComparison';
 const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
+      <header className="bg-white border-b">
         <div className="container mx-auto py-6">
           <h1 className="text-2xl font-bold">Anggaran Insight Fusion</h1>
           <p className="text-gray-600">Aplikasi Dinamis Penyandingan Data Anggaran "Semula vs Menjadi"</p>

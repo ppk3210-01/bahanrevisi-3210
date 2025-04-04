@@ -14,9 +14,6 @@ export interface BudgetItem {
   status: 'unchanged' | 'changed' | 'new' | 'deleted';
   isApproved: boolean;
   komponenOutput: string;
-  programPembebanan?: string;
-  kegiatan?: string;
-  rincianOutput?: string;
 }
 
 export interface BudgetSummary {

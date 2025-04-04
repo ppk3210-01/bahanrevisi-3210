@@ -8,7 +8,6 @@ import ExportOptions from './ExportOptions';
 import BudgetSummaryBox from './BudgetSummaryBox';
 import { FilterSelection } from '@/types/budget';
 import useBudgetData from '@/hooks/useBudgetData';
-import { formatCurrency } from '@/utils/budgetCalculations';
 
 const BudgetComparison: React.FC = () => {
   const [filters, setFilters] = useState<FilterSelection>({
@@ -43,16 +42,16 @@ const BudgetComparison: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Summary Box - Moved above filters */}
-      {!loading && (
+      {/* Filters section */}
+      <BudgetFilter onFilterChange={handleFilterChange} />
+      
+      {/* Summary Box */}
+      {!loading && budgetItems.length > 0 && (
         <BudgetSummaryBox 
           totalSemula={totalSemula}
           totalMenjadi={totalMenjadi}
         />
       )}
-      
-      {/* Filters section */}
-      <BudgetFilter onFilterChange={handleFilterChange} />
       
       {/* Budget table section */}
       <Card>
@@ -79,13 +78,6 @@ const BudgetComparison: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
-      {/* Warning message when there's a difference */}
-      {totalSemula !== totalMenjadi && (
-        <div className="warning-box p-4 bg-amber-100 border border-amber-300 rounded-md text-amber-800">
-          ⚠ PERINGATAN: Terjadi perbedaan total anggaran sebesar {formatCurrency(totalMenjadi - totalSemula)}
-        </div>
-      )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -17,10 +18,12 @@ interface SummaryDialogProps {
 }
 
 const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
+  // Extract changed, new, and deleted items
   const changedItems = items.filter(item => item.status === 'changed');
   const newItems = items.filter(item => item.status === 'new');
   const deletedItems = items.filter(item => item.status === 'deleted');
   
+  // Calculate totals
   const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
@@ -42,6 +45,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         </DialogHeader>
         
         <div className="space-y-6 mt-4">
+          {/* Changed items section */}
           {changedItems.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Rincian Yang Diubah</h3>
@@ -88,6 +92,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             </div>
           )}
           
+          {/* New items section */}
           {newItems.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-2 text-green-600">Rincian Baru</h3>
@@ -118,6 +123,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             </div>
           )}
           
+          {/* Deleted items section */}
           {deletedItems.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-2 text-red-600">Rincian Yang Dihapus</h3>
@@ -148,6 +154,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             </div>
           )}
           
+          {/* Summary section */}
           <div className="bg-gray-50 p-4 rounded-md">
             <h3 className="text-lg font-semibold mb-2">Kesimpulan</h3>
             <div className="space-y-2">
@@ -167,6 +174,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
               </div>
             </div>
             
+            {/* Warning message */}
             {totalSelisih !== 0 && (
               <div className={`p-3 mt-4 rounded-md ${totalSelisih > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                 <p className="font-semibold">
