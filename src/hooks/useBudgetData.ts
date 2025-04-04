@@ -84,7 +84,7 @@ const useBudgetData = (filters: FilterSelection) => {
   const fetchBudgetItems = useCallback(async () => {
     setLoading(true);
     try {
-      let query = supabase.from('budget_items');
+      let query = supabase.from('budget_items').select();
 
       // Apply filters
       if (filters.programPembebanan) {
