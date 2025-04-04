@@ -1,7 +1,5 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, uuidv4 } from '@/integrations/supabase/client';
 import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
 import { toast } from './use-toast';
