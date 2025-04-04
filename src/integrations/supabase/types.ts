@@ -9,8 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      akun: {
+        Row: {
+          id: string
+          nama: string
+          urutan: number
+        }
+        Insert: {
+          id: string
+          nama: string
+          urutan: number
+        }
+        Update: {
+          id?: string
+          nama?: string
+          urutan?: number
+        }
+        Relationships: []
+      }
       budget_items: {
         Row: {
+          akun: string | null
           created_at: string | null
           harga_satuan_menjadi: number
           harga_satuan_semula: number
@@ -26,12 +45,14 @@ export type Database = {
           satuan_semula: string
           selisih: number | null
           status: string
+          sub_komponen: string | null
           updated_at: string | null
           uraian: string
           volume_menjadi: number
           volume_semula: number
         }
         Insert: {
+          akun?: string | null
           created_at?: string | null
           harga_satuan_menjadi: number
           harga_satuan_semula: number
@@ -47,12 +68,14 @@ export type Database = {
           satuan_semula: string
           selisih?: number | null
           status?: string
+          sub_komponen?: string | null
           updated_at?: string | null
           uraian: string
           volume_menjadi: number
           volume_semula: number
         }
         Update: {
+          akun?: string | null
           created_at?: string | null
           harga_satuan_menjadi?: number
           harga_satuan_semula?: number
@@ -68,6 +91,7 @@ export type Database = {
           satuan_semula?: string
           selisih?: number | null
           status?: string
+          sub_komponen?: string | null
           updated_at?: string | null
           uraian?: string
           volume_menjadi?: number
@@ -90,6 +114,24 @@ export type Database = {
           created_at?: string | null
           id?: string
           nama?: string
+        }
+        Relationships: []
+      }
+      sub_komponen: {
+        Row: {
+          id: string
+          nama: string
+          program_pembebanan: string
+        }
+        Insert: {
+          id: string
+          nama: string
+          program_pembebanan: string
+        }
+        Update: {
+          id?: string
+          nama?: string
+          program_pembebanan?: string
         }
         Relationships: []
       }

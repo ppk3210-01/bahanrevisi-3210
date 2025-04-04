@@ -20,7 +20,9 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
     programPembebanan: '',
     kegiatan: '',
     rincianOutput: '',
-    komponenOutput: ''
+    komponenOutput: '',
+    subKomponen: '',
+    akun: ''
   });
 
   // Handle changes to program pembebanan
@@ -29,7 +31,9 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
       programPembebanan: value,
       kegiatan: '',
       rincianOutput: '',
-      komponenOutput: ''
+      komponenOutput: '',
+      subKomponen: '',
+      akun: filters.akun // Keep akun filter as it's independent
     });
   };
 
@@ -39,7 +43,8 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
       ...filters,
       kegiatan: value,
       rincianOutput: '',
-      komponenOutput: ''
+      komponenOutput: '',
+      subKomponen: ''
     });
   };
 
@@ -48,7 +53,8 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
     setFilters({
       ...filters,
       rincianOutput: value,
-      komponenOutput: ''
+      komponenOutput: '',
+      subKomponen: ''
     });
   };
 
@@ -56,7 +62,24 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
   const handleKomponenOutputChange = (value: string) => {
     setFilters({
       ...filters,
-      komponenOutput: value
+      komponenOutput: value,
+      subKomponen: ''
+    });
+  };
+
+  // Handle changes to sub komponen
+  const handleSubKomponenChange = (value: string) => {
+    setFilters({
+      ...filters,
+      subKomponen: value
+    });
+  };
+
+  // Handle changes to akun
+  const handleAkunChange = (value: string) => {
+    setFilters({
+      ...filters,
+      akun: value
     });
   };
 
@@ -70,7 +93,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
       <CardHeader>
         <CardTitle>Pilih Program dan Anggaran</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Program Pembebanan Dropdown */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Program Pembebanan</label>
@@ -105,7 +128,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua</SelectItem>
-              {filters.programPembebanan && 
+              {filters.programPembebanan && filters.programPembebanan !== 'all' && 
                 HIERARCHY_DATA.kegiatan[filters.programPembebanan]?.map((kegiatan) => (
                   <SelectItem key={kegiatan.id} value={kegiatan.id}>
                     {kegiatan.name}
@@ -128,7 +151,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua</SelectItem>
-              {filters.kegiatan && 
+              {filters.kegiatan && filters.kegiatan !== 'all' && 
                 HIERARCHY_DATA.rincianOutput[filters.kegiatan]?.map((rincian) => (
                   <SelectItem key={rincian.id} value={rincian.id}>
                     {rincian.name}
@@ -151,12 +174,56 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua</SelectItem>
-              {filters.rincianOutput && 
+              {filters.rincianOutput && filters.rincianOutput !== 'all' && 
                 HIERARCHY_DATA.komponenOutput[filters.rincianOutput]?.map((komponen) => (
                   <SelectItem key={komponen.id} value={komponen.id}>
                     {komponen.name}
                   </SelectItem>
                 ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Sub Komponen Dropdown */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Sub Komponen</label>
+          <Select
+            value={filters.subKomponen}
+            onValueChange={handleSubKomponenChange}
+            disabled={!filters.programPembebanan}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih Sub Komponen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua</SelectItem>
+              {filters.programPembebanan && filters.programPembebanan !== 'all' && 
+                HIERARCHY_DATA.subKomponen[filters.programPembebanan]?.map((subKomponen) => (
+                  <SelectItem key={subKomponen.id} value={subKomponen.id}>
+                    {subKomponen.name}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Akun Dropdown */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Akun</label>
+          <Select
+            value={filters.akun}
+            onValueChange={handleAkunChange}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih Akun" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua</SelectItem>
+              {HIERARCHY_DATA.akun.map((akun) => (
+                <SelectItem key={akun.id} value={akun.id}>
+                  {akun.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

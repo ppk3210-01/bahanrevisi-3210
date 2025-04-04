@@ -23,6 +23,14 @@ const useBudgetData = (filters: FilterSelection) => {
         
         // Apply filtering logic based on selected filters at any level
         // Including support for "all" (which means don't filter by that level)
+        if (filters.akun && filters.akun !== 'all') {
+          query = query.eq('akun', filters.akun);
+        }
+        
+        if (filters.subKomponen && filters.subKomponen !== 'all') {
+          query = query.eq('sub_komponen', filters.subKomponen);
+        } 
+
         if (filters.komponenOutput && filters.komponenOutput !== 'all') {
           query = query.eq('komponen_output', filters.komponenOutput);
         } else if (filters.rincianOutput && filters.rincianOutput !== 'all') {
@@ -62,7 +70,9 @@ const useBudgetData = (filters: FilterSelection) => {
             // Add these fields if they exist in your database, otherwise set defaults
             programPembebanan: item.program_pembebanan || '',
             kegiatan: item.kegiatan || '',
-            rincianOutput: item.rincian_output || ''
+            rincianOutput: item.rincian_output || '',
+            subKomponen: item.sub_komponen || '',
+            akun: item.akun || ''
           }));
 
           setBudgetItems(transformedData);
@@ -102,9 +112,11 @@ const useBudgetData = (filters: FilterSelection) => {
         status: 'new',
         is_approved: false,
         // Include filter values if they exist
-        program_pembebanan: filters.programPembebanan || null,
-        kegiatan: filters.kegiatan || null,
-        rincian_output: filters.rincianOutput || null
+        program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
+        kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
+        rincian_output: filters.rincianOutput !== 'all' ? filters.rincianOutput : null,
+        sub_komponen: filters.subKomponen !== 'all' ? filters.subKomponen : null,
+        akun: filters.akun !== 'all' ? filters.akun : null
       };
       
       // Save to Supabase
@@ -137,7 +149,9 @@ const useBudgetData = (filters: FilterSelection) => {
           komponenOutput: data.komponen_output,
           programPembebanan: data.program_pembebanan || '',
           kegiatan: data.kegiatan || '',
-          rincianOutput: data.rincian_output || ''
+          rincianOutput: data.rincian_output || '',
+          subKomponen: data.sub_komponen || '',
+          akun: data.akun || ''
         };
 
         // Add to state
@@ -175,6 +189,8 @@ const useBudgetData = (filters: FilterSelection) => {
       if ('volumeMenjadi' in updates) supabaseUpdates.volume_menjadi = updates.volumeMenjadi;
       if ('satuanMenjadi' in updates) supabaseUpdates.satuan_menjadi = updates.satuanMenjadi;
       if ('hargaSatuanMenjadi' in updates) supabaseUpdates.harga_satuan_menjadi = updates.hargaSatuanMenjadi;
+      if ('subKomponen' in updates) supabaseUpdates.sub_komponen = updates.subKomponen;
+      if ('akun' in updates) supabaseUpdates.akun = updates.akun;
       
       // Calculate derived values if relevant fields have been updated
       let updatedItem = { ...currentItem, ...updates };

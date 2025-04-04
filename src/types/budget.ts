@@ -17,6 +17,8 @@ export interface BudgetItem {
   programPembebanan?: string;
   kegiatan?: string;
   rincianOutput?: string;
+  subKomponen?: string;
+  akun?: string;
 }
 
 export interface BudgetSummary {
@@ -38,6 +40,8 @@ export interface HierarchyData {
   kegiatan: Record<string, FilterOption[]>;
   rincianOutput: Record<string, FilterOption[]>;
   komponenOutput: Record<string, FilterOption[]>;
+  subKomponen: Record<string, FilterOption[]>;
+  akun: FilterOption[];
 }
 
 export interface FilterSelection {
@@ -45,4 +49,6 @@ export interface FilterSelection {
   kegiatan: string;
   rincianOutput: string;
   komponenOutput: string;
+  subKomponen: string;
+  akun: string;
 }

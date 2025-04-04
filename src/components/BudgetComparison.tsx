@@ -16,7 +16,9 @@ const BudgetComparison: React.FC = () => {
     programPembebanan: '',
     kegiatan: '',
     rincianOutput: '',
-    komponenOutput: ''
+    komponenOutput: '',
+    subKomponen: '',
+    akun: ''
   });
 
   // Get budget data based on filters

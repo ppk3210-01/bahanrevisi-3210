@@ -20,6 +20,8 @@ export type BudgetItemRecord = {
   program_pembebanan: string | null;
   kegiatan: string | null;
   rincian_output: string | null;
+  sub_komponen: string | null;
+  akun: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 };
@@ -28,6 +30,18 @@ export type KomponenOutputRecord = {
   id: string;
   nama: string;
   created_at?: string | null;
+};
+
+export type SubKomponenRecord = {
+  id: string;
+  nama: string;
+  program_pembebanan: string;
+};
+
+export type AkunRecord = {
+  id: string;
+  nama: string;
+  urutan: number;
 };
 
 // This is a simplified version of the Database type that includes our tables
@@ -55,6 +69,16 @@ export type TemporaryDatabase = {
         Update: Partial<Omit<KomponenOutputRecord, 'created_at'>> & {
           created_at?: string | null;
         };
+      };
+      sub_komponen: {
+        Row: SubKomponenRecord;
+        Insert: SubKomponenRecord;
+        Update: Partial<SubKomponenRecord>;
+      };
+      akun: {
+        Row: AkunRecord;
+        Insert: AkunRecord;
+        Update: Partial<AkunRecord>;
       };
     };
   };

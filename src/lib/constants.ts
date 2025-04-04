@@ -1,4 +1,3 @@
-
 export const UNIT_OPTIONS = [
   'BLN',
   'BS',
@@ -134,7 +133,7 @@ export const HIERARCHY_DATA = {
       { id: '2903.QMA.006', name: 'PUBLIKASI/LAPORAN PENYUSUNAN INFLASI (2903.QMA.006)' }
     ],
     '2904.BMA': [
-      { id: '2904.BMA.006', name: 'PUBLIKASI/LAPORAN STATISTIK INDUSTRI, PERTAMBANGAN DAN PENGGALIAN, ENERGI, DAN KONSTRUKSI (2904.BMA.006)' }
+      { id: '2904.BMA.006', name: 'PUBLIKASI/LAPORAN STATISTIK INDUSTRI, PERTAMBANGAN DAN PENGGALIAN, ENERGI, DAN KONSTRUksi (2904.BMA.006)' }
     ],
     '2905.BMA': [
       { id: '2905.BMA.004', name: 'PUBLIKASI/LAPORAN SAKERNAS (2905.BMA.004)' },
@@ -167,7 +166,42 @@ export const HIERARCHY_DATA = {
     '2886.EBD': [
       { id: '2886.EBD.955', name: 'Layanan Manajemen Keuangan (2886.EBD.955)' }
     ]
-  }
+  },
+  subKomponen: {
+    '054.01.GG': [
+      { id: '005', name: 'Dukungan Penyelenggaraan Tugas dan Fungsi Unit (005)' },
+      { id: '051_GG', name: 'PERSIAPAN (051)' },
+      { id: '052', name: 'PENGUMPULAN DATA (052)' },
+      { id: '053', name: 'PENGOLAHAN DAN ANALISIS (053)' },
+      { id: '054', name: 'DISEMINASI DAN EVALUASI (054)' },
+      { id: '056', name: 'Pengembangan Infrastruktur dan Layanan Teknologi Informasi dan Komunikasi (056)' },
+      { id: '506', name: 'Pemutakhiran Kerangka Geospasial dan Muatan Wilkerstat (506)' },
+      { id: '516', name: 'Updating Direktori Usaha/Perusahaan Ekonomi Lanjutan (516)' },
+      { id: '519', name: 'Penyusunan Bahan Publisitas (519)' }
+    ],
+    '054.01.WA': [
+      { id: '051_WA', name: 'Tanpa Komponen (051)' },
+      { id: '001', name: 'Gaji dan Tunjangan (001)' },
+      { id: '002', name: 'Operasional dan Pemeliharaan Kantor (002)' }
+    ]
+  },
+  akun: [
+    { id: '521111', name: 'Belanja Keperluan Perkantoran (521111)' },
+    { id: '521115', name: 'Belanja Honor Operasional Satuan Kerja (521115)' },
+    { id: '521119', name: 'Belanja Barang Operasional Lainnya (521119)' },
+    { id: '521211', name: 'Belanja Honor Bahan (521211)' },
+    { id: '521213', name: 'Belanja Honor Output Kegiatan (521213)' },
+    { id: '521219', name: 'Belanja Barang Non Operasional Lainnya (521219)' },
+    { id: '521811', name: 'Belanja Barang Persediaan Barang Konsumsi (521811)' },
+    { id: '524111', name: 'Belanja Perjalanan Dinas Biasa (524111)' },
+    { id: '524113', name: 'Belanja Perjalanan Dinas Dalam Kota (524113)' },
+    { id: '524114', name: 'Belanja Perjalanan Dinas Paket Meeting Dalam Kota (524114)' },
+    { id: '524119', name: 'Belanja Perjalanan Dinas Paket Meeting Luar Kota (524119)' },
+    { id: '523121', name: 'Belanja Pemeliharaan Peralatan dan Mesin (523121)' },
+    { id: '522151', name: 'Belanja Jasa Profesi (522151)' },
+    { id: '532111', name: 'Belanja Modal Peralatan dan Mesin (532111)' },
+    { id: '533111', name: 'Belanja Modal Gedung dan Bangunan (533111)' }
+  ]
 };
 
 // Sample budget data for initial demo
