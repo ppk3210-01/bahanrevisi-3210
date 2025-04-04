@@ -9,9 +9,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FileText } from 'lucide-react';
+import { FileText, FileSpreadsheet } from 'lucide-react';
 import { BudgetItem } from '@/types/budget';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
+import { toast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
 
 interface SummaryDialogProps {
   items: BudgetItem[];
@@ -24,9 +26,104 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
   const deletedItems = items.filter(item => item.status === 'deleted');
   
   // Calculate totals
-  const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
-  const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-  const totalSelisih = totalMenjadi - totalSemula;
+  const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
+  const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
+  const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
+
+  // Function to export summary to Excel
+  const exportSummaryToExcel = () => {
+    if (items.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Peringatan",
+        description: "Tidak ada data untuk diekspor"
+      });
+      return;
+    }
+
+    try {
+      const workbook = XLSX.utils.book_new();
+      
+      // Sheet 1: Changed Items
+      if (changedItems.length > 0) {
+        const changedData = changedItems.map((item, index) => ({
+          'No': index + 1,
+          'Uraian': item.uraian,
+          'Pembebanan': item.komponenOutput,
+          'Volume Semula': item.volumeSemula,
+          'Satuan Semula': item.satuanSemula,
+          'Harga Satuan Semula': item.hargaSatuanSemula,
+          'Jumlah Semula': roundToThousands(item.jumlahSemula),
+          'Volume Menjadi': item.volumeMenjadi,
+          'Satuan Menjadi': item.satuanMenjadi,
+          'Harga Satuan Menjadi': item.hargaSatuanMenjadi,
+          'Jumlah Menjadi': roundToThousands(item.jumlahMenjadi),
+          'Selisih': roundToThousands(item.selisih)
+        }));
+        
+        const changedWs = XLSX.utils.json_to_sheet(changedData);
+        XLSX.utils.book_append_sheet(workbook, changedWs, "Item Diubah");
+      }
+      
+      // Sheet 2: New Items
+      if (newItems.length > 0) {
+        const newData = newItems.map((item, index) => ({
+          'No': index + 1,
+          'Uraian': item.uraian,
+          'Pembebanan': item.komponenOutput,
+          'Volume': item.volumeMenjadi,
+          'Satuan': item.satuanMenjadi,
+          'Harga Satuan': item.hargaSatuanMenjadi,
+          'Jumlah': roundToThousands(item.jumlahMenjadi)
+        }));
+        
+        const newWs = XLSX.utils.json_to_sheet(newData);
+        XLSX.utils.book_append_sheet(workbook, newWs, "Item Baru");
+      }
+      
+      // Sheet 3: Deleted Items
+      if (deletedItems.length > 0) {
+        const deletedData = deletedItems.map((item, index) => ({
+          'No': index + 1,
+          'Uraian': item.uraian,
+          'Pembebanan': item.komponenOutput,
+          'Volume': item.volumeSemula,
+          'Satuan': item.satuanSemula,
+          'Harga Satuan': item.hargaSatuanSemula,
+          'Jumlah': roundToThousands(item.jumlahSemula)
+        }));
+        
+        const deletedWs = XLSX.utils.json_to_sheet(deletedData);
+        XLSX.utils.book_append_sheet(workbook, deletedWs, "Item Dihapus");
+      }
+      
+      // Sheet 4: Summary
+      const summaryData = [
+        { 'Keterangan': 'Total Semula', 'Nilai': totalSemula },
+        { 'Keterangan': 'Total Menjadi', 'Nilai': totalMenjadi },
+        { 'Keterangan': 'Selisih', 'Nilai': totalSelisih }
+      ];
+      
+      const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(workbook, summaryWs, "Ringkasan");
+      
+      // Generate file name and save
+      const fileName = `Ringkasan_Perubahan_Anggaran_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      
+      toast({
+        title: "Berhasil!",
+        description: "Berhasil mengunduh ringkasan perubahan anggaran"
+      });
+    } catch (error) {
+      console.error('Error exporting summary to Excel:', error);
+      toast({
+        variant: "destructive",
+        title: "Gagal!",
+        description: "Gagal mengunduh file. Silakan coba lagi."
+      });
+    }
+  };
   
   return (
     <Dialog>
@@ -39,8 +136,12 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ringkasan Perubahan Anggaran</DialogTitle>
-          <DialogDescription>
-            Berikut adalah daftar perubahan anggaran yang telah dilakukan
+          <DialogDescription className="flex justify-between items-center">
+            <span>Berikut adalah daftar perubahan anggaran yang telah dilakukan</span>
+            <Button variant="outline" size="sm" onClick={exportSummaryToExcel}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Export Excel
+            </Button>
           </DialogDescription>
         </DialogHeader>
         
@@ -83,9 +184,9 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                             </div>
                           )}
                         </td>
-                        <td className="border p-2 text-right">{formatCurrency(item.jumlahSemula)}</td>
-                        <td className="border p-2 text-right">{formatCurrency(item.jumlahMenjadi)}</td>
-                        <td className="border p-2 text-right">{formatCurrency(item.selisih)}</td>
+                        <td className="border p-2 text-right">{formatCurrency(roundToThousands(item.jumlahSemula))}</td>
+                        <td className="border p-2 text-right">{formatCurrency(roundToThousands(item.jumlahMenjadi))}</td>
+                        <td className="border p-2 text-right">{formatCurrency(roundToThousands(item.selisih))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -118,7 +219,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                         <td className="border p-2 text-left">{item.volumeMenjadi}</td>
                         <td className="border p-2 text-left">{item.satuanMenjadi}</td>
                         <td className="border p-2 text-right">{formatCurrency(item.hargaSatuanMenjadi)}</td>
-                        <td className="border p-2 text-right">{formatCurrency(item.jumlahMenjadi)}</td>
+                        <td className="border p-2 text-right">{formatCurrency(roundToThousands(item.jumlahMenjadi))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -151,7 +252,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                         <td className="border p-2 text-left">{item.volumeSemula}</td>
                         <td className="border p-2 text-left">{item.satuanSemula}</td>
                         <td className="border p-2 text-right">{formatCurrency(item.hargaSatuanSemula)}</td>
-                        <td className="border p-2 text-right">{formatCurrency(item.jumlahSemula)}</td>
+                        <td className="border p-2 text-right">{formatCurrency(roundToThousands(item.jumlahSemula))}</td>
                       </tr>
                     ))}
                   </tbody>

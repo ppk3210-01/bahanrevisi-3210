@@ -121,14 +121,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.rincianOutput}
             onValueChange={handleRincianOutputChange}
-            disabled={!filters.kegiatan || filters.kegiatan === ''}
+            disabled={!filters.kegiatan}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Rincian Output" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua</SelectItem>
-              {filters.kegiatan && filters.kegiatan !== '' && 
+              {filters.kegiatan && 
                 HIERARCHY_DATA.rincianOutput[filters.kegiatan]?.map((rincian) => (
                   <SelectItem key={rincian.id} value={rincian.id}>
                     {rincian.name}
@@ -144,14 +144,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.komponenOutput}
             onValueChange={handleKomponenOutputChange}
-            disabled={!filters.rincianOutput || filters.rincianOutput === ''}
+            disabled={!filters.rincianOutput}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Komponen Output" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua</SelectItem>
-              {filters.rincianOutput && filters.rincianOutput !== '' && 
+              {filters.rincianOutput && 
                 HIERARCHY_DATA.komponenOutput[filters.rincianOutput]?.map((komponen) => (
                   <SelectItem key={komponen.id} value={komponen.id}>
                     {komponen.name}

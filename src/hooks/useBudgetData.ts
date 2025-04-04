@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -21,16 +22,16 @@ const useBudgetData = (filters: FilterSelection) => {
           .select('*');
         
         // Apply filtering logic based on selected filters at any level
-        // Including support for "Semua" (empty string)
-        if (filters.komponenOutput) {
+        // Including support for "all" (which means don't filter by that level)
+        if (filters.komponenOutput && filters.komponenOutput !== 'all') {
           query = query.eq('komponen_output', filters.komponenOutput);
-        } else if (filters.rincianOutput) {
+        } else if (filters.rincianOutput && filters.rincianOutput !== 'all') {
           // Filter by rincian_output
           query = query.eq('rincian_output', filters.rincianOutput);
-        } else if (filters.kegiatan) {
+        } else if (filters.kegiatan && filters.kegiatan !== 'all') {
           // Filter by kegiatan
           query = query.eq('kegiatan', filters.kegiatan);
-        } else if (filters.programPembebanan) {
+        } else if (filters.programPembebanan && filters.programPembebanan !== 'all') {
           // Filter by program_pembebanan
           query = query.eq('program_pembebanan', filters.programPembebanan);
         }
@@ -43,7 +44,6 @@ const useBudgetData = (filters: FilterSelection) => {
 
         if (data) {
           // Transform data from Supabase format to our BudgetItem format
-          // Apply rounding to currency values
           const transformedData: BudgetItem[] = data.map((item: any) => ({
             id: item.id,
             uraian: item.uraian,

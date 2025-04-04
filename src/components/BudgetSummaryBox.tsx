@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 
 interface BudgetSummaryBoxProps {
   totalSemula: number;
@@ -9,7 +9,10 @@ interface BudgetSummaryBoxProps {
 }
 
 const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({ totalSemula, totalMenjadi }) => {
-  const selisih = totalMenjadi - totalSemula;
+  // Apply rounding to the totals
+  const roundedTotalSemula = roundToThousands(totalSemula);
+  const roundedTotalMenjadi = roundToThousands(totalMenjadi);
+  const selisih = roundedTotalMenjadi - roundedTotalSemula;
   const hasSelisih = selisih !== 0;
 
   return (
@@ -18,12 +21,12 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({ totalSemula, totalM
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-purple-100 rounded-md">
             <h3 className="text-sm font-medium text-gray-500 mb-1">PAGU Semula</h3>
-            <p className="text-2xl font-bold">{formatCurrency(totalSemula)}</p>
+            <p className="text-2xl font-bold">{formatCurrency(roundedTotalSemula)}</p>
           </div>
           
           <div className="p-4 bg-yellow-100 rounded-md">
             <h3 className="text-sm font-medium text-gray-500 mb-1">PAGU Menjadi</h3>
-            <p className="text-2xl font-bold">{formatCurrency(totalMenjadi)}</p>
+            <p className="text-2xl font-bold">{formatCurrency(roundedTotalMenjadi)}</p>
           </div>
           
           <div className={`p-4 rounded-md ${hasSelisih ? 'bg-red-50' : 'bg-green-50'}`}>

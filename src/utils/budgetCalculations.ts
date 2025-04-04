@@ -18,15 +18,12 @@ export const roundToThousands = (amount: number): number => {
 
 // Format number as currency (e.g., Rp 1.000.000)
 export const formatCurrency = (amount: number): string => {
-  // Round to thousands before formatting
-  const roundedAmount = roundToThousands(amount);
-  
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(roundedAmount);
+  }).format(amount);
 };
 
 // Check if an item has been changed
