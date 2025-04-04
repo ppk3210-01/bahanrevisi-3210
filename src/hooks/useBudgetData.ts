@@ -84,23 +84,32 @@ const useBudgetData = (filters: FilterSelection) => {
   const fetchBudgetItems = useCallback(async () => {
     setLoading(true);
     try {
-      let query = supabase.from('budget_items').select();
-
-      // Apply filters
+      // Fix the TypeScript infinite recursion by explicitly using a typed query
+      const baseQuery = supabase.from('budget_items').select('*');
+      
+      // Apply filters - each one is processed independently to avoid type recursion
+      let filtersApplied = baseQuery;
+      
       if (filters.programPembebanan) {
-        query = query.eq('program_pembebanan', filters.programPembebanan);
+        filtersApplied = filtersApplied.eq('program_pembebanan', filters.programPembebanan);
       }
+      
       if (filters.kegiatan) {
-        query = query.eq('kegiatan', filters.kegiatan);
+        filtersApplied = filtersApplied.eq('kegiatan', filters.kegiatan);
       }
+      
       if (filters.rincianOutput) {
-        query = query.eq('rincian_output', filters.rincianOutput);
+        filtersApplied = filtersApplied.eq('rincian_output', filters.rincianOutput);
       }
+      
       if (filters.komponenOutput) {
-        query = query.eq('komponen_output', filters.komponenOutput);
+        filtersApplied = filtersApplied.eq('komponen_output', filters.komponenOutput);
       }
-
-      const { data, error: fetchError } = await query.order('created_at', { ascending: true });
+      
+      // Complete the query with ordering
+      const { data, error: fetchError } = await filtersApplied.order('created_at', { 
+        ascending: true 
+      });
 
       if (fetchError) {
         console.error('Error fetching budget items:', fetchError);
@@ -108,7 +117,7 @@ const useBudgetData = (filters: FilterSelection) => {
         return;
       }
 
-      const items = data ? data.map(convertToFrontendItem) : [];
+      const items = data ? data.map(item => convertToFrontendItem(item as BudgetItemDB)) : [];
       setBudgetItems(items);
       setError(null);
     } catch (err) {
