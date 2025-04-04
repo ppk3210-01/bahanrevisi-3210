@@ -32,7 +32,7 @@ export const hasItemChanged = (item: BudgetItem): boolean => {
 
 // Update item status based on its values
 export const updateItemStatus = (item: BudgetItem): BudgetItem => {
-  let status = 'unchanged';
+  let status: 'unchanged' | 'changed' | 'new' | 'deleted' = 'unchanged';
   
   if (item.volumeSemula === 0 && item.hargaSatuanSemula === 0 && (item.volumeMenjadi > 0 || item.hargaSatuanMenjadi > 0)) {
     status = 'new';

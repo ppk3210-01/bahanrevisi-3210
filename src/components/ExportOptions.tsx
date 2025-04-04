@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, FilePdf, FileSpreadsheet } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet } from 'lucide-react';
 import { BudgetItem } from '@/types/budget';
 import { formatCurrency } from '@/utils/budgetCalculations';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface ExportOptionsProps {
   items: BudgetItem[];
@@ -44,7 +44,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       </Button>
       
       <Button variant="outline" onClick={exportToPDF}>
-        <FilePdf className="mr-2 h-4 w-4" />
+        <FileText className="mr-2 h-4 w-4" />
         Export PDF
       </Button>
     </div>

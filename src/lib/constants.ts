@@ -184,7 +184,7 @@ export const SAMPLE_BUDGET_ITEMS = [
     hargaSatuanMenjadi: 5000000,
     jumlahMenjadi: 60000000,
     selisih: 0,
-    status: 'unchanged',
+    status: 'unchanged' as 'unchanged',
     isApproved: false,
     komponenOutput: '2886.EBA.956'
   },
@@ -200,7 +200,7 @@ export const SAMPLE_BUDGET_ITEMS = [
     hargaSatuanMenjadi: 2500000,
     jumlahMenjadi: 12500000,
     selisih: 2500000,
-    status: 'changed',
+    status: 'changed' as 'changed',
     isApproved: false,
     komponenOutput: '2886.EBA.962'
   },
@@ -216,7 +216,7 @@ export const SAMPLE_BUDGET_ITEMS = [
     hargaSatuanMenjadi: 20000000,
     jumlahMenjadi: 40000000,
     selisih: 10000000,
-    status: 'changed',
+    status: 'changed' as 'changed',
     isApproved: false,
     komponenOutput: '2886.EBA.956'
   },
@@ -232,7 +232,7 @@ export const SAMPLE_BUDGET_ITEMS = [
     hargaSatuanMenjadi: 25000000,
     jumlahMenjadi: 25000000,
     selisih: 25000000,
-    status: 'new',
+    status: 'new' as 'new',
     isApproved: false,
     komponenOutput: '2901.CAN.004'
   }

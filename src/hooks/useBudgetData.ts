@@ -17,7 +17,7 @@ const useBudgetData = (filters: FilterSelection) => {
       try {
         // In a real app, this would be a fetch from Supabase
         // For now, we'll use sample data and filter it based on the selected filters
-        let filteredItems = [...SAMPLE_BUDGET_ITEMS];
+        let filteredItems: BudgetItem[] = [...SAMPLE_BUDGET_ITEMS];
 
         // Apply filtering logic
         if (filters.programPembebanan) {

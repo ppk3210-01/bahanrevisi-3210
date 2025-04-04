@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import {
 import { BudgetItem } from '@/types/budget';
 import { UNIT_OPTIONS } from '@/lib/constants';
 import { getRowStyle, formatCurrency } from '@/utils/budgetCalculations';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface BudgetTableProps {
   items: BudgetItem[];
@@ -46,14 +45,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     komponenOutput: komponenOutput
   });
 
-  // Handle adding a new item
   const handleAddItem = () => {
     if (!newItem.uraian) {
       toast.error('Uraian harus diisi');
       return;
     }
 
-    // Add new item with komponenOutput from props
     onAdd({
       uraian: newItem.uraian || '',
       volumeSemula: newItem.volumeSemula || 0,
@@ -66,7 +63,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       isApproved: false
     });
 
-    // Reset form
     setNewItem({
       uraian: '',
       volumeSemula: 0,
@@ -81,20 +77,16 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     toast.success('Item berhasil ditambahkan');
   };
 
-  // Start editing an item
   const startEditing = (item: BudgetItem) => {
     setEditingId(item.id);
   };
 
-  // Save changes when editing
   const saveEditing = (id: string) => {
     setEditingId(null);
     toast.success('Perubahan berhasil disimpan');
   };
 
-  // Handle changes to editable fields
   const handleEditChange = (id: string, field: string, value: string | number) => {
-    // For numeric fields, ensure the value is a number
     if (field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
       if (typeof value === 'string') {
         const numValue = Number(value.replace(/,/g, ''));
@@ -106,11 +98,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     onUpdate(id, { [field]: value });
   };
 
-  // Get specific item field renderer based on whether we're editing
   const renderItemField = (item: BudgetItem, field: keyof BudgetItem) => {
     const isEditing = editingId === item.id;
     
-    // Handle different field types
     switch(field) {
       case 'uraian':
         return isEditing ? (
@@ -187,7 +177,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
   };
 
-  // Calculate totals
   const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
@@ -274,7 +263,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               </tr>
             ))}
 
-            {/* New item row */}
             <tr className="bg-gray-50">
               <td>{items.length + 1}</td>
               <td className="uraian-cell">
@@ -369,7 +357,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               </td>
             </tr>
             
-            {/* Totals row */}
             <tr className="font-semibold bg-gray-100">
               <td colSpan={5} className="text-right">Total:</td>
               <td className="number-cell">{formatCurrency(totalSemula)}</td>
@@ -382,7 +369,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </table>
       </div>
       
-      {/* Warning box for budget changes */}
       {totalSelisih !== 0 && (
         <div className="warning-box m-4">
           ⚠ PERINGATAN:
