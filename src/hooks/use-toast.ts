@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -167,6 +168,33 @@ function toast({ ...props }: Toast) {
     update,
   }
 }
+
+// Add helper methods to the toast object
+toast.success = (title: string, description?: string) => {
+  return toast({
+    variant: "default",
+    title,
+    description,
+    className: "bg-green-50 border-green-200 text-green-800",
+  });
+};
+
+toast.error = (title: string, description?: string) => {
+  return toast({
+    variant: "destructive",
+    title,
+    description,
+  });
+};
+
+toast.info = (title: string, description?: string) => {
+  return toast({
+    variant: "default",
+    title,
+    description,
+    className: "bg-blue-50 border-blue-200 text-blue-800",
+  });
+};
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
