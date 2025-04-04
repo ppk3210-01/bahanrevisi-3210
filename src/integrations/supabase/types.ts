@@ -9,7 +9,90 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      budget_items: {
+        Row: {
+          created_at: string | null
+          harga_satuan_menjadi: number
+          harga_satuan_semula: number
+          id: string
+          is_approved: boolean
+          jumlah_menjadi: number | null
+          jumlah_semula: number | null
+          kegiatan: string | null
+          komponen_output: string
+          program_pembebanan: string | null
+          rincian_output: string | null
+          satuan_menjadi: string
+          satuan_semula: string
+          selisih: number | null
+          status: string
+          updated_at: string | null
+          uraian: string
+          volume_menjadi: number
+          volume_semula: number
+        }
+        Insert: {
+          created_at?: string | null
+          harga_satuan_menjadi: number
+          harga_satuan_semula: number
+          id?: string
+          is_approved?: boolean
+          jumlah_menjadi?: number | null
+          jumlah_semula?: number | null
+          kegiatan?: string | null
+          komponen_output: string
+          program_pembebanan?: string | null
+          rincian_output?: string | null
+          satuan_menjadi: string
+          satuan_semula: string
+          selisih?: number | null
+          status?: string
+          updated_at?: string | null
+          uraian: string
+          volume_menjadi: number
+          volume_semula: number
+        }
+        Update: {
+          created_at?: string | null
+          harga_satuan_menjadi?: number
+          harga_satuan_semula?: number
+          id?: string
+          is_approved?: boolean
+          jumlah_menjadi?: number | null
+          jumlah_semula?: number | null
+          kegiatan?: string | null
+          komponen_output?: string
+          program_pembebanan?: string | null
+          rincian_output?: string | null
+          satuan_menjadi?: string
+          satuan_semula?: string
+          selisih?: number | null
+          status?: string
+          updated_at?: string | null
+          uraian?: string
+          volume_menjadi?: number
+          volume_semula?: number
+        }
+        Relationships: []
+      }
+      komponen_output: {
+        Row: {
+          created_at: string | null
+          id: string
+          nama: string
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          nama: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nama?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

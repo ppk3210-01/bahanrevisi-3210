@@ -4,11 +4,9 @@ import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Database } from '@/integrations/supabase/types';
+import { BudgetItemRecord, TemporaryDatabase } from '@/types/supabase';
 
-// Define a type for budget item records from Supabase
-type BudgetItemRecord = Database['public']['Tables']['budget_items']['Row'];
-
+// Use our temporary type definitions until the Supabase generated types are available
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +17,7 @@ const useBudgetData = (filters: FilterSelection) => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Use the supabase client with our temporary type definitions
         let query = supabase
           .from('budget_items')
           .select('*');
@@ -29,15 +28,12 @@ const useBudgetData = (filters: FilterSelection) => {
           query = query.eq('komponen_output', filters.komponenOutput);
         } else if (filters.rincianOutput) {
           // Filter by rincian_output
-          // Assuming you have a rincian_output column in your table
           query = query.eq('rincian_output', filters.rincianOutput);
         } else if (filters.kegiatan) {
           // Filter by kegiatan
-          // Assuming you have a kegiatan column in your table
           query = query.eq('kegiatan', filters.kegiatan);
         } else if (filters.programPembebanan) {
           // Filter by program_pembebanan
-          // Assuming you have a program_pembebanan column in your table
           query = query.eq('program_pembebanan', filters.programPembebanan);
         }
 
@@ -151,7 +147,11 @@ const useBudgetData = (filters: FilterSelection) => {
       }
     } catch (err) {
       console.error('Error adding budget item:', err);
-      toast.error('Gagal menambahkan item. Silakan coba lagi.');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal menambahkan item. Silakan coba lagi.'
+      });
       throw err;
     }
   };
@@ -245,7 +245,11 @@ const useBudgetData = (filters: FilterSelection) => {
       return updatedItem;
     } catch (err) {
       console.error('Error updating budget item:', err);
-      toast.error('Gagal mengupdate item. Silakan coba lagi.');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal mengupdate item. Silakan coba lagi.'
+      });
       throw err;
     }
   };
@@ -267,7 +271,11 @@ const useBudgetData = (filters: FilterSelection) => {
       setBudgetItems(prev => prev.filter(item => item.id !== id));
     } catch (err) {
       console.error('Error deleting budget item:', err);
-      toast.error('Gagal menghapus item. Silakan coba lagi.');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal menghapus item. Silakan coba lagi.'
+      });
       throw err;
     }
   };
@@ -319,7 +327,11 @@ const useBudgetData = (filters: FilterSelection) => {
       );
     } catch (err) {
       console.error('Error approving budget item:', err);
-      toast.error('Gagal menyetujui item. Silakan coba lagi.');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal menyetujui item. Silakan coba lagi.'
+      });
       throw err;
     }
   };
