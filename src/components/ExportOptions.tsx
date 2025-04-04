@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, FileText, FileSpreadsheet } from 'lucide-react';
 import { BudgetItem } from '@/types/budget';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { toast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
@@ -20,15 +20,16 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
     return items.map((item, index) => ({
       'No': index + 1,
       'Uraian': item.uraian,
+      'Pembebanan': item.komponenOutput,
       'Volume Semula': item.volumeSemula,
       'Satuan Semula': item.satuanSemula,
       'Harga Satuan Semula': item.hargaSatuanSemula,
-      'Jumlah Semula': item.jumlahSemula,
+      'Jumlah Semula': roundToThousands(item.jumlahSemula),
       'Volume Menjadi': item.volumeMenjadi,
       'Satuan Menjadi': item.satuanMenjadi,
       'Harga Satuan Menjadi': item.hargaSatuanMenjadi,
-      'Jumlah Menjadi': item.jumlahMenjadi,
-      'Selisih': item.selisih,
+      'Jumlah Menjadi': roundToThousands(item.jumlahMenjadi),
+      'Selisih': roundToThousands(item.selisih),
       'Status': item.status
     }));
   };
@@ -51,12 +52,12 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       XLSX.utils.book_append_sheet(workbook, worksheet, "Budget");
       
       // Add footer with totals
-      const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
-      const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-      const totalSelisih = totalMenjadi - totalSemula;
+      const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
+      const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
+      const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
       
       XLSX.utils.sheet_add_aoa(worksheet, [
-        ["", "TOTAL", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
+        ["", "TOTAL", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
       ], {origin: -1});
       
       // Generate Excel file
@@ -100,7 +101,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       
       // Create table structure for PDF
       const tableColumn = [
-        'No', 'Uraian', 'Volume Semula', 'Satuan Semula', 'Harga Satuan Semula', 
+        'No', 'Uraian', 'Pembebanan', 'Volume Semula', 'Satuan Semula', 'Harga Satuan Semula', 
         'Jumlah Semula', 'Volume Menjadi', 'Satuan Menjadi', 'Harga Satuan Menjadi', 
         'Jumlah Menjadi', 'Selisih'
       ];
@@ -109,6 +110,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       const tableRows = exportData.map(item => [
         item['No'],
         item['Uraian'],
+        item['Pembebanan'],
         item['Volume Semula'],
         item['Satuan Semula'],
         formatCurrency(item['Harga Satuan Semula']),
@@ -121,13 +123,13 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       ]);
       
       // Calculate totals
-      const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
-      const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-      const totalSelisih = totalMenjadi - totalSemula;
+      const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
+      const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
+      const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
       
       // Add total row
       tableRows.push([
-        '', 'TOTAL', '', '', '', 
+        '', 'TOTAL', '', '', '', '', 
         formatCurrency(totalSemula), '', '', '', 
         formatCurrency(totalMenjadi), formatCurrency(totalSelisih)
       ]);
@@ -138,7 +140,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
         body: tableRows,
         startY: 25,
         styles: { fontSize: 8, cellPadding: 2 },
-        columnStyles: { 0: { cellWidth: 8 }, 1: { cellWidth: 40 } }
+        columnStyles: { 0: { cellWidth: 8 }, 1: { cellWidth: 30 }, 2: { cellWidth: 30 } }
       });
       
       // Save the PDF with a filename

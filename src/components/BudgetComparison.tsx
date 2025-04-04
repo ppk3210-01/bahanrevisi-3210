@@ -9,6 +9,7 @@ import { FilterSelection } from '@/types/budget';
 import useBudgetData from '@/hooks/useBudgetData';
 import { Alert } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import ExportOptions from './ExportOptions';
 
 const BudgetComparison: React.FC = () => {
   const [filters, setFilters] = useState<FilterSelection>({
@@ -45,13 +46,11 @@ const BudgetComparison: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Summary Box - Show above filters */}
-      {!loading && budgetItems.length > 0 && (
-        <BudgetSummaryBox 
-          totalSemula={totalSemula}
-          totalMenjadi={totalMenjadi}
-        />
-      )}
+      {/* Summary Box - Show above filters always */}
+      <BudgetSummaryBox 
+        totalSemula={totalSemula}
+        totalMenjadi={totalMenjadi}
+      />
       
       {/* Filters section */}
       <BudgetFilter onFilterChange={handleFilterChange} />
@@ -62,6 +61,7 @@ const BudgetComparison: React.FC = () => {
           <CardTitle>Perbandingan Anggaran Semula vs Menjadi</CardTitle>
           <div className="flex space-x-2">
             <SummaryDialog items={budgetItems} />
+            <ExportOptions items={budgetItems} komponenOutput={selectedKomponenOutput} />
           </div>
         </CardHeader>
         

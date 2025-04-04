@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection } from '@/types/budget';
-import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
+import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { BudgetItemRecord } from '@/types/supabase';
@@ -22,7 +21,7 @@ const useBudgetData = (filters: FilterSelection) => {
           .select('*');
         
         // Apply filtering logic based on selected filters at any level
-        // This implements the improved filter logic
+        // Including support for "Semua" (empty string)
         if (filters.komponenOutput) {
           query = query.eq('komponen_output', filters.komponenOutput);
         } else if (filters.rincianOutput) {
@@ -44,18 +43,19 @@ const useBudgetData = (filters: FilterSelection) => {
 
         if (data) {
           // Transform data from Supabase format to our BudgetItem format
+          // Apply rounding to currency values
           const transformedData: BudgetItem[] = data.map((item: any) => ({
             id: item.id,
             uraian: item.uraian,
             volumeSemula: Number(item.volume_semula),
             satuanSemula: item.satuan_semula,
             hargaSatuanSemula: Number(item.harga_satuan_semula),
-            jumlahSemula: Number(item.jumlah_semula || 0),
+            jumlahSemula: roundToThousands(Number(item.jumlah_semula || 0)),
             volumeMenjadi: Number(item.volume_menjadi),
             satuanMenjadi: item.satuan_menjadi,
             hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
-            jumlahMenjadi: Number(item.jumlah_menjadi || 0),
-            selisih: Number(item.selisih || 0),
+            jumlahMenjadi: roundToThousands(Number(item.jumlah_menjadi || 0)),
+            selisih: roundToThousands(Number(item.selisih || 0)),
             status: item.status as "unchanged" | "changed" | "new" | "deleted",
             isApproved: item.is_approved,
             komponenOutput: item.komponen_output,
@@ -82,9 +82,9 @@ const useBudgetData = (filters: FilterSelection) => {
   const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>) => {
     try {
       // Calculate derived values
-      const jumlahSemula = calculateAmount(item.volumeSemula, item.hargaSatuanSemula);
-      const jumlahMenjadi = calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi);
-      const selisih = calculateDifference(jumlahSemula, jumlahMenjadi);
+      const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
+      const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
+      const selisih = roundToThousands(calculateDifference(jumlahSemula, jumlahMenjadi));
       
       // Create new item data for Supabase
       const newItemData = {
@@ -126,12 +126,12 @@ const useBudgetData = (filters: FilterSelection) => {
           volumeSemula: Number(data.volume_semula),
           satuanSemula: data.satuan_semula,
           hargaSatuanSemula: Number(data.harga_satuan_semula),
-          jumlahSemula: Number(data.jumlah_semula || 0),
+          jumlahSemula: roundToThousands(Number(data.jumlah_semula || 0)),
           volumeMenjadi: Number(data.volume_menjadi),
           satuanMenjadi: data.satuan_menjadi,
           hargaSatuanMenjadi: Number(data.harga_satuan_menjadi),
-          jumlahMenjadi: Number(data.jumlah_menjadi || 0),
-          selisih: Number(data.selisih || 0),
+          jumlahMenjadi: roundToThousands(Number(data.jumlah_menjadi || 0)),
+          selisih: roundToThousands(Number(data.selisih || 0)),
           status: data.status as "unchanged" | "changed" | "new" | "deleted",
           isApproved: data.is_approved,
           komponenOutput: data.komponen_output,

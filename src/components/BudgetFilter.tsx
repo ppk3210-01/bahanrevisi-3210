@@ -82,6 +82,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
               <SelectValue placeholder="Pilih Program Pembebanan" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="">Semua</SelectItem>
               {HIERARCHY_DATA.programPembebanan.map((program) => (
                 <SelectItem key={program.id} value={program.id}>
                   {program.name}
@@ -103,6 +104,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
               <SelectValue placeholder="Pilih Kegiatan" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="">Semua</SelectItem>
               {filters.programPembebanan && 
                 HIERARCHY_DATA.kegiatan[filters.programPembebanan]?.map((kegiatan) => (
                   <SelectItem key={kegiatan.id} value={kegiatan.id}>
@@ -119,13 +121,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.rincianOutput}
             onValueChange={handleRincianOutputChange}
-            disabled={!filters.kegiatan}
+            disabled={!filters.kegiatan || filters.kegiatan === ''}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Rincian Output" />
             </SelectTrigger>
             <SelectContent>
-              {filters.kegiatan && 
+              <SelectItem value="">Semua</SelectItem>
+              {filters.kegiatan && filters.kegiatan !== '' && 
                 HIERARCHY_DATA.rincianOutput[filters.kegiatan]?.map((rincian) => (
                   <SelectItem key={rincian.id} value={rincian.id}>
                     {rincian.name}
@@ -141,13 +144,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.komponenOutput}
             onValueChange={handleKomponenOutputChange}
-            disabled={!filters.rincianOutput}
+            disabled={!filters.rincianOutput || filters.rincianOutput === ''}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Komponen Output" />
             </SelectTrigger>
             <SelectContent>
-              {filters.rincianOutput && 
+              <SelectItem value="">Semua</SelectItem>
+              {filters.rincianOutput && filters.rincianOutput !== '' && 
                 HIERARCHY_DATA.komponenOutput[filters.rincianOutput]?.map((komponen) => (
                   <SelectItem key={komponen.id} value={komponen.id}>
                     {komponen.name}

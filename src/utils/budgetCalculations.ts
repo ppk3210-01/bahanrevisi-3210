@@ -11,14 +11,22 @@ export const calculateDifference = (initialAmount: number, newAmount: number): n
   return newAmount - initialAmount;
 };
 
+// Round to thousands
+export const roundToThousands = (amount: number): number => {
+  return Math.round(amount / 1000) * 1000;
+};
+
 // Format number as currency (e.g., Rp 1.000.000)
 export const formatCurrency = (amount: number): string => {
+  // Round to thousands before formatting
+  const roundedAmount = roundToThousands(amount);
+  
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(amount);
+  }).format(roundedAmount);
 };
 
 // Check if an item has been changed
@@ -62,9 +70,10 @@ export const getRowStyle = (status: string): string => {
 
 // Generate the budget summary from the list of items
 export const generateBudgetSummary = (items: BudgetItem[]): BudgetSummary => {
-  const totalSemula = items.reduce((total, item) => total + item.jumlahSemula, 0);
-  const totalMenjadi = items.reduce((total, item) => total + item.jumlahMenjadi, 0);
-  const totalSelisih = totalMenjadi - totalSemula;
+  // Round the totals to thousands
+  const totalSemula = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahSemula), 0));
+  const totalMenjadi = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahMenjadi), 0));
+  const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
 
   const changedItems = items.filter(item => item.status === 'changed');
   const newItems = items.filter(item => item.status === 'new');

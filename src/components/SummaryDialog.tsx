@@ -54,6 +54,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Uraian</th>
+                      <th className="border p-2 text-left">Pembebanan</th>
                       <th className="border p-2 text-left">Detail Perubahan</th>
                       <th className="border p-2 text-right">Jumlah Semula</th>
                       <th className="border p-2 text-right">Jumlah Menjadi</th>
@@ -64,6 +65,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                     {changedItems.map((item) => (
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="border p-2 text-left">{item.uraian}</td>
+                        <td className="border p-2 text-left">{item.komponenOutput}</td>
                         <td className="border p-2 text-left">
                           {item.volumeSemula !== item.volumeMenjadi && (
                             <div>
@@ -101,6 +103,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Uraian</th>
+                      <th className="border p-2 text-left">Pembebanan</th>
                       <th className="border p-2 text-left">Volume</th>
                       <th className="border p-2 text-left">Satuan</th>
                       <th className="border p-2 text-right">Harga Satuan</th>
@@ -111,6 +114,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                     {newItems.map((item) => (
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="border p-2 text-left">{item.uraian}</td>
+                        <td className="border p-2 text-left">{item.komponenOutput}</td>
                         <td className="border p-2 text-left">{item.volumeMenjadi}</td>
                         <td className="border p-2 text-left">{item.satuanMenjadi}</td>
                         <td className="border p-2 text-right">{formatCurrency(item.hargaSatuanMenjadi)}</td>
@@ -132,6 +136,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="border p-2 text-left">Uraian</th>
+                      <th className="border p-2 text-left">Pembebanan</th>
                       <th className="border p-2 text-left">Volume</th>
                       <th className="border p-2 text-left">Satuan</th>
                       <th className="border p-2 text-right">Harga Satuan</th>
@@ -142,6 +147,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
                     {deletedItems.map((item) => (
                       <tr key={item.id} className="hover:bg-gray-50">
                         <td className="border p-2 text-left">{item.uraian}</td>
+                        <td className="border p-2 text-left">{item.komponenOutput}</td>
                         <td className="border p-2 text-left">{item.volumeSemula}</td>
                         <td className="border p-2 text-left">{item.satuanSemula}</td>
                         <td className="border p-2 text-right">{formatCurrency(item.hargaSatuanSemula)}</td>
