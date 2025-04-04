@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, uuidv4 } from '@/integrations/supabase/client';
 import { BudgetItem, FilterSelection } from '@/types/budget';
-import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
+import { calculateAmount, calculateDifference, updateItemStatus, formatCurrency } from '@/utils/budgetCalculations';
 import { toast } from './use-toast';
 
 // Define the expected database schema
