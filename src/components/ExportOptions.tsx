@@ -53,10 +53,17 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       // Generate Excel file
       XLSX.writeFile(workbook, `Anggaran_${komponenOutput.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
       
-      toast.success('Berhasil mengunduh file Excel');
+      toast({
+        title: "Berhasil!",
+        description: "Berhasil mengunduh file Excel"
+      });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
-      toast.error('Gagal mengunduh file. Silakan coba lagi.');
+      toast({
+        variant: "destructive",
+        title: "Gagal!",
+        description: "Gagal mengunduh file. Silakan coba lagi."
+      });
     }
   };
 
@@ -64,7 +71,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
   const exportToPDF = () => {
     try {
       const exportData = prepareExportData();
-      const doc = new jsPDF('landscape', 'mm', 'a4');
+      const doc = new jsPDF('landscape', 'mm', 'a4') as any; // using any to avoid TypeScript issues with jsPDF-autotable
       
       // Add title
       doc.setFontSize(14);
@@ -107,7 +114,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       ]);
       
       // Generate PDF with autotable
-      (doc as any).autoTable({
+      doc.autoTable({
         head: [tableColumn],
         body: tableRows,
         startY: 25,
@@ -117,10 +124,17 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       
       doc.save(`Anggaran_${komponenOutput.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
       
-      toast.success('Berhasil mengunduh file PDF');
+      toast({
+        title: "Berhasil!",
+        description: "Berhasil mengunduh file PDF"
+      });
     } catch (error) {
       console.error('Error exporting to PDF:', error);
-      toast.error('Gagal mengunduh file. Silakan coba lagi.');
+      toast({
+        variant: "destructive",
+        title: "Gagal!",
+        description: "Gagal mengunduh file. Silakan coba lagi."
+      });
     }
   };
 

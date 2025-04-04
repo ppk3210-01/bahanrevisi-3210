@@ -4,6 +4,10 @@ import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
+
+// Define a type for budget item records from Supabase
+type BudgetItemRecord = Database['public']['Tables']['budget_items']['Row'];
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -32,18 +36,18 @@ const useBudgetData = (filters: FilterSelection) => {
 
         if (data) {
           // Transform data from Supabase format to our BudgetItem format
-          const transformedData: BudgetItem[] = data.map(item => ({
+          const transformedData: BudgetItem[] = data.map((item: BudgetItemRecord) => ({
             id: item.id,
             uraian: item.uraian,
             volumeSemula: Number(item.volume_semula),
             satuanSemula: item.satuan_semula,
             hargaSatuanSemula: Number(item.harga_satuan_semula),
-            jumlahSemula: Number(item.jumlah_semula),
+            jumlahSemula: Number(item.jumlah_semula || 0),
             volumeMenjadi: Number(item.volume_menjadi),
             satuanMenjadi: item.satuan_menjadi,
             hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
-            jumlahMenjadi: Number(item.jumlah_menjadi),
-            selisih: Number(item.selisih),
+            jumlahMenjadi: Number(item.jumlah_menjadi || 0),
+            selisih: Number(item.selisih || 0),
             status: item.status as "unchanged" | "changed" | "new" | "deleted",
             isApproved: item.is_approved,
             komponenOutput: item.komponen_output
@@ -70,32 +74,24 @@ const useBudgetData = (filters: FilterSelection) => {
       const jumlahMenjadi = calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi);
       const selisih = calculateDifference(jumlahSemula, jumlahMenjadi);
       
-      // Create new item with status
-      const newItem: BudgetItem = {
-        id: Date.now().toString(), // Temporary ID until we get the one from Supabase
-        ...item,
-        jumlahSemula,
-        jumlahMenjadi,
-        selisih,
+      // Create new item data for Supabase
+      const newItemData = {
+        uraian: item.uraian,
+        volume_semula: item.volumeSemula,
+        satuan_semula: item.satuanSemula,
+        harga_satuan_semula: item.hargaSatuanSemula,
+        volume_menjadi: item.volumeMenjadi,
+        satuan_menjadi: item.satuanMenjadi,
+        harga_satuan_menjadi: item.hargaSatuanMenjadi,
+        komponen_output: item.komponenOutput,
         status: 'new',
-        isApproved: false
+        is_approved: false
       };
       
       // Save to Supabase
       const { data, error: supabaseError } = await supabase
         .from('budget_items')
-        .insert({
-          uraian: item.uraian,
-          volume_semula: item.volumeSemula,
-          satuan_semula: item.satuanSemula,
-          harga_satuan_semula: item.hargaSatuanSemula,
-          volume_menjadi: item.volumeMenjadi,
-          satuan_menjadi: item.satuanMenjadi,
-          harga_satuan_menjadi: item.hargaSatuanMenjadi,
-          komponen_output: item.komponenOutput,
-          status: 'new',
-          is_approved: false
-        })
+        .insert(newItemData)
         .select()
         .single();
       
@@ -111,12 +107,12 @@ const useBudgetData = (filters: FilterSelection) => {
           volumeSemula: Number(data.volume_semula),
           satuanSemula: data.satuan_semula,
           hargaSatuanSemula: Number(data.harga_satuan_semula),
-          jumlahSemula: Number(data.jumlah_semula),
+          jumlahSemula: Number(data.jumlah_semula || 0),
           volumeMenjadi: Number(data.volume_menjadi),
           satuanMenjadi: data.satuan_menjadi,
           hargaSatuanMenjadi: Number(data.harga_satuan_menjadi),
-          jumlahMenjadi: Number(data.jumlah_menjadi),
-          selisih: Number(data.selisih),
+          jumlahMenjadi: Number(data.jumlah_menjadi || 0),
+          selisih: Number(data.selisih || 0),
           status: data.status as "unchanged" | "changed" | "new" | "deleted",
           isApproved: data.is_approved,
           komponenOutput: data.komponen_output
