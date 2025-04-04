@@ -34,7 +34,11 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
   // Function to export to Excel
   const exportToExcel = () => {
     if (items.length === 0) {
-      toast.error('Tidak ada data untuk diekspor');
+      toast({
+        title: "Tidak ada data",
+        description: "Tidak ada data untuk diekspor",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -57,10 +61,18 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
       
-      toast.success('Berhasil mengunduh file Excel');
+      toast({
+        title: "Berhasil",
+        description: "Berhasil mengunduh file Excel",
+        variant: "default"
+      });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
-      toast.error('Gagal mengunduh file. Silakan coba lagi.');
+      toast({
+        title: "Gagal",
+        description: "Gagal mengunduh file. Silakan coba lagi.",
+        variant: "destructive"
+      });
     }
   };
 
