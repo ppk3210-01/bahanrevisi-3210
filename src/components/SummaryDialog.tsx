@@ -161,7 +161,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {/* Changed items section */}
           {changedItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Rincian Yang Diubah</h3>
+              <h3 className="text-lg font-semibold mb-2 text-orange-800">Rincian Yang Diubah</h3>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
