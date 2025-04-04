@@ -84,32 +84,24 @@ const useBudgetData = (filters: FilterSelection) => {
   const fetchBudgetItems = useCallback(async () => {
     setLoading(true);
     try {
-      // Fix the TypeScript infinite recursion by explicitly using a typed query
-      const baseQuery = supabase.from('budget_items').select('*');
+      // Create a base query to avoid TypeScript deep recursion errors
+      const query = supabase.from('budget_items').select('*');
       
-      // Apply filters - each one is processed independently to avoid type recursion
-      let filtersApplied = baseQuery;
+      // Build filter conditions as an array
+      const conditions = [];
+      if (filters.programPembebanan) conditions.push(['program_pembebanan', 'eq', filters.programPembebanan]);
+      if (filters.kegiatan) conditions.push(['kegiatan', 'eq', filters.kegiatan]);
+      if (filters.rincianOutput) conditions.push(['rincian_output', 'eq', filters.rincianOutput]);
+      if (filters.komponenOutput) conditions.push(['komponen_output', 'eq', filters.komponenOutput]);
       
-      if (filters.programPembebanan) {
-        filtersApplied = filtersApplied.eq('program_pembebanan', filters.programPembebanan);
+      // Apply filters
+      let filteredQuery = query;
+      for (const [column, operator, value] of conditions) {
+        filteredQuery = filteredQuery.filter(column as string, operator as string, value);
       }
       
-      if (filters.kegiatan) {
-        filtersApplied = filtersApplied.eq('kegiatan', filters.kegiatan);
-      }
-      
-      if (filters.rincianOutput) {
-        filtersApplied = filtersApplied.eq('rincian_output', filters.rincianOutput);
-      }
-      
-      if (filters.komponenOutput) {
-        filtersApplied = filtersApplied.eq('komponen_output', filters.komponenOutput);
-      }
-      
-      // Complete the query with ordering
-      const { data, error: fetchError } = await filtersApplied.order('created_at', { 
-        ascending: true 
-      });
+      // Execute the query
+      const { data, error: fetchError } = await filteredQuery.order('created_at', { ascending: true });
 
       if (fetchError) {
         console.error('Error fetching budget items:', fetchError);
