@@ -82,7 +82,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
               <SelectValue placeholder="Pilih Program Pembebanan" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Semua</SelectItem>
+              <SelectItem value="all">Semua</SelectItem>
               {HIERARCHY_DATA.programPembebanan.map((program) => (
                 <SelectItem key={program.id} value={program.id}>
                   {program.name}
@@ -104,7 +104,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
               <SelectValue placeholder="Pilih Kegiatan" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Semua</SelectItem>
+              <SelectItem value="all">Semua</SelectItem>
               {filters.programPembebanan && 
                 HIERARCHY_DATA.kegiatan[filters.programPembebanan]?.map((kegiatan) => (
                   <SelectItem key={kegiatan.id} value={kegiatan.id}>
@@ -127,7 +127,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
               <SelectValue placeholder="Pilih Rincian Output" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Semua</SelectItem>
+              <SelectItem value="all">Semua</SelectItem>
               {filters.kegiatan && filters.kegiatan !== '' && 
                 HIERARCHY_DATA.rincianOutput[filters.kegiatan]?.map((rincian) => (
                   <SelectItem key={rincian.id} value={rincian.id}>
@@ -150,7 +150,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
               <SelectValue placeholder="Pilih Komponen Output" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Semua</SelectItem>
+              <SelectItem value="all">Semua</SelectItem>
               {filters.rincianOutput && filters.rincianOutput !== '' && 
                 HIERARCHY_DATA.komponenOutput[filters.rincianOutput]?.map((komponen) => (
                   <SelectItem key={komponen.id} value={komponen.id}>
