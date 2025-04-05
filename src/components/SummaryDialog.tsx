@@ -198,7 +198,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           
           {/* Narrative Summary */}
           <div className="bg-gray-50 p-4 rounded border">
-            <h3 className="text-lg font-semibold mb-2">Kesimpulan</h3>
+            <h3 className="text-red-600 font-semibold mb-2">Kesimpulan</h3>
             <p>Total Pagu anggaran semula sebesar <strong>{formatCurrency(totalSemula)}</strong> berubah menjadi <strong>{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}>{formatCurrency(totalSelisih)}</strong>.</p>
             <p className="mt-2">Terdapat {changedItems.length} detil anggaran yang diubah, {newItems.length} detil anggaran baru, dan {deletedItems.length} detil anggaran yang dihapus.</p>
             <p className="mt-2">Perubahan ini {totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total Pagu anggaran.</p>
