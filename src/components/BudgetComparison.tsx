@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -10,6 +10,8 @@ import useBudgetData from '@/hooks/useBudgetData';
 import { Alert } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import ExportOptions from './ExportOptions';
+import BudgetImportExport from './BudgetImportExport';
+import TableSearch from './TableSearch';
 
 const BudgetComparison: React.FC = () => {
   const [filters, setFilters] = useState<FilterSelection>({
@@ -20,6 +22,8 @@ const BudgetComparison: React.FC = () => {
     subKomponen: '',
     akun: ''
   });
+  
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Get budget data based on filters
   const {
@@ -27,20 +31,45 @@ const BudgetComparison: React.FC = () => {
     loading,
     error,
     addBudgetItem,
+    addBulkBudgetItems,
     updateBudgetItem,
     deleteBudgetItem,
     approveBudgetItem
   } = useBudgetData(filters);
 
+  // Filter items based on search term
+  const filteredItems = searchTerm 
+    ? budgetItems.filter(item => 
+        item.uraian.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.satuanSemula.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.satuanMenjadi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(item.volumeSemula).includes(searchTerm) ||
+        String(item.volumeMenjadi).includes(searchTerm) ||
+        String(item.hargaSatuanSemula).includes(searchTerm) ||
+        String(item.hargaSatuanMenjadi).includes(searchTerm) ||
+        String(item.jumlahSemula).includes(searchTerm) ||
+        String(item.jumlahMenjadi).includes(searchTerm) ||
+        String(item.selisih).includes(searchTerm)
+      )
+    : budgetItems;
+
   // Calculate totals for summary box
-  const totalSemula = budgetItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
-  const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-  const totalSelisih = totalMenjadi - totalSemula;
+  const totalSemula = filteredItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
+  const totalMenjadi = filteredItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+  const totalSelisih = totalSemula - totalMenjadi;
   const hasSelisih = totalSelisih !== 0;
 
   // Function to handle filter changes
   const handleFilterChange = (newFilters: FilterSelection) => {
     setFilters(newFilters);
+    setSearchTerm('');
+  };
+
+  // Function to handle bulk import
+  const handleBulkImport = (items: Omit<any, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[] | null) => {
+    if (items && items.length > 0) {
+      addBulkBudgetItems(items);
+    }
   };
 
   // Check if all filters are set (not empty and not 'all')
@@ -72,11 +101,20 @@ const BudgetComparison: React.FC = () => {
       
       {/* Budget table section */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
           <CardTitle>Perbandingan Anggaran Semula vs Menjadi</CardTitle>
-          <div className="flex space-x-2">
-            <SummaryDialog items={budgetItems} />
-            <ExportOptions items={budgetItems} komponenOutput={filters.komponenOutput} />
+          
+          <div className="flex flex-wrap items-center gap-2">
+            <TableSearch onSearch={setSearchTerm} />
+            <div className="flex space-x-2">
+              <SummaryDialog items={filteredItems} />
+              <BudgetImportExport 
+                filters={filters} 
+                onImport={handleBulkImport} 
+                areFiltersComplete={areFiltersComplete} 
+              />
+              <ExportOptions items={filteredItems} komponenOutput={filters.komponenOutput} />
+            </div>
           </div>
         </CardHeader>
         
@@ -84,7 +122,7 @@ const BudgetComparison: React.FC = () => {
           <div className="px-6">
             <Alert variant="destructive" className="bg-red-50 border-red-200 mb-4">
               <AlertTriangle className="h-4 w-4 mr-2" />
-              <span className="font-medium">PERINGATAN: Terjadi perbedaan total anggaran sebesar {totalSelisih.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</span>
+              <span className="font-medium">PERINGATAN: Terjadi perbedaan total anggaran sebesar {Math.abs(totalSelisih).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</span>
             </Alert>
           </div>
         )}
@@ -94,7 +132,7 @@ const BudgetComparison: React.FC = () => {
             <div className="text-red-500 p-4">{error}</div>
           ) : (
             <BudgetTable
-              items={budgetItems}
+              items={filteredItems}
               komponenOutput={filters.komponenOutput}
               onAdd={addBudgetItem}
               onUpdate={updateBudgetItem}

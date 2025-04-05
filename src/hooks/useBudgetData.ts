@@ -1,108 +1,143 @@
 
 import { useState, useEffect } from 'react';
-import { BudgetItem, FilterSelection } from '@/types/budget';
-import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
+import { FilterSelection, BudgetItem } from '@/types/budget';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { BudgetItemRecord } from '@/types/supabase';
+import { calculateAmount, calculateDifference } from '@/utils/budgetCalculations';
+
+const mapDatabaseToModelItem = (record: BudgetItemRecord): BudgetItem => {
+  const jumlahSemula = calculateAmount(record.volume_semula, record.harga_satuan_semula);
+  const jumlahMenjadi = calculateAmount(record.volume_menjadi, record.harga_satuan_menjadi);
+  const selisih = calculateDifference(jumlahSemula, jumlahMenjadi);
+
+  return {
+    id: record.id,
+    uraian: record.uraian,
+    volumeSemula: record.volume_semula,
+    satuanSemula: record.satuan_semula,
+    hargaSatuanSemula: record.harga_satuan_semula,
+    jumlahSemula,
+    volumeMenjadi: record.volume_menjadi,
+    satuanMenjadi: record.satuan_menjadi,
+    hargaSatuanMenjadi: record.harga_satuan_menjadi,
+    jumlahMenjadi,
+    selisih,
+    status: record.status as 'unchanged' | 'changed' | 'new' | 'deleted',
+    isApproved: record.is_approved,
+    komponenOutput: record.komponen_output,
+    programPembebanan: record.program_pembebanan || undefined,
+    kegiatan: record.kegiatan || undefined,
+    rincianOutput: record.rincian_output || undefined,
+    subKomponen: record.sub_komponen || undefined,
+    akun: record.akun || undefined
+  };
+};
+
+const mapModelToDatabaseItem = (item: Partial<BudgetItem>): Partial<BudgetItemRecord> => {
+  const result: Partial<BudgetItemRecord> = {};
+  
+  if (item.uraian !== undefined) result.uraian = item.uraian;
+  if (item.volumeSemula !== undefined) result.volume_semula = item.volumeSemula;
+  if (item.satuanSemula !== undefined) result.satuan_semula = item.satuanSemula;
+  if (item.hargaSatuanSemula !== undefined) result.harga_satuan_semula = item.hargaSatuanSemula;
+  if (item.volumeMenjadi !== undefined) result.volume_menjadi = item.volumeMenjadi;
+  if (item.satuanMenjadi !== undefined) result.satuan_menjadi = item.satuanMenjadi;
+  if (item.hargaSatuanMenjadi !== undefined) result.harga_satuan_menjadi = item.hargaSatuanMenjadi;
+  if (item.status !== undefined) result.status = item.status;
+  if (item.isApproved !== undefined) result.is_approved = item.isApproved;
+  if (item.komponenOutput !== undefined) result.komponen_output = item.komponenOutput;
+  if (item.programPembebanan !== undefined) result.program_pembebanan = item.programPembebanan;
+  if (item.kegiatan !== undefined) result.kegiatan = item.kegiatan;
+  if (item.rincianOutput !== undefined) result.rincian_output = item.rincianOutput;
+  if (item.subKomponen !== undefined) result.sub_komponen = item.subKomponen;
+  if (item.akun !== undefined) result.akun = item.akun;
+
+  // Calculate and set the derived values
+  if (item.volumeSemula !== undefined && item.hargaSatuanSemula !== undefined) {
+    result.jumlah_semula = calculateAmount(item.volumeSemula, item.hargaSatuanSemula);
+  }
+  
+  if (item.volumeMenjadi !== undefined && item.hargaSatuanMenjadi !== undefined) {
+    result.jumlah_menjadi = calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi);
+  }
+  
+  if (result.jumlah_semula !== undefined && result.jumlah_menjadi !== undefined) {
+    result.selisih = result.jumlah_semula - result.jumlah_menjadi;
+  }
+
+  return result;
+};
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to fetch data based on filters
+  // Fetch budget items when filters change
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchItems = async () => {
       try {
-        // Use the supabase client with our temporary type definitions
+        setLoading(true);
+        setError(null);
+
         let query = supabase
           .from('budget_items')
           .select('*');
+
+        // Apply filters if they have specific values
+        if (filters.programPembebanan && filters.programPembebanan !== 'all') {
+          query = query.eq('program_pembebanan', filters.programPembebanan);
+        }
         
-        // Apply filtering logic based on selected filters at any level
-        // Including support for "all" (which means don't filter by that level)
-        if (filters.akun && filters.akun !== 'all') {
-          query = query.eq('akun', filters.akun);
+        if (filters.kegiatan && filters.kegiatan !== 'all') {
+          query = query.eq('kegiatan', filters.kegiatan);
+        }
+        
+        if (filters.rincianOutput && filters.rincianOutput !== 'all') {
+          query = query.eq('rincian_output', filters.rincianOutput);
+        }
+        
+        if (filters.komponenOutput && filters.komponenOutput !== 'all') {
+          query = query.eq('komponen_output', filters.komponenOutput);
         }
         
         if (filters.subKomponen && filters.subKomponen !== 'all') {
           query = query.eq('sub_komponen', filters.subKomponen);
-        } 
-
-        if (filters.komponenOutput && filters.komponenOutput !== 'all') {
-          query = query.eq('komponen_output', filters.komponenOutput);
-        } else if (filters.rincianOutput && filters.rincianOutput !== 'all') {
-          // Filter by rincian_output
-          query = query.eq('rincian_output', filters.rincianOutput);
-        } else if (filters.kegiatan && filters.kegiatan !== 'all') {
-          // Filter by kegiatan
-          query = query.eq('kegiatan', filters.kegiatan);
-        } else if (filters.programPembebanan && filters.programPembebanan !== 'all') {
-          // Filter by program_pembebanan
-          query = query.eq('program_pembebanan', filters.programPembebanan);
         }
-
-        const { data, error: supabaseError } = await query;
         
-        if (supabaseError) {
-          throw supabaseError;
+        if (filters.akun && filters.akun !== 'all') {
+          query = query.eq('akun', filters.akun);
+        }
+                
+        const { data, error } = await query;
+
+        if (error) {
+          throw new Error(`Error fetching data: ${error.message}`);
         }
 
-        if (data) {
-          // Transform data from Supabase format to our BudgetItem format
-          const transformedData: BudgetItem[] = data.map((item: any) => {
-            const jumlahSemula = Number(item.jumlah_semula || 0);
-            const jumlahMenjadi = Number(item.jumlah_menjadi || 0);
-            // Calculate selisih as Jumlah Semula - Jumlah Menjadi
-            const calculatedSelisih = jumlahSemula - jumlahMenjadi;
-            
-            return {
-              id: item.id,
-              uraian: item.uraian,
-              volumeSemula: Number(item.volume_semula),
-              satuanSemula: item.satuan_semula,
-              hargaSatuanSemula: Number(item.harga_satuan_semula),
-              jumlahSemula: roundToThousands(jumlahSemula),
-              volumeMenjadi: Number(item.volume_menjadi),
-              satuanMenjadi: item.satuan_menjadi,
-              hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
-              jumlahMenjadi: roundToThousands(jumlahMenjadi),
-              selisih: roundToThousands(calculatedSelisih), // Use the calculated selisih
-              status: item.status as "unchanged" | "changed" | "new" | "deleted",
-              isApproved: item.is_approved,
-              komponenOutput: item.komponen_output,
-              programPembebanan: item.program_pembebanan || '',
-              kegiatan: item.kegiatan || '',
-              rincianOutput: item.rincian_output || '',
-              subKomponen: item.sub_komponen || '',
-              akun: item.akun || ''
-            };
-          });
-
-          setBudgetItems(transformedData);
-        }
-        setLoading(false);
+        // Transform database records to our model
+        const items: BudgetItem[] = (data || []).map(mapDatabaseToModelItem);
+        setBudgetItems(items);
       } catch (err) {
-        console.error('Error fetching budget data:', err);
-        setError('Failed to load budget data. Please try again.');
+        console.error('Error in useBudgetData:', err);
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchItems();
   }, [filters]);
 
-  // Add a new budget item
+  // Add new budget item
   const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>) => {
     try {
-      // Calculate derived values
-      const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
-      const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-      const selisih = roundToThousands(jumlahSemula - jumlahMenjadi); // Corrected: Jumlah Semula - Jumlah Menjadi
+      const jumlahSemula = calculateAmount(item.volumeSemula, item.hargaSatuanSemula);
+      const jumlahMenjadi = calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi);
+      const selisih = jumlahSemula - jumlahMenjadi;
       
-      // Create new item data for Supabase
-      const newItemData = {
+      // Map model item to database record
+      const newRecord: Omit<BudgetItemRecord, 'id' | 'created_at' | 'updated_at'> = {
         uraian: item.uraian,
         volume_semula: item.volumeSemula,
         satuan_semula: item.satuanSemula,
@@ -113,257 +148,187 @@ const useBudgetData = (filters: FilterSelection) => {
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
         jumlah_menjadi: jumlahMenjadi,
         selisih: selisih,
+        status: selisih === 0 ? 'unchanged' : 'changed',
+        is_approved: item.isApproved,
         komponen_output: item.komponenOutput,
-        status: 'new',
-        is_approved: false,
-        // Include filter values if they exist
-        program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
-        kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
-        rincian_output: filters.rincianOutput !== 'all' ? filters.rincianOutput : null,
+        program_pembebanan: item.programPembebanan || null,
+        kegiatan: item.kegiatan || null,
+        rincian_output: item.rincianOutput || null,
         sub_komponen: item.subKomponen || null,
         akun: item.akun || null
       };
-      
-      // Save to Supabase
-      const { data, error: supabaseError } = await supabase
+
+      const { data, error } = await supabase
         .from('budget_items')
-        .insert(newItemData)
-        .select()
+        .insert(newRecord)
+        .select('*')
         .single();
-      
-      if (supabaseError) {
-        throw supabaseError;
+
+      if (error) {
+        throw new Error(`Error adding budget item: ${error.message}`);
       }
 
-      if (data) {
-        // Transform data from Supabase format to our BudgetItem format
-        const savedItem: BudgetItem = {
-          id: data.id,
-          uraian: data.uraian,
-          volumeSemula: Number(data.volume_semula),
-          satuanSemula: data.satuan_semula,
-          hargaSatuanSemula: Number(data.harga_satuan_semula),
-          jumlahSemula: roundToThousands(Number(data.jumlah_semula || 0)),
-          volumeMenjadi: Number(data.volume_menjadi),
-          satuanMenjadi: data.satuan_menjadi,
-          hargaSatuanMenjadi: Number(data.harga_satuan_menjadi),
-          jumlahMenjadi: roundToThousands(Number(data.jumlah_menjadi || 0)),
-          selisih: roundToThousands(Number(data.selisih || 0)),
-          status: data.status as "unchanged" | "changed" | "new" | "deleted",
-          isApproved: data.is_approved,
-          komponenOutput: data.komponen_output,
-          programPembebanan: data.program_pembebanan || '',
-          kegiatan: data.kegiatan || '',
-          rincianOutput: data.rincian_output || '',
-          subKomponen: data.sub_komponen || '',
-          akun: data.akun || ''
-        };
-
-        // Add to state
-        setBudgetItems(prev => [...prev, savedItem]);
-        return savedItem;
-      }
+      const newItem = mapDatabaseToModelItem(data);
+      setBudgetItems(prevItems => [...prevItems, newItem]);
+      return newItem;
     } catch (err) {
-      console.error('Error adding budget item:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: 'Gagal menambahkan item. Silakan coba lagi.'
-      });
+      console.error('Error in addBudgetItem:', err);
       throw err;
     }
   };
 
-  // Update an existing budget item
+  // Add multiple budget items at once (for import)
+  const addBulkBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
+    try {
+      const newRecords = items.map(item => {
+        const jumlahSemula = calculateAmount(item.volumeSemula, item.hargaSatuanSemula);
+        const jumlahMenjadi = calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi);
+        const selisih = jumlahSemula - jumlahMenjadi;
+        
+        return {
+          uraian: item.uraian,
+          volume_semula: item.volumeSemula,
+          satuan_semula: item.satuanSemula,
+          harga_satuan_semula: item.hargaSatuanSemula,
+          jumlah_semula: jumlahSemula,
+          volume_menjadi: item.volumeMenjadi,
+          satuan_menjadi: item.satuanMenjadi,
+          harga_satuan_menjadi: item.hargaSatuanMenjadi,
+          jumlah_menjadi: jumlahMenjadi,
+          selisih: selisih,
+          status: selisih === 0 ? 'unchanged' : 'changed',
+          is_approved: item.isApproved,
+          komponen_output: item.komponenOutput,
+          program_pembebanan: item.programPembebanan || null,
+          kegiatan: item.kegiatan || null,
+          rincian_output: item.rincianOutput || null,
+          sub_komponen: item.subKomponen || null,
+          akun: item.akun || null
+        };
+      });
+
+      const { data, error } = await supabase
+        .from('budget_items')
+        .insert(newRecords)
+        .select('*');
+
+      if (error) {
+        throw new Error(`Error adding bulk budget items: ${error.message}`);
+      }
+
+      const newItems = (data || []).map(mapDatabaseToModelItem);
+      setBudgetItems(prevItems => [...prevItems, ...newItems]);
+      return newItems;
+    } catch (err) {
+      console.error('Error in addBulkBudgetItems:', err);
+      throw err;
+    }
+  };
+
+  // Update existing budget item
   const updateBudgetItem = async (id: string, updates: Partial<BudgetItem>) => {
     try {
-      // Find the current item to use for calculations
-      const currentItem = budgetItems.find(item => item.id === id);
-      if (!currentItem) {
-        throw new Error('Item not found');
-      }
+      const dbUpdates = mapModelToDatabaseItem(updates);
       
-      // Transform BudgetItem updates to Supabase format
-      const supabaseUpdates: Record<string, any> = {};
-      
-      // Handle direct field mappings
-      if ('uraian' in updates) supabaseUpdates.uraian = updates.uraian;
-      if ('volumeSemula' in updates) supabaseUpdates.volume_semula = updates.volumeSemula;
-      if ('satuanSemula' in updates) supabaseUpdates.satuan_semula = updates.satuanSemula;
-      if ('hargaSatuanSemula' in updates) supabaseUpdates.harga_satuan_semula = updates.hargaSatuanSemula;
-      if ('volumeMenjadi' in updates) supabaseUpdates.volume_menjadi = updates.volumeMenjadi;
-      if ('satuanMenjadi' in updates) supabaseUpdates.satuan_menjadi = updates.satuanMenjadi;
-      if ('hargaSatuanMenjadi' in updates) supabaseUpdates.harga_satuan_menjadi = updates.hargaSatuanMenjadi;
-      if ('subKomponen' in updates) supabaseUpdates.sub_komponen = updates.subKomponen;
-      if ('akun' in updates) supabaseUpdates.akun = updates.akun;
-      
-      // Calculate derived values if relevant fields have been updated
-      let updatedItem = { ...currentItem, ...updates };
-      
-      // Calculate jumlah_menjadi if any of its components have changed
-      if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates) {
-        const jumlahMenjadi = calculateAmount(
-          updatedItem.volumeMenjadi, 
-          updatedItem.hargaSatuanMenjadi
-        );
-        supabaseUpdates.jumlah_menjadi = jumlahMenjadi;
-        updatedItem.jumlahMenjadi = jumlahMenjadi;
+      // Check if we need to update the status
+      if (updates.volumeMenjadi !== undefined || 
+          updates.hargaSatuanMenjadi !== undefined ||
+          updates.satuanMenjadi !== undefined) {
         
-        // Calculate selisih based on the new jumlah_menjadi
-        const selisih = updatedItem.jumlahSemula - jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
-        supabaseUpdates.selisih = selisih;
-        updatedItem.selisih = selisih;
-      }
-      
-      // Calculate jumlah_semula if any of its components have changed
-      if ('volumeSemula' in updates || 'hargaSatuanSemula' in updates) {
-        const jumlahSemula = calculateAmount(
-          updatedItem.volumeSemula, 
-          updatedItem.hargaSatuanSemula
-        );
-        supabaseUpdates.jumlah_semula = jumlahSemula;
-        updatedItem.jumlahSemula = jumlahSemula;
+        // Get the current item
+        const currentItem = budgetItems.find(item => item.id === id);
         
-        // Recalculate selisih since jumlah_semula changed
-        const selisih = jumlahSemula - updatedItem.jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
-        supabaseUpdates.selisih = selisih;
-        updatedItem.selisih = selisih;
-      }
-      
-      // Update status based on changes - item is not approved anymore if it was changed
-      if (Object.keys(updates).length > 0 && currentItem.isApproved) {
-        supabaseUpdates.is_approved = false;
-        supabaseUpdates.status = 'changed';
-        updatedItem.isApproved = false;
-        updatedItem.status = 'changed';
-      } else if ('volumeMenjadi' in updates || 'hargaSatuanMenjadi' in updates || 'satuanMenjadi' in updates) {
-        // If value is edited, update the status
-        updatedItem = updateItemStatus(updatedItem);
-        supabaseUpdates.status = updatedItem.status;
-      }
-      
-      // Update in Supabase
-      const { error: supabaseError } = await supabase
-        .from('budget_items')
-        .update(supabaseUpdates)
-        .eq('id', id);
-      
-      if (supabaseError) {
-        throw supabaseError;
-      }
-      
-      // Update in local state
-      setBudgetItems(prev => 
-        prev.map(item => {
-          if (item.id === id) {
-            return updatedItem;
+        if (currentItem) {
+          const volumeMenjadi = updates.volumeMenjadi ?? currentItem.volumeMenjadi;
+          const hargaSatuanMenjadi = updates.hargaSatuanMenjadi ?? currentItem.hargaSatuanMenjadi;
+          
+          const newJumlahMenjadi = calculateAmount(volumeMenjadi, hargaSatuanMenjadi);
+          const newSelisih = currentItem.jumlahSemula - newJumlahMenjadi;
+          
+          // Update status based on selisih
+          if (newSelisih === 0) {
+            dbUpdates.status = 'unchanged';
+          } else {
+            dbUpdates.status = 'changed';
           }
-          return item;
-        })
-      );
+        }
+      }
       
+      const { data, error } = await supabase
+        .from('budget_items')
+        .update(dbUpdates)
+        .eq('id', id)
+        .select('*')
+        .single();
+
+      if (error) {
+        throw new Error(`Error updating budget item: ${error.message}`);
+      }
+
+      const updatedItem = mapDatabaseToModelItem(data);
+      setBudgetItems(prevItems => 
+        prevItems.map(item => item.id === id ? updatedItem : item)
+      );
       return updatedItem;
     } catch (err) {
-      console.error('Error updating budget item:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: 'Gagal mengupdate item. Silakan coba lagi.'
-      });
+      console.error('Error in updateBudgetItem:', err);
       throw err;
     }
   };
 
-  // Delete a budget item
+  // Delete budget item
   const deleteBudgetItem = async (id: string) => {
     try {
-      // Delete from Supabase
-      const { error: supabaseError } = await supabase
+      const { error } = await supabase
         .from('budget_items')
         .delete()
         .eq('id', id);
-      
-      if (supabaseError) {
-        throw supabaseError;
+
+      if (error) {
+        throw new Error(`Error deleting budget item: ${error.message}`);
       }
-      
-      // Update local state
-      setBudgetItems(prev => prev.filter(item => item.id !== id));
+
+      setBudgetItems(prevItems => prevItems.filter(item => item.id !== id));
     } catch (err) {
-      console.error('Error deleting budget item:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: 'Gagal menghapus item. Silakan coba lagi.'
-      });
+      console.error('Error in deleteBudgetItem:', err);
       throw err;
     }
   };
 
-  // Approve a budget item
+  // Approve budget item
   const approveBudgetItem = async (id: string) => {
     try {
-      // Find the item
-      const item = budgetItems.find(item => item.id === id);
-      if (!item) {
-        throw new Error('Item not found');
-      }
-      
-      // Update in Supabase
-      const { error: supabaseError } = await supabase
+      const { data, error } = await supabase
         .from('budget_items')
-        .update({
-          volume_semula: item.volumeMenjadi,
-          satuan_semula: item.satuanMenjadi,
-          harga_satuan_semula: item.hargaSatuanMenjadi,
-          jumlah_semula: item.jumlahMenjadi,
-          selisih: 0,
-          status: 'unchanged',
-          is_approved: true
-        })
-        .eq('id', id);
-      
-      if (supabaseError) {
-        throw supabaseError;
+        .update({ is_approved: true })
+        .eq('id', id)
+        .select('*')
+        .single();
+
+      if (error) {
+        throw new Error(`Error approving budget item: ${error.message}`);
       }
-      
-      // Update in local state
-      setBudgetItems(prev => 
-        prev.map(item => {
-          if (item.id === id) {
-            return {
-              ...item,
-              volumeSemula: item.volumeMenjadi,
-              satuanSemula: item.satuanMenjadi,
-              hargaSatuanSemula: item.hargaSatuanMenjadi,
-              jumlahSemula: item.jumlahMenjadi,
-              selisih: 0,
-              status: 'unchanged',
-              isApproved: true
-            };
-          }
-          return item;
-        })
+
+      const updatedItem = mapDatabaseToModelItem(data);
+      setBudgetItems(prevItems => 
+        prevItems.map(item => item.id === id ? updatedItem : item)
       );
+      return updatedItem;
     } catch (err) {
-      console.error('Error approving budget item:', err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: 'Gagal menyetujui item. Silakan coba lagi.'
-      });
+      console.error('Error in approveBudgetItem:', err);
       throw err;
     }
   };
 
-  return {
-    budgetItems,
-    loading,
-    error,
-    addBudgetItem,
-    updateBudgetItem,
-    deleteBudgetItem,
-    approveBudgetItem
+  return { 
+    budgetItems, 
+    loading, 
+    error, 
+    addBudgetItem, 
+    addBulkBudgetItems, 
+    updateBudgetItem, 
+    deleteBudgetItem, 
+    approveBudgetItem 
   };
 };
 

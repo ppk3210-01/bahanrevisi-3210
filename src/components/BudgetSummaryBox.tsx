@@ -13,36 +13,34 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
   totalMenjadi,
   totalSelisih
 }) => {
-  // Determine the color based on selisih value
+  // Determine the color for selisih box
   const getSelisihColor = () => {
-    if (totalSelisih === 0) return "bg-green-50 border-green-200";
-    return "bg-red-50 border-red-200"; // red for both positive and negative selisih
+    if (totalSelisih === 0) return "bg-green-100 border-green-300";
+    return "bg-red-100 border-red-300";
   };
 
   const getTextColor = () => {
     if (totalSelisih === 0) return "text-green-600";
-    return totalSelisih > 0 ? "text-red-600" : "text-red-600";
+    return "text-red-600";
   };
 
   return (
-    <div className={`rounded-lg border ${getSelisihColor()} shadow-sm p-6`}>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">Anggaran Semula</h3>
-          <p className="text-2xl font-bold">{formatCurrency(totalSemula)}</p>
-        </div>
-        
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">Anggaran Menjadi</h3>
-          <p className="text-2xl font-bold">{formatCurrency(totalMenjadi)}</p>
-        </div>
-        
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">Selisih</h3>
-          <p className={`text-2xl font-bold ${getTextColor()}`}>
-            {formatCurrency(totalSelisih)}
-          </p>
-        </div>
+    <div className="flex gap-4 sticky top-0 z-10 mb-6">
+      <div className="rounded-lg border border-blue-300 bg-blue-50 shadow-sm p-3 flex-1">
+        <h3 className="text-sm font-medium text-blue-700">Anggaran Semula</h3>
+        <p className="text-lg font-bold">{formatCurrency(totalSemula)}</p>
+      </div>
+      
+      <div className="rounded-lg border border-purple-300 bg-purple-50 shadow-sm p-3 flex-1">
+        <h3 className="text-sm font-medium text-purple-700">Anggaran Menjadi</h3>
+        <p className="text-lg font-bold">{formatCurrency(totalMenjadi)}</p>
+      </div>
+      
+      <div className={`rounded-lg border shadow-sm p-3 flex-1 ${getSelisihColor()}`}>
+        <h3 className="text-sm font-medium text-gray-700">Selisih</h3>
+        <p className={`text-lg font-bold ${getTextColor()}`}>
+          {formatCurrency(totalSelisih)}
+        </p>
       </div>
     </div>
   );
