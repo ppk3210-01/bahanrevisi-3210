@@ -72,13 +72,13 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         
         changedItems.forEach((item, index) => {
           changedData.push([
-            index + 1,
+            (index + 1).toString(), // Convert number to string
             formatPembebananCode(item),
             item.uraian,
             renderDetailPerubahan(item),
-            item.jumlahSemula,
-            item.jumlahMenjadi,
-            item.selisih
+            item.jumlahSemula.toString(), // Convert number to string
+            item.jumlahMenjadi.toString(), // Convert number to string
+            item.selisih.toString() // Convert number to string
           ]);
         });
         
@@ -94,13 +94,13 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         
         newItems.forEach((item, index) => {
           newData.push([
-            index + 1,
+            (index + 1).toString(), // Convert number to string
             formatPembebananCode(item),
             item.uraian,
-            item.volumeMenjadi,
+            item.volumeMenjadi.toString(), // Convert number to string
             item.satuanMenjadi,
-            item.hargaSatuanMenjadi,
-            item.jumlahMenjadi
+            item.hargaSatuanMenjadi.toString(), // Convert number to string
+            item.jumlahMenjadi.toString() // Convert number to string
           ]);
         });
         
@@ -116,13 +116,13 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         
         deletedItems.forEach((item, index) => {
           deletedData.push([
-            index + 1,
+            (index + 1).toString(), // Convert number to string
             formatPembebananCode(item),
             item.uraian,
-            item.volumeSemula,
+            item.volumeSemula.toString(), // Convert number to string
             item.satuanSemula,
-            item.hargaSatuanSemula,
-            item.jumlahSemula
+            item.hargaSatuanSemula.toString(), // Convert number to string
+            item.jumlahSemula.toString() // Convert number to string
           ]);
         });
         
