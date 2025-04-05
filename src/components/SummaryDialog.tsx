@@ -55,8 +55,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       const summaryData = [
         ['Ringkasan Perubahan Pagu Anggaran'],
         [''],
-        ['Total Semula', formatCurrency(totalSemula)],
-        ['Total Menjadi', formatCurrency(totalMenjadi)],
+        ['Total Pagu Semula', formatCurrency(totalSemula)],
+        ['Total Pagu Menjadi', formatCurrency(totalMenjadi)],
         ['Selisih', formatCurrency(totalSelisih)],
         ['']
       ];
@@ -181,11 +181,11 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {/* Summary Boxes */}
           <div className="grid grid-cols-3 gap-4">
             <div className="border rounded p-4">
-              <h3 className="text-lg font-semibold">Total Semula</h3>
+              <h3 className="text-lg font-semibold">Total Pagu Semula</h3>
               <p className="text-xl font-bold">{formatCurrency(totalSemula)}</p>
             </div>
             <div className="border rounded p-4">
-              <h3 className="text-lg font-semibold">Total Menjadi</h3>
+              <h3 className="text-lg font-semibold">Total Pagu Menjadi</h3>
               <p className="text-xl font-bold">{formatCurrency(totalMenjadi)}</p>
             </div>
             <div className={`border rounded p-4 ${totalSelisih !== 0 ? 'bg-red-50' : 'bg-green-50'}`}>
