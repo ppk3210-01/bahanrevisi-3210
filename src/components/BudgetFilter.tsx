@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React from 'react';
 import { 
   Select, 
   SelectContent, 
@@ -70,19 +71,19 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
   };
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>Pilih Program dan Anggaran</CardTitle>
+    <Card className="mb-3">
+      <CardHeader className="py-2 px-4">
+        <CardTitle className="text-base">Pilih Program dan Anggaran</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <CardContent className="p-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {/* Program Pembebanan Dropdown */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Program Pembebanan</label>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Program Pembebanan</label>
           <Select
             value={filters.programPembebanan}
             onValueChange={handleProgramChange}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Pilih Program Pembebanan" />
             </SelectTrigger>
             <SelectContent>
@@ -97,14 +98,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
         </div>
 
         {/* Kegiatan Dropdown */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Kegiatan</label>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Kegiatan</label>
           <Select
             value={filters.kegiatan}
             onValueChange={handleKegiatanChange}
             disabled={!filters.programPembebanan || filters.programPembebanan === 'all'}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Pilih Kegiatan" />
             </SelectTrigger>
             <SelectContent>
@@ -120,14 +121,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
         </div>
 
         {/* Rincian Output Dropdown */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Rincian Output</label>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Rincian Output</label>
           <Select
             value={filters.rincianOutput}
             onValueChange={handleRincianOutputChange}
             disabled={!filters.kegiatan || filters.kegiatan === 'all'}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Pilih Rincian Output" />
             </SelectTrigger>
             <SelectContent>
@@ -143,14 +144,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
         </div>
 
         {/* Komponen Output Dropdown */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Komponen Output</label>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Komponen Output</label>
           <Select
             value={filters.komponenOutput}
             onValueChange={handleKomponenOutputChange}
             disabled={!filters.rincianOutput || filters.rincianOutput === 'all'}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Pilih Komponen Output" />
             </SelectTrigger>
             <SelectContent>
@@ -166,14 +167,14 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
         </div>
 
         {/* Sub Komponen Dropdown */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Sub Komponen</label>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Sub Komponen</label>
           <Select
             value={filters.subKomponen}
             onValueChange={handleSubKomponenChange}
             disabled={!filters.programPembebanan || filters.programPembebanan === 'all'}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Pilih Sub Komponen" />
             </SelectTrigger>
             <SelectContent>
@@ -189,13 +190,13 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
         </div>
 
         {/* Akun Dropdown */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Akun</label>
+        <div className="space-y-1">
+          <label className="text-xs font-medium">Akun</label>
           <Select
             value={filters.akun}
             onValueChange={handleAkunChange}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Pilih Akun" />
             </SelectTrigger>
             <SelectContent>

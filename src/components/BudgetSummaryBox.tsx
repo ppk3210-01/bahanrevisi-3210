@@ -15,26 +15,26 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
   totalSelisih
 }) => {
   return (
-    <div className="sticky top-[84px] z-10 bg-gray-50 pt-2 pb-2">
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="border-2 border-blue-300 shadow-sm">
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold text-gray-700">Anggaran Semula</h3>
-            <p className="text-2xl font-bold">{formatCurrency(totalSemula)}</p>
+    <div className="sticky top-[65px] z-10 bg-gray-50 py-1 border-b border-gray-200">
+      <div className="grid grid-cols-3 gap-2">
+        <Card className="border border-blue-300 shadow-sm">
+          <CardContent className="p-2">
+            <h3 className="text-sm font-semibold text-gray-700">Anggaran Semula</h3>
+            <p className="text-lg font-bold">{formatCurrency(totalSemula)}</p>
           </CardContent>
         </Card>
         
-        <Card className="border-2 border-green-300 shadow-sm">
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold text-gray-700">Anggaran Menjadi</h3>
-            <p className="text-2xl font-bold">{formatCurrency(totalMenjadi)}</p>
+        <Card className="border border-green-300 shadow-sm">
+          <CardContent className="p-2">
+            <h3 className="text-sm font-semibold text-gray-700">Anggaran Menjadi</h3>
+            <p className="text-lg font-bold">{formatCurrency(totalMenjadi)}</p>
           </CardContent>
         </Card>
         
-        <Card className={`border-2 ${totalSelisih !== 0 ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'} shadow-sm`}>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold text-gray-700">Selisih</h3>
-            <p className={`text-2xl font-bold ${totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
+        <Card className={`border ${totalSelisih !== 0 ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'} shadow-sm`}>
+          <CardContent className="p-2">
+            <h3 className="text-sm font-semibold text-gray-700">Selisih</h3>
+            <p className={`text-lg font-bold ${totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
               {formatCurrency(totalSelisih)}
             </p>
           </CardContent>

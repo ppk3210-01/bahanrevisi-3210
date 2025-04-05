@@ -76,9 +76,9 @@ const BudgetComparison: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="pt-6">
+    <div className="space-y-2">
+      <Card className="shadow-sm">
+        <CardContent className="pt-3 pb-3">
           <BudgetFilter 
             onFilterChange={handleFilterChange}
             filters={filters}
@@ -94,17 +94,17 @@ const BudgetComparison: React.FC = () => {
         />
       )}
 
-      <Card>
+      <Card className="shadow-sm">
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <div className="flex justify-between items-center px-6 pt-6">
-            <TabsList>
-              <TabsTrigger value="data">Data Anggaran</TabsTrigger>
-              <TabsTrigger value="import">Import/Export</TabsTrigger>
-              <TabsTrigger value="summary">Ringkasan</TabsTrigger>
+          <div className="flex justify-between items-center px-4 pt-2">
+            <TabsList className="h-8">
+              <TabsTrigger value="data" className="text-xs px-2 py-1">Data Anggaran</TabsTrigger>
+              <TabsTrigger value="import" className="text-xs px-2 py-1">Import/Export</TabsTrigger>
+              <TabsTrigger value="summary" className="text-xs px-2 py-1">Ringkasan</TabsTrigger>
             </TabsList>
           </div>
           
-          <CardContent className="pt-4">
+          <CardContent className="pt-2 px-2">
             <TabsContent value="data" className="mt-0">
               <BudgetTable 
                 items={budgetItems}
@@ -122,10 +122,10 @@ const BudgetComparison: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="import" className="mt-0">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Import Data</h3>
+                    <h3 className="text-sm font-medium mb-2">Import Data</h3>
                     <ExcelImportExport 
                       onImport={(items) => {
                         importBudgetItems(items);
@@ -138,7 +138,7 @@ const BudgetComparison: React.FC = () => {
                   </div>
                   
                   <div>
-                    <h3 className="text-lg font-medium mb-4">Export Tools</h3>
+                    <h3 className="text-sm font-medium mb-2">Export Tools</h3>
                     <ExportOptions 
                       items={budgetItems} 
                       komponenOutput={filters.komponenOutput} 
@@ -149,33 +149,33 @@ const BudgetComparison: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="summary" className="mt-0">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <Info className="h-5 w-5 text-blue-500" />
-                  <h3 className="text-lg font-medium">Ringkasan Perubahan Anggaran</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-1 mb-2">
+                  <Info className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-sm font-medium">Ringkasan Perubahan Anggaran</h3>
                 </div>
                 
                 {budgetSummary && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Card className="border-2 border-changed-row shadow-sm">
-                        <CardContent className="p-4">
-                          <h3 className="text-lg font-semibold text-gray-700">Item Diubah</h3>
-                          <p className="text-2xl font-bold">{budgetSummary.changedItems.length}</p>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      <Card className="border border-changed-row shadow-sm">
+                        <CardContent className="p-2">
+                          <h3 className="text-xs font-semibold text-gray-700">Item Diubah</h3>
+                          <p className="text-lg font-bold">{budgetSummary.changedItems.length}</p>
                         </CardContent>
                       </Card>
                       
-                      <Card className="border-2 border-new-row shadow-sm">
-                        <CardContent className="p-4">
-                          <h3 className="text-lg font-semibold text-gray-700">Item Baru</h3>
-                          <p className="text-2xl font-bold">{budgetSummary.newItems.length}</p>
+                      <Card className="border border-new-row shadow-sm">
+                        <CardContent className="p-2">
+                          <h3 className="text-xs font-semibold text-gray-700">Item Baru</h3>
+                          <p className="text-lg font-bold">{budgetSummary.newItems.length}</p>
                         </CardContent>
                       </Card>
                       
-                      <Card className="border-2 border-deleted-row shadow-sm">
-                        <CardContent className="p-4">
-                          <h3 className="text-lg font-semibold text-gray-700">Item Dihapus</h3>
-                          <p className="text-2xl font-bold">{budgetSummary.deletedItems.length}</p>
+                      <Card className="border border-deleted-row shadow-sm">
+                        <CardContent className="p-2">
+                          <h3 className="text-xs font-semibold text-gray-700">Item Dihapus</h3>
+                          <p className="text-lg font-bold">{budgetSummary.deletedItems.length}</p>
                         </CardContent>
                       </Card>
                     </div>
@@ -183,9 +183,9 @@ const BudgetComparison: React.FC = () => {
                     <Button 
                       variant="outline" 
                       onClick={showSummary}
-                      className="w-full md:w-auto"
+                      className="w-full md:w-auto h-8 text-xs"
                     >
-                      <Info className="mr-2 h-4 w-4" /> 
+                      <Info className="mr-1 h-3 w-3" /> 
                       Lihat Detail Ringkasan
                     </Button>
                   </div>

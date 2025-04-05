@@ -389,17 +389,17 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading budget data...</div>;
+    return <div className="flex justify-center p-4">Loading budget data...</div>;
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-2 mb-4">
+    <div className="space-y-2">
+      <div className="flex flex-col sm:flex-row justify-between gap-2 mb-2">
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
           <Input
             placeholder="Cari anggaran..."
-            className="pl-8 w-full sm:w-80"
+            className="pl-8 w-full sm:w-80 h-8 text-sm"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -409,7 +409,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">Tampilkan:</span>
+          <span className="text-xs text-gray-500">Tampilkan:</span>
           <Select
             value={pageSize.toString()} 
             onValueChange={(value) => {
@@ -417,7 +417,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               setCurrentPage(1);
             }}
           >
-            <SelectTrigger className="w-24">
+            <SelectTrigger className="w-20 h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -431,99 +431,99 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
       </div>
       
-      <div className="text-sm text-gray-500">
+      <div className="text-xs text-gray-500">
         Menampilkan {paginatedItems.length} dari {filteredItems.length} item
         {searchTerm && ` (filter: "${searchTerm}")`}
       </div>
       
-      <div className="overflow-hidden rounded-md border border-gray-200">
+      <div className="rounded-md border border-gray-200 w-full">
         {komponenOutput && (
-          <div className="bg-purple-100 p-4 border-b border-gray-200">
-            <h3 className="font-medium">Komponen Output: {komponenOutput}</h3>
+          <div className="bg-purple-100 p-2 border-b border-gray-200">
+            <h3 className="font-medium text-sm">Komponen Output: {komponenOutput}</h3>
           </div>
         )}
         
-        <div className="overflow-x-auto">
-          <table className="w-full data-table">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-full data-table text-sm">
             <thead>
-              <tr>
-                <th>No</th>
-                <th className="uraian-cell">
+              <tr className="text-xs">
+                <th className="py-2 px-1 w-8">No</th>
+                <th className="uraian-cell py-2 px-1 w-[20%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('uraian')}
                   >
                     Uraian
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell">
+                <th className="number-cell py-2 px-1 w-[7%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('volumeSemula')}
                   >
-                    Volume Semula
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    Vol.Semula
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="unit-cell">Satuan Semula</th>
-                <th className="number-cell">
+                <th className="unit-cell py-2 px-1 w-[7%]">Sat.Semula</th>
+                <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('hargaSatuanSemula')}
                   >
-                    Harga Satuan Semula
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    Hrg.Semula
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell">
+                <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('jumlahSemula')}
                   >
-                    Jumlah Semula
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    Jml.Semula
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell border-l-2">
+                <th className="number-cell py-2 px-1 w-[7%] border-l-2">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('volumeMenjadi')}
                   >
-                    Volume Menjadi
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    Vol.Menjadi
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="unit-cell">Satuan Menjadi</th>
-                <th className="number-cell">
+                <th className="unit-cell py-2 px-1 w-[7%]">Sat.Menjadi</th>
+                <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('hargaSatuanMenjadi')}
                   >
-                    Harga Satuan Menjadi
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    Hrg.Menjadi
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell">
+                <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('jumlahMenjadi')}
                   >
-                    Jumlah Menjadi
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    Jml.Menjadi
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell">
+                <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('selisih')}
                   >
                     Selisih
-                    <ArrowUpDown className="h-4 w-4 ml-1" />
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th>Aksi</th>
-                <th>PPK</th>
+                <th className="py-2 px-1 w-[7%]">Aksi</th>
+                <th className="py-2 px-1 w-[7%]">PPK</th>
               </tr>
             </thead>
             
@@ -620,16 +620,17 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               ))}
 
               <tr className="bg-gray-50">
-                <td>{filteredItems.length + 1}</td>
-                <td className="uraian-cell">
+                <td className="py-1 px-1">{filteredItems.length + 1}</td>
+                <td className="uraian-cell py-1 px-1">
                   <Input 
                     placeholder="Tambah Uraian Baru" 
                     value={newItem.uraian || ''} 
                     onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
                     required
+                    className="h-7 text-xs"
                   />
                 </td>
-                <td className="number-cell">
+                <td className="number-cell py-1 px-1">
                   <Input 
                     type="number" 
                     placeholder="0" 
@@ -637,27 +638,28 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     onChange={(e) => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
                     min="0"
                     required
+                    className="h-7 text-xs"
                   />
                 </td>
-                <td className="unit-cell">
+                <td className="unit-cell py-1 px-1">
                   <Select 
                     value={newItem.satuanSemula} 
                     onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-7 text-xs">
                       <SelectValue placeholder="Satuan" />
                     </SelectTrigger>
                     <SelectContent>
                       {UNIT_OPTIONS.map((unit) => (
-                        <SelectItem key={unit} value={unit}>
+                        <SelectItem key={unit} value={unit} className="text-xs">
                           {unit}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </td>
-                <td className="number-cell">
+                <td className="number-cell py-1 px-1">
                   <Input 
                     type="number" 
                     placeholder="0" 
@@ -665,12 +667,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     onChange={(e) => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
                     min="0"
                     required
+                    className="h-7 text-xs"
                   />
                 </td>
-                <td className="number-cell">
+                <td className="number-cell py-1 px-1">
                   {formatCurrency(newItemJumlahSemula)}
                 </td>
-                <td className="number-cell border-l-2">
+                <td className="number-cell py-1 px-1 border-l-2">
                   <Input 
                     type="number" 
                     placeholder="0" 
@@ -678,27 +681,28 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     onChange={(e) => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
                     min="0"
                     required
+                    className="h-7 text-xs"
                   />
                 </td>
-                <td className="unit-cell">
+                <td className="unit-cell py-1 px-1">
                   <Select 
                     value={newItem.satuanMenjadi} 
                     onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-7 text-xs">
                       <SelectValue placeholder="Satuan" />
                     </SelectTrigger>
                     <SelectContent>
                       {UNIT_OPTIONS.map((unit) => (
-                        <SelectItem key={unit} value={unit}>
+                        <SelectItem key={unit} value={unit} className="text-xs">
                           {unit}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </td>
-                <td className="number-cell">
+                <td className="number-cell py-1 px-1">
                   <Input 
                     type="number" 
                     placeholder="0" 
@@ -706,42 +710,44 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
                     min="0"
                     required
+                    className="h-7 text-xs"
                   />
                 </td>
-                <td className="number-cell">
+                <td className="number-cell py-1 px-1">
                   {formatCurrency(newItemJumlahMenjadi)}
                 </td>
-                <td className="number-cell">
+                <td className="number-cell py-1 px-1">
                   {formatCurrency(newItemSelisih)}
                 </td>
-                <td colSpan={2}>
+                <td colSpan={2} className="py-1 px-1">
                   <Button 
                     variant="outline" 
                     onClick={handleAddItem} 
                     disabled={!areFiltersComplete}
                     title={!areFiltersComplete ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
+                    className="h-7 text-xs w-full"
                   >
-                    <PlusCircle className="h-4 w-4 mr-2" /> Tambah
+                    <PlusCircle className="h-3 w-3 mr-1" /> Tambah
                   </Button>
                 </td>
               </tr>
               
-              <tr className="font-semibold bg-gray-100">
-                <td colSpan={5} className="text-right">Total Halaman:</td>
-                <td className="number-cell">{formatCurrency(pageTotalSemula)}</td>
+              <tr className="font-semibold bg-gray-100 text-xs">
+                <td colSpan={5} className="text-right py-1 px-1">Total Halaman:</td>
+                <td className="number-cell py-1 px-1">{formatCurrency(pageTotalSemula)}</td>
                 <td colSpan={3} className="border-l-2"></td>
-                <td className="number-cell">{formatCurrency(pageTotalMenjadi)}</td>
-                <td className="number-cell">{formatCurrency(pageTotalSelisih)}</td>
+                <td className="number-cell py-1 px-1">{formatCurrency(pageTotalMenjadi)}</td>
+                <td className="number-cell py-1 px-1">{formatCurrency(pageTotalSelisih)}</td>
                 <td colSpan={2}></td>
               </tr>
               
               {(pageSize !== -1 || searchTerm) && (
-                <tr className="font-bold bg-gray-200">
-                  <td colSpan={5} className="text-right">Total Keseluruhan:</td>
-                  <td className="number-cell">{formatCurrency(grandTotalSemula)}</td>
+                <tr className="font-bold bg-gray-200 text-xs">
+                  <td colSpan={5} className="text-right py-1 px-1">Total Keseluruhan:</td>
+                  <td className="number-cell py-1 px-1">{formatCurrency(grandTotalSemula)}</td>
                   <td colSpan={3} className="border-l-2"></td>
-                  <td className="number-cell">{formatCurrency(grandTotalMenjadi)}</td>
-                  <td className="number-cell">{formatCurrency(grandTotalSelisih)}</td>
+                  <td className="number-cell py-1 px-1">{formatCurrency(grandTotalMenjadi)}</td>
+                  <td className="number-cell py-1 px-1">{formatCurrency(grandTotalSelisih)}</td>
                   <td colSpan={2}></td>
                 </tr>
               )}
