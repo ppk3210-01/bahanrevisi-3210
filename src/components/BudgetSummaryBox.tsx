@@ -16,7 +16,7 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
 }) => {
   return (
     <div className="sticky top-[84px] z-10 bg-gray-50 pt-2 pb-2">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-4">
         <Card className="border-2 border-blue-300 shadow-sm">
           <CardContent className="p-4">
             <h3 className="text-lg font-semibold text-gray-700">Anggaran Semula</h3>

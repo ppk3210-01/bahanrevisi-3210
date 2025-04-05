@@ -86,68 +86,46 @@ const BudgetComparison: React.FC = () => {
         </CardContent>
       </Card>
 
-      <div className="flex flex-col md:flex-row gap-4 items-start">
-        {budgetSummary && (
-          <div className={`${isMobile ? 'w-full' : 'w-1/3'} space-y-4`}>
-            <BudgetSummaryBox 
-              totalSemula={budgetSummary.totalSemula}
-              totalMenjadi={budgetSummary.totalMenjadi}
-              totalSelisih={budgetSummary.totalSelisih}
-            />
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Export & Tools</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={showSummary}
-                      className="w-full"
-                    >
-                      <Info className="mr-2 h-4 w-4" /> 
-                      Lihat Ringkasan
-                    </Button>
-                    <ExportOptions 
-                      items={budgetItems} 
-                      komponenOutput={filters.komponenOutput} 
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+      {budgetSummary && (
+        <BudgetSummaryBox 
+          totalSemula={budgetSummary.totalSemula}
+          totalMenjadi={budgetSummary.totalMenjadi}
+          totalSelisih={budgetSummary.totalSelisih}
+        />
+      )}
 
-        <div className={`${isMobile || !budgetSummary ? 'w-full' : 'w-2/3'}`}>
-          <Card>
-            <Tabs value={currentTab} onValueChange={setCurrentTab}>
-              <div className="flex justify-between items-center px-6 pt-6">
-                <TabsList>
-                  <TabsTrigger value="data">Data Anggaran</TabsTrigger>
-                  <TabsTrigger value="import">Import/Export</TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <CardContent className="pt-4">
-                <TabsContent value="data" className="mt-0">
-                  <BudgetTable 
-                    items={budgetItems}
-                    komponenOutput={filters.komponenOutput}
-                    onAdd={addBudgetItem}
-                    onUpdate={updateBudgetItem}
-                    onDelete={deleteBudgetItem}
-                    onApprove={approveBudgetItem}
-                    onReject={rejectBudgetItem}
-                    isLoading={loading}
-                    subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
-                    akun={filters.akun !== 'all' ? filters.akun : undefined}
-                    areFiltersComplete={areFiltersComplete()}
-                  />
-                </TabsContent>
-                
-                <TabsContent value="import" className="mt-0">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Import dan Export Data</h3>
+      <Card>
+        <Tabs value={currentTab} onValueChange={setCurrentTab}>
+          <div className="flex justify-between items-center px-6 pt-6">
+            <TabsList>
+              <TabsTrigger value="data">Data Anggaran</TabsTrigger>
+              <TabsTrigger value="import">Import/Export</TabsTrigger>
+              <TabsTrigger value="summary">Ringkasan</TabsTrigger>
+            </TabsList>
+          </div>
+          
+          <CardContent className="pt-4">
+            <TabsContent value="data" className="mt-0">
+              <BudgetTable 
+                items={budgetItems}
+                komponenOutput={filters.komponenOutput}
+                onAdd={addBudgetItem}
+                onUpdate={updateBudgetItem}
+                onDelete={deleteBudgetItem}
+                onApprove={approveBudgetItem}
+                onReject={rejectBudgetItem}
+                isLoading={loading}
+                subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+                akun={filters.akun !== 'all' ? filters.akun : undefined}
+                areFiltersComplete={areFiltersComplete()}
+              />
+            </TabsContent>
+            
+            <TabsContent value="import" className="mt-0">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Import Data</h3>
                     <ExcelImportExport 
                       onImport={(items) => {
                         importBudgetItems(items);
@@ -158,12 +136,65 @@ const BudgetComparison: React.FC = () => {
                       akun={filters.akun !== 'all' ? filters.akun : undefined}
                     />
                   </div>
-                </TabsContent>
-              </CardContent>
-            </Tabs>
-          </Card>
-        </div>
-      </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Export Tools</h3>
+                    <ExportOptions 
+                      items={budgetItems} 
+                      komponenOutput={filters.komponenOutput} 
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="summary" className="mt-0">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Info className="h-5 w-5 text-blue-500" />
+                  <h3 className="text-lg font-medium">Ringkasan Perubahan Anggaran</h3>
+                </div>
+                
+                {budgetSummary && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card className="border-2 border-changed-row shadow-sm">
+                        <CardContent className="p-4">
+                          <h3 className="text-lg font-semibold text-gray-700">Item Diubah</h3>
+                          <p className="text-2xl font-bold">{budgetSummary.changedItems.length}</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border-2 border-new-row shadow-sm">
+                        <CardContent className="p-4">
+                          <h3 className="text-lg font-semibold text-gray-700">Item Baru</h3>
+                          <p className="text-2xl font-bold">{budgetSummary.newItems.length}</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border-2 border-deleted-row shadow-sm">
+                        <CardContent className="p-4">
+                          <h3 className="text-lg font-semibold text-gray-700">Item Dihapus</h3>
+                          <p className="text-2xl font-bold">{budgetSummary.deletedItems.length}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      onClick={showSummary}
+                      className="w-full md:w-auto"
+                    >
+                      <Info className="mr-2 h-4 w-4" /> 
+                      Lihat Detail Ringkasan
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          </CardContent>
+        </Tabs>
+      </Card>
 
       {budgetSummary && (
         <SummaryDialog 
