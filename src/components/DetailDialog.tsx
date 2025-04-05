@@ -114,7 +114,7 @@ const DetailDialog: React.FC<DetailDialogProps> = ({ item, open, onOpenChange })
           
           <div>
             <h3 className="text-sm font-semibold text-gray-500">Status Persetujuan</h3>
-            <p className="text-base">{item.isApproved ? 'Disetujui' : 'Belum Disetujui'}</p>
+            <p className="text-base">{item.isApproved ? 'Disetujui' : 'Belum Disetujui PPK'}</p>
           </div>
         </div>
       </DialogContent>
