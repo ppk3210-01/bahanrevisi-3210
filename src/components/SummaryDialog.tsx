@@ -170,7 +170,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>Ringkasan Perubahan Pagu Anggaran</DialogTitle>
+          <DialogTitle className="text-blue-900 font-bold">Ringkasan Perubahan Pagu Anggaran</DialogTitle>
           <Button variant="outline" onClick={exportToExcel}>
             <FileSpreadsheet className="h-4 w-4 mr-2" />
             Export Excel
@@ -207,7 +207,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {/* Changed Items */}
           {changedItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Pagu Anggaran Berubah</h3>
+              <h3 className="text-orange-600 font-bold mb-2">Pagu Anggaran Berubah</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -250,7 +250,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {/* New Items */}
           {newItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Pagu Anggaran Baru</h3>
+              <h3 className="text-green-600 font-bold mb-2">Pagu Anggaran Baru</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
