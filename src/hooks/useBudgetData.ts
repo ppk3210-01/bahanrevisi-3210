@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -443,6 +444,62 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
+  // Reject a budget item - reset "menjadi" values to match "semula" values
+  const rejectBudgetItem = async (id: string) => {
+    try {
+      // Find the item
+      const item = budgetItems.find(item => item.id === id);
+      if (!item) {
+        throw new Error('Item not found');
+      }
+      
+      // Update in Supabase - reset "menjadi" values to match "semula" values
+      const { error: supabaseError } = await supabase
+        .from('budget_items')
+        .update({
+          volume_menjadi: item.volumeSemula,
+          satuan_menjadi: item.satuanSemula,
+          harga_satuan_menjadi: item.hargaSatuanSemula,
+          jumlah_menjadi: item.jumlahSemula,
+          selisih: 0,
+          status: 'unchanged',
+          is_approved: false
+        })
+        .eq('id', id);
+      
+      if (supabaseError) {
+        throw supabaseError;
+      }
+      
+      // Update in local state
+      setBudgetItems(prev => 
+        prev.map(item => {
+          if (item.id === id) {
+            return {
+              ...item,
+              volumeMenjadi: item.volumeSemula,
+              satuanMenjadi: item.satuanSemula,
+              hargaSatuanMenjadi: item.hargaSatuanSemula,
+              jumlahMenjadi: item.jumlahSemula,
+              selisih: 0,
+              status: 'unchanged',
+              isApproved: false
+            };
+          }
+          return item;
+        })
+      );
+    } catch (err) {
+      console.error('Error rejecting budget item:', err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal menolak item. Silakan coba lagi.'
+      });
+      throw err;
+    }
+  };
+
   return {
     budgetItems,
     loading,
@@ -451,6 +508,7 @@ const useBudgetData = (filters: FilterSelection) => {
     updateBudgetItem,
     deleteBudgetItem,
     approveBudgetItem,
+    rejectBudgetItem,
     importBudgetItems
   };
 };

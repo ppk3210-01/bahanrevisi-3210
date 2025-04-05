@@ -1,137 +1,170 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
-import SummaryDialog from './SummaryDialog';
 import BudgetSummaryBox from './BudgetSummaryBox';
-import { FilterSelection } from '@/types/budget';
-import useBudgetData from '@/hooks/useBudgetData';
-import { Alert } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
-import ExportOptions from './ExportOptions';
 import ExcelImportExport from './ExcelImportExport';
+import ExportOptions from './ExportOptions';
+import SummaryDialog from './SummaryDialog';
+import { Button } from '@/components/ui/button';
+import { FilterSelection, BudgetSummary } from '@/types/budget';
+import { generateBudgetSummary } from '@/utils/budgetCalculations';
+import useBudgetData from '@/hooks/useBudgetData';
+import { useMediaQuery } from '@/hooks/use-mobile';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
+
+const DEFAULT_FILTER: FilterSelection = {
+  programPembebanan: 'all',
+  kegiatan: 'all',
+  rincianOutput: 'all',
+  komponenOutput: 'all',
+  subKomponen: 'all',
+  akun: 'all'
+};
 
 const BudgetComparison: React.FC = () => {
-  const [filters, setFilters] = useState<FilterSelection>({
-    programPembebanan: '',
-    kegiatan: '',
-    rincianOutput: '',
-    komponenOutput: '',
-    subKomponen: '',
-    akun: ''
-  });
-
-  // Get budget data based on filters
-  const {
-    budgetItems,
-    loading,
-    error,
-    addBudgetItem,
-    updateBudgetItem,
-    deleteBudgetItem,
+  const [filters, setFilters] = useState<FilterSelection>(DEFAULT_FILTER);
+  const [summaryVisible, setSummaryVisible] = useState(false);
+  const [currentTab, setCurrentTab] = useState('data');
+  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  const { 
+    budgetItems, 
+    loading, 
+    addBudgetItem, 
+    updateBudgetItem, 
+    deleteBudgetItem, 
     approveBudgetItem,
+    rejectBudgetItem,
     importBudgetItems
   } = useBudgetData(filters);
 
-  // Calculate totals for summary box
-  const totalSemula = budgetItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
-  const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-  const totalSelisih = totalMenjadi - totalSemula;
-  const hasSelisih = totalSelisih !== 0;
+  useEffect(() => {
+    if (budgetItems) {
+      setBudgetSummary(generateBudgetSummary(budgetItems));
+    }
+  }, [budgetItems]);
 
-  // Function to handle filter changes
-  const handleFilterChange = (newFilters: FilterSelection) => {
-    setFilters(newFilters);
+  const areFiltersComplete = () => {
+    // Check if at least the minimum required filters are selected
+    return (
+      filters.komponenOutput !== 'all' &&
+      filters.subKomponen !== 'all' &&
+      filters.akun !== 'all'
+    );
   };
 
-  // Check if all filters are set (not empty and not 'all')
-  const areFiltersComplete = 
-    filters.programPembebanan && 
-    filters.programPembebanan !== 'all' &&
-    filters.kegiatan && 
-    filters.kegiatan !== 'all' &&
-    filters.rincianOutput && 
-    filters.rincianOutput !== 'all' &&
-    filters.komponenOutput && 
-    filters.komponenOutput !== 'all' &&
-    filters.subKomponen && 
-    filters.subKomponen !== 'all' &&
-    filters.akun && 
-    filters.akun !== 'all';
+  // Functions to handle filter changes
+  const handleFilterChange = (filter: Partial<FilterSelection>) => {
+    setFilters(prev => ({
+      ...prev,
+      ...filter
+    }));
+  };
 
-  // Handle bulk import with proper typing
-  const handleBulkImport = async (items: any[]) => {
-    if (!areFiltersComplete) {
-      return Promise.reject(new Error('Pilih semua filter terlebih dahulu'));
-    }
-    
-    try {
-      await importBudgetItems(items);
-      return Promise.resolve();
-    } catch (error) {
-      return Promise.reject(error);
-    }
+  // Show the summary dialog
+  const showSummary = () => {
+    setSummaryVisible(true);
   };
 
   return (
     <div className="space-y-6">
-      {/* Summary Box - always shown at the top */}
-      <BudgetSummaryBox 
-        totalSemula={totalSemula}
-        totalMenjadi={totalMenjadi}
-        totalSelisih={totalSelisih}
-      />
-      
-      {/* Filters section */}
-      <BudgetFilter onFilterChange={handleFilterChange} />
-      
-      {/* Budget table section */}
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <CardTitle>Perbandingan Anggaran Semula vs Menjadi</CardTitle>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <ExcelImportExport 
-              onImport={handleBulkImport}
-              komponenOutput={filters.komponenOutput}
-              subKomponen={filters.subKomponen}
-              akun={filters.akun}
-            />
-            <div className="flex space-x-2">
-              <SummaryDialog items={budgetItems} />
-              <ExportOptions items={budgetItems} komponenOutput={filters.komponenOutput} />
-            </div>
-          </div>
-        </CardHeader>
-        
-        {hasSelisih && (
-          <div className="px-6">
-            <Alert variant="destructive" className="bg-red-50 border-red-200 mb-4">
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              <span className="font-medium">PERINGATAN: Terjadi perbedaan total anggaran sebesar {totalSelisih.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</span>
-            </Alert>
-          </div>
-        )}
-        
-        <CardContent>
-          {error ? (
-            <div className="text-red-500 p-4">{error}</div>
-          ) : (
-            <BudgetTable
-              items={budgetItems}
-              komponenOutput={filters.komponenOutput}
-              onAdd={addBudgetItem}
-              onUpdate={updateBudgetItem}
-              onDelete={deleteBudgetItem}
-              onApprove={approveBudgetItem}
-              isLoading={loading}
-              subKomponen={filters.subKomponen}
-              akun={filters.akun}
-              areFiltersComplete={areFiltersComplete}
-            />
-          )}
+        <CardContent className="pt-6">
+          <BudgetFilter 
+            onFilterChange={handleFilterChange}
+            selectedFilters={filters}
+          />
         </CardContent>
       </Card>
+
+      <div className="flex flex-col md:flex-row gap-4 items-start">
+        {budgetSummary && (
+          <div className={`${isMobile ? 'w-full' : 'w-1/3'} space-y-4`}>
+            <BudgetSummaryBox summary={budgetSummary} />
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Export & Tools</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={showSummary}
+                      className="w-full"
+                    >
+                      <InfoCircledIcon className="mr-2 h-4 w-4" /> 
+                      Lihat Ringkasan
+                    </Button>
+                    <ExportOptions 
+                      items={budgetItems} 
+                      komponenOutput={filters.komponenOutput} 
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className={`${isMobile || !budgetSummary ? 'w-full' : 'w-2/3'}`}>
+          <Card>
+            <Tabs value={currentTab} onValueChange={setCurrentTab}>
+              <div className="flex justify-between items-center px-6 pt-6">
+                <TabsList>
+                  <TabsTrigger value="data">Data Anggaran</TabsTrigger>
+                  <TabsTrigger value="import">Import/Export</TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <CardContent className="pt-4">
+                <TabsContent value="data" className="mt-0">
+                  <BudgetTable 
+                    items={budgetItems}
+                    komponenOutput={filters.komponenOutput}
+                    onAdd={addBudgetItem}
+                    onUpdate={updateBudgetItem}
+                    onDelete={deleteBudgetItem}
+                    onApprove={approveBudgetItem}
+                    onReject={rejectBudgetItem}
+                    isLoading={loading}
+                    subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+                    akun={filters.akun !== 'all' ? filters.akun : undefined}
+                    areFiltersComplete={areFiltersComplete()}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="import" className="mt-0">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium">Import dan Export Data</h3>
+                    <ExcelImportExport 
+                      onImport={importBudgetItems}
+                      komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
+                      subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+                      akun={filters.akun !== 'all' ? filters.akun : undefined}
+                    />
+                  </div>
+                </TabsContent>
+              </CardContent>
+            </Tabs>
+          </Card>
+        </div>
+      </div>
+
+      {budgetSummary && (
+        <SummaryDialog 
+          summary={budgetSummary} 
+          open={summaryVisible} 
+          onOpenChange={setSummaryVisible} 
+        />
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown } from 'lucide-react';
+import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -30,6 +31,7 @@ interface BudgetTableProps {
   onUpdate: (id: string, updates: Partial<BudgetItem>) => void;
   onDelete: (id: string) => void;
   onApprove: (id: string) => void;
+  onReject: (id: string) => void;
   isLoading: boolean;
   subKomponen?: string;
   akun?: string;
@@ -43,6 +45,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   onUpdate,
   onDelete,
   onApprove,
+  onReject,
   isLoading,
   subKomponen,
   akun,
@@ -576,22 +579,42 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   </td>
                   <td className="text-center">
                     {needsApproval(item) && (
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="text-green-600" 
-                        onClick={() => {
-                          onApprove(item.id);
-                          toast({
-                            title: "Berhasil",
-                            description: 'Item disetujui oleh PPK'
-                          });
-                        }}
-                      >
-                        <Check className="h-4 w-4 font-bold" />
-                      </Button>
+                      <div className="flex space-x-1 justify-center">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="text-green-600 border-green-600 hover:bg-green-50" 
+                          onClick={() => {
+                            onApprove(item.id);
+                            toast({
+                              title: "Berhasil",
+                              description: 'Item disetujui oleh PPK'
+                            });
+                          }}
+                          title="Setujui"
+                        >
+                          <Check className="h-4 w-4 font-bold" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="text-red-600 border-red-600 hover:bg-red-50" 
+                          onClick={() => {
+                            onReject(item.id);
+                            toast({
+                              title: "Info",
+                              description: 'Item ditolak oleh PPK'
+                            });
+                          }}
+                          title="Tolak"
+                        >
+                          <X className="h-4 w-4 font-bold" />
+                        </Button>
+                      </div>
                     )}
-                    {item.isApproved && <span className="text-green-600 font-bold text-lg">✓</span>}
+                    {item.isApproved && (
+                      <span className="text-green-600 font-bold">Yes</span>
+                    )}
                   </td>
                 </tr>
               ))}
