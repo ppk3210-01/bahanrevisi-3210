@@ -160,21 +160,21 @@ const BudgetComparison: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                       <Card className="border border-changed-row shadow-sm">
                         <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Item Diubah</h3>
+                          <h3 className="text-xs font-semibold text-gray-700">Detil Diubah</h3>
                           <p className="text-lg font-bold">{budgetSummary.changedItems.length}</p>
                         </CardContent>
                       </Card>
                       
                       <Card className="border border-new-row shadow-sm">
                         <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Item Baru</h3>
+                          <h3 className="text-xs font-semibold text-gray-700">Detil Baru</h3>
                           <p className="text-lg font-bold">{budgetSummary.newItems.length}</p>
                         </CardContent>
                       </Card>
                       
                       <Card className="border border-deleted-row shadow-sm">
                         <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Item Dihapus</h3>
+                          <h3 className="text-xs font-semibold text-gray-700">Detil Dihapus</h3>
                           <p className="text-lg font-bold">{budgetSummary.deletedItems.length}</p>
                         </CardContent>
                       </Card>
