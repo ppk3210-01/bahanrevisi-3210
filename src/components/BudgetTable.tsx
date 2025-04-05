@@ -595,7 +595,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="py-2 px-1 w-[7%]">Aksi</th>
+                <th className="py-2 px-1 w-[7%]">Aksi SM/PJK</th>
                 <th className="py-2 px-1 w-[7%]">PPK</th>
               </tr>
             </thead>
