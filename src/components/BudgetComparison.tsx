@@ -17,8 +17,8 @@ import { Button } from '@/components/ui/button';
 import { FilterSelection, BudgetSummary } from '@/types/budget';
 import { generateBudgetSummary } from '@/utils/budgetCalculations';
 import useBudgetData from '@/hooks/useBudgetData';
-import { useMediaQuery } from '@/hooks/use-mobile';
-import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { InfoCircle } from 'lucide-react';
 
 const DEFAULT_FILTER: FilterSelection = {
   programPembebanan: 'all',
@@ -34,7 +34,7 @@ const BudgetComparison: React.FC = () => {
   const [summaryVisible, setSummaryVisible] = useState(false);
   const [currentTab, setCurrentTab] = useState('data');
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useIsMobile();
   
   const { 
     budgetItems, 
@@ -81,7 +81,7 @@ const BudgetComparison: React.FC = () => {
         <CardContent className="pt-6">
           <BudgetFilter 
             onFilterChange={handleFilterChange}
-            selectedFilters={filters}
+            filters={filters}
           />
         </CardContent>
       </Card>
@@ -89,7 +89,11 @@ const BudgetComparison: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-4 items-start">
         {budgetSummary && (
           <div className={`${isMobile ? 'w-full' : 'w-1/3'} space-y-4`}>
-            <BudgetSummaryBox summary={budgetSummary} />
+            <BudgetSummaryBox 
+              totalSemula={budgetSummary.totalSemula}
+              totalMenjadi={budgetSummary.totalMenjadi}
+              totalSelisih={budgetSummary.totalSelisih}
+            />
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-4">
@@ -100,7 +104,7 @@ const BudgetComparison: React.FC = () => {
                       onClick={showSummary}
                       className="w-full"
                     >
-                      <InfoCircledIcon className="mr-2 h-4 w-4" /> 
+                      <InfoCircle className="mr-2 h-4 w-4" /> 
                       Lihat Ringkasan
                     </Button>
                     <ExportOptions 
@@ -145,7 +149,10 @@ const BudgetComparison: React.FC = () => {
                   <div className="space-y-4">
                     <h3 className="text-lg font-medium">Import dan Export Data</h3>
                     <ExcelImportExport 
-                      onImport={importBudgetItems}
+                      onImport={(items) => {
+                        importBudgetItems(items);
+                        return Promise.resolve();
+                      }}
                       komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
                       subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
                       akun={filters.akun !== 'all' ? filters.akun : undefined}
@@ -160,7 +167,12 @@ const BudgetComparison: React.FC = () => {
 
       {budgetSummary && (
         <SummaryDialog 
-          summary={budgetSummary} 
+          totalSemula={budgetSummary.totalSemula}
+          totalMenjadi={budgetSummary.totalMenjadi}
+          totalSelisih={budgetSummary.totalSelisih}
+          changedItems={budgetSummary.changedItems} 
+          newItems={budgetSummary.newItems}
+          deletedItems={budgetSummary.deletedItems} 
           open={summaryVisible} 
           onOpenChange={setSummaryVisible} 
         />

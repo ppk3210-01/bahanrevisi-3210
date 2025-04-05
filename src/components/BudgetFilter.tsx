@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Select, 
@@ -12,81 +11,63 @@ import { FilterSelection } from '@/types/budget';
 import { HIERARCHY_DATA } from '@/lib/constants';
 
 interface BudgetFilterProps {
-  onFilterChange: (filters: FilterSelection) => void;
+  onFilterChange: (filters: Partial<FilterSelection>) => void;
+  filters: FilterSelection;
 }
 
-const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
-  const [filters, setFilters] = useState<FilterSelection>({
-    programPembebanan: '',
-    kegiatan: '',
-    rincianOutput: '',
-    komponenOutput: '',
-    subKomponen: '',
-    akun: ''
-  });
-
+const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) => {
   // Handle changes to program pembebanan
   const handleProgramChange = (value: string) => {
-    setFilters({
+    onFilterChange({
       programPembebanan: value,
-      kegiatan: '',
-      rincianOutput: '',
-      komponenOutput: '',
-      subKomponen: '',
-      akun: filters.akun // Keep akun filter as it's independent
+      kegiatan: 'all',
+      rincianOutput: 'all',
+      komponenOutput: 'all',
+      subKomponen: 'all'
+      // Keep akun filter as it's independent
     });
   };
 
   // Handle changes to kegiatan
   const handleKegiatanChange = (value: string) => {
-    setFilters({
-      ...filters,
+    onFilterChange({
       kegiatan: value,
-      rincianOutput: '',
-      komponenOutput: '',
-      subKomponen: ''
+      rincianOutput: 'all',
+      komponenOutput: 'all',
+      subKomponen: 'all'
     });
   };
 
   // Handle changes to rincian output
   const handleRincianOutputChange = (value: string) => {
-    setFilters({
-      ...filters,
+    onFilterChange({
       rincianOutput: value,
-      komponenOutput: '',
-      subKomponen: ''
+      komponenOutput: 'all',
+      subKomponen: 'all'
     });
   };
 
   // Handle changes to komponen output
   const handleKomponenOutputChange = (value: string) => {
-    setFilters({
-      ...filters,
+    onFilterChange({
       komponenOutput: value,
-      subKomponen: ''
+      subKomponen: 'all'
     });
   };
 
   // Handle changes to sub komponen
   const handleSubKomponenChange = (value: string) => {
-    setFilters({
-      ...filters,
+    onFilterChange({
       subKomponen: value
     });
   };
 
   // Handle changes to akun
   const handleAkunChange = (value: string) => {
-    setFilters({
-      ...filters,
+    onFilterChange({
       akun: value
     });
   };
-
-  // Trigger the filter change callback whenever filters change
-  useEffect(() => {
-    onFilterChange(filters);
-  }, [filters, onFilterChange]);
 
   return (
     <Card className="mb-6">
@@ -121,7 +102,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.kegiatan}
             onValueChange={handleKegiatanChange}
-            disabled={!filters.programPembebanan}
+            disabled={!filters.programPembebanan || filters.programPembebanan === 'all'}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Kegiatan" />
@@ -144,7 +125,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.rincianOutput}
             onValueChange={handleRincianOutputChange}
-            disabled={!filters.kegiatan}
+            disabled={!filters.kegiatan || filters.kegiatan === 'all'}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Rincian Output" />
@@ -167,7 +148,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.komponenOutput}
             onValueChange={handleKomponenOutputChange}
-            disabled={!filters.rincianOutput}
+            disabled={!filters.rincianOutput || filters.rincianOutput === 'all'}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Komponen Output" />
@@ -190,7 +171,7 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange }) => {
           <Select
             value={filters.subKomponen}
             onValueChange={handleSubKomponenChange}
-            disabled={!filters.programPembebanan}
+            disabled={!filters.programPembebanan || filters.programPembebanan === 'all'}
           >
             <SelectTrigger>
               <SelectValue placeholder="Pilih Sub Komponen" />
