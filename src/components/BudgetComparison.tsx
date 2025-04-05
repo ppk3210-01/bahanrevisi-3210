@@ -18,7 +18,7 @@ import { FilterSelection, BudgetSummary } from '@/types/budget';
 import { generateBudgetSummary } from '@/utils/budgetCalculations';
 import useBudgetData from '@/hooks/useBudgetData';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { InfoCircle } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 const DEFAULT_FILTER: FilterSelection = {
   programPembebanan: 'all',
@@ -104,7 +104,7 @@ const BudgetComparison: React.FC = () => {
                       onClick={showSummary}
                       className="w-full"
                     >
-                      <InfoCircle className="mr-2 h-4 w-4" /> 
+                      <Info className="mr-2 h-4 w-4" /> 
                       Lihat Ringkasan
                     </Button>
                     <ExportOptions 
@@ -167,12 +167,7 @@ const BudgetComparison: React.FC = () => {
 
       {budgetSummary && (
         <SummaryDialog 
-          totalSemula={budgetSummary.totalSemula}
-          totalMenjadi={budgetSummary.totalMenjadi}
-          totalSelisih={budgetSummary.totalSelisih}
-          changedItems={budgetSummary.changedItems} 
-          newItems={budgetSummary.newItems}
-          deletedItems={budgetSummary.deletedItems} 
+          items={budgetSummary.changedItems.concat(budgetSummary.newItems).concat(budgetSummary.deletedItems)}
           open={summaryVisible} 
           onOpenChange={setSummaryVisible} 
         />
