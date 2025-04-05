@@ -168,8 +168,6 @@ const BudgetComparison: React.FC = () => {
       {budgetSummary && (
         <SummaryDialog 
           items={budgetSummary.changedItems.concat(budgetSummary.newItems).concat(budgetSummary.deletedItems)}
-          open={summaryVisible} 
-          onOpenChange={setSummaryVisible} 
         />
       )}
     </div>
