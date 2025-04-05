@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 import { writeFileSync } from 'fs';
 
 // Run Supabase CLI to generate types
-exec('npx supabase gen types typescript --project-id daegbpegzubzmjvyprtl', (error, stdout, stderr) => {
+exec('npx supabase gen types typescript --project-id vodfnexxrevgrxmmaksy', (error, stdout, stderr) => {
   if (error) {
     console.error(`Error generating types: ${error}`);
     return;
