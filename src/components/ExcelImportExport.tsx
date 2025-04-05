@@ -2,15 +2,10 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { FilePlus2, Download, Info } from 'lucide-react';
+import { FilePlus2, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import * as XLSX from 'xlsx';
 import { BudgetItem } from '@/types/budget';
-import { 
-  Tooltip,
-  TooltipContent, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
 
 interface ExcelImportExportProps {
   onImport: (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => Promise<void>;
@@ -37,58 +32,14 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       'Sub Komponen': subKomponen || 'Contoh: SK123',
       'Akun': akun || 'Contoh: 522151',
       'Uraian': 'Deskripsi Anggaran',
-      'Volume Semula': 1,
+      'Volume Semula': '1',
       'Satuan Semula': 'Paket',
-      'Harga Satuan Semula': 1000000,
-      'Volume Menjadi': 1,
+      'Harga Satuan Semula': '1000000',
+      'Volume Menjadi': '1',
       'Satuan Menjadi': 'Paket',
-      'Harga Satuan Menjadi': 1000000,
-    },
-    {
-      'Program Pembebanan': '054.01.GG',
-      'Kegiatan': '2896',
-      'Rincian Output': '2896.BMA',
-      'Komponen Output': '2896.BMA.004',
-      'Sub Komponen': 'SK123',
-      'Akun': '522151',
-      'Uraian': 'Contoh Isian Data 1',
-      'Volume Semula': 2,
-      'Satuan Semula': 'Bulan',
-      'Harga Satuan Semula': 500000,
-      'Volume Menjadi': 3,
-      'Satuan Menjadi': 'Bulan',
-      'Harga Satuan Menjadi': 500000,
-    },
-    {
-      'Program Pembebanan': '054.01.GG',
-      'Kegiatan': '2896',
-      'Rincian Output': '2896.BMA',
-      'Komponen Output': '2896.BMA.004',
-      'Sub Komponen': 'SK123',
-      'Akun': '522151',
-      'Uraian': 'Contoh Isian Data 2',
-      'Volume Semula': 1,
-      'Satuan Semula': 'Paket',
-      'Harga Satuan Semula': 2500000,
-      'Volume Menjadi': 1,
-      'Satuan Menjadi': 'Paket',
-      'Harga Satuan Menjadi': 3000000,
+      'Harga Satuan Menjadi': '1000000',
     }
   ];
-
-  const templateInstructions = `
-PETUNJUK PENGISIAN:
-1. Baris pertama adalah contoh format (tidak perlu dihapus)
-2. Data dimulai dari baris kedua
-3. Semua kolom harus diisi
-4. Format data:
-   - Program Pembebanan, Kegiatan, Rincian Output, Komponen Output, Sub Komponen, Akun: teks
-   - Uraian: teks
-   - Volume Semula, Volume Menjadi: angka positif
-   - Satuan Semula, Satuan Menjadi: teks (contoh: Paket, Bulan, OB, OH, dll)
-   - Harga Satuan Semula, Harga Satuan Menjadi: angka positif tanpa titik/koma
-5. Pastikan tidak ada sel yang kosong
-  `;
 
   // Function to download template
   const downloadTemplate = () => {
@@ -114,49 +65,6 @@ PETUNJUK PENGISIAN:
     ];
     
     worksheet['!cols'] = columnWidths;
-    
-    // Add instruction sheet
-    const instructionSheet = XLSX.utils.aoa_to_sheet([
-      ['PETUNJUK PENGISIAN TEMPLATE'],
-      [''],
-      ['1. Baris pertama adalah contoh format (tidak perlu dihapus)'],
-      ['2. Data dimulai dari baris kedua'],
-      ['3. Semua kolom harus diisi dengan lengkap sesuai format'],
-      ['4. Format data untuk masing-masing kolom:'],
-      ['   - Program Pembebanan: teks (contoh: 054.01.GG)'],
-      ['   - Kegiatan: teks (contoh: 2896)'],
-      ['   - Rincian Output: teks (contoh: 2896.BMA)'],
-      ['   - Komponen Output: teks (contoh: 2896.BMA.004)'],
-      ['   - Sub Komponen: teks (contoh: SK123)'],
-      ['   - Akun: teks (contoh: 522151)'],
-      ['   - Uraian: teks - deskripsi anggaran'],
-      ['   - Volume Semula: angka positif'],
-      ['   - Satuan Semula: teks (contoh: Paket, Bulan, OB, OH, dll)'],
-      ['   - Harga Satuan Semula: angka positif tanpa titik/koma'],
-      ['   - Volume Menjadi: angka positif'],
-      ['   - Satuan Menjadi: teks (contoh: Paket, Bulan, OB, OH, dll)'],
-      ['   - Harga Satuan Menjadi: angka positif tanpa titik/koma'],
-      ['5. Pastikan tidak ada sel yang kosong'],
-      ['6. Jangan mengubah format kolom, seperti menambah atau mengurangi kolom'],
-      ['7. Semua nilai angka harus diisi tanpa format pemisah ribuan (titik/koma)'],
-      [''],
-      ['Contoh format yang benar:'],
-      ['Program Pembebanan: 054.01.GG'],
-      ['Kegiatan: 2896'],
-      ['Rincian Output: 2896.BMA'],
-      ['Komponen Output: 2896.BMA.004'],
-      ['Sub Komponen: SK123'],
-      ['Akun: 522151'],
-      ['Uraian: Honor Narasumber'],
-      ['Volume Semula: 2'],
-      ['Satuan Semula: Orang'],
-      ['Harga Satuan Semula: 1000000  (tulis sebagai angka tanpa pemisah ribuan)'],
-      ['Volume Menjadi: 3'],
-      ['Satuan Menjadi: Orang'],
-      ['Harga Satuan Menjadi: 1000000  (tulis sebagai angka tanpa pemisah ribuan)'],
-    ]);
-    
-    XLSX.utils.book_append_sheet(workbook, instructionSheet, 'Petunjuk');
     
     XLSX.writeFile(workbook, 'budget_template.xlsx');
     toast({
@@ -214,25 +122,16 @@ PETUNJUK PENGISIAN:
       reader.onload = (e) => {
         try {
           const data = e.target?.result;
-          if (!data) {
-            reject(new Error('Failed to read file data'));
-            return;
-          }
           const workbook = XLSX.read(data, { type: 'binary' });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          console.log('Parsed Excel data:', jsonData);
           resolve(jsonData);
         } catch (error) {
-          console.error('Error parsing Excel:', error);
           reject(error);
         }
       };
-      reader.onerror = (error) => {
-        console.error('FileReader error:', error);
-        reject(error);
-      };
+      reader.onerror = (error) => reject(error);
       reader.readAsBinaryString(file);
     });
   };
@@ -244,8 +143,6 @@ PETUNJUK PENGISIAN:
     let invalidCount = 0;
     
     data.forEach((row, index) => {
-      console.log(`Validating row ${index + 1}:`, row);
-      
       // Check required fields
       const requiredFields = [
         'Program Pembebanan',
@@ -263,16 +160,9 @@ PETUNJUK PENGISIAN:
         'Harga Satuan Menjadi'
       ];
       
-      const missingFields = requiredFields.filter(field => {
-        const hasField = field in row && row[field] !== undefined && row[field] !== null && row[field] !== '';
-        if (!hasField) {
-          console.log(`Missing field in row ${index + 1}: ${field}`);
-        }
-        return !hasField;
-      });
+      const missingFields = requiredFields.filter(field => !row[field]);
       
       if (missingFields.length > 0) {
-        console.log(`Row ${index + 1} has missing fields:`, missingFields);
         invalidCount++;
         return;
       }
@@ -285,35 +175,28 @@ PETUNJUK PENGISIAN:
       
       // Validate numeric fields
       if (isNaN(volumeSemula) || isNaN(hargaSatuanSemula) || isNaN(volumeMenjadi) || isNaN(hargaSatuanMenjadi)) {
-        console.log(`Row ${index + 1} has invalid numeric fields:`, {
-          volumeSemula,
-          hargaSatuanSemula,
-          volumeMenjadi,
-          hargaSatuanMenjadi
-        });
         invalidCount++;
         return;
       }
       
       // Create valid item
       const validItem = {
-        uraian: String(row['Uraian']),
+        uraian: row['Uraian'],
         volumeSemula,
-        satuanSemula: String(row['Satuan Semula']),
+        satuanSemula: row['Satuan Semula'],
         hargaSatuanSemula,
         volumeMenjadi,
-        satuanMenjadi: String(row['Satuan Menjadi']),
+        satuanMenjadi: row['Satuan Menjadi'],
         hargaSatuanMenjadi,
-        komponenOutput: String(row['Komponen Output']),
-        programPembebanan: String(row['Program Pembebanan']),
-        kegiatan: String(row['Kegiatan']),
-        rincianOutput: String(row['Rincian Output']),
-        subKomponen: String(row['Sub Komponen']),
-        akun: String(row['Akun']),
+        komponenOutput: row['Komponen Output'],
+        programPembebanan: row['Program Pembebanan'],
+        kegiatan: row['Kegiatan'],
+        rincianOutput: row['Rincian Output'],
+        subKomponen: row['Sub Komponen'],
+        akun: row['Akun'],
         isApproved: false
       };
       
-      console.log(`Row ${index + 1} is valid:`, validItem);
       validItems.push(validItem);
     });
     
@@ -325,32 +208,18 @@ PETUNJUK PENGISIAN:
       });
     }
     
-    console.log('Valid items:', validItems);
     return validItems;
   };
 
   return (
-    <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button 
-            variant="outline" 
-            onClick={downloadTemplate}
-          >
-            <Download className="h-4 w-4 mr-2" /> 
-            Download Template
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent className="w-80 p-4 text-sm">
-          <p className="font-bold mb-1">Format Template Excel:</p>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Template berisi 13 kolom wajib diisi</li>
-            <li>Kolom number (Volume & Harga) format angka biasa tanpa pemisah ribuan</li>
-            <li>File berisi sheet contoh dan petunjuk lengkap</li>
-            <li>Ikuti contoh yang ada di template</li>
-          </ul>
-        </TooltipContent>
-      </Tooltip>
+    <div className="flex space-x-2">
+      <Button 
+        variant="outline" 
+        onClick={downloadTemplate}
+      >
+        <Download className="h-4 w-4 mr-2" /> 
+        Download Template
+      </Button>
       
       <div className="relative">
         <Input
@@ -363,31 +232,11 @@ PETUNJUK PENGISIAN:
         <Button 
           variant="outline" 
           disabled={isLoading}
-          className="w-full sm:w-auto"
         >
           <FilePlus2 className="h-4 w-4 mr-2" /> 
           {isLoading ? 'Importing...' : 'Import Excel'}
         </Button>
       </div>
-      
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Info className="h-4 w-4 text-blue-500" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent className="w-80 p-4 text-sm">
-          <p className="font-bold mb-1">Panduan Import Excel:</p>
-          <ol className="list-decimal pl-5 space-y-1">
-            <li>Download template terlebih dahulu</li>
-            <li>Isi sesuai format yang telah ditentukan</li>
-            <li>Pastikan semua kolom diisi dengan benar</li>
-            <li>Hindari penggunaan format khusus seperti mata uang</li>
-            <li>Simpan file dalam format .xlsx</li>
-            <li>Upload file melalui tombol Import Excel</li>
-          </ol>
-        </TooltipContent>
-      </Tooltip>
     </div>
   );
 };

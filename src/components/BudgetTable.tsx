@@ -592,7 +592,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                       </Button>
                     )}
                     {item.isApproved && <span className="text-green-600 font-bold text-lg">✓</span>}
-                    {item.status === 'unchanged' && <span className="text-gray-400">-</span>}
                   </td>
                 </tr>
               ))}
