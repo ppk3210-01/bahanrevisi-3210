@@ -8,10 +8,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileBarChart2 } from "lucide-react";
+import { FileBarChart2, FileSpreadsheet } from "lucide-react";
 import { formatCurrency } from '@/utils/budgetCalculations';
 import { BudgetItem } from '@/types/budget';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import * as XLSX from 'xlsx';
+import { toast } from '@/hooks/use-toast';
 
 interface SummaryDialogProps {
   items: BudgetItem[];
@@ -30,6 +32,133 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
     if (!item.komponenOutput || !item.subKomponen || !item.akun) return '-';
     return `${item.komponenOutput}.${item.subKomponen}.A.${item.akun}`;
   };
+
+  const renderDetailPerubahan = (item: BudgetItem) => {
+    if (item.volumeSemula !== item.volumeMenjadi) {
+      return `Volume: ${item.volumeSemula} → ${item.volumeMenjadi}`;
+    }
+    if (item.satuanSemula !== item.satuanMenjadi) {
+      return `Satuan: ${item.satuanSemula} → ${item.satuanMenjadi}`;
+    }
+    if (item.hargaSatuanSemula !== item.hargaSatuanMenjadi) {
+      return `Harga Satuan: ${formatCurrency(item.hargaSatuanSemula)} → ${formatCurrency(item.hargaSatuanMenjadi)}`;
+    }
+    return '-';
+  };
+
+  const exportToExcel = () => {
+    try {
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      
+      // Summary sheet
+      const summaryData = [
+        ['Ringkasan Perubahan Anggaran'],
+        [''],
+        ['Total Semula', formatCurrency(totalSemula)],
+        ['Total Menjadi', formatCurrency(totalMenjadi)],
+        ['Selisih', formatCurrency(totalSelisih)],
+        ['']
+      ];
+      
+      const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, summaryWs, "Ringkasan");
+      
+      // Changed items sheet
+      if (changedItems.length > 0) {
+        const changedData = [
+          ['No', 'Pembebanan', 'Uraian', 'Detail Perubahan', 'Jumlah Semula', 'Jumlah Menjadi', 'Selisih']
+        ];
+        
+        changedItems.forEach((item, index) => {
+          changedData.push([
+            index + 1,
+            formatPembebananCode(item),
+            item.uraian,
+            renderDetailPerubahan(item),
+            item.jumlahSemula,
+            item.jumlahMenjadi,
+            item.selisih
+          ]);
+        });
+        
+        const changedWs = XLSX.utils.aoa_to_sheet(changedData);
+        XLSX.utils.book_append_sheet(wb, changedWs, "Anggaran Berubah");
+      }
+      
+      // New items sheet
+      if (newItems.length > 0) {
+        const newData = [
+          ['No', 'Pembebanan', 'Uraian', 'Volume', 'Satuan', 'Harga Satuan', 'Jumlah']
+        ];
+        
+        newItems.forEach((item, index) => {
+          newData.push([
+            index + 1,
+            formatPembebananCode(item),
+            item.uraian,
+            item.volumeMenjadi,
+            item.satuanMenjadi,
+            item.hargaSatuanMenjadi,
+            item.jumlahMenjadi
+          ]);
+        });
+        
+        const newWs = XLSX.utils.aoa_to_sheet(newData);
+        XLSX.utils.book_append_sheet(wb, newWs, "Anggaran Baru");
+      }
+      
+      // Deleted items sheet
+      if (deletedItems.length > 0) {
+        const deletedData = [
+          ['No', 'Pembebanan', 'Uraian', 'Volume', 'Satuan', 'Harga Satuan', 'Jumlah']
+        ];
+        
+        deletedItems.forEach((item, index) => {
+          deletedData.push([
+            index + 1,
+            formatPembebananCode(item),
+            item.uraian,
+            item.volumeSemula,
+            item.satuanSemula,
+            item.hargaSatuanSemula,
+            item.jumlahSemula
+          ]);
+        });
+        
+        const deletedWs = XLSX.utils.aoa_to_sheet(deletedData);
+        XLSX.utils.book_append_sheet(wb, deletedWs, "Anggaran Dihapus");
+      }
+      
+      // Generate narrative summary
+      const narrativeData = [
+        ['Kesimpulan Perubahan Anggaran'],
+        [''],
+        [`Total anggaran semula sebesar ${formatCurrency(totalSemula)} berubah menjadi ${formatCurrency(totalMenjadi)}, dengan selisih sebesar ${formatCurrency(totalSelisih)}.`],
+        [`Terdapat ${changedItems.length} item anggaran yang diubah, ${newItems.length} item anggaran baru, dan ${deletedItems.length} item anggaran yang dihapus.`],
+        [`Perubahan ini ${totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total anggaran.`],
+        ['']
+      ];
+      
+      const narrativeWs = XLSX.utils.aoa_to_sheet(narrativeData);
+      XLSX.utils.book_append_sheet(wb, narrativeWs, "Kesimpulan");
+      
+      // Export to file
+      XLSX.writeFile(wb, "Ringkasan_Perubahan_Anggaran.xlsx");
+      
+      toast({
+        title: "Berhasil",
+        description: "Ringkasan perubahan anggaran berhasil diekspor ke Excel"
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: "Gagal mengekspor data. Silakan coba lagi."
+      });
+    }
+  };
   
   return (
     <Dialog>
@@ -40,8 +169,12 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Ringkasan Perubahan Anggaran</DialogTitle>
+          <Button variant="outline" onClick={exportToExcel}>
+            <FileSpreadsheet className="h-4 w-4 mr-2" />
+            Export Excel
+          </Button>
         </DialogHeader>
         
         <div className="space-y-8">
@@ -63,65 +196,93 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             </div>
           </div>
           
-          {/* New Items */}
-          {newItems.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Anggaran Baru</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>No</TableHead>
-                    <TableHead>Pembebanan</TableHead>
-                    <TableHead>Uraian</TableHead>
-                    <TableHead className="text-right">Jumlah Menjadi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {newItems.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{formatPembebananCode(item)}</TableCell>
-                      <TableCell>{item.uraian}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          {/* Narrative Summary */}
+          <div className="bg-gray-50 p-4 rounded border">
+            <h3 className="text-lg font-semibold mb-2">Kesimpulan</h3>
+            <p>Total anggaran semula sebesar <strong>{formatCurrency(totalSemula)}</strong> berubah menjadi <strong>{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}>{formatCurrency(totalSelisih)}</strong>.</p>
+            <p className="mt-2">Terdapat {changedItems.length} item anggaran yang diubah, {newItems.length} item anggaran baru, dan {deletedItems.length} item anggaran yang dihapus.</p>
+            <p className="mt-2">Perubahan ini {totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total anggaran.</p>
+          </div>
           
           {/* Changed Items */}
           {changedItems.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Anggaran Berubah</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>No</TableHead>
-                    <TableHead>Pembebanan</TableHead>
-                    <TableHead>Uraian</TableHead>
-                    <TableHead className="text-right">Semula</TableHead>
-                    <TableHead className="text-right">Menjadi</TableHead>
-                    <TableHead className="text-right">Selisih</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {changedItems.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{formatPembebananCode(item)}</TableCell>
-                      <TableCell>{item.uraian}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={item.selisih !== 0 ? 'text-red-600' : 'text-green-600'}>
-                          {formatCurrency(item.selisih)}
-                        </span>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>No</TableHead>
+                      <TableHead className="whitespace-normal">Pembebanan</TableHead>
+                      <TableHead className="whitespace-normal">Uraian</TableHead>
+                      <TableHead>Detail Perubahan</TableHead>
+                      <TableHead className="text-right">Jumlah Semula</TableHead>
+                      <TableHead className="text-right">Jumlah Menjadi</TableHead>
+                      <TableHead className="text-right">Selisih</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {changedItems.map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[150px]">
+                          {formatPembebananCode(item)}
+                        </TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[200px]">
+                          {item.uraian}
+                        </TableCell>
+                        <TableCell>{renderDetailPerubahan(item)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={item.selisih !== 0 ? 'text-red-600' : 'text-green-600'}>
+                            {formatCurrency(item.selisih)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+          
+          {/* New Items */}
+          {newItems.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Anggaran Baru</h3>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>No</TableHead>
+                      <TableHead className="whitespace-normal">Pembebanan</TableHead>
+                      <TableHead className="whitespace-normal">Uraian</TableHead>
+                      <TableHead>Volume</TableHead>
+                      <TableHead>Satuan</TableHead>
+                      <TableHead className="text-right">Harga Satuan</TableHead>
+                      <TableHead className="text-right">Jumlah</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {newItems.map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[150px]">
+                          {formatPembebananCode(item)}
+                        </TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[200px]">
+                          {item.uraian}
+                        </TableCell>
+                        <TableCell>{item.volumeMenjadi}</TableCell>
+                        <TableCell>{item.satuanMenjadi}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.hargaSatuanMenjadi)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
           
@@ -129,26 +290,38 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {deletedItems.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Anggaran Dihapus</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>No</TableHead>
-                    <TableHead>Pembebanan</TableHead>
-                    <TableHead>Uraian</TableHead>
-                    <TableHead className="text-right">Jumlah Semula</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {deletedItems.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{formatPembebananCode(item)}</TableCell>
-                      <TableCell>{item.uraian}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>No</TableHead>
+                      <TableHead className="whitespace-normal">Pembebanan</TableHead>
+                      <TableHead className="whitespace-normal">Uraian</TableHead>
+                      <TableHead>Volume</TableHead>
+                      <TableHead>Satuan</TableHead>
+                      <TableHead className="text-right">Harga Satuan</TableHead>
+                      <TableHead className="text-right">Jumlah</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {deletedItems.map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[150px]">
+                          {formatPembebananCode(item)}
+                        </TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[200px]">
+                          {item.uraian}
+                        </TableCell>
+                        <TableCell>{item.volumeSemula}</TableCell>
+                        <TableCell>{item.satuanSemula}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.hargaSatuanSemula)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </div>

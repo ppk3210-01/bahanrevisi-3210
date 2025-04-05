@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -63,14 +62,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     akun
   });
   
-  // Add state for search, pagination, and sorting
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [sortField, setSortField] = useState<keyof BudgetItem | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   
-  // Add state for detail dialog
   const [detailItem, setDetailItem] = useState<BudgetItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
 
@@ -310,7 +307,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
   };
 
-  // First filter items based on search term
   const filteredItems = items.filter(item => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -328,7 +324,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     );
   });
 
-  // Then sort the filtered items
   const sortedItems = [...filteredItems].sort((a, b) => {
     if (!sortField) return 0;
     
@@ -358,14 +353,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     return 0;
   });
 
-  // Finally paginate the sorted items
   const paginatedItems = pageSize === -1 
     ? sortedItems 
     : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const totalPages = pageSize === -1 ? 1 : Math.ceil(sortedItems.length / pageSize);
 
-  // Calculate totals for the current page and overall
   const pageTotalSemula = paginatedItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const pageTotalMenjadi = paginatedItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const pageTotalSelisih = pageTotalMenjadi - pageTotalSemula;
@@ -386,6 +379,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
+  };
+
+  const needsApproval = (item: BudgetItem): boolean => {
+    return (item.status === 'new' || item.status === 'changed') && !item.isApproved;
   };
 
   if (isLoading) {
@@ -578,7 +575,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     </div>
                   </td>
                   <td className="text-center">
-                    {!item.isApproved && item.status !== 'unchanged' && (
+                    {needsApproval(item) && (
                       <Button 
                         variant="outline" 
                         size="icon" 
@@ -591,10 +588,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                           });
                         }}
                       >
-                        <Check className="h-4 w-4" />
+                        <Check className="h-4 w-4 font-bold" />
                       </Button>
                     )}
-                    {item.isApproved && <span className="text-green-600 font-bold">✓</span>}
+                    {item.isApproved && <span className="text-green-600 font-bold text-lg">✓</span>}
                   </td>
                 </tr>
               ))}
