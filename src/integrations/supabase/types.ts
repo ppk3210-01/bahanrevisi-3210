@@ -99,130 +99,41 @@ export type Database = {
         }
         Relationships: []
       }
-      kegiatan: {
-        Row: {
-          id: string
-          nama: string
-          program_pembebanan: string | null
-        }
-        Insert: {
-          id: string
-          nama: string
-          program_pembebanan?: string | null
-        }
-        Update: {
-          id?: string
-          nama?: string
-          program_pembebanan?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "kegiatan_program_pembebanan_fkey"
-            columns: ["program_pembebanan"]
-            isOneToOne: false
-            referencedRelation: "program_pembebanan"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       komponen_output: {
         Row: {
           created_at: string | null
           id: string
           nama: string
-          rincian_output: string | null
         }
         Insert: {
           created_at?: string | null
           id: string
           nama: string
-          rincian_output?: string | null
         }
         Update: {
           created_at?: string | null
-          id?: string
-          nama?: string
-          rincian_output?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "komponen_output_rincian_output_fkey"
-            columns: ["rincian_output"]
-            isOneToOne: false
-            referencedRelation: "rincian_output"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      program_pembebanan: {
-        Row: {
-          id: string
-          nama: string
-        }
-        Insert: {
-          id: string
-          nama: string
-        }
-        Update: {
           id?: string
           nama?: string
         }
         Relationships: []
       }
-      rincian_output: {
-        Row: {
-          id: string
-          kegiatan: string | null
-          nama: string
-        }
-        Insert: {
-          id: string
-          kegiatan?: string | null
-          nama: string
-        }
-        Update: {
-          id?: string
-          kegiatan?: string | null
-          nama?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "rincian_output_kegiatan_fkey"
-            columns: ["kegiatan"]
-            isOneToOne: false
-            referencedRelation: "kegiatan"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       sub_komponen: {
         Row: {
           id: string
-          komponen_output: string | null
           nama: string
           program_pembebanan: string
         }
         Insert: {
           id: string
-          komponen_output?: string | null
           nama: string
           program_pembebanan: string
         }
         Update: {
           id?: string
-          komponen_output?: string | null
           nama?: string
           program_pembebanan?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "sub_komponen_komponen_output_fkey"
-            columns: ["komponen_output"]
-            isOneToOne: false
-            referencedRelation: "komponen_output"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {

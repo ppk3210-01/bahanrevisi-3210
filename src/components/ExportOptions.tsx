@@ -15,27 +15,23 @@ interface ExportOptionsProps {
 const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) => {
   // Prepare data for export
   const prepareExportData = () => {
-    return items.map((item, index) => {
-      // Format: KomponenOutput.SubKomponen.A.Akun
-      const pembebanan = `${item.komponenOutput || '-'}.${item.subKomponen || '-'}.A.${item.akun || '-'}`;
-      
-      return {
-        'No': index + 1,
-        'Uraian': item.uraian,
-        'Pembebanan': pembebanan,
-        'Volume Semula': item.volumeSemula,
-        'Satuan Semula': item.satuanSemula,
-        'Harga Satuan Semula': item.hargaSatuanSemula, // Keep original value without rounding
-        'Jumlah Semula': roundToThousands(item.jumlahSemula), // Apply rounding to thousands
-        'Volume Menjadi': item.volumeMenjadi,
-        'Satuan Menjadi': item.satuanMenjadi,
-        'Harga Satuan Menjadi': item.hargaSatuanMenjadi, // Keep original value without rounding
-        'Jumlah Menjadi': roundToThousands(item.jumlahMenjadi), // Apply rounding to thousands
-        'Selisih': roundToThousands(item.jumlahSemula - item.jumlahMenjadi), // Apply rounding to thousands
-        'Status': item.status,
-        'Disetujui PPK': item.isApproved ? 'Ya' : 'Belum'
-      };
-    });
+    return items.map((item, index) => ({
+      'No': index + 1,
+      'Uraian': item.uraian,
+      'Pembebanan': item.komponenOutput,
+      'Sub Komponen': item.subKomponen || '-',
+      'Akun': item.akun || '-',
+      'Volume Semula': item.volumeSemula,
+      'Satuan Semula': item.satuanSemula,
+      'Harga Satuan Semula': item.hargaSatuanSemula, // Keep original value without rounding
+      'Jumlah Semula': roundToThousands(item.jumlahSemula), // Apply rounding to thousands
+      'Volume Menjadi': item.volumeMenjadi,
+      'Satuan Menjadi': item.satuanMenjadi,
+      'Harga Satuan Menjadi': item.hargaSatuanMenjadi, // Keep original value without rounding
+      'Jumlah Menjadi': roundToThousands(item.jumlahMenjadi), // Apply rounding to thousands
+      'Selisih': roundToThousands(item.selisih), // Apply rounding to thousands
+      'Status': item.status
+    }));
   };
 
   // Function to export to Excel
@@ -58,10 +54,10 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
       // Add footer with totals
       const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
       const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
-      const totalSelisih = roundToThousands(items.reduce((sum, item) => sum + (item.jumlahSemula - item.jumlahMenjadi), 0));
+      const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
       
       XLSX.utils.sheet_add_aoa(worksheet, [
-        ["", "TOTAL", "", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, "", ""]
+        ["", "TOTAL", "", "", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
       ], {origin: -1});
       
       // Generate Excel file

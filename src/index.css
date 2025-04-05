@@ -159,30 +159,6 @@
   background-color: #F0FDF4;
 }
 
-.bg-blue-50 {
-  background-color: #EFF6FF;
-}
-
-.bg-purple-50 {
-  background-color: #F5F3FF;
-}
-
-.border-red-300 {
-  border-color: #FCA5A5;
-}
-
-.border-green-300 {
-  border-color: #86EFAC;
-}
-
-.border-blue-300 {
-  border-color: #93C5FD;
-}
-
-.border-purple-300 {
-  border-color: #C4B5FD;
-}
-
 .text-red-600 {
   color: #DC2626;
 }
@@ -191,29 +167,14 @@
   color: #16A34A;
 }
 
-.text-blue-700 {
-  color: #1D4ED8;
-}
-
-.text-purple-700 {
-  color: #7E22CE;
-}
-
 /* Purple background for unapproved items */
 .bg-purple-100 {
   background-color: #D6BCFA;
 }
 
 /* Styling for the Komponen Output header */
-.bg-purple-500 {
+.bg-purple-100 {
   background-color: #9b87f5;
   color: white;
   font-weight: 600;
-}
-
-/* Border styles */
-.border-l-2 {
-  border-left-width: 2px;
-  border-left-style: solid;
-  border-left-color: #E5E7EB;
 }
