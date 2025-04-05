@@ -17,7 +17,7 @@ const DetailDialog: React.FC<DetailDialogProps> = ({ item, open, onOpenChange })
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Detail Anggaran</DialogTitle>
+          <DialogTitle>Detail Pagu Anggaran</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 mt-4">

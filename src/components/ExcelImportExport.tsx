@@ -327,7 +327,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           <DialogHeader>
             <DialogTitle>Panduan Import Excel</DialogTitle>
             <DialogDescription>
-              Petunjuk cara mengimpor data anggaran menggunakan file Excel
+              Petunjuk cara mengimpor data menggunakan file Excel
             </DialogDescription>
           </DialogHeader>
           
@@ -374,7 +374,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
                     <td className="border border-gray-200 p-2">Sub Komponen</td>
                     <td className="border border-gray-200 p-2">Text</td>
                     <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">SK123</td>
+                    <td className="border border-gray-200 p-2">005</td>
                   </tr>
                   <tr>
                     <td className="border border-gray-200 p-2">Akun</td>

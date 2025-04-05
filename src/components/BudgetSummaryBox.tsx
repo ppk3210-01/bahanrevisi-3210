@@ -19,14 +19,14 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
       <div className="grid grid-cols-3 gap-2">
         <Card className="border border-blue-300 shadow-sm">
           <CardContent className="p-2">
-            <h3 className="text-sm font-semibold text-gray-700">Anggaran Semula</h3>
+            <h3 className="text-sm font-semibold text-gray-700">Pagu Anggaran Semula</h3>
             <p className="text-lg font-bold">{formatCurrency(totalSemula)}</p>
           </CardContent>
         </Card>
         
         <Card className="border border-green-300 shadow-sm">
           <CardContent className="p-2">
-            <h3 className="text-sm font-semibold text-gray-700">Anggaran Menjadi</h3>
+            <h3 className="text-sm font-semibold text-gray-700">Pagu Anggaran Menjadi</h3>
             <p className="text-lg font-bold">{formatCurrency(totalMenjadi)}</p>
           </CardContent>
         </Card>

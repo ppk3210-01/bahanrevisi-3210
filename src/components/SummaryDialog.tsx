@@ -53,7 +53,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       
       // Summary sheet
       const summaryData = [
-        ['Ringkasan Perubahan Anggaran'],
+        ['Ringkasan Perubahan Pagu Anggaran'],
         [''],
         ['Total Semula', formatCurrency(totalSemula)],
         ['Total Menjadi', formatCurrency(totalMenjadi)],
@@ -83,7 +83,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         });
         
         const changedWs = XLSX.utils.aoa_to_sheet(changedData);
-        XLSX.utils.book_append_sheet(wb, changedWs, "Anggaran Berubah");
+        XLSX.utils.book_append_sheet(wb, changedWs, "Pagu Anggaran Berubah");
       }
       
       // New items sheet
@@ -105,7 +105,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         });
         
         const newWs = XLSX.utils.aoa_to_sheet(newData);
-        XLSX.utils.book_append_sheet(wb, newWs, "Anggaran Baru");
+        XLSX.utils.book_append_sheet(wb, newWs, "Pagu Anggaran Baru");
       }
       
       // Deleted items sheet
@@ -127,16 +127,16 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         });
         
         const deletedWs = XLSX.utils.aoa_to_sheet(deletedData);
-        XLSX.utils.book_append_sheet(wb, deletedWs, "Anggaran Dihapus");
+        XLSX.utils.book_append_sheet(wb, deletedWs, "Pagu Anggaran Dihapus");
       }
       
       // Generate narrative summary
       const narrativeData = [
         ['Kesimpulan Perubahan Anggaran'],
         [''],
-        [`Total anggaran semula sebesar ${formatCurrency(totalSemula)} berubah menjadi ${formatCurrency(totalMenjadi)}, dengan selisih sebesar ${formatCurrency(totalSelisih)}.`],
-        [`Terdapat ${changedItems.length} item anggaran yang diubah, ${newItems.length} item anggaran baru, dan ${deletedItems.length} item anggaran yang dihapus.`],
-        [`Perubahan ini ${totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total anggaran.`],
+        [`Total Pagu anggaran semula sebesar ${formatCurrency(totalSemula)} berubah menjadi ${formatCurrency(totalMenjadi)}, dengan selisih sebesar ${formatCurrency(totalSelisih)}.`],
+        [`Terdapat ${changedItems.length} detil anggaran yang diubah, ${newItems.length} detil anggaran baru, dan ${deletedItems.length} detil anggaran yang dihapus.`],
+        [`Perubahan ini ${totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total Pagu anggaran.`],
         ['']
       ];
       
@@ -148,7 +148,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       
       toast({
         title: "Berhasil",
-        description: "Ringkasan perubahan anggaran berhasil diekspor ke Excel"
+        description: "Ringkasan perubahan Pagu anggaran berhasil diekspor ke Excel"
       });
     } catch (error) {
       console.error("Export error:", error);
@@ -170,7 +170,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>Ringkasan Perubahan Anggaran</DialogTitle>
+          <DialogTitle>Ringkasan Perubahan Pagu Anggaran</DialogTitle>
           <Button variant="outline" onClick={exportToExcel}>
             <FileSpreadsheet className="h-4 w-4 mr-2" />
             Export Excel
@@ -199,15 +199,15 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {/* Narrative Summary */}
           <div className="bg-gray-50 p-4 rounded border">
             <h3 className="text-lg font-semibold mb-2">Kesimpulan</h3>
-            <p>Total anggaran semula sebesar <strong>{formatCurrency(totalSemula)}</strong> berubah menjadi <strong>{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}>{formatCurrency(totalSelisih)}</strong>.</p>
-            <p className="mt-2">Terdapat {changedItems.length} item anggaran yang diubah, {newItems.length} item anggaran baru, dan {deletedItems.length} item anggaran yang dihapus.</p>
-            <p className="mt-2">Perubahan ini {totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total anggaran.</p>
+            <p>Total Pagu anggaran semula sebesar <strong>{formatCurrency(totalSemula)}</strong> berubah menjadi <strong>{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}>{formatCurrency(totalSelisih)}</strong>.</p>
+            <p className="mt-2">Terdapat {changedItems.length} detil anggaran yang diubah, {newItems.length} detil anggaran baru, dan {deletedItems.length} detil anggaran yang dihapus.</p>
+            <p className="mt-2">Perubahan ini {totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total Pagu anggaran.</p>
           </div>
           
           {/* Changed Items */}
           {changedItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Anggaran Berubah</h3>
+              <h3 className="text-lg font-semibold mb-2">Pagu Anggaran Berubah</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -250,7 +250,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {/* New Items */}
           {newItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Anggaran Baru</h3>
+              <h3 className="text-lg font-semibold mb-2">Pagu Anggaran Baru</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -289,7 +289,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
           {/* Deleted Items */}
           {deletedItems.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Anggaran Dihapus</h3>
+              <h3 className="text-lg font-semibold mb-2">Pagu Anggaran Dihapus</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>

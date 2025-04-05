@@ -92,7 +92,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       toast({
         variant: "destructive",
         title: "Error",
-        description: 'Uraian harus diisi'
+        description: 'Uraian detil harus diisi'
       });
       return false;
     }

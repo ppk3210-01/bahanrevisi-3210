@@ -14,7 +14,7 @@ const Index = () => {
           />
           <div>
             <h1 className="text-xl font-bold">Bahan Revisi-3210</h1>
-            <p className="text-gray-600 text-sm">Aplikasi Bahan Revisi Anggaran "Semula vs Menjadi"</p>
+            <p className="text-gray-600 text-sm">Aplikasi Bahan Revisi Pagu Anggaran "Semula vs Menjadi"</p>
           </div>
         </div>
       </header>

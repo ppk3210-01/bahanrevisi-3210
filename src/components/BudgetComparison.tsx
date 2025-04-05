@@ -152,7 +152,7 @@ const BudgetComparison: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-1 mb-2">
                   <Info className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-sm font-medium">Ringkasan Perubahan Anggaran</h3>
+                  <h3 className="text-sm font-medium">Ringkasan Perubahan Pagu Anggaran</h3>
                 </div>
                 
                 {budgetSummary && (
