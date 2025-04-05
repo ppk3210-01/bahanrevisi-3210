@@ -31,7 +31,7 @@ const BudgetComparison: React.FC = () => {
     updateBudgetItem,
     deleteBudgetItem,
     approveBudgetItem,
-    importBudgetItems // We'll add this function to the hook
+    importBudgetItems
   } = useBudgetData(filters);
 
   // Calculate totals for summary box
@@ -60,14 +60,18 @@ const BudgetComparison: React.FC = () => {
     filters.akun && 
     filters.akun !== 'all';
 
-  // Handle bulk import
+  // Handle bulk import with proper typing
   const handleBulkImport = async (items: any[]) => {
     if (!areFiltersComplete) {
       return Promise.reject(new Error('Pilih semua filter terlebih dahulu'));
     }
     
-    // We'll create this function in useBudgetData.ts
-    return importBudgetItems(items);
+    try {
+      await importBudgetItems(items);
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   };
 
   return (
