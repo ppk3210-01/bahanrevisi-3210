@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X } from 'lucide-react';
+import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -22,6 +21,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationEllipsis,
 } from "@/components/ui/pagination";
 
 interface BudgetTableProps {
@@ -388,6 +388,79 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     return (item.status === 'new' || item.status === 'changed') && !item.isApproved;
   };
 
+  const renderPagination = () => {
+    if (pageSize === -1 || totalPages <= 1) return null;
+    
+    const MAX_VISIBLE_PAGES = 7;
+    const showEllipsis = totalPages > MAX_VISIBLE_PAGES;
+    
+    return (
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(currentPage - 1);
+              }} 
+              aria-disabled={currentPage === 1}
+              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+          
+          {Array.from({ length: Math.min(MAX_VISIBLE_PAGES, totalPages) }).map((_, i) => (
+            <PaginationItem key={i + 1}>
+              <PaginationLink
+                isActive={currentPage === i + 1}
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageChange(i + 1);
+                }}
+              >
+                {i + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          
+          {showEllipsis && (
+            <>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(totalPages);
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <span>Last</span>
+                  <ChevronsRight className="h-4 w-4" />
+                </PaginationLink>
+              </PaginationItem>
+            </>
+          )}
+          
+          <PaginationItem>
+            <PaginationNext 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(currentPage + 1);
+              }} 
+              aria-disabled={currentPage === totalPages}
+              className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
+
   if (isLoading) {
     return <div className="flex justify-center p-4">Loading budget data...</div>;
   }
@@ -613,7 +686,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                       </div>
                     )}
                     {item.isApproved && (
-                      <span className="text-green-600 font-bold">Yes</span>
+                      <span className="text-green-600 font-bold">ok</span>
                     )}
                   </td>
                 </tr>
@@ -756,40 +829,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
       </div>
       
-      {pageSize !== -1 && totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" onClick={(e) => {
-                e.preventDefault();
-                handlePageChange(currentPage - 1);
-              }} aria-disabled={currentPage === 1} />
-            </PaginationItem>
-            
-            {[...Array(totalPages)].map((_, i) => (
-              <PaginationItem key={i + 1}>
-                <PaginationLink
-                  isActive={currentPage === i + 1}
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(i + 1);
-                  }}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            
-            <PaginationItem>
-              <PaginationNext href="#" onClick={(e) => {
-                e.preventDefault();
-                handlePageChange(currentPage + 1);
-              }} aria-disabled={currentPage === totalPages} />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+      {renderPagination()}
       
       <DetailDialog
         item={detailItem}

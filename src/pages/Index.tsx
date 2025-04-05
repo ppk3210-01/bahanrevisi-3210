@@ -5,7 +5,7 @@ import BudgetComparison from '@/components/BudgetComparison';
 const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b sticky top-0 z-20">
+      <header className="bg-white border-b sticky top-0 z-50">
         <div className="container mx-auto py-2 flex items-center">
           <img 
             src="/lovable-uploads/234c2470-e258-4fcb-8dc3-87747ed54c6e.png" 
