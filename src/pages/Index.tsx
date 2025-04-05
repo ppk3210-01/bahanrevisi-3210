@@ -6,9 +6,16 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b sticky top-0 z-10">
-        <div className="container mx-auto py-6">
-          <h1 className="text-2xl font-bold">Bahan Revisi-3210</h1>
-          <p className="text-gray-600">Aplikasi Bahan Revisi Anggaran "Semula vs Menjadi"</p>
+        <div className="container mx-auto py-6 flex items-center">
+          <img 
+            src="/lovable-uploads/234c2470-e258-4fcb-8dc3-87747ed54c6e.png" 
+            alt="Logo" 
+            className="h-10 w-10 mr-3" 
+          />
+          <div>
+            <h1 className="text-2xl font-bold">Bahan Revisi-3210</h1>
+            <p className="text-gray-600">Aplikasi Bahan Revisi Anggaran "Semula vs Menjadi"</p>
+          </div>
         </div>
       </header>
       

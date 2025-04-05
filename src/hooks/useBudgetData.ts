@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -169,6 +168,94 @@ const useBudgetData = (filters: FilterSelection) => {
         variant: "destructive",
         title: "Error",
         description: 'Gagal menambahkan item. Silakan coba lagi.'
+      });
+      throw err;
+    }
+  };
+
+  // New function to import multiple budget items
+  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
+    try {
+      setLoading(true);
+      
+      // Prepare items for batch insert
+      const itemsToInsert = items.map(item => {
+        // Calculate derived values
+        const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
+        const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
+        const selisih = roundToThousands(jumlahSemula - jumlahMenjadi);
+        
+        return {
+          uraian: item.uraian,
+          volume_semula: item.volumeSemula,
+          satuan_semula: item.satuanSemula,
+          harga_satuan_semula: item.hargaSatuanSemula,
+          jumlah_semula: jumlahSemula,
+          volume_menjadi: item.volumeMenjadi,
+          satuan_menjadi: item.satuanMenjadi,
+          harga_satuan_menjadi: item.hargaSatuanMenjadi,
+          jumlah_menjadi: jumlahMenjadi,
+          selisih: selisih,
+          komponen_output: item.komponenOutput,
+          status: 'new',
+          is_approved: false,
+          // Use values from the item or from current filters
+          program_pembebanan: item.programPembebanan || filters.programPembebanan,
+          kegiatan: item.kegiatan || filters.kegiatan,
+          rincian_output: item.rincianOutput || filters.rincianOutput,
+          sub_komponen: item.subKomponen || filters.subKomponen,
+          akun: item.akun || filters.akun
+        };
+      });
+      
+      // Insert all items in one batch
+      const { data, error: supabaseError } = await supabase
+        .from('budget_items')
+        .insert(itemsToInsert)
+        .select();
+      
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      if (data) {
+        // Transform the returned data
+        const savedItems: BudgetItem[] = data.map((item: any) => ({
+          id: item.id,
+          uraian: item.uraian,
+          volumeSemula: Number(item.volume_semula),
+          satuanSemula: item.satuan_semula,
+          hargaSatuanSemula: Number(item.harga_satuan_semula),
+          jumlahSemula: roundToThousands(Number(item.jumlah_semula || 0)),
+          volumeMenjadi: Number(item.volume_menjadi),
+          satuanMenjadi: item.satuan_menjadi,
+          hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
+          jumlahMenjadi: roundToThousands(Number(item.jumlah_menjadi || 0)),
+          selisih: roundToThousands(Number(item.selisih || 0)),
+          status: item.status as "unchanged" | "changed" | "new" | "deleted",
+          isApproved: item.is_approved,
+          komponenOutput: item.komponen_output,
+          programPembebanan: item.program_pembebanan || '',
+          kegiatan: item.kegiatan || '',
+          rincianOutput: item.rincian_output || '',
+          subKomponen: item.sub_komponen || '',
+          akun: item.akun || ''
+        }));
+
+        // Add to state
+        setBudgetItems(prev => [...prev, ...savedItems]);
+        setLoading(false);
+        return savedItems;
+      }
+      
+      setLoading(false);
+    } catch (err) {
+      console.error('Error importing budget items:', err);
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal mengimpor item. Silakan coba lagi.'
       });
       throw err;
     }
@@ -363,7 +450,8 @@ const useBudgetData = (filters: FilterSelection) => {
     addBudgetItem,
     updateBudgetItem,
     deleteBudgetItem,
-    approveBudgetItem
+    approveBudgetItem,
+    importBudgetItems
   };
 };
 

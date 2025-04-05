@@ -10,6 +10,7 @@ import useBudgetData from '@/hooks/useBudgetData';
 import { Alert } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import ExportOptions from './ExportOptions';
+import ExcelImportExport from './ExcelImportExport';
 
 const BudgetComparison: React.FC = () => {
   const [filters, setFilters] = useState<FilterSelection>({
@@ -29,7 +30,8 @@ const BudgetComparison: React.FC = () => {
     addBudgetItem,
     updateBudgetItem,
     deleteBudgetItem,
-    approveBudgetItem
+    approveBudgetItem,
+    importBudgetItems // We'll add this function to the hook
   } = useBudgetData(filters);
 
   // Calculate totals for summary box
@@ -58,9 +60,19 @@ const BudgetComparison: React.FC = () => {
     filters.akun && 
     filters.akun !== 'all';
 
+  // Handle bulk import
+  const handleBulkImport = async (items: any[]) => {
+    if (!areFiltersComplete) {
+      return Promise.reject(new Error('Pilih semua filter terlebih dahulu'));
+    }
+    
+    // We'll create this function in useBudgetData.ts
+    return importBudgetItems(items);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Summary Box - Show above filters always */}
+      {/* Summary Box - always shown at the top */}
       <BudgetSummaryBox 
         totalSemula={totalSemula}
         totalMenjadi={totalMenjadi}
@@ -72,11 +84,19 @@ const BudgetComparison: React.FC = () => {
       
       {/* Budget table section */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle>Perbandingan Anggaran Semula vs Menjadi</CardTitle>
-          <div className="flex space-x-2">
-            <SummaryDialog items={budgetItems} />
-            <ExportOptions items={budgetItems} komponenOutput={filters.komponenOutput} />
+          <div className="flex flex-col sm:flex-row gap-2">
+            <ExcelImportExport 
+              onImport={handleBulkImport}
+              komponenOutput={filters.komponenOutput}
+              subKomponen={filters.subKomponen}
+              akun={filters.akun}
+            />
+            <div className="flex space-x-2">
+              <SummaryDialog items={budgetItems} />
+              <ExportOptions items={budgetItems} komponenOutput={filters.komponenOutput} />
+            </div>
           </div>
         </CardHeader>
         
