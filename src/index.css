@@ -60,7 +60,7 @@
 }
 
 .data-table th {
-  @apply bg-gray-50 text-gray-700 text-xs;
+  @apply bg-blue-50 text-blue-700 text-xs;
 }
 
 .data-table .uraian-cell {
@@ -75,8 +75,20 @@
   @apply text-center;
 }
 
+.data-table tbody tr:nth-child(even) {
+  @apply bg-blue-50/30;
+}
+
+.data-table tbody tr:hover {
+  @apply bg-blue-100/50;
+}
+
+.data-table thead {
+  @apply bg-gradient-to-r from-blue-100 to-sky-100;
+}
+
 .changed-row {
-  @apply bg-yellow-50;
+  @apply bg-orange-50;
 }
 
 .new-row {
@@ -88,17 +100,40 @@
 }
 
 .border-changed-row {
-  border-color: #fef3c7;
+  border-color: #fdba74;
 }
 
 .border-new-row {
-  border-color: #d1fae5;
+  border-color: #86efac;
 }
 
 .border-deleted-row {
-  border-color: #fee2e2;
+  border-color: #fca5a5;
 }
 
 .unapproved-change {
   @apply font-semibold text-blue-700;
+}
+
+/* Card styling for the analysis boxes */
+.analysis-card {
+  @apply bg-gradient-to-br from-white to-blue-50 border border-blue-100 rounded-lg shadow-sm;
+}
+
+/* Make volume cells narrower with wrap text */
+.volume-cell {
+  @apply max-w-[80px] text-right whitespace-normal break-words;
+}
+
+/* Add colors to budget table rows */
+.budget-table tbody tr:nth-child(odd) {
+  @apply bg-gradient-to-r from-blue-50/20 to-transparent;
+}
+
+.budget-table tbody tr:nth-child(even) {
+  @apply bg-gradient-to-r from-green-50/20 to-transparent;
+}
+
+.budget-table tbody tr:hover {
+  @apply bg-blue-100/40;
 }

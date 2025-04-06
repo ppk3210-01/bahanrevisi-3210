@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -13,6 +14,7 @@ import ExcelImportExport from './ExcelImportExport';
 import ExportOptions from './ExportOptions';
 import SummaryDialog from './SummaryDialog';
 import DetailedSummaryView from './DetailedSummaryView';
+import AdvancedBudgetAnalysis from './AdvancedBudgetAnalysis';
 import { Button } from '@/components/ui/button';
 import { FilterSelection, BudgetSummary } from '@/types/budget';
 import { generateBudgetSummary } from '@/utils/budgetCalculations';
@@ -82,7 +84,7 @@ const BudgetComparison: React.FC = () => {
         />
       )}
 
-      <Card className="shadow-sm">
+      <Card className="shadow-sm border border-blue-100">
         <CardContent className="pt-3 pb-3">
           <BudgetFilter 
             onFilterChange={handleFilterChange}
@@ -91,13 +93,13 @@ const BudgetComparison: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm">
+      <Card className="shadow-sm border border-blue-100">
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <div className="flex justify-between items-center px-4 pt-2">
-            <TabsList className="h-8">
-              <TabsTrigger value="data" className="text-xs px-2 py-1">Data Anggaran</TabsTrigger>
-              <TabsTrigger value="import" className="text-xs px-2 py-1">Import/Export</TabsTrigger>
-              <TabsTrigger value="summary" className="text-xs px-2 py-1">Ringkasan</TabsTrigger>
+          <div className="flex justify-between items-center px-4 pt-2 bg-gradient-to-r from-blue-50 to-sky-50">
+            <TabsList className="h-8 bg-white/50 border border-blue-100">
+              <TabsTrigger value="data" className="text-xs px-2 py-1 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">Data Anggaran</TabsTrigger>
+              <TabsTrigger value="import" className="text-xs px-2 py-1 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">Import/Export</TabsTrigger>
+              <TabsTrigger value="summary" className="text-xs px-2 py-1 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">Ringkasan</TabsTrigger>
             </TabsList>
           </div>
           
@@ -122,59 +124,37 @@ const BudgetComparison: React.FC = () => {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div>
-                    <h3 className="text-sm font-medium mb-2">Import Data</h3>
-                    <div className="border rounded-md p-3 text-xs">
-                      <h4 className="font-medium mb-2">Panduan Import Excel:</h4>
-                      <p className="mb-2">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
-                      <ol className="list-decimal pl-5 mb-2 space-y-1">
-                        <li>uraian (string): Uraian/nama item anggaran</li>
-                        <li>volumeSemula (numeric): Volume semula</li>
-                        <li>satuanSemula (string): Satuan semula - contoh: "Paket", "Kegiatan", "Bulan", dll</li>
-                        <li>hargaSatuanSemula (numeric): Harga satuan semula</li>
-                        <li>volumeMenjadi (numeric): Volume menjadi</li>
-                        <li>satuanMenjadi (string): Satuan menjadi</li>
-                        <li>hargaSatuanMenjadi (numeric): Harga satuan menjadi</li>
-                        <li>subKomponen (string, optional): Sub komponen anggaran</li>
-                        <li>akun (string, optional): Kode akun</li>
-                      </ol>
-                      <p className="mb-2">Catatan penting:</p>
-                      <ul className="list-disc pl-5 mb-2 space-y-1">
-                        <li>Jumlah Semula dan Jumlah Menjadi dihitung otomatis</li>
-                        <li>Selisih dihitung otomatis (Jumlah Semula - Jumlah Menjadi)</li>
-                        <li>Status akan otomatis terisi sebagai 'new' untuk data baru</li>
-                        <li>Data akan ditambahkan sesuai dengan filter yang dipilih</li>
-                      </ul>
-                      <div className="mb-2">
-                        <p className="font-medium">Contoh Format Excel:</p>
-                        <table className="w-full text-xs border-collapse">
-                          <thead>
-                            <tr className="bg-gray-100">
-                              <th className="border border-gray-300 px-1 py-1">uraian</th>
-                              <th className="border border-gray-300 px-1 py-1">volumeSemula</th>
-                              <th className="border border-gray-300 px-1 py-1">satuanSemula</th>
-                              <th className="border border-gray-300 px-1 py-1">hargaSatuanSemula</th>
-                              <th className="border border-gray-300 px-1 py-1">volumeMenjadi</th>
-                              <th className="border border-gray-300 px-1 py-1">satuanMenjadi</th>
-                              <th className="border border-gray-300 px-1 py-1">hargaSatuanMenjadi</th>
-                              <th className="border border-gray-300 px-1 py-1">subKomponen</th>
-                              <th className="border border-gray-300 px-1 py-1">akun</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td className="border border-gray-300 px-1 py-1">Belanja ATK</td>
-                              <td className="border border-gray-300 px-1 py-1">1</td>
-                              <td className="border border-gray-300 px-1 py-1">Paket</td>
-                              <td className="border border-gray-300 px-1 py-1">5000000</td>
-                              <td className="border border-gray-300 px-1 py-1">1</td>
-                              <td className="border border-gray-300 px-1 py-1">Paket</td>
-                              <td className="border border-gray-300 px-1 py-1">4500000</td>
-                              <td className="border border-gray-300 px-1 py-1">Layanan Perkantoran</td>
-                              <td className="border border-gray-300 px-1 py-1">521111</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
+                    <h3 className="text-sm font-medium mb-2 text-blue-700">Import Data</h3>
+                    <div className="border rounded-md p-3 text-xs border-blue-100 bg-blue-50/30">
+                      <h4 className="font-medium mb-2">Format Excel Import:</h4>
+                      <table className="w-full text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-blue-100/50">
+                            <th className="border border-blue-200 px-1 py-1">uraian</th>
+                            <th className="border border-blue-200 px-1 py-1">volumeSemula</th>
+                            <th className="border border-blue-200 px-1 py-1">satuanSemula</th>
+                            <th className="border border-blue-200 px-1 py-1">hargaSatuanSemula</th>
+                            <th className="border border-blue-200 px-1 py-1">volumeMenjadi</th>
+                            <th className="border border-blue-200 px-1 py-1">satuanMenjadi</th>
+                            <th className="border border-blue-200 px-1 py-1">hargaSatuanMenjadi</th>
+                            <th className="border border-blue-200 px-1 py-1">subKomponen</th>
+                            <th className="border border-blue-200 px-1 py-1">akun</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="border border-blue-200 px-1 py-1">Belanja ATK</td>
+                            <td className="border border-blue-200 px-1 py-1">1</td>
+                            <td className="border border-blue-200 px-1 py-1">Paket</td>
+                            <td className="border border-blue-200 px-1 py-1">5000000</td>
+                            <td className="border border-blue-200 px-1 py-1">1</td>
+                            <td className="border border-blue-200 px-1 py-1">Paket</td>
+                            <td className="border border-blue-200 px-1 py-1">4500000</td>
+                            <td className="border border-blue-200 px-1 py-1">Layanan Perkantoran</td>
+                            <td className="border border-blue-200 px-1 py-1">521111</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                     
                     <div className="mt-4">
@@ -191,7 +171,7 @@ const BudgetComparison: React.FC = () => {
                   </div>
                   
                   <div className="mt-4">
-                    <h3 className="text-sm font-medium mb-2">Export Tools</h3>
+                    <h3 className="text-sm font-medium mb-2 text-blue-700">Export Tools</h3>
                     <ExportOptions 
                       items={budgetItems} 
                       komponenOutput={filters.komponenOutput} 
@@ -205,30 +185,30 @@ const BudgetComparison: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-1 mb-2">
                   <Info className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-sm font-medium">Ringkasan Perubahan Pagu Anggaran</h3>
+                  <h3 className="text-sm font-medium text-blue-700">Ringkasan Perubahan Pagu Anggaran</h3>
                 </div>
                 
                 {budgetSummary && (
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <Card className="border border-changed-row shadow-sm">
+                      <Card className="border border-changed-row shadow-sm bg-gradient-to-br from-orange-50 to-orange-100/50">
                         <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Diubah</h3>
-                          <p className="text-lg font-bold">{budgetSummary.changedItems.length}</p>
+                          <h3 className="text-xs font-semibold text-orange-700">Detil Diubah</h3>
+                          <p className="text-lg font-bold text-orange-800">{budgetSummary.changedItems.length}</p>
                         </CardContent>
                       </Card>
                       
-                      <Card className="border border-new-row shadow-sm">
+                      <Card className="border border-new-row shadow-sm bg-gradient-to-br from-green-50 to-green-100/50">
                         <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Baru</h3>
-                          <p className="text-lg font-bold">{budgetSummary.newItems.length}</p>
+                          <h3 className="text-xs font-semibold text-green-700">Detil Baru</h3>
+                          <p className="text-lg font-bold text-green-800">{budgetSummary.newItems.length}</p>
                         </CardContent>
                       </Card>
                       
-                      <Card className="border border-deleted-row shadow-sm">
+                      <Card className="border border-deleted-row shadow-sm bg-gradient-to-br from-red-50 to-red-100/50">
                         <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Dihapus</h3>
-                          <p className="text-lg font-bold">{budgetSummary.deletedItems.length}</p>
+                          <h3 className="text-xs font-semibold text-red-700">Detil Dihapus</h3>
+                          <p className="text-lg font-bold text-red-800">{budgetSummary.deletedItems.length}</p>
                         </CardContent>
                       </Card>
                     </div>
@@ -236,7 +216,7 @@ const BudgetComparison: React.FC = () => {
                     <Button 
                       variant="outline" 
                       onClick={showSummary}
-                      className="w-full md:w-auto h-8 text-xs"
+                      className="w-full md:w-auto h-8 text-xs bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
                     >
                       <Info className="mr-1 h-3 w-3" /> 
                       Lihat Detail Ringkasan
@@ -245,6 +225,8 @@ const BudgetComparison: React.FC = () => {
                     <div className="mt-4">
                       <DetailedSummaryView />
                     </div>
+                    
+                    <AdvancedBudgetAnalysis />
                   </div>
                 )}
               </div>

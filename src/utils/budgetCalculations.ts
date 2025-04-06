@@ -1,105 +1,111 @@
 
-import { BudgetItem, BudgetSummary } from "@/types/budget";
+import { BudgetItem, BudgetItemInput, BudgetSummary } from '@/types/budget';
 
-// Calculate the amount based on volume and unit price
-export const calculateAmount = (volume: number, unitPrice: number): number => {
-  return volume * unitPrice;
-};
-
-// Calculate the difference between the initial and new amounts (Jumlah Semula - Jumlah Menjadi)
-export const calculateDifference = (initialAmount: number, newAmount: number): number => {
-  return initialAmount - newAmount;
-};
-
-// Round to thousands
-export const roundToThousands = (amount: number): number => {
-  return Math.round(amount / 1000) * 1000;
-};
-
-// Format number as currency (e.g., Rp 1.000.000)
-export const formatCurrency = (amount: number): string => {
+// Helper to format currency values
+export const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
+    maximumFractionDigits: 0,
+  }).format(value);
 };
 
-// Check if an item has been changed
-export const hasItemChanged = (item: BudgetItem): boolean => {
-  return (
-    item.volumeSemula !== item.volumeMenjadi ||
-    item.satuanSemula !== item.satuanMenjadi ||
-    item.hargaSatuanSemula !== item.hargaSatuanMenjadi
-  );
+// Helper to format numbers in thousands (K)
+export const formatInThousands = (value: number): string => {
+  return (Math.round(value / 1000)).toLocaleString() + 'K';
 };
 
-// Update item status based on its values
-export const updateItemStatus = (item: BudgetItem): BudgetItem => {
-  let status: 'unchanged' | 'changed' | 'new' | 'deleted' = 'unchanged';
-  
-  if (item.volumeSemula === 0 && item.hargaSatuanSemula === 0 && (item.volumeMenjadi > 0 || item.hargaSatuanMenjadi > 0)) {
-    status = 'new';
-  } else if (hasItemChanged(item)) {
-    status = 'changed';
-  }
-  
-  return {
-    ...item,
-    status
-  };
+// Calculate the total value for an item (volume * unit price)
+export const calculateTotal = (volume: number, unitPrice: number): number => {
+  return volume * unitPrice;
 };
 
-// Calculate the row style based on status
-export const getRowStyle = (status: string): string => {
-  switch (status) {
-    case 'changed':
-      return 'row-changed';
-    case 'new':
-      return 'row-new';
-    case 'deleted':
-      return 'row-deleted';
-    default:
-      return '';
-  }
+// Calculate the difference between two values
+export const calculateDifference = (value1: number, value2: number): number => {
+  return value2 - value1;
 };
 
-// Generate the budget summary from the list of items
+// Generate a summary of budget changes
 export const generateBudgetSummary = (items: BudgetItem[]): BudgetSummary => {
-  // Round the totals to thousands
-  const totalSemula = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahSemula), 0));
-  const totalMenjadi = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahMenjadi), 0));
-  const totalSelisih = roundToThousands(totalSemula - totalMenjadi); // Corrected: Jumlah Semula - Jumlah Menjadi
-
+  // Items that have been changed (but not deleted)
   const changedItems = items.filter(item => item.status === 'changed');
+  
+  // New items that have been added
   const newItems = items.filter(item => item.status === 'new');
+  
+  // Items that have been deleted
   const deletedItems = items.filter(item => item.status === 'deleted');
-
+  
+  // Calculate totals
+  const totalSemula = items.reduce((total, item) => total + item.jumlahSemula, 0);
+  const totalMenjadi = items.reduce((total, item) => total + item.jumlahMenjadi, 0);
+  const totalSelisih = totalMenjadi - totalSemula;
+  
   return {
+    changedItems,
+    newItems,
+    deletedItems,
     totalSemula,
     totalMenjadi,
     totalSelisih,
-    changedItems,
-    newItems,
-    deletedItems
   };
 };
 
-// Approve budget item - move "menjadi" values to "semula"
-export const approveBudgetItem = (item: BudgetItem): BudgetItem => {
+// Create a budget item with calculated fields
+export const createBudgetItem = (input: BudgetItemInput, id?: string): BudgetItem => {
+  const jumlahSemula = calculateTotal(input.volumeSemula, input.hargaSatuanSemula);
+  const jumlahMenjadi = calculateTotal(input.volumeMenjadi, input.hargaSatuanMenjadi);
+  const selisih = calculateDifference(jumlahSemula, jumlahMenjadi);
+  
   return {
-    ...item,
-    volumeSemula: item.volumeMenjadi,
-    satuanSemula: item.satuanMenjadi,
-    hargaSatuanSemula: item.hargaSatuanMenjadi,
-    jumlahSemula: item.jumlahMenjadi,
-    volumeMenjadi: item.volumeMenjadi,
-    satuanMenjadi: item.satuanMenjadi,
-    hargaSatuanMenjadi: item.hargaSatuanMenjadi,
-    jumlahMenjadi: item.jumlahMenjadi,
-    selisih: 0,
-    status: 'unchanged',
-    isApproved: true
+    id: id || crypto.randomUUID(),
+    uraian: input.uraian,
+    volumeSemula: input.volumeSemula,
+    satuanSemula: input.satuanSemula,
+    hargaSatuanSemula: input.hargaSatuanSemula,
+    jumlahSemula,
+    volumeMenjadi: input.volumeMenjadi,
+    satuanMenjadi: input.satuanMenjadi,
+    hargaSatuanMenjadi: input.hargaSatuanMenjadi,
+    jumlahMenjadi,
+    selisih,
+    status: input.status || 'new',
+    approved: input.approved || false,
+    komponenOutput: input.komponenOutput,
+    subKomponen: input.subKomponen,
+    akun: input.akun,
   };
+};
+
+// Update a budget item with calculated fields
+export const updateBudgetItem = (item: BudgetItem, input: Partial<BudgetItemInput>): BudgetItem => {
+  const updatedItem = { ...item };
+  
+  // Update fields that have changed
+  if (input.uraian !== undefined) updatedItem.uraian = input.uraian;
+  if (input.volumeSemula !== undefined) updatedItem.volumeSemula = input.volumeSemula;
+  if (input.satuanSemula !== undefined) updatedItem.satuanSemula = input.satuanSemula;
+  if (input.hargaSatuanSemula !== undefined) updatedItem.hargaSatuanSemula = input.hargaSatuanSemula;
+  if (input.volumeMenjadi !== undefined) updatedItem.volumeMenjadi = input.volumeMenjadi;
+  if (input.satuanMenjadi !== undefined) updatedItem.satuanMenjadi = input.satuanMenjadi;
+  if (input.hargaSatuanMenjadi !== undefined) updatedItem.hargaSatuanMenjadi = input.hargaSatuanMenjadi;
+  if (input.status !== undefined) updatedItem.status = input.status;
+  if (input.approved !== undefined) updatedItem.approved = input.approved;
+  if (input.komponenOutput !== undefined) updatedItem.komponenOutput = input.komponenOutput;
+  if (input.subKomponen !== undefined) updatedItem.subKomponen = input.subKomponen;
+  if (input.akun !== undefined) updatedItem.akun = input.akun;
+  
+  // Recalculate derived values
+  updatedItem.jumlahSemula = calculateTotal(updatedItem.volumeSemula, updatedItem.hargaSatuanSemula);
+  updatedItem.jumlahMenjadi = calculateTotal(updatedItem.volumeMenjadi, updatedItem.hargaSatuanMenjadi);
+  updatedItem.selisih = calculateDifference(updatedItem.jumlahSemula, updatedItem.jumlahMenjadi);
+  
+  return updatedItem;
+};
+
+// Calculate the difference in percentage between two values
+export const calculatePercentageDifference = (value1: number, value2: number): number => {
+  if (value1 === 0) return value2 === 0 ? 0 : 100;
+  return ((value2 - value1) / value1) * 100;
 };

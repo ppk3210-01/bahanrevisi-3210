@@ -8,7 +8,8 @@ import {
   TableBody, 
   TableRow, 
   TableHead, 
-  TableCell 
+  TableCell, 
+  TableFooter 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { ChevronsUpDown, Download } from 'lucide-react';
@@ -31,6 +32,11 @@ type SummaryItem = {
 
 type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
 type SortDirection = 'asc' | 'desc';
+
+// Helper function to format numbers in thousands
+const formatInThousands = (value: number): string => {
+  return (Math.round(value / 1000)).toLocaleString() + 'K';
+};
 
 const DetailedSummaryView: React.FC = () => {
   const [accountGroupData, setAccountGroupData] = useState<SummaryItem[]>([]);
@@ -216,13 +222,31 @@ const DetailedSummaryView: React.FC = () => {
     total_items: accountGroupData.reduce((sum, item) => sum + (item.total_items || 0), 0)
   };
 
+  const komponenTotals = {
+    total_semula: komponenData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
+    total_menjadi: komponenData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
+    total_selisih: komponenData.reduce((sum, item) => sum + (item.total_selisih || 0), 0),
+    new_items: komponenData.reduce((sum, item) => sum + (item.new_items || 0), 0),
+    changed_items: komponenData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
+    total_items: komponenData.reduce((sum, item) => sum + (item.total_items || 0), 0)
+  };
+
+  const akunTotals = {
+    total_semula: akunData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
+    total_menjadi: akunData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
+    total_selisih: akunData.reduce((sum, item) => sum + (item.total_selisih || 0), 0),
+    new_items: akunData.reduce((sum, item) => sum + (item.new_items || 0), 0),
+    changed_items: akunData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
+    total_items: akunData.reduce((sum, item) => sum + (item.total_items || 0), 0)
+  };
+
   if (loading) {
     return <div className="text-center py-4">Memuat data rekap anggaran...</div>;
   }
 
   const renderSortIcon = (field: SortField, currentSort: {field: SortField, direction: SortDirection}) => {
     return (
-      <ChevronsUpDown className={`inline h-4 w-4 ml-1 ${currentSort.field === field ? 'opacity-100' : 'opacity-50'}`} />
+      <ChevronsUpDown className={`inline h-3 w-3 ml-1 ${currentSort.field === field ? 'opacity-100' : 'opacity-50'}`} />
     );
   };
 
@@ -232,7 +256,7 @@ const DetailedSummaryView: React.FC = () => {
     groupField: 'account_group' | 'komponen_output' | 'akun',
     currentSort: {field: SortField, direction: SortDirection},
     setSort: React.Dispatch<React.SetStateAction<{field: SortField, direction: SortDirection}>>,
-    totals?: {
+    totals: {
       total_semula: number;
       total_menjadi: number;
       total_selisih: number;
@@ -242,80 +266,79 @@ const DetailedSummaryView: React.FC = () => {
     }
   ) => {
     return (
-      <Card className="shadow-sm mb-4">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-md">{title}</CardTitle>
+      <Card className="shadow-sm mb-3 border-blue-100">
+        <CardHeader className="pb-1 pt-2">
+          <CardTitle className="text-sm text-blue-700">{title}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-gray-50 sticky top-0">
-                <TableRow>
-                  <TableHead className="w-[25%] cursor-pointer" onClick={() => handleSort('group', currentSort, setSort)}>
+            <Table className="text-xs">
+              <TableHeader className="bg-blue-50 sticky top-0">
+                <TableRow className="h-8">
+                  <TableHead className="w-[25%] cursor-pointer py-1.5" onClick={() => handleSort('group', currentSort, setSort)}>
                     {groupField === 'account_group' ? 'Kelompok Akun' : groupField === 'komponen_output' ? 'Komponen Output' : 'Akun'}
                     {renderSortIcon('group', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_semula', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1.5" onClick={() => handleSort('total_semula', currentSort, setSort)}>
                     Pagu Semula {renderSortIcon('total_semula', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_menjadi', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1.5" onClick={() => handleSort('total_menjadi', currentSort, setSort)}>
                     Pagu Menjadi {renderSortIcon('total_menjadi', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_selisih', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1.5" onClick={() => handleSort('total_selisih', currentSort, setSort)}>
                     Selisih {renderSortIcon('total_selisih', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('new_items', currentSort, setSort)}>
-                    Item Bertambah {renderSortIcon('new_items', currentSort)}
+                  <TableHead className="text-right cursor-pointer py-1.5" onClick={() => handleSort('new_items', currentSort, setSort)}>
+                    Item Baru {renderSortIcon('new_items', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('changed_items', currentSort, setSort)}>
-                    Item Berubah {renderSortIcon('changed_items', currentSort)}
+                  <TableHead className="text-right cursor-pointer py-1.5" onClick={() => handleSort('changed_items', currentSort, setSort)}>
+                    Item Ubah {renderSortIcon('changed_items', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_items', currentSort, setSort)}>
-                    Jumlah Item {renderSortIcon('total_items', currentSort)}
+                  <TableHead className="text-right cursor-pointer py-1.5" onClick={() => handleSort('total_items', currentSort, setSort)}>
+                    Total {renderSortIcon('total_items', currentSort)}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
+                  <TableRow key={index} className={index % 2 === 0 ? 'bg-blue-50/30' : ''}>
+                    <TableCell className="py-1 font-medium text-xs">
                       {item[groupField] || 'Tidak Terdefinisi'}
                     </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.total_semula || 0)}
+                    <TableCell className="py-1 text-right text-xs">
+                      {formatInThousands(item.total_semula || 0)}
                     </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.total_menjadi || 0)}
+                    <TableCell className="py-1 text-right text-xs">
+                      {formatInThousands(item.total_menjadi || 0)}
                     </TableCell>
-                    <TableCell className={`text-right ${item.total_selisih > 0 ? 'text-green-600' : item.total_selisih < 0 ? 'text-red-600' : ''}`}>
-                      {formatCurrency(item.total_selisih || 0)}
+                    <TableCell className={`py-1 text-right text-xs ${item.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatInThousands(item.total_selisih || 0)}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="py-1 text-right text-xs">
                       {item.new_items || 0}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="py-1 text-right text-xs">
                       {item.changed_items || 0}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="py-1 text-right text-xs">
                       {item.total_items || 0}
                     </TableCell>
                   </TableRow>
                 ))}
-                
-                {totals && (
-                  <TableRow className="bg-gray-50 font-bold">
-                    <TableCell>TOTAL</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totals.total_semula)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totals.total_menjadi)}</TableCell>
-                    <TableCell className={`text-right ${totals.total_selisih > 0 ? 'text-green-600' : totals.total_selisih < 0 ? 'text-red-600' : ''}`}>
-                      {formatCurrency(totals.total_selisih)}
-                    </TableCell>
-                    <TableCell className="text-right">{totals.new_items}</TableCell>
-                    <TableCell className="text-right">{totals.changed_items}</TableCell>
-                    <TableCell className="text-right">{totals.total_items}</TableCell>
-                  </TableRow>
-                )}
               </TableBody>
+              <TableFooter className="bg-blue-100">
+                <TableRow>
+                  <TableCell className="font-bold text-xs">TOTAL</TableCell>
+                  <TableCell className="text-right font-bold text-xs">{formatInThousands(totals.total_semula)}</TableCell>
+                  <TableCell className="text-right font-bold text-xs">{formatInThousands(totals.total_menjadi)}</TableCell>
+                  <TableCell className={`text-right font-bold text-xs ${totals.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatInThousands(totals.total_selisih)}
+                  </TableCell>
+                  <TableCell className="text-right font-bold text-xs">{totals.new_items}</TableCell>
+                  <TableCell className="text-right font-bold text-xs">{totals.changed_items}</TableCell>
+                  <TableCell className="text-right font-bold text-xs">{totals.total_items}</TableCell>
+                </TableRow>
+              </TableFooter>
             </Table>
           </div>
         </CardContent>
@@ -324,16 +347,16 @@ const DetailedSummaryView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">Ringkasan Detail Anggaran</h2>
+    <div className="space-y-3">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-sm font-bold text-blue-800">Ringkasan Detail Anggaran</h2>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={exportToExcel}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 text-xs h-7 bg-blue-50 hover:bg-blue-100 border-blue-200"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-3 w-3" />
           Lihat Detail Rekap
         </Button>
       </div>
@@ -352,7 +375,8 @@ const DetailedSummaryView: React.FC = () => {
         sortedKomponenData, 
         'komponen_output', 
         komponenSort, 
-        setKomponenSort
+        setKomponenSort,
+        komponenTotals
       )}
       
       {renderTable(
@@ -360,7 +384,8 @@ const DetailedSummaryView: React.FC = () => {
         sortedAkunData, 
         'akun', 
         akunSort, 
-        setAkunSort
+        setAkunSort,
+        akunTotals
       )}
     </div>
   );
