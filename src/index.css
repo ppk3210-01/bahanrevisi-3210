@@ -19,8 +19,8 @@
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
@@ -101,4 +101,60 @@
 
 .unapproved-change {
   @apply font-semibold text-blue-700;
+}
+
+/* Row styling for data tables */
+.row-changed {
+  @apply bg-gradient-to-r from-amber-50 to-yellow-50;
+}
+
+.row-new {
+  @apply bg-gradient-to-r from-emerald-50 to-green-50;
+}
+
+.row-deleted {
+  @apply bg-gradient-to-r from-red-50 to-rose-50;
+}
+
+/* Add gradient text classes */
+.text-gradient-blue {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text;
+}
+
+.text-gradient-green {
+  @apply bg-gradient-to-r from-green-600 to-teal-600 text-transparent bg-clip-text;
+}
+
+.text-gradient-purple {
+  @apply bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text;
+}
+
+/* Add button gradient classes */
+.btn-gradient-blue {
+  @apply bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white;
+}
+
+.btn-gradient-green {
+  @apply bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white;
+}
+
+.btn-gradient-purple {
+  @apply bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white;
+}
+
+/* Add card gradient classes */
+.card-gradient-blue {
+  @apply bg-gradient-to-br from-blue-50 to-indigo-50 border-t-4 border-t-blue-400;
+}
+
+.card-gradient-green {
+  @apply bg-gradient-to-br from-green-50 to-teal-50 border-t-4 border-t-green-400;
+}
+
+.card-gradient-purple {
+  @apply bg-gradient-to-br from-purple-50 to-pink-50 border-t-4 border-t-purple-400;
+}
+
+.card-gradient-orange {
+  @apply bg-gradient-to-br from-orange-50 to-amber-50 border-t-4 border-t-orange-400;
 }

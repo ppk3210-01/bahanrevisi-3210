@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -132,6 +131,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
     
     return true;
+  };
+
+  const getRowColor = (index: number) => {
+    const colors = [
+      'bg-blue-50', 'bg-purple-50', 'bg-indigo-50', 'bg-teal-50', 'bg-sky-50'
+    ];
+    return colors[index % colors.length];
   };
 
   const getCellClass = (item: BudgetItem, isValueChange: boolean): string => {
@@ -549,14 +555,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       
       <div className="rounded-md border border-gray-200 w-full">
         {komponenOutput && (
-          <div className="bg-purple-100 p-2 border-b border-gray-200">
+          <div className="bg-gradient-to-r from-purple-100 to-indigo-100 p-2 border-b border-gray-200">
             <h3 className="font-medium text-sm">Komponen Output: {komponenOutput}</h3>
           </div>
         )}
         
         <div className="overflow-x-auto w-full">
           <table className="w-full min-w-full data-table text-xs">
-            <thead className="sticky top-0 bg-white z-10 shadow-sm">
+            <thead className="sticky top-0 bg-gradient-to-r from-blue-100 to-indigo-100 z-10 shadow-sm">
               <tr className="text-xs">
                 <th className="py-2 px-1 w-8">No</th>
                 <th className="uraian-cell py-2 px-1 w-[20%]">
@@ -568,7 +574,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[7%]">
+                <th className="number-cell py-2 px-1 w-[5%]">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('volumeSemula')}
@@ -596,7 +602,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[7%] border-l-2">
+                <th className="number-cell py-2 px-1 w-[5%] border-l-2">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('volumeMenjadi')}
@@ -640,7 +646,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             
             <tbody>
               {paginatedItems.map((item, index) => (
-                <tr key={item.id} className={getRowStyle(item.status)}>
+                <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? getRowColor(index) : ''}`}>
                   <td>{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
                   <td className="uraian-cell">{renderItemField(item, 'uraian')}</td>
                   <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
@@ -726,7 +732,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                       </div>
                     )}
                     {item.isApproved && (
-                      <span className="text-green-600 font-medium">✓</span>
+                      <span className="text-green-600 font-medium">OK</span>
                     )}
                   </td>
                 </tr>
@@ -838,14 +844,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     onClick={handleAddItem} 
                     disabled={!areFiltersComplete}
                     title={!areFiltersComplete ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
-                    className="h-7 text-xs w-full"
+                    className="h-7 text-xs w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
                   >
                     <PlusCircle className="h-3 w-3 mr-1" /> Tambah
                   </Button>
                 </td>
               </tr>
               
-              <tr className="font-semibold bg-gray-100 text-xs">
+              <tr className="font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-xs">
                 <td colSpan={5} className="text-right py-1 px-1">Total Halaman:</td>
                 <td className="number-cell py-1 px-1">{formatCurrency(pageTotalSemula)}</td>
                 <td colSpan={3} className="border-l-2"></td>
@@ -855,7 +861,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               </tr>
               
               {(pageSize !== -1 || searchTerm) && (
-                <tr className="font-bold bg-gray-200 text-xs">
+                <tr className="font-bold bg-gradient-to-r from-blue-200 to-indigo-200 text-xs">
                   <td colSpan={5} className="text-right py-1 px-1">Total Keseluruhan:</td>
                   <td className="number-cell py-1 px-1">{formatCurrency(grandTotalSemula)}</td>
                   <td colSpan={3} className="border-l-2"></td>

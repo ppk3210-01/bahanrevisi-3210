@@ -32,6 +32,11 @@ type SummaryItem = {
 type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
 type SortDirection = 'asc' | 'desc';
 
+// Format numbers to thousands (K)
+const formatToThousands = (value: number): string => {
+  return (Math.round(value / 1000)).toLocaleString() + 'K';
+};
+
 const DetailedSummaryView: React.FC = () => {
   const [accountGroupData, setAccountGroupData] = useState<SummaryItem[]>([]);
   const [komponenData, setKomponenData] = useState<SummaryItem[]>([]);
@@ -215,6 +220,24 @@ const DetailedSummaryView: React.FC = () => {
     changed_items: accountGroupData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
     total_items: accountGroupData.reduce((sum, item) => sum + (item.total_items || 0), 0)
   };
+  
+  const komponenTotals = {
+    total_semula: komponenData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
+    total_menjadi: komponenData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
+    total_selisih: komponenData.reduce((sum, item) => sum + (item.total_selisih || 0), 0),
+    new_items: komponenData.reduce((sum, item) => sum + (item.new_items || 0), 0),
+    changed_items: komponenData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
+    total_items: komponenData.reduce((sum, item) => sum + (item.total_items || 0), 0)
+  };
+  
+  const akunTotals = {
+    total_semula: akunData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
+    total_menjadi: akunData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
+    total_selisih: akunData.reduce((sum, item) => sum + (item.total_selisih || 0), 0),
+    new_items: akunData.reduce((sum, item) => sum + (item.new_items || 0), 0),
+    changed_items: akunData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
+    total_items: akunData.reduce((sum, item) => sum + (item.total_items || 0), 0)
+  };
 
   if (loading) {
     return <div className="text-center py-4">Memuat data rekap anggaran...</div>;
@@ -232,7 +255,7 @@ const DetailedSummaryView: React.FC = () => {
     groupField: 'account_group' | 'komponen_output' | 'akun',
     currentSort: {field: SortField, direction: SortDirection},
     setSort: React.Dispatch<React.SetStateAction<{field: SortField, direction: SortDirection}>>,
-    totals?: {
+    totals: {
       total_semula: number;
       total_menjadi: number;
       total_selisih: number;
@@ -241,80 +264,86 @@ const DetailedSummaryView: React.FC = () => {
       total_items: number;
     }
   ) => {
+    // Choose a different pastel color for each table
+    let bgColor = "from-blue-50 to-indigo-50";
+    if (title.includes("Komponen")) {
+      bgColor = "from-purple-50 to-pink-50";
+    } else if (title.includes("Akun")) {
+      bgColor = "from-green-50 to-teal-50";
+    }
+    
     return (
-      <Card className="shadow-sm mb-4">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-md">{title}</CardTitle>
+      <Card className="shadow-sm mb-3 border-t-4 border-t-blue-400">
+        <CardHeader className="pb-1 pt-2">
+          <CardTitle className="text-sm">{title}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-gray-50 sticky top-0">
-                <TableRow>
-                  <TableHead className="w-[25%] cursor-pointer" onClick={() => handleSort('group', currentSort, setSort)}>
+              <TableHeader className={`bg-gradient-to-r ${bgColor} sticky top-0`}>
+                <TableRow className="text-xs h-8">
+                  <TableHead className="w-[25%] cursor-pointer py-1 px-2" onClick={() => handleSort('group', currentSort, setSort)}>
                     {groupField === 'account_group' ? 'Kelompok Akun' : groupField === 'komponen_output' ? 'Komponen Output' : 'Akun'}
                     {renderSortIcon('group', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_semula', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_semula', currentSort, setSort)}>
                     Pagu Semula {renderSortIcon('total_semula', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_menjadi', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_menjadi', currentSort, setSort)}>
                     Pagu Menjadi {renderSortIcon('total_menjadi', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_selisih', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_selisih', currentSort, setSort)}>
                     Selisih {renderSortIcon('total_selisih', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('new_items', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('new_items', currentSort, setSort)}>
                     Item Bertambah {renderSortIcon('new_items', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('changed_items', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('changed_items', currentSort, setSort)}>
                     Item Berubah {renderSortIcon('changed_items', currentSort)}
                   </TableHead>
-                  <TableHead className="text-right cursor-pointer" onClick={() => handleSort('total_items', currentSort, setSort)}>
+                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_items', currentSort, setSort)}>
                     Jumlah Item {renderSortIcon('total_items', currentSort)}
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
+                  <TableRow key={index} className={`text-xs h-7 ${index % 2 === 0 ? `bg-gradient-to-r ${bgColor} bg-opacity-30` : ''}`}>
+                    <TableCell className="font-medium py-1 px-2">
                       {item[groupField] || 'Tidak Terdefinisi'}
                     </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.total_semula || 0)}
+                    <TableCell className="text-right py-1 px-2">
+                      {formatToThousands(item.total_semula || 0)}
                     </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(item.total_menjadi || 0)}
+                    <TableCell className="text-right py-1 px-2">
+                      {formatToThousands(item.total_menjadi || 0)}
                     </TableCell>
-                    <TableCell className={`text-right ${item.total_selisih > 0 ? 'text-green-600' : item.total_selisih < 0 ? 'text-red-600' : ''}`}>
-                      {formatCurrency(item.total_selisih || 0)}
+                    <TableCell className={`text-right py-1 px-2 ${item.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatToThousands(item.total_selisih || 0)}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right py-1 px-2">
                       {item.new_items || 0}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right py-1 px-2">
                       {item.changed_items || 0}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right py-1 px-2">
                       {item.total_items || 0}
                     </TableCell>
                   </TableRow>
                 ))}
                 
-                {totals && (
-                  <TableRow className="bg-gray-50 font-bold">
-                    <TableCell>TOTAL</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totals.total_semula)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totals.total_menjadi)}</TableCell>
-                    <TableCell className={`text-right ${totals.total_selisih > 0 ? 'text-green-600' : totals.total_selisih < 0 ? 'text-red-600' : ''}`}>
-                      {formatCurrency(totals.total_selisih)}
-                    </TableCell>
-                    <TableCell className="text-right">{totals.new_items}</TableCell>
-                    <TableCell className="text-right">{totals.changed_items}</TableCell>
-                    <TableCell className="text-right">{totals.total_items}</TableCell>
-                  </TableRow>
-                )}
+                <TableRow className="bg-blue-100 font-bold text-xs h-8">
+                  <TableCell className="py-1 px-2">TOTAL</TableCell>
+                  <TableCell className="text-right py-1 px-2">{formatToThousands(totals.total_semula)}</TableCell>
+                  <TableCell className="text-right py-1 px-2">{formatToThousands(totals.total_menjadi)}</TableCell>
+                  <TableCell className={`text-right py-1 px-2 ${totals.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatToThousands(totals.total_selisih)}
+                  </TableCell>
+                  <TableCell className="text-right py-1 px-2">{totals.new_items}</TableCell>
+                  <TableCell className="text-right py-1 px-2">{totals.changed_items}</TableCell>
+                  <TableCell className="text-right py-1 px-2">{totals.total_items}</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </div>
@@ -323,15 +352,149 @@ const DetailedSummaryView: React.FC = () => {
     );
   };
 
+  // Create additional boxes for the Summary view
+  const renderAdditionalBoxes = () => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+        <Card className="shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50 border-t-4 border-t-blue-400">
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-sm">Tren Perubahan Anggaran</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3">
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span>Kenaikan Anggaran:</span>
+                <span className="font-semibold text-green-600">{
+                  formatToThousands(accountGroupData.reduce((sum, item) => 
+                    item.total_selisih > 0 ? sum + item.total_selisih : sum, 0)
+                  )
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Penurunan Anggaran:</span>
+                <span className="font-semibold text-red-600">{
+                  formatToThousands(accountGroupData.reduce((sum, item) => 
+                    item.total_selisih < 0 ? sum + Math.abs(item.total_selisih) : sum, 0)
+                  )
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Total Perubahan Signifikan:</span>
+                <span className="font-semibold text-blue-600">{
+                  accountGroupData.filter(item => Math.abs(item.total_selisih) > 1000000).length
+                }</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm bg-gradient-to-br from-purple-50 to-pink-50 border-t-4 border-t-purple-400">
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-sm">Status Anggaran</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3">
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span>Total Akun yang Berubah:</span>
+                <span className="font-semibold text-purple-600">{
+                  akunData.filter(item => item.total_selisih !== 0).length
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Persentase Perubahan:</span>
+                <span className="font-semibold text-blue-600">{
+                  accountGroupTotals.total_semula === 0 ? "0%" : 
+                  ((Math.abs(accountGroupTotals.total_selisih) / accountGroupTotals.total_semula) * 100).toFixed(2) + "%"
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Total Item yang Disetujui:</span>
+                <span className="font-semibold text-green-600">{
+                  akunData.reduce((sum, item) => sum + item.total_items, 0)
+                }</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm bg-gradient-to-br from-green-50 to-teal-50 border-t-4 border-t-green-400">
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-sm">Analisis Perubahan</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3">
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span>Komponen dengan Perubahan Terbesar:</span>
+                <span className="font-semibold text-teal-600">{
+                  komponenData.length > 0 ? 
+                  (komponenData.sort((a, b) => Math.abs(b.total_selisih) - Math.abs(a.total_selisih))[0].komponen_output || '-').substring(0, 20) + '...' : 
+                  '-'
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Akun dengan Penambahan Terbanyak:</span>
+                <span className="font-semibold text-green-600">{
+                  akunData.length > 0 ?
+                  (akunData.sort((a, b) => b.new_items - a.new_items)[0].akun || '-') :
+                  '-'
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Akun dengan Perubahan Terbanyak:</span>
+                <span className="font-semibold text-blue-600">{
+                  akunData.length > 0 ?
+                  (akunData.sort((a, b) => b.changed_items - a.changed_items)[0].akun || '-') :
+                  '-'
+                }</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm bg-gradient-to-br from-orange-50 to-yellow-50 border-t-4 border-t-orange-400">
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-sm">Dampak Perubahan Anggaran</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3">
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span>Efisiensi Anggaran:</span>
+                <span className={`font-semibold ${accountGroupTotals.total_selisih < 0 ? 'text-green-600' : 'text-orange-600'}`}>{
+                  accountGroupTotals.total_selisih < 0 ? 
+                  formatToThousands(Math.abs(accountGroupTotals.total_selisih)) : 
+                  '0K'
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Penambahan Anggaran:</span>
+                <span className={`font-semibold ${accountGroupTotals.total_selisih > 0 ? 'text-green-600' : 'text-orange-600'}`}>{
+                  accountGroupTotals.total_selisih > 0 ? 
+                  formatToThousands(accountGroupTotals.total_selisih) : 
+                  '0K'
+                }</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Status Keseimbangan:</span>
+                <span className={`font-semibold ${accountGroupTotals.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>{
+                  accountGroupTotals.total_selisih === 0 ? 'Seimbang' : 'Tidak Seimbang'
+                }</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold">Ringkasan Detail Anggaran</h2>
+    <div className="space-y-3">
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">Ringkasan Detail Anggaran</h2>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={exportToExcel}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
         >
           <Download className="h-4 w-4" />
           Lihat Detail Rekap
@@ -352,7 +515,8 @@ const DetailedSummaryView: React.FC = () => {
         sortedKomponenData, 
         'komponen_output', 
         komponenSort, 
-        setKomponenSort
+        setKomponenSort,
+        komponenTotals
       )}
       
       {renderTable(
@@ -360,8 +524,11 @@ const DetailedSummaryView: React.FC = () => {
         sortedAkunData, 
         'akun', 
         akunSort, 
-        setAkunSort
+        setAkunSort,
+        akunTotals
       )}
+      
+      {renderAdditionalBoxes()}
     </div>
   );
 };
