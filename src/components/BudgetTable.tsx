@@ -575,7 +575,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         
         <div className="overflow-x-auto w-full">
           <table className="w-full min-w-full data-table text-xs">
-            <thead className="sticky top-0 bg-purple-600 text-white z-10 shadow-sm">
+            <thead className="sticky top-0 bg-gradient-to-r from-blue-100 to-indigo-100 z-10 shadow-sm">
               <tr className="text-xs">
                 <th className="py-2 px-1 w-8">No</th>
                 <th className="uraian-cell py-2 px-1 w-[20%]">
