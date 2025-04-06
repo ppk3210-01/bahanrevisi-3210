@@ -11,10 +11,21 @@ import {
   TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronsUpDown, Download } from 'lucide-react';
+import { ChevronsUpDown, Download, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Type definitions for our summary data
 type SummaryItem = {
@@ -32,9 +43,11 @@ type SummaryItem = {
 type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
 type SortDirection = 'asc' | 'desc';
 
-// Format numbers to thousands (K)
+// Format numbers by rounding to the nearest thousand and using currency format
 const formatToThousands = (value: number): string => {
-  return (Math.round(value / 1000)).toLocaleString() + 'K';
+  // Round to nearest thousand
+  const roundedValue = Math.round(value / 1000) * 1000;
+  return formatCurrency(roundedValue);
 };
 
 const DetailedSummaryView: React.FC = () => {
@@ -266,14 +279,18 @@ const DetailedSummaryView: React.FC = () => {
   ) => {
     // Choose a different pastel color for each table
     let bgColor = "from-blue-50 to-indigo-50";
+    let borderColor = "border-t-blue-400";
+    
     if (title.includes("Komponen")) {
       bgColor = "from-purple-50 to-pink-50";
+      borderColor = "border-t-purple-400";
     } else if (title.includes("Akun")) {
       bgColor = "from-green-50 to-teal-50";
+      borderColor = "border-t-green-400";
     }
     
     return (
-      <Card className="shadow-sm mb-3 border-t-4 border-t-blue-400">
+      <Card className={`shadow-sm mb-3 border-t-4 ${borderColor}`}>
         <CardHeader className="pb-1 pt-2">
           <CardTitle className="text-sm">{title}</CardTitle>
         </CardHeader>
@@ -281,7 +298,7 @@ const DetailedSummaryView: React.FC = () => {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader className={`bg-gradient-to-r ${bgColor} sticky top-0`}>
-                <TableRow className="text-xs h-8">
+                <TableRow className="text-xs h-7">
                   <TableHead className="w-[25%] cursor-pointer py-1 px-2" onClick={() => handleSort('group', currentSort, setSort)}>
                     {groupField === 'account_group' ? 'Kelompok Akun' : groupField === 'komponen_output' ? 'Komponen Output' : 'Akun'}
                     {renderSortIcon('group', currentSort)}
@@ -308,7 +325,7 @@ const DetailedSummaryView: React.FC = () => {
               </TableHeader>
               <TableBody>
                 {data.map((item, index) => (
-                  <TableRow key={index} className={`text-xs h-7 ${index % 2 === 0 ? `bg-gradient-to-r ${bgColor} bg-opacity-30` : ''}`}>
+                  <TableRow key={index} className={`text-xs h-6 ${index % 2 === 0 ? `bg-gradient-to-r ${bgColor} bg-opacity-30` : ''}`}>
                     <TableCell className="font-medium py-1 px-2">
                       {item[groupField] || 'Tidak Terdefinisi'}
                     </TableCell>
@@ -333,7 +350,7 @@ const DetailedSummaryView: React.FC = () => {
                   </TableRow>
                 ))}
                 
-                <TableRow className="bg-blue-100 font-bold text-xs h-8">
+                <TableRow className={`bg-gradient-to-r from-${bgColor.split('-')[1]}-100 to-${bgColor.split('-')[3]}-100 font-bold text-xs h-7`}>
                   <TableCell className="py-1 px-2">TOTAL</TableCell>
                   <TableCell className="text-right py-1 px-2">{formatToThousands(totals.total_semula)}</TableCell>
                   <TableCell className="text-right py-1 px-2">{formatToThousands(totals.total_menjadi)}</TableCell>
@@ -356,7 +373,7 @@ const DetailedSummaryView: React.FC = () => {
   const renderAdditionalBoxes = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-        <Card className="shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50 border-t-4 border-t-blue-400">
+        <Card className="shadow-sm card-gradient-blue">
           <CardHeader className="pb-2 pt-3">
             <CardTitle className="text-sm">Tren Perubahan Anggaran</CardTitle>
           </CardHeader>
@@ -388,7 +405,7 @@ const DetailedSummaryView: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm bg-gradient-to-br from-purple-50 to-pink-50 border-t-4 border-t-purple-400">
+        <Card className="shadow-sm card-gradient-purple">
           <CardHeader className="pb-2 pt-3">
             <CardTitle className="text-sm">Status Anggaran</CardTitle>
           </CardHeader>
@@ -417,7 +434,7 @@ const DetailedSummaryView: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm bg-gradient-to-br from-green-50 to-teal-50 border-t-4 border-t-green-400">
+        <Card className="shadow-sm card-gradient-green">
           <CardHeader className="pb-2 pt-3">
             <CardTitle className="text-sm">Analisis Perubahan</CardTitle>
           </CardHeader>
@@ -451,7 +468,7 @@ const DetailedSummaryView: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm bg-gradient-to-br from-orange-50 to-yellow-50 border-t-4 border-t-orange-400">
+        <Card className="shadow-sm card-gradient-orange">
           <CardHeader className="pb-2 pt-3">
             <CardTitle className="text-sm">Dampak Perubahan Anggaran</CardTitle>
           </CardHeader>
@@ -462,7 +479,7 @@ const DetailedSummaryView: React.FC = () => {
                 <span className={`font-semibold ${accountGroupTotals.total_selisih < 0 ? 'text-green-600' : 'text-orange-600'}`}>{
                   accountGroupTotals.total_selisih < 0 ? 
                   formatToThousands(Math.abs(accountGroupTotals.total_selisih)) : 
-                  '0K'
+                  formatToThousands(0)
                 }</span>
               </div>
               <div className="flex justify-between items-center">
@@ -470,7 +487,7 @@ const DetailedSummaryView: React.FC = () => {
                 <span className={`font-semibold ${accountGroupTotals.total_selisih > 0 ? 'text-green-600' : 'text-orange-600'}`}>{
                   accountGroupTotals.total_selisih > 0 ? 
                   formatToThousands(accountGroupTotals.total_selisih) : 
-                  '0K'
+                  formatToThousands(0)
                 }</span>
               </div>
               <div className="flex justify-between items-center">
@@ -489,7 +506,7 @@ const DetailedSummaryView: React.FC = () => {
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">Ringkasan Detail Anggaran</h2>
+        <h2 className="text-base font-bold text-gradient-blue">Ringkasan Detail Anggaran</h2>
         <Button 
           variant="outline" 
           size="sm" 

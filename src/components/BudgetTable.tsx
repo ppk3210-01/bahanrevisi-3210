@@ -505,6 +505,19 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     );
   };
 
+  const getRowStyle = (status: string): string => {
+    switch (status) {
+      case 'changed':
+        return 'row-changed';
+      case 'new':
+        return 'row-new';
+      case 'deleted':
+        return 'row-deleted';
+      default:
+        return '';
+    }
+  };
+
   if (isLoading) {
     return <div className="flex justify-center p-4">Loading budget data...</div>;
   }

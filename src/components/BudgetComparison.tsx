@@ -18,7 +18,18 @@ import { FilterSelection, BudgetSummary } from '@/types/budget';
 import { generateBudgetSummary } from '@/utils/budgetCalculations';
 import useBudgetData from '@/hooks/useBudgetData';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Info } from 'lucide-react';
+import { Info, HelpCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const DEFAULT_FILTER: FilterSelection = {
   programPembebanan: 'all',
@@ -122,7 +133,153 @@ const BudgetComparison: React.FC = () => {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div>
-                    <h3 className="text-sm font-medium mb-2">Import Data</h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-sm font-medium">Import Data</h3>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-7 px-2 text-xs gap-1">
+                            <HelpCircle className="h-3 w-3" />
+                            Panduan Import
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="max-w-xl">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-gradient-blue">Panduan Import Excel</AlertDialogTitle>
+                            <AlertDialogDescription className="text-xs">
+                              <div className="space-y-2">
+                                <p className="font-medium">Petunjuk cara mengimpor data menggunakan file Excel</p>
+                                
+                                <div>
+                                  <h3 className="font-medium">Format File</h3>
+                                  <p>File Excel (.xlsx atau .xls) harus memiliki format berikut:</p>
+                                  
+                                  <div className="overflow-x-auto mt-2">
+                                    <table className="w-full border-collapse text-xs">
+                                      <thead>
+                                        <tr className="bg-blue-50">
+                                          <th className="border px-2 py-1 text-left">Kolom</th>
+                                          <th className="border px-2 py-1 text-left">Tipe Data</th>
+                                          <th className="border px-2 py-1 text-left">Format</th>
+                                          <th className="border px-2 py-1 text-left">Contoh</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr>
+                                          <td className="border px-2 py-1">Program Pembebanan</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">054.01.GG</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Kegiatan</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">2896</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Rincian Output</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">2896.BMA</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Komponen Output</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">2896.BMA.004</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Sub Komponen</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">005</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Akun</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">522151</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Uraian</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">Belanja Jasa Profesi</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Volume Semula</td>
+                                          <td className="border px-2 py-1">Number</td>
+                                          <td className="border px-2 py-1">General atau Number</td>
+                                          <td className="border px-2 py-1">1</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Satuan Semula</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">Paket</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Harga Satuan Semula</td>
+                                          <td className="border px-2 py-1">Number</td>
+                                          <td className="border px-2 py-1">General, Number atau Currency</td>
+                                          <td className="border px-2 py-1">1000000</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Volume Menjadi</td>
+                                          <td className="border px-2 py-1">Number</td>
+                                          <td className="border px-2 py-1">General atau Number</td>
+                                          <td className="border px-2 py-1">1</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Satuan Menjadi</td>
+                                          <td className="border px-2 py-1">Text</td>
+                                          <td className="border px-2 py-1">-</td>
+                                          <td className="border px-2 py-1">Paket</td>
+                                        </tr>
+                                        <tr>
+                                          <td className="border px-2 py-1">Harga Satuan Menjadi</td>
+                                          <td className="border px-2 py-1">Number</td>
+                                          <td className="border px-2 py-1">General, Number atau Currency</td>
+                                          <td className="border px-2 py-1">1200000</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <h3 className="font-medium">Petunjuk Import</h3>
+                                  <ol className="list-decimal ml-5 space-y-1">
+                                    <li>Unduh template dengan klik tombol Download Template.</li>
+                                    <li>Buka file template dengan Microsoft Excel atau aplikasi spreadsheet lainnya.</li>
+                                    <li>Isikan data sesuai format yang telah ditentukan. Pastikan semua kolom terisi dengan benar.</li>
+                                    <li>Simpan file Excel setelah selesai mengisi data.</li>
+                                    <li>Klik tombol Import Excel dan pilih file yang telah diisi.</li>
+                                    <li>Tunggu hingga proses import selesai.</li>
+                                  </ol>
+                                </div>
+                                
+                                <div>
+                                  <h3 className="font-medium">Tips Import</h3>
+                                  <ul className="list-disc ml-5 space-y-1">
+                                    <li>Pastikan format kolom numerik sudah benar (Volume dan Harga Satuan).</li>
+                                    <li>Jangan mengubah nama kolom pada baris pertama.</li>
+                                    <li>Pastikan tidak ada sel yang kosong pada baris data.</li>
+                                    <li>Jika menggunakan template dari aplikasi ini, format kolom sudah diatur dengan benar.</li>
+                                    <li>Pastikan nilai numerik tidak menggunakan tanda pemisah ribuan seperti titik atau koma.</li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogAction>Tutup</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+
                     <div className="border rounded-md p-3 text-xs">
                       <h4 className="font-medium mb-2">Panduan Import Excel:</h4>
                       <p className="mb-2">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
@@ -148,7 +305,7 @@ const BudgetComparison: React.FC = () => {
                         <p className="font-medium">Contoh Format Excel:</p>
                         <table className="w-full text-xs border-collapse">
                           <thead>
-                            <tr className="bg-gray-100">
+                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50">
                               <th className="border border-gray-300 px-1 py-1">uraian</th>
                               <th className="border border-gray-300 px-1 py-1">volumeSemula</th>
                               <th className="border border-gray-300 px-1 py-1">satuanSemula</th>
@@ -161,7 +318,7 @@ const BudgetComparison: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
+                            <tr className="bg-white">
                               <td className="border border-gray-300 px-1 py-1">Belanja ATK</td>
                               <td className="border border-gray-300 px-1 py-1">1</td>
                               <td className="border border-gray-300 px-1 py-1">Paket</td>
@@ -211,21 +368,21 @@ const BudgetComparison: React.FC = () => {
                 {budgetSummary && (
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <Card className="border border-changed-row shadow-sm">
+                      <Card className="border border-changed-row shadow-sm bg-gradient-to-r from-amber-50 to-yellow-50">
                         <CardContent className="p-2">
                           <h3 className="text-xs font-semibold text-gray-700">Detil Diubah</h3>
                           <p className="text-lg font-bold">{budgetSummary.changedItems.length}</p>
                         </CardContent>
                       </Card>
                       
-                      <Card className="border border-new-row shadow-sm">
+                      <Card className="border border-new-row shadow-sm bg-gradient-to-r from-emerald-50 to-green-50">
                         <CardContent className="p-2">
                           <h3 className="text-xs font-semibold text-gray-700">Detil Baru</h3>
                           <p className="text-lg font-bold">{budgetSummary.newItems.length}</p>
                         </CardContent>
                       </Card>
                       
-                      <Card className="border border-deleted-row shadow-sm">
+                      <Card className="border border-deleted-row shadow-sm bg-gradient-to-r from-red-50 to-rose-50">
                         <CardContent className="p-2">
                           <h3 className="text-xs font-semibold text-gray-700">Detil Dihapus</h3>
                           <p className="text-lg font-bold">{budgetSummary.deletedItems.length}</p>
@@ -236,7 +393,7 @@ const BudgetComparison: React.FC = () => {
                     <Button 
                       variant="outline" 
                       onClick={showSummary}
-                      className="w-full md:w-auto h-8 text-xs"
+                      className="w-full md:w-auto h-8 text-xs btn-gradient-blue"
                     >
                       <Info className="mr-1 h-3 w-3" /> 
                       Lihat Detail Ringkasan

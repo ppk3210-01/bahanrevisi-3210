@@ -8,9 +8,11 @@ interface BudgetSummaryBoxProps {
   totalSelisih: number;
 }
 
-// Format numbers to thousands (K)
+// Format numbers to thousands by rounding to the nearest thousand
 const formatToThousands = (value: number): string => {
-  return (Math.round(value / 1000)).toLocaleString() + 'K';
+  // Round to nearest thousand
+  const roundedValue = Math.round(value / 1000) * 1000;
+  return formatCurrency(roundedValue);
 };
 
 const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({ 
