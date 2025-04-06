@@ -130,23 +130,23 @@ const BudgetComparison: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="import" className="mt-0">
-              <div className="space-y-1 text-xs leading-tight">
+              <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-medium leading-tight">Import Data</h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-sm font-medium">Import Data</h3>
                       
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-6 px-2 text-[10px] gap-1">
+                          <Button variant="outline" size="sm" className="h-7 px-2 text-xs gap-1">
                             <HelpCircle className="h-3 w-3" />
                             Panduan Import
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="max-w-xl text-xs leading-snug">
+                        <AlertDialogContent className="max-w-xl">
                           <AlertDialogHeader>
                             <AlertDialogTitle className="text-gradient-blue">Panduan Import Excel</AlertDialogTitle>
-                            <AlertDialogDescription className="text-xs leading-snug space-y-1">
+                            <AlertDialogDescription className="text-xs">
                               <div className="space-y-2">
                                 <p className="font-medium">Petunjuk cara mengimpor data menggunakan file Excel</p>
                                 
@@ -155,7 +155,7 @@ const BudgetComparison: React.FC = () => {
                                   <p>File Excel (.xlsx atau .xls) harus memiliki format berikut:</p>
                                   
                                   <div className="overflow-x-auto mt-2">
-                                    <table className="w-full border-collapse text-[11px] leading-snug">
+                                    <table className="w-full border-collapse text-xs">
                                       <thead>
                                         <tr className="bg-blue-50">
                                           <th className="border px-2 py-1 text-left">Kolom</th>
@@ -280,10 +280,10 @@ const BudgetComparison: React.FC = () => {
                       </AlertDialog>
                     </div>
 
-                    <div className="border rounded-md p-2 text-xs leading-tight space-y-1">
-                      <h4 className="font-medium mb-1">Panduan Import Excel:</h4>
-                      <p className="mb-1">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
-                      <ol className="list-decimal pl-4 mb-1 space-y-1">
+                    <div className="border rounded-md p-3 text-xs">
+                      <h4 className="font-medium mb-2">Panduan Import Excel:</h4>
+                      <p className="mb-2">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
+                      <ol className="list-decimal pl-5 mb-2 space-y-1">
                         <li>uraian (string): Uraian/nama item anggaran</li>
                         <li>volumeSemula (numeric): Volume semula</li>
                         <li>satuanSemula (string): Satuan semula - contoh: "Paket", "Kegiatan", "Bulan", dll</li>
@@ -295,15 +295,15 @@ const BudgetComparison: React.FC = () => {
                         <li>akun (string, optional): Kode akun</li>
                       </ol>
                       <p className="mb-2">Catatan penting:</p>
-                      <ul className="list-disc pl-4 mb-1 space-y-1">
+                      <ul className="list-disc pl-5 mb-2 space-y-1">
                         <li>Jumlah Semula dan Jumlah Menjadi dihitung otomatis</li>
                         <li>Selisih dihitung otomatis (Jumlah Semula - Jumlah Menjadi)</li>
                         <li>Status akan otomatis terisi sebagai 'new' untuk data baru</li>
                         <li>Data akan ditambahkan sesuai dengan filter yang dipilih</li>
                       </ul>
-                      <div className="mb-1">
+                      <div className="mb-2">
                         <p className="font-medium">Contoh Format Excel:</p>
-                        <table className="w-full text-[11px] border-collapse leading-snug">
+                        <table className="w-full text-xs border-collapse">
                           <thead>
                             <tr className="bg-gradient-to-r from-blue-50 to-indigo-50">
                               <th className="border border-gray-300 px-1 py-1">uraian</th>
@@ -334,7 +334,7 @@ const BudgetComparison: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="mt-2">
+                    <div className="mt-4">
                       <ExcelImportExport 
                         onImport={(items) => {
                           importBudgetItems(items);
@@ -347,8 +347,8 @@ const BudgetComparison: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="mt-2">
-                    <h3 className="text-sm font-medium mb-1 leading-tight">Export Tools</h3>
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium mb-2">Export Tools</h3>
                     <ExportOptions 
                       items={budgetItems} 
                       komponenOutput={filters.komponenOutput} 
