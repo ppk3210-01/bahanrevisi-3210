@@ -137,7 +137,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      budget_summary_by_account_group: {
+        Row: {
+          account_group: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_akun: {
+        Row: {
+          akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_komponen: {
+        Row: {
+          changed_items: number | null
+          komponen_output: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

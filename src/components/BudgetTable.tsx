@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight } from 'lucide-react';
+import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -391,71 +392,108 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const renderPagination = () => {
     if (pageSize === -1 || totalPages <= 1) return null;
     
-    const MAX_VISIBLE_PAGES = 7;
-    const showEllipsis = totalPages > MAX_VISIBLE_PAGES;
+    // Calculate which page links to show
+    const showMaxPages = 7; // Maximum number of page links to show
+    let startPage = Math.max(1, currentPage - Math.floor(showMaxPages / 2));
+    let endPage = Math.min(totalPages, startPage + showMaxPages - 1);
+    
+    // Adjust if we're near the end of the page list
+    if (endPage - startPage + 1 < showMaxPages) {
+      startPage = Math.max(1, endPage - showMaxPages + 1);
+    }
+    
+    const pages = [];
+    
+    // Add "First" page if not on page 1
+    if (startPage > 1) {
+      pages.push(
+        <PaginationItem key="first">
+          <PaginationLink
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handlePageChange(1);
+            }}
+            className="flex items-center"
+          >
+            <ChevronsLeft className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">First</span>
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Add "Previous" button
+    pages.push(
+      <PaginationItem key="prev">
+        <PaginationPrevious 
+          href="#" 
+          onClick={(e) => {
+            e.preventDefault();
+            handlePageChange(currentPage - 1);
+          }} 
+          aria-disabled={currentPage === 1}
+          className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+        />
+      </PaginationItem>
+    );
+    
+    // Add page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            isActive={currentPage === i}
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handlePageChange(i);
+            }}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Add "Next" button
+    pages.push(
+      <PaginationItem key="next">
+        <PaginationNext 
+          href="#" 
+          onClick={(e) => {
+            e.preventDefault();
+            handlePageChange(currentPage + 1);
+          }} 
+          aria-disabled={currentPage === totalPages}
+          className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+        />
+      </PaginationItem>
+    );
+    
+    // Add "Last" page if not on last page
+    if (endPage < totalPages) {
+      pages.push(
+        <PaginationItem key="last">
+          <PaginationLink
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              handlePageChange(totalPages);
+            }}
+            className="flex items-center"
+          >
+            <span className="hidden sm:inline">Last</span>
+            <ChevronsRight className="h-4 w-4 ml-1" />
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
     
     return (
       <Pagination>
         <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious 
-              href="#" 
-              onClick={(e) => {
-                e.preventDefault();
-                handlePageChange(currentPage - 1);
-              }} 
-              aria-disabled={currentPage === 1}
-              className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-            />
-          </PaginationItem>
-          
-          {Array.from({ length: Math.min(MAX_VISIBLE_PAGES, totalPages) }).map((_, i) => (
-            <PaginationItem key={i + 1}>
-              <PaginationLink
-                isActive={currentPage === i + 1}
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePageChange(i + 1);
-                }}
-              >
-                {i + 1}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-          
-          {showEllipsis && (
-            <>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(totalPages);
-                  }}
-                  className="flex items-center gap-1"
-                >
-                  <span>Last</span>
-                  <ChevronsRight className="h-4 w-4" />
-                </PaginationLink>
-              </PaginationItem>
-            </>
-          )}
-          
-          <PaginationItem>
-            <PaginationNext 
-              href="#" 
-              onClick={(e) => {
-                e.preventDefault();
-                handlePageChange(currentPage + 1);
-              }} 
-              aria-disabled={currentPage === totalPages}
-              className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-            />
-          </PaginationItem>
+          {pages}
         </PaginationContent>
       </Pagination>
     );
@@ -517,8 +555,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         )}
         
         <div className="overflow-x-auto w-full">
-          <table className="w-full min-w-full data-table text-sm">
-            <thead>
+          <table className="w-full min-w-full data-table text-xs">
+            <thead className="sticky top-0 bg-white z-10 shadow-sm">
               <tr className="text-xs">
                 <th className="py-2 px-1 w-8">No</th>
                 <th className="uraian-cell py-2 px-1 w-[20%]">
@@ -617,26 +655,27 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   <td>
                     <div className="flex space-x-1">
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="icon" 
                         onClick={() => showDetailDialog(item)}
                         title="Lihat Detail"
+                        className="h-6 w-6"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3 w-3" />
                       </Button>
 
                       {editingId === item.id ? (
-                        <Button variant="outline" size="icon" onClick={() => saveEditing(item.id)}>
-                          <Check className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                          <Check className="h-3 w-3" />
                         </Button>
                       ) : (
-                        <Button variant="outline" size="icon" onClick={() => startEditing(item)}>
-                          <FileEdit className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" onClick={() => startEditing(item)} className="h-6 w-6">
+                          <FileEdit className="h-3 w-3" />
                         </Button>
                       )}
                       
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="icon" 
                         onClick={() => {
                           onDelete(item.id);
@@ -645,8 +684,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             description: 'Item berhasil dihapus'
                           });
                         }}
+                        className="h-6 w-6"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </td>
@@ -654,9 +694,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     {needsApproval(item) && (
                       <div className="flex space-x-1 justify-center">
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="icon" 
-                          className="text-green-600 border-green-600 hover:bg-green-50" 
+                          className="text-green-600 h-6 w-6" 
                           onClick={() => {
                             onApprove(item.id);
                             toast({
@@ -666,12 +706,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                           }}
                           title="Setujui"
                         >
-                          <Check className="h-4 w-4 font-bold" />
+                          <Check className="h-3 w-3 font-bold" />
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="icon" 
-                          className="text-red-600 border-red-600 hover:bg-red-50" 
+                          className="text-red-600 h-6 w-6" 
                           onClick={() => {
                             onReject(item.id);
                             toast({
@@ -681,12 +721,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                           }}
                           title="Tolak"
                         >
-                          <X className="h-4 w-4 font-bold" />
+                          <X className="h-3 w-3 font-bold" />
                         </Button>
                       </div>
                     )}
                     {item.isApproved && (
-                      <span className="text-green-600 font-bold">ok</span>
+                      <span className="text-green-600 font-medium">✓</span>
                     )}
                   </td>
                 </tr>

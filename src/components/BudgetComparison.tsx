@@ -13,6 +13,7 @@ import BudgetSummaryBox from './BudgetSummaryBox';
 import ExcelImportExport from './ExcelImportExport';
 import ExportOptions from './ExportOptions';
 import SummaryDialog from './SummaryDialog';
+import DetailedSummaryView from './DetailedSummaryView';
 import { Button } from '@/components/ui/button';
 import { FilterSelection, BudgetSummary } from '@/types/budget';
 import { generateBudgetSummary } from '@/utils/budgetCalculations';
@@ -77,6 +78,14 @@ const BudgetComparison: React.FC = () => {
 
   return (
     <div className="space-y-2">
+      {budgetSummary && (
+        <BudgetSummaryBox 
+          totalSemula={budgetSummary.totalSemula}
+          totalMenjadi={budgetSummary.totalMenjadi}
+          totalSelisih={budgetSummary.totalSelisih}
+        />
+      )}
+
       <Card className="shadow-sm">
         <CardContent className="pt-3 pb-3">
           <BudgetFilter 
@@ -85,14 +94,6 @@ const BudgetComparison: React.FC = () => {
           />
         </CardContent>
       </Card>
-
-      {budgetSummary && (
-        <BudgetSummaryBox 
-          totalSemula={budgetSummary.totalSemula}
-          totalMenjadi={budgetSummary.totalMenjadi}
-          totalSelisih={budgetSummary.totalSelisih}
-        />
-      )}
 
       <Card className="shadow-sm">
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
@@ -123,21 +124,77 @@ const BudgetComparison: React.FC = () => {
             
             <TabsContent value="import" className="mt-0">
               <div className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div>
                     <h3 className="text-sm font-medium mb-2">Import Data</h3>
-                    <ExcelImportExport 
-                      onImport={(items) => {
-                        importBudgetItems(items);
-                        return Promise.resolve();
-                      }}
-                      komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
-                      subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
-                      akun={filters.akun !== 'all' ? filters.akun : undefined}
-                    />
+                    <div className="border rounded-md p-3 text-xs">
+                      <h4 className="font-medium mb-2">Panduan Import Excel:</h4>
+                      <p className="mb-2">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
+                      <ol className="list-decimal pl-5 mb-2 space-y-1">
+                        <li>uraian (string): Uraian/nama item anggaran</li>
+                        <li>volumeSemula (numeric): Volume semula</li>
+                        <li>satuanSemula (string): Satuan semula - contoh: "Paket", "Kegiatan", "Bulan", dll</li>
+                        <li>hargaSatuanSemula (numeric): Harga satuan semula</li>
+                        <li>volumeMenjadi (numeric): Volume menjadi</li>
+                        <li>satuanMenjadi (string): Satuan menjadi</li>
+                        <li>hargaSatuanMenjadi (numeric): Harga satuan menjadi</li>
+                        <li>subKomponen (string, optional): Sub komponen anggaran</li>
+                        <li>akun (string, optional): Kode akun</li>
+                      </ol>
+                      <p className="mb-2">Catatan penting:</p>
+                      <ul className="list-disc pl-5 mb-2 space-y-1">
+                        <li>Jumlah Semula dan Jumlah Menjadi dihitung otomatis</li>
+                        <li>Selisih dihitung otomatis (Jumlah Semula - Jumlah Menjadi)</li>
+                        <li>Status akan otomatis terisi sebagai 'new' untuk data baru</li>
+                        <li>Data akan ditambahkan sesuai dengan filter yang dipilih</li>
+                      </ul>
+                      <div className="mb-2">
+                        <p className="font-medium">Contoh Format Excel:</p>
+                        <table className="w-full text-xs border-collapse">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border border-gray-300 px-1 py-1">uraian</th>
+                              <th className="border border-gray-300 px-1 py-1">volumeSemula</th>
+                              <th className="border border-gray-300 px-1 py-1">satuanSemula</th>
+                              <th className="border border-gray-300 px-1 py-1">hargaSatuanSemula</th>
+                              <th className="border border-gray-300 px-1 py-1">volumeMenjadi</th>
+                              <th className="border border-gray-300 px-1 py-1">satuanMenjadi</th>
+                              <th className="border border-gray-300 px-1 py-1">hargaSatuanMenjadi</th>
+                              <th className="border border-gray-300 px-1 py-1">subKomponen</th>
+                              <th className="border border-gray-300 px-1 py-1">akun</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="border border-gray-300 px-1 py-1">Belanja ATK</td>
+                              <td className="border border-gray-300 px-1 py-1">1</td>
+                              <td className="border border-gray-300 px-1 py-1">Paket</td>
+                              <td className="border border-gray-300 px-1 py-1">5000000</td>
+                              <td className="border border-gray-300 px-1 py-1">1</td>
+                              <td className="border border-gray-300 px-1 py-1">Paket</td>
+                              <td className="border border-gray-300 px-1 py-1">4500000</td>
+                              <td className="border border-gray-300 px-1 py-1">Layanan Perkantoran</td>
+                              <td className="border border-gray-300 px-1 py-1">521111</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <ExcelImportExport 
+                        onImport={(items) => {
+                          importBudgetItems(items);
+                          return Promise.resolve();
+                        }}
+                        komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
+                        subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+                        akun={filters.akun !== 'all' ? filters.akun : undefined}
+                      />
+                    </div>
                   </div>
                   
-                  <div>
+                  <div className="mt-4">
                     <h3 className="text-sm font-medium mb-2">Export Tools</h3>
                     <ExportOptions 
                       items={budgetItems} 
@@ -188,6 +245,10 @@ const BudgetComparison: React.FC = () => {
                       <Info className="mr-1 h-3 w-3" /> 
                       Lihat Detail Ringkasan
                     </Button>
+                    
+                    <div className="mt-4">
+                      <DetailedSummaryView />
+                    </div>
                   </div>
                 )}
               </div>
@@ -199,6 +260,8 @@ const BudgetComparison: React.FC = () => {
       {budgetSummary && (
         <SummaryDialog 
           items={budgetSummary.changedItems.concat(budgetSummary.newItems).concat(budgetSummary.deletedItems)}
+          open={summaryVisible}
+          onOpenChange={setSummaryVisible}
         />
       )}
     </div>
