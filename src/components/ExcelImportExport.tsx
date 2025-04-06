@@ -295,7 +295,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           <Download className="h-4 w-4 mr-2" /> 
           Download Template
         </Button>
-        
+        {/*}
         <div className="relative">
           <Input
             type="file"
@@ -321,7 +321,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           Panduan Import
         </Button>
       </div>
-      
+      */}
       <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
