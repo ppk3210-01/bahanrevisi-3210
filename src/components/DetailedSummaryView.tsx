@@ -58,7 +58,7 @@ const DetailedSummaryView: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch account group data using rpc instead of from table/view directly
+        // Fetch account group data using rpc
         const { data: accountGroupResult, error: accountGroupError } = await supabase
           .rpc('get_budget_summary_by_account_group');
         
