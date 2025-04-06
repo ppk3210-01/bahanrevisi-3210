@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/budgetCalculations';
@@ -11,7 +10,7 @@ import {
   TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronUpDown, Download } from 'lucide-react';
+import { ChevronsUpDown, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
@@ -58,24 +57,21 @@ const DetailedSummaryView: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch account group data
+        // Fetch account group data using raw SQL query instead of table/view name
         const { data: accountGroupResult, error: accountGroupError } = await supabase
-          .from('budget_summary_by_account_group')
-          .select('*');
+          .rpc('get_budget_summary_by_account_group');
         
         if (accountGroupError) throw accountGroupError;
         
-        // Fetch komponen data
+        // Fetch komponen data using raw SQL query
         const { data: komponenResult, error: komponenError } = await supabase
-          .from('budget_summary_by_komponen')
-          .select('*');
+          .rpc('get_budget_summary_by_komponen');
         
         if (komponenError) throw komponenError;
         
-        // Fetch akun data
+        // Fetch akun data using raw SQL query
         const { data: akunResult, error: akunError } = await supabase
-          .from('budget_summary_by_akun')
-          .select('*');
+          .rpc('get_budget_summary_by_akun');
         
         if (akunError) throw akunError;
         
@@ -225,7 +221,7 @@ const DetailedSummaryView: React.FC = () => {
 
   const renderSortIcon = (field: SortField, currentSort: {field: SortField, direction: SortDirection}) => {
     return (
-      <ChevronUpDown className={`inline h-4 w-4 ml-1 ${currentSort.field === field ? 'opacity-100' : 'opacity-50'}`} />
+      <ChevronsUpDown className={`inline h-4 w-4 ml-1 ${currentSort.field === field ? 'opacity-100' : 'opacity-50'}`} />
     );
   };
 

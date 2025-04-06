@@ -1,11 +1,9 @@
-
 import React from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FileBarChart2, FileSpreadsheet } from "lucide-react";
@@ -17,9 +15,11 @@ import { toast } from '@/hooks/use-toast';
 
 interface SummaryDialogProps {
   items: BudgetItem[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
+const SummaryDialog: React.FC<SummaryDialogProps> = ({ items, open, onOpenChange }) => {
   const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
@@ -48,10 +48,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
 
   const exportToExcel = () => {
     try {
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       
-      // Summary sheet
       const summaryData = [
         ['Ringkasan Perubahan Pagu Anggaran'],
         [''],
@@ -64,7 +62,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
       XLSX.utils.book_append_sheet(wb, summaryWs, "Ringkasan");
       
-      // Changed items sheet
       if (changedItems.length > 0) {
         const changedData = [
           ['No', 'Pembebanan', 'Uraian', 'Detail Perubahan', 'Jumlah Semula', 'Jumlah Menjadi', 'Selisih']
@@ -72,13 +69,13 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         
         changedItems.forEach((item, index) => {
           changedData.push([
-            (index + 1).toString(), // Convert number to string
+            (index + 1).toString(),
             formatPembebananCode(item),
             item.uraian,
             renderDetailPerubahan(item),
-            item.jumlahSemula.toString(), // Convert number to string
-            item.jumlahMenjadi.toString(), // Convert number to string
-            item.selisih.toString() // Convert number to string
+            item.jumlahSemula.toString(),
+            item.jumlahMenjadi.toString(),
+            item.selisih.toString()
           ]);
         });
         
@@ -86,7 +83,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         XLSX.utils.book_append_sheet(wb, changedWs, "Pagu Anggaran Berubah");
       }
       
-      // New items sheet
       if (newItems.length > 0) {
         const newData = [
           ['No', 'Pembebanan', 'Uraian', 'Volume', 'Satuan', 'Harga Satuan', 'Jumlah']
@@ -94,13 +90,13 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         
         newItems.forEach((item, index) => {
           newData.push([
-            (index + 1).toString(), // Convert number to string
+            (index + 1).toString(),
             formatPembebananCode(item),
             item.uraian,
-            item.volumeMenjadi.toString(), // Convert number to string
+            item.volumeMenjadi.toString(),
             item.satuanMenjadi,
-            item.hargaSatuanMenjadi.toString(), // Convert number to string
-            item.jumlahMenjadi.toString() // Convert number to string
+            item.hargaSatuanMenjadi.toString(),
+            item.jumlahMenjadi.toString()
           ]);
         });
         
@@ -108,7 +104,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         XLSX.utils.book_append_sheet(wb, newWs, "Pagu Anggaran Baru");
       }
       
-      // Deleted items sheet
       if (deletedItems.length > 0) {
         const deletedData = [
           ['No', 'Pembebanan', 'Uraian', 'Volume', 'Satuan', 'Harga Satuan', 'Jumlah']
@@ -116,13 +111,13 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         
         deletedItems.forEach((item, index) => {
           deletedData.push([
-            (index + 1).toString(), // Convert number to string
+            (index + 1).toString(),
             formatPembebananCode(item),
             item.uraian,
-            item.volumeSemula.toString(), // Convert number to string
+            item.volumeSemula.toString(),
             item.satuanSemula,
-            item.hargaSatuanSemula.toString(), // Convert number to string
-            item.jumlahSemula.toString() // Convert number to string
+            item.hargaSatuanSemula.toString(),
+            item.jumlahSemula.toString()
           ]);
         });
         
@@ -130,7 +125,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         XLSX.utils.book_append_sheet(wb, deletedWs, "Pagu Anggaran Dihapus");
       }
       
-      // Generate narrative summary
       const narrativeData = [
         ['Kesimpulan Perubahan Anggaran'],
         [''],
@@ -143,7 +137,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
       const narrativeWs = XLSX.utils.aoa_to_sheet(narrativeData);
       XLSX.utils.book_append_sheet(wb, narrativeWs, "Kesimpulan");
       
-      // Export to file
       XLSX.writeFile(wb, "Ringkasan_Perubahan_Anggaran.xlsx");
       
       toast({
@@ -161,13 +154,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
   };
   
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <FileBarChart2 className="h-4 w-4 mr-2" />
-          Ringkasan Perubahan
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="text-blue-900 font-bold">Ringkasan Perubahan Pagu Anggaran</DialogTitle>
@@ -178,7 +165,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
         </DialogHeader>
         
         <div className="space-y-8">
-          {/* Summary Boxes */}
           <div className="grid grid-cols-3 gap-4">
             <div className="border rounded p-4">
               <h3 className="text-lg font-semibold">Total Pagu Semula</h3>
@@ -196,7 +182,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             </div>
           </div>
           
-          {/* Narrative Summary */}
           <div className="bg-gray-50 p-4 rounded border">
             <h3 className="text-red-600 font-semibold mb-2">Kesimpulan</h3>
             <p>Total Pagu anggaran semula sebesar <strong>{formatCurrency(totalSemula)}</strong> berubah menjadi <strong>{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}>{formatCurrency(totalSelisih)}</strong>.</p>
@@ -204,7 +189,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             <p className="mt-2">Perubahan ini {totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total Pagu anggaran.</p>
           </div>
           
-          {/* Changed Items */}
           {changedItems.length > 0 && (
             <div>
               <h3 className="text-orange-600 font-bold mb-2">Pagu Anggaran Berubah</h3>
@@ -247,7 +231,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             </div>
           )}
           
-          {/* New Items */}
           {newItems.length > 0 && (
             <div>
               <h3 className="text-green-600 font-bold mb-2">Pagu Anggaran Baru</h3>
@@ -286,7 +269,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items }) => {
             </div>
           )}
           
-          {/* Deleted Items */}
           {deletedItems.length > 0 && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Pagu Anggaran Dihapus</h3>

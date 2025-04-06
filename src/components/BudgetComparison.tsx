@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -55,7 +54,6 @@ const BudgetComparison: React.FC = () => {
   }, [budgetItems]);
 
   const areFiltersComplete = () => {
-    // Check if at least the minimum required filters are selected
     return (
       filters.komponenOutput !== 'all' &&
       filters.subKomponen !== 'all' &&
@@ -63,7 +61,6 @@ const BudgetComparison: React.FC = () => {
     );
   };
 
-  // Functions to handle filter changes
   const handleFilterChange = (filter: Partial<FilterSelection>) => {
     setFilters(prev => ({
       ...prev,
@@ -71,7 +68,6 @@ const BudgetComparison: React.FC = () => {
     }));
   };
 
-  // Show the summary dialog
   const showSummary = () => {
     setSummaryVisible(true);
   };

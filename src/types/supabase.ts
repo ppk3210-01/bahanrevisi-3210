@@ -44,6 +44,18 @@ export type AkunRecord = {
   urutan: number;
 };
 
+export type BudgetSummaryRecord = {
+  account_group?: string;
+  akun?: string;
+  komponen_output?: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+};
+
 // This is a simplified version of the Database type that includes our tables
 export type TemporaryDatabase = {
   public: {
@@ -79,6 +91,31 @@ export type TemporaryDatabase = {
         Row: AkunRecord;
         Insert: AkunRecord;
         Update: Partial<AkunRecord>;
+      };
+    };
+    Views: {
+      budget_summary_by_account_group: {
+        Row: BudgetSummaryRecord;
+      };
+      budget_summary_by_komponen: {
+        Row: BudgetSummaryRecord;
+      };
+      budget_summary_by_akun: {
+        Row: BudgetSummaryRecord;
+      };
+    };
+    Functions: {
+      get_budget_summary_by_account_group: {
+        Args: Record<string, never>;
+        Returns: BudgetSummaryRecord[];
+      };
+      get_budget_summary_by_komponen: {
+        Args: Record<string, never>;
+        Returns: BudgetSummaryRecord[];
+      };
+      get_budget_summary_by_akun: {
+        Args: Record<string, never>;
+        Returns: BudgetSummaryRecord[];
       };
     };
   };
