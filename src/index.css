@@ -160,13 +160,13 @@
 }
 
 /* Add table styling improvements */
-/*.data-table tr:nth-child(even) {
+.data-table tr:nth-child(even) {
   @apply bg-gradient-to-r from-blue-50/30 to-indigo-50/30;
 }
 
 .data-table tr:hover {
   @apply bg-gray-50;
-}*/
+}
 
 .data-table thead tr {
   @apply bg-gradient-to-r from-blue-100 to-indigo-100;
