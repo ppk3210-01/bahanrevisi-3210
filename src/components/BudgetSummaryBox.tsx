@@ -8,11 +8,6 @@ interface BudgetSummaryBoxProps {
   totalSelisih: number;
 }
 
-// Add the formatInThousands function if it doesn't exist in budgetCalculations
-const formatInThousands = (value: number): string => {
-  return (Math.round(value / 1000)).toLocaleString() + 'K';
-};
-
 const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({ 
   totalSemula, 
   totalMenjadi,
