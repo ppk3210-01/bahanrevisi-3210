@@ -169,7 +169,7 @@
 }
 
 .data-table thead tr {
-  @apply bg-gradient-to-r from-blue-100 to-indigo-100;
+  @apply bg-purple-600 text-white;
 }
 
 .data-table tfoot tr {
