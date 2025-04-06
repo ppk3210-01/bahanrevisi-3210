@@ -63,61 +63,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors for the budget app - enhanced with more vibrant colors
-				'changed-row': '#FEF7CD', // Yellow
-				'new-row': '#F2FCE2',     // Green
-				'deleted-row': '#FFDEE2', // Red
-				'warning-box': '#ea384c', // Red
-                
-				// Add more color options
-				'budget-blue': {
-					50: '#e6f1ff',
-					100: '#c8e0ff',
-					200: '#99c0ff',
-					300: '#66a1ff',
-					400: '#3381ff',
-					500: '#0066ff',
-					600: '#0052cc',
-					700: '#003d99',
-					800: '#002966',
-					900: '#001433',
-				},
-				'budget-green': {
-					50: '#e6fff2',
-					100: '#c8ffe6',
-					200: '#99ffcc',
-					300: '#66ffb3',
-					400: '#33ff99',
-					500: '#00ff80',
-					600: '#00cc66',
-					700: '#00994d',
-					800: '#006633',
-					900: '#00331a',
-				},
-				'budget-orange': {
-					50: '#fff0e6',
-					100: '#ffe0c8',
-					200: '#ffc199',
-					300: '#ffa366',
-					400: '#ff8533',
-					500: '#ff6600',
-					600: '#cc5200',
-					700: '#993d00',
-					800: '#662900',
-					900: '#331400',
-				},
-				'budget-purple': {
-					50: '#f2e6ff',
-					100: '#e0c8ff',
-					200: '#c199ff',
-					300: '#a366ff',
-					400: '#8533ff',
-					500: '#6600ff',
-					600: '#5200cc',
-					700: '#3d0099',
-					800: '#290066',
-					900: '#140033',
-				},
+				// Custom colors for the budget app
+				'changed-row': '#FEF7CD', // Kuning muda
+				'new-row': '#F2FCE2',     // Hijau muda
+				'deleted-row': '#F1F0FB', // Abu-abu silang
+				'warning-box': '#ea384c', // Merah
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -145,13 +95,6 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
-			},
-			backgroundImage: {
-				'gradient-card': 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
-				'gradient-blue': 'linear-gradient(90deg, hsla(221, 45%, 73%, 1) 0%, hsla(220, 78%, 29%, 1) 100%)',
-				'gradient-green': 'linear-gradient(90deg, hsla(46, 73%, 75%, 1) 0%, hsla(176, 73%, 88%, 1) 100%)',
-				'gradient-orange': 'linear-gradient(90deg, hsla(29, 92%, 70%, 1) 0%, hsla(0, 87%, 73%, 1) 100%)',
-				'gradient-purple': 'linear-gradient(90deg, hsla(277, 75%, 84%, 1) 0%, hsla(297, 50%, 51%, 1) 100%)',
 			}
 		}
 	},
