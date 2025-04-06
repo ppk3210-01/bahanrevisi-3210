@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/budgetCalculations';
@@ -57,19 +58,19 @@ const DetailedSummaryView: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch account group data using raw SQL query instead of table/view name
+        // Fetch account group data using rpc instead of from table/view directly
         const { data: accountGroupResult, error: accountGroupError } = await supabase
           .rpc('get_budget_summary_by_account_group');
         
         if (accountGroupError) throw accountGroupError;
         
-        // Fetch komponen data using raw SQL query
+        // Fetch komponen data using rpc
         const { data: komponenResult, error: komponenError } = await supabase
           .rpc('get_budget_summary_by_komponen');
         
         if (komponenError) throw komponenError;
         
-        // Fetch akun data using raw SQL query
+        // Fetch akun data using rpc
         const { data: akunResult, error: akunError } = await supabase
           .rpc('get_budget_summary_by_akun');
         
