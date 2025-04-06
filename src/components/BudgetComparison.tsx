@@ -305,7 +305,7 @@ const BudgetComparison: React.FC = () => {
                         <p className="font-medium">Contoh Format Excel:</p>
                         <table className="w-full text-xs border-collapse">
                           <thead>
-                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                            <tr className="sticky top-0 bg-purple-600 text-white z-10 shadow-sm">
                               <th className="border border-gray-300 px-1 py-1">uraian</th>
                               <th className="border border-gray-300 px-1 py-1">volumeSemula</th>
                               <th className="border border-gray-300 px-1 py-1">satuanSemula</th>
