@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -640,7 +639,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             
             <tbody>
               {paginatedItems.map((item, index) => (
-                <tr key={item.id} className={getRowStyle(item.status)}>
+                <tr key={item.id} className={getRowStyle(item)}>
                   <td>{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
                   <td className="uraian-cell">{renderItemField(item, 'uraian')}</td>
                   <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
