@@ -60,7 +60,7 @@
 }
 
 .data-table th {
-  @apply bg-gradient-to-r from-blue-70 to-indigo-50 text-gray-700 text-xs;
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700 text-xs;
 }
 
 .data-table .uraian-cell {
@@ -165,7 +165,7 @@
 }
 
 .data-table tr:hover {
-  @apply bg-gray-50;
+  @apply bg-gradient-to-r from-blue-100/50 to-indigo-100/50;
 }
 
 .data-table thead tr {
