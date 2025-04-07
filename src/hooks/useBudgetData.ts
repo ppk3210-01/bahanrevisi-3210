@@ -8,7 +8,71 @@ import {
 } from '@/utils/budgetCalculations';
 
 // Mock data for initial budget items
-const initialBudgetItems: BudgetItem[] = [];
+const initialBudgetItems: BudgetItem[] = [
+  {
+    id: uuidv4(),
+    uraian: 'Pengadaan Laptop',
+    volumeSemula: 2,
+    satuanSemula: 'Unit',
+    hargaSatuanSemula: 15000000,
+    jumlahSemula: 30000000,
+    volumeMenjadi: 3,
+    satuanMenjadi: 'Unit',
+    hargaSatuanMenjadi: 15000000,
+    jumlahMenjadi: 45000000,
+    selisih: 15000000,
+    status: 'changed',
+    isApproved: false,
+    komponenOutput: 'Perangkat Keras',
+    subKomponen: 'Peralatan Elektronik',
+    akun: '532111',
+    programPembebanan: 'Program Statistik',
+    kegiatan: 'Pengadaan',
+    rincianOutput: 'Peralatan Kantor'
+  },
+  {
+    id: uuidv4(),
+    uraian: 'Pengadaan Printer',
+    volumeSemula: 1,
+    satuanSemula: 'Unit',
+    hargaSatuanSemula: 5000000,
+    jumlahSemula: 5000000,
+    volumeMenjadi: 1,
+    satuanMenjadi: 'Unit',
+    hargaSatuanMenjadi: 5000000,
+    jumlahMenjadi: 5000000,
+    selisih: 0,
+    status: 'unchanged',
+    isApproved: true,
+    komponenOutput: 'Perangkat Keras',
+    subKomponen: 'Peralatan Elektronik',
+    akun: '532111',
+    programPembebanan: 'Program Statistik',
+    kegiatan: 'Pengadaan',
+    rincianOutput: 'Peralatan Kantor'
+  },
+  {
+    id: uuidv4(),
+    uraian: 'ATK Kantor',
+    volumeSemula: 0,
+    satuanSemula: 'Paket',
+    hargaSatuanSemula: 0,
+    jumlahSemula: 0,
+    volumeMenjadi: 1,
+    satuanMenjadi: 'Paket',
+    hargaSatuanMenjadi: 3000000,
+    jumlahMenjadi: 3000000,
+    selisih: 3000000,
+    status: 'new',
+    isApproved: false,
+    komponenOutput: 'Perangkat Keras',
+    subKomponen: 'ATK',
+    akun: '521111',
+    programPembebanan: 'Program Statistik',
+    kegiatan: 'Pengadaan',
+    rincianOutput: 'Peralatan Kantor'
+  }
+];
 
 const useBudgetData = (filters: FilterSelection) => {
   // We store all budget items, unfiltered

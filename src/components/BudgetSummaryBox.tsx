@@ -30,7 +30,7 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
         
         <div>
           <span className="text-gray-600 mr-1">Selisih:</span>
-          <span className={`font-semibold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <span className={`font-semibold ${totalSelisih === 0 ? 'text-green-600' : totalSelisih > 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatCurrency(roundToThousands(totalSelisih))}
           </span>
         </div>
