@@ -8,9 +8,7 @@ import {
 } from '@/utils/budgetCalculations';
 
 // Mock data for initial budget items
-const initialBudgetItems: BudgetItem[] = [
-  // ... keep existing code (initial budget items if any)
-];
+const initialBudgetItems: BudgetItem[] = [];
 
 const useBudgetData = (filters: FilterSelection) => {
   // We store all budget items, unfiltered
@@ -101,17 +99,15 @@ const useBudgetData = (filters: FilterSelection) => {
   };
   
   // Update an existing budget item
-  const updateBudgetItem = (id: string, updatedItem: Partial<BudgetItem>): BudgetItem | null => {
-    // ... keep existing code (update budget item logic)
-    
+  const updateBudgetItem = (id: string, itemUpdates: Partial<BudgetItem>): BudgetItem | null => {
     const updatedItems = allItems.map(item => {
       if (item.id === id) {
         // Calculate new values
-        const volumeSemula = updatedItem.volumeSemula !== undefined ? updatedItem.volumeSemula : item.volumeSemula;
-        const hargaSatuanSemula = updatedItem.hargaSatuanSemula !== undefined ? updatedItem.hargaSatuanSemula : item.hargaSatuanSemula;
+        const volumeSemula = itemUpdates.volumeSemula !== undefined ? itemUpdates.volumeSemula : item.volumeSemula;
+        const hargaSatuanSemula = itemUpdates.hargaSatuanSemula !== undefined ? itemUpdates.hargaSatuanSemula : item.hargaSatuanSemula;
         
-        const volumeMenjadi = updatedItem.volumeMenjadi !== undefined ? updatedItem.volumeMenjadi : item.volumeMenjadi;
-        const hargaSatuanMenjadi = updatedItem.hargaSatuanMenjadi !== undefined ? updatedItem.hargaSatuanMenjadi : item.hargaSatuanMenjadi;
+        const volumeMenjadi = itemUpdates.volumeMenjadi !== undefined ? itemUpdates.volumeMenjadi : item.volumeMenjadi;
+        const hargaSatuanMenjadi = itemUpdates.hargaSatuanMenjadi !== undefined ? itemUpdates.hargaSatuanMenjadi : item.hargaSatuanMenjadi;
         
         const jumlahSemula = calculateAmount(volumeSemula, hargaSatuanSemula);
         const jumlahMenjadi = calculateAmount(volumeMenjadi, hargaSatuanMenjadi);
@@ -120,9 +116,9 @@ const useBudgetData = (filters: FilterSelection) => {
         const selisih = calculateDifference(jumlahSemula, jumlahMenjadi);
         
         // Update the item
-        const updatedItem: BudgetItem = {
+        const updatedBudgetItem: BudgetItem = {
           ...item,
-          ...updatedItem,
+          ...itemUpdates,
           volumeSemula,
           hargaSatuanSemula,
           jumlahSemula,
@@ -133,7 +129,7 @@ const useBudgetData = (filters: FilterSelection) => {
         };
         
         // Update status based on values
-        return updateItemStatus(updatedItem);
+        return updateItemStatus(updatedBudgetItem);
       }
       
       return item;
@@ -151,8 +147,6 @@ const useBudgetData = (filters: FilterSelection) => {
   
   // Approve a budget item
   const approveBudgetItem = (id: string): BudgetItem | null => {
-    // ... keep existing code (approve budget item logic)
-    
     // Find the item
     const item = allItems.find(item => item.id === id);
     
@@ -181,8 +175,6 @@ const useBudgetData = (filters: FilterSelection) => {
   
   // Reject a budget item
   const rejectBudgetItem = (id: string): BudgetItem | null => {
-    // ... keep existing code (reject budget item logic)
-    
     // Find the item
     const item = allItems.find(item => item.id === id);
     
@@ -211,8 +203,6 @@ const useBudgetData = (filters: FilterSelection) => {
   
   // Import budget items from Excel
   const importBudgetItems = (items: Partial<BudgetItem>[]): void => {
-    // ... keep existing code (import budget items logic)
-    
     const newItems = items.map(item => {
       // Calculate jumlahSemula and jumlahMenjadi
       const volumeSemula = item.volumeSemula || 0;
