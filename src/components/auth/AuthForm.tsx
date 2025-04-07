@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
-import { Link } from 'react-router-dom';
 
 export interface AuthFormProps {
   onSuccess?: () => void;
@@ -32,31 +31,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
     try {
       setLoading(true);
       
-      // Try to find user's email from username
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('id, username, full_name')
-        .eq('username', username)
-        .single();
-      
-      if (profileError || !profileData) {
-        throw new Error('Username atau password tidak valid');
-      }
-      
-      // Get user's email from auth.users table using the id
-      const { data: userData, error: userError } = await supabase
-        .from('user_profiles')
-        .select('id, username, full_name, email')
-        .eq('username', username)
-        .single();
-      
-      if (userError || !userData || !userData.email) {
-        throw new Error('Username atau password tidak valid');
-      }
-      
-      // Now login with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: userData.email,
+        email: username,
         password: password,
       });
       
@@ -126,10 +102,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="pt-0 flex flex-col gap-2">
-        <div className="text-center text-sm text-gray-500 w-full">
-          Belum punya akun? <Link to="/register" className="text-blue-600 hover:underline">Daftar di sini</Link>
-        </div>
+      <CardFooter className="pt-0">
         <div className="text-center text-sm text-gray-500 w-full">
           Jika mengalami kendala login, hubungi administrator.
         </div>
