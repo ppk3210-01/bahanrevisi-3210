@@ -63,11 +63,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom colors for the budget app
-				'changed-row': '#FEF7CD', // Kuning muda
-				'new-row': '#F2FCE2',     // Hijau muda
-				'deleted-row': '#F1F0FB', // Abu-abu silang
-				'warning-box': '#ea384c', // Merah
+				// Custom colors for the budget app - updated to be more subtle
+				'changed-row': '#F5F3E6', // Subtle yellow
+				'new-row': '#F0F5EB',     // Subtle green
+				'deleted-row': '#F1F0FB', // Subtle purple/gray
+				'warning-box': '#e67a8a', // Muted red
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

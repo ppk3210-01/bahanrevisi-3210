@@ -70,7 +70,7 @@ export const generateBudgetSummary = (items: BudgetItem[]): BudgetSummary => {
   // Round the totals to thousands
   const totalSemula = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahSemula), 0));
   const totalMenjadi = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahMenjadi), 0));
-  const totalSelisih = roundToThousands(totalMenjadi - totalSemula); // Changed: Jumlah Menjadi - Jumlah Semula
+  const totalSelisih = roundToThousands(totalMenjadi - totalSemula); // Jumlah Menjadi - Jumlah Semula
 
   const changedItems = items.filter(item => item.status === 'changed');
   const newItems = items.filter(item => item.status === 'new');

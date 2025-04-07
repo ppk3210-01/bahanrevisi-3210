@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -49,6 +50,7 @@ const BudgetComparison: React.FC = () => {
   
   const { 
     budgetItems, 
+    allBudgetItems,
     loading, 
     addBudgetItem, 
     updateBudgetItem, 
@@ -58,11 +60,12 @@ const BudgetComparison: React.FC = () => {
     importBudgetItems
   } = useBudgetData(filters);
 
+  // Use all budget items for the summary calculation, not just filtered ones
   useEffect(() => {
-    if (budgetItems) {
-      setBudgetSummary(generateBudgetSummary(budgetItems));
+    if (allBudgetItems) {
+      setBudgetSummary(generateBudgetSummary(allBudgetItems));
     }
-  }, [budgetItems]);
+  }, [allBudgetItems]);
 
   const areFiltersComplete = () => {
     return (
