@@ -31,8 +31,31 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
     try {
       setLoading(true);
       
+      // Try to find user's email from username
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id, username, full_name')
+        .eq('username', username)
+        .single();
+      
+      if (profileError || !profileData) {
+        throw new Error('Username atau password tidak valid');
+      }
+      
+      // Get user's email from auth.users table using the id
+      const { data: userData, error: userError } = await supabase
+        .from('user_profiles')
+        .select('id, username, full_name, email')
+        .eq('username', username)
+        .single();
+      
+      if (userError || !userData || !userData.email) {
+        throw new Error('Username atau password tidak valid');
+      }
+      
+      // Now login with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: username,
+        email: userData.email,
         password: password,
       });
       

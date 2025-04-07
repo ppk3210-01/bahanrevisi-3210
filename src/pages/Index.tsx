@@ -12,7 +12,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-blue-600 text-white border-b sticky top-0 z-50">
+      <header className="bg-gray-700 text-white border-b sticky top-0 z-50">
         <div className="container mx-auto py-3 flex items-center justify-between">
           <div className="flex items-center">
             <img 
@@ -34,7 +34,7 @@ const Index = () => {
         <BudgetComparison />
       </main>
       
-      <footer className="bg-blue-600 text-white border-t mt-6">
+      <footer className="bg-gray-700 text-white border-t mt-6">
         <div className="container mx-auto py-3">
           <div className="text-sm font-medium text-right">© 2025 bahanrevisi-3210</div>
           <div className="text-xs opacity-80 text-right">Powered by Andries-3210</div>

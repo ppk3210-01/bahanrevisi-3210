@@ -40,8 +40,8 @@ const AuthStatus: React.FC<AuthStatusProps> = ({ user, profile }) => {
 
   if (!user) {
     return (
-      <Button variant="ghost" size="sm" asChild>
-        <a href="/login" className="text-blue-600 hover:text-blue-800">
+      <Button variant="outline" size="sm" asChild>
+        <a href="/login" className="text-white hover:text-gray-200 bg-transparent border-white hover:bg-gray-800">
           Login
         </a>
       </Button>
@@ -50,12 +50,12 @@ const AuthStatus: React.FC<AuthStatusProps> = ({ user, profile }) => {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="text-sm text-gray-600 hidden md:block">
+      <div className="text-sm text-white hidden md:block">
         Selamat datang, <span className="font-semibold">{profile?.full_name || user.email}</span>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-gray-600">
             <UserCircle2 className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
