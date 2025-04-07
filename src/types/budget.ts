@@ -52,18 +52,3 @@ export interface FilterSelection {
   subKomponen: string;
   akun: string;
 }
-
-export interface BudgetDataHook {
-  budgetItems: BudgetItem[];
-  loading: boolean;
-  error: string | null;
-  addBudgetItem: (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>) => Promise<BudgetItem | undefined>;
-  updateBudgetItem: (id: string, updates: Partial<BudgetItem>) => Promise<BudgetItem | undefined>;
-  deleteBudgetItem: (id: string) => Promise<void>;
-  approveBudgetItem: (id: string) => Promise<void>;
-  rejectBudgetItem: (id: string) => Promise<void>;
-  importBudgetItems: (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => Promise<BudgetItem[] | undefined>;
-  totalSemula: number;
-  totalMenjadi: number;
-  totalSelisih: number;
-}

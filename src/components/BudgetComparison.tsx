@@ -55,10 +55,7 @@ const BudgetComparison: React.FC = () => {
     deleteBudgetItem, 
     approveBudgetItem,
     rejectBudgetItem,
-    importBudgetItems,
-    totalSemula,
-    totalMenjadi,
-    totalSelisih
+    importBudgetItems
   } = useBudgetData(filters);
 
   useEffect(() => {
@@ -88,12 +85,13 @@ const BudgetComparison: React.FC = () => {
 
   return (
     <div className="space-y-2">
-      {/* Use the total values from useBudgetData hook directly */}
-      <BudgetSummaryBox 
-        totalSemula={totalSemula}
-        totalMenjadi={totalMenjadi}
-        totalSelisih={totalSelisih}
-      />
+      {budgetSummary && (
+        <BudgetSummaryBox 
+          totalSemula={budgetSummary.totalSemula}
+          totalMenjadi={budgetSummary.totalMenjadi}
+          totalSelisih={budgetSummary.totalSelisih}
+        />
+      )}
 
       <Card className="shadow-sm">
         <CardContent className="pt-3 pb-3">
@@ -147,7 +145,7 @@ const BudgetComparison: React.FC = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent className="max-w-xl">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-blue-600">Panduan Import Excel</AlertDialogTitle>
+                            <AlertDialogTitle className="text-gradient-blue">Panduan Import Excel</AlertDialogTitle>
                             <AlertDialogDescription className="text-xs">
                               <div className="space-y-2">
                                 <p className="font-medium">Petunjuk cara mengimpor data menggunakan file Excel</p>
@@ -276,30 +274,147 @@ const BudgetComparison: React.FC = () => {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogAction>OK</AlertDialogAction>
+                            <AlertDialogAction>Tutup</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
+
+                    {/*<div className="border rounded-md p-3 text-xs">
+                      <h4 className="font-medium mb-2">Panduan Import Excel:</h4>
+                      <p className="mb-2">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
+                      <ol className="list-decimal pl-5 mb-2 space-y-1">
+                        <li>uraian (string): Uraian/nama item anggaran</li>
+                        <li>volumeSemula (numeric): Volume semula</li>
+                        <li>satuanSemula (string): Satuan semula - contoh: "Paket", "Kegiatan", "Bulan", dll</li>
+                        <li>hargaSatuanSemula (numeric): Harga satuan semula</li>
+                        <li>volumeMenjadi (numeric): Volume menjadi</li>
+                        <li>satuanMenjadi (string): Satuan menjadi</li>
+                        <li>hargaSatuanMenjadi (numeric): Harga satuan menjadi</li>
+                        <li>subKomponen (string, optional): Sub komponen anggaran</li>
+                        <li>akun (string, optional): Kode akun</li>
+                      </ol>
+                      <p className="mb-2">Catatan penting:</p>
+                      <ul className="list-disc pl-5 mb-2 space-y-1">
+                        <li>Jumlah Semula dan Jumlah Menjadi dihitung otomatis</li>
+                        <li>Selisih dihitung otomatis (Jumlah Semula - Jumlah Menjadi)</li>
+                        <li>Status akan otomatis terisi sebagai 'new' untuk data baru</li>
+                        <li>Data akan ditambahkan sesuai dengan filter yang dipilih</li>
+                      </ul>
+                      <div className="mb-2">
+                        <p className="font-medium">Contoh Format Excel:</p>
+                        <table className="w-full text-xs border-collapse">
+                          <thead>
+                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                              <th className="border border-gray-300 px-1 py-1">uraian</th>
+                              <th className="border border-gray-300 px-1 py-1">volumeSemula</th>
+                              <th className="border border-gray-300 px-1 py-1">satuanSemula</th>
+                              <th className="border border-gray-300 px-1 py-1">hargaSatuanSemula</th>
+                              <th className="border border-gray-300 px-1 py-1">volumeMenjadi</th>
+                              <th className="border border-gray-300 px-1 py-1">satuanMenjadi</th>
+                              <th className="border border-gray-300 px-1 py-1">hargaSatuanMenjadi</th>
+                              <th className="border border-gray-300 px-1 py-1">subKomponen</th>
+                              <th className="border border-gray-300 px-1 py-1">akun</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="bg-white">
+                              <td className="border border-gray-300 px-1 py-1">Belanja ATK</td>
+                              <td className="border border-gray-300 px-1 py-1">1</td>
+                              <td className="border border-gray-300 px-1 py-1">Paket</td>
+                              <td className="border border-gray-300 px-1 py-1">5000000</td>
+                              <td className="border border-gray-300 px-1 py-1">1</td>
+                              <td className="border border-gray-300 px-1 py-1">Paket</td>
+                              <td className="border border-gray-300 px-1 py-1">4500000</td>
+                              <td className="border border-gray-300 px-1 py-1">Layanan Perkantoran</td>
+                              <td className="border border-gray-300 px-1 py-1">521111</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>*/}
                     
-                    <ExcelImportExport onImport={importBudgetItems} items={budgetItems} />
+                    <div className="mt-4">
+                      <ExcelImportExport 
+                        onImport={(items) => {
+                          importBudgetItems(items);
+                          return Promise.resolve();
+                        }}
+                        komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
+                        subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+                        akun={filters.akun !== 'all' ? filters.akun : undefined}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium mb-2">Export Tools</h3>
+                    <ExportOptions 
+                      items={budgetItems} 
+                      komponenOutput={filters.komponenOutput} 
+                    />
                   </div>
                 </div>
               </div>
             </TabsContent>
             
             <TabsContent value="summary" className="mt-0">
-              <DetailedSummaryView items={budgetItems} />
+              <div className="space-y-3">
+                <div className="flex items-center gap-1 mb-2">
+                  <Info className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-sm font-medium">Ringkasan Perubahan Pagu Anggaran</h3>
+                </div>
+                
+                {budgetSummary && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      <Card className="border border-changed-row shadow-sm bg-gradient-to-r from-amber-50 to-yellow-50">
+                        <CardContent className="p-2">
+                          <h3 className="text-xs font-semibold text-gray-700">Detil Diubah</h3>
+                          <p className="text-lg font-bold">{budgetSummary.changedItems.length}</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border border-new-row shadow-sm bg-gradient-to-r from-emerald-50 to-green-50">
+                        <CardContent className="p-2">
+                          <h3 className="text-xs font-semibold text-gray-700">Detil Baru</h3>
+                          <p className="text-lg font-bold">{budgetSummary.newItems.length}</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border border-deleted-row shadow-sm bg-gradient-to-r from-red-50 to-rose-50">
+                        <CardContent className="p-2">
+                          <h3 className="text-xs font-semibold text-gray-700">Detil Dihapus</h3>
+                          <p className="text-lg font-bold">{budgetSummary.deletedItems.length}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      onClick={showSummary}
+                      className="w-full md:w-auto h-8 text-xs btn-gradient-blue"
+                    >
+                      <Info className="mr-1 h-3 w-3" /> 
+                      Lihat Detail Ringkasan
+                    </Button>
+                    
+                    <div className="mt-4">
+                      <DetailedSummaryView />
+                    </div>
+                  </div>
+                )}
+              </div>
             </TabsContent>
           </CardContent>
         </Tabs>
       </Card>
-      
+
       {budgetSummary && (
         <SummaryDialog 
-          items={budgetItems} 
-          open={summaryVisible} 
-          onOpenChange={setSummaryVisible} 
+          items={budgetSummary.changedItems.concat(budgetSummary.newItems).concat(budgetSummary.deletedItems)}
+          open={summaryVisible}
+          onOpenChange={setSummaryVisible}
         />
       )}
     </div>

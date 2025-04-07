@@ -31,7 +31,6 @@ export type Database = {
         Row: {
           akun: string | null
           created_at: string | null
-          created_by: string | null
           harga_satuan_menjadi: number
           harga_satuan_semula: number
           id: string
@@ -48,7 +47,6 @@ export type Database = {
           status: string
           sub_komponen: string | null
           updated_at: string | null
-          updated_by: string | null
           uraian: string
           volume_menjadi: number
           volume_semula: number
@@ -56,7 +54,6 @@ export type Database = {
         Insert: {
           akun?: string | null
           created_at?: string | null
-          created_by?: string | null
           harga_satuan_menjadi: number
           harga_satuan_semula: number
           id?: string
@@ -73,7 +70,6 @@ export type Database = {
           status: string
           sub_komponen?: string | null
           updated_at?: string | null
-          updated_by?: string | null
           uraian: string
           volume_menjadi: number
           volume_semula: number
@@ -81,7 +77,6 @@ export type Database = {
         Update: {
           akun?: string | null
           created_at?: string | null
-          created_by?: string | null
           harga_satuan_menjadi?: number
           harga_satuan_semula?: number
           id?: string
@@ -98,7 +93,6 @@ export type Database = {
           status?: string
           sub_komponen?: string | null
           updated_at?: string | null
-          updated_by?: string | null
           uraian?: string
           volume_menjadi?: number
           volume_semula?: number
@@ -138,30 +132,6 @@ export type Database = {
           id?: string
           nama?: string
           program_pembebanan?: string
-        }
-        Relationships: []
-      }
-      user_profiles: {
-        Row: {
-          created_at: string
-          full_name: string
-          id: string
-          role: Database["public"]["Enums"]["user_role"]
-          username: string
-        }
-        Insert: {
-          created_at?: string
-          full_name: string
-          id: string
-          role?: Database["public"]["Enums"]["user_role"]
-          username: string
-        }
-        Update: {
-          created_at?: string
-          full_name?: string
-          id?: string
-          role?: Database["public"]["Enums"]["user_role"]
-          username?: string
         }
         Relationships: []
       }
@@ -241,13 +211,9 @@ export type Database = {
           total_semula: number | null
         }[]
       }
-      get_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: Database["public"]["Enums"]["user_role"]
-      }
     }
     Enums: {
-      user_role: "admin" | "user" | "viewer"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
