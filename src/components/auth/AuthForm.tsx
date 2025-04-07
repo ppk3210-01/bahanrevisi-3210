@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/hooks/use-toast";
+import { Link } from 'react-router-dom';
 
 export interface AuthFormProps {
   onSuccess?: () => void;
@@ -125,7 +126,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-0 flex flex-col gap-2">
+        <div className="text-center text-sm text-gray-500 w-full">
+          Belum punya akun? <Link to="/register" className="text-blue-600 hover:underline">Daftar di sini</Link>
+        </div>
         <div className="text-center text-sm text-gray-500 w-full">
           Jika mengalami kendala login, hubungi administrator.
         </div>
