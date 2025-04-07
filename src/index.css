@@ -59,8 +59,9 @@
   }
 }
 
+/* Table styling */
 .data-table th {
-  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700 text-xs;
+  @apply bg-gray-100 text-gray-700 text-xs;
 }
 
 .data-table .uraian-cell {
@@ -75,8 +76,9 @@
   @apply text-center;
 }
 
+/* Status-based row styling */
 .changed-row {
-  @apply bg-yellow-50;
+  @apply bg-amber-50;
 }
 
 .new-row {
@@ -105,102 +107,107 @@
 
 /* Row styling for data tables */
 .row-changed {
-  @apply bg-gradient-to-r from-amber-50 to-yellow-50;
+  @apply bg-amber-50;
 }
 
 .row-new {
-  @apply bg-gradient-to-r from-emerald-50 to-green-50;
+  @apply bg-green-50;
 }
 
 .row-deleted {
-  @apply bg-gradient-to-r from-red-50 to-rose-50;
+  @apply bg-red-50;
 }
 
-/* Add gradient text classes */
-.text-gradient-blue {
-  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text;
+/* Button styling */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white;
 }
 
-.text-gradient-green {
-  @apply bg-gradient-to-r from-green-600 to-teal-600 text-transparent bg-clip-text;
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 text-white;
 }
 
-.text-gradient-purple {
-  @apply bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text;
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white;
 }
 
-/* Add button gradient classes */
-.btn-gradient-blue {
-  @apply bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white;
+.btn-warning {
+  @apply bg-amber-500 hover:bg-amber-600 text-white;
 }
 
-.btn-gradient-green {
-  @apply bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white;
+/* Card styling */
+.card-blue {
+  @apply bg-blue-50 border-t-4 border-blue-400;
 }
 
-.btn-gradient-purple {
-  @apply bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white;
+.card-green {
+  @apply bg-green-50 border-t-4 border-green-400;
 }
 
-/* Add card gradient classes */
-.card-gradient-blue {
-  @apply bg-gradient-to-br from-blue-50 to-indigo-50 border-t-4 border-t-blue-400;
+.card-amber {
+  @apply bg-amber-50 border-t-4 border-amber-400;
 }
 
-.card-gradient-green {
-  @apply bg-gradient-to-br from-green-50 to-teal-50 border-t-4 border-t-green-400;
+.card-red {
+  @apply bg-red-50 border-t-4 border-red-400;
 }
 
-.card-gradient-purple {
-  @apply bg-gradient-to-br from-purple-50 to-pink-50 border-t-4 border-t-purple-400;
-}
-
-.card-gradient-orange {
-  @apply bg-gradient-to-br from-orange-50 to-amber-50 border-t-4 border-t-orange-400;
-}
-
-/* Add table styling improvements */
+/* Data table styling */
 .data-table tr:nth-child(even) {
-  @apply bg-gradient-to-r from-blue-50/30 to-indigo-50/30;
+  @apply bg-gray-50/50;
 }
 
 .data-table tr:hover {
-  @apply bg-gradient-to-r from-blue-100/50 to-indigo-100/50;
+  @apply bg-gray-100/50;
 }
 
 .data-table thead tr {
-  @apply bg-gradient-to-r from-blue-100 to-indigo-100;
+  @apply bg-gray-100;
 }
 
 .data-table tfoot tr {
-  @apply bg-gradient-to-r from-blue-100 to-indigo-100 font-semibold;
+  @apply bg-gray-100 font-semibold;
 }
 
-/* Add colorful alert dialog */
-.alert-dialog-gradient {
-  @apply bg-gradient-to-br from-blue-50 to-indigo-50;
+/* Custom text formatting */
+.text-success {
+  @apply text-green-600;
 }
 
-/* Add enhanced button styles */
-.btn-3d {
-  @apply shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
+.text-danger {
+  @apply text-red-600;
 }
 
-/* Animated background for important elements */
-.animated-bg {
-  background: linear-gradient(-45deg, #4f46e5, #3b82f6, #8b5cf6, #6366f1);
-  background-size: 400% 400%;
-  animation: gradientAnimation 15s ease infinite;
+.text-warning {
+  @apply text-amber-600;
 }
 
-@keyframes gradientAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+.text-info {
+  @apply text-blue-600;
+}
+
+/* Background colors for panels */
+.bg-panel {
+  @apply bg-gray-50;
+}
+
+.bg-panel-header {
+  @apply bg-gray-100;
+}
+
+.bg-panel-footer {
+  @apply bg-gray-100;
+}
+
+/* Custom status display for PPK approval */
+.status-ok {
+  @apply inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-md;
+}
+
+.status-pending {
+  @apply inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-amber-800 bg-amber-100 rounded-md;
+}
+
+.status-rejected {
+  @apply inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-md;
 }

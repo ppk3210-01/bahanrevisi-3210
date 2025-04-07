@@ -4,11 +4,13 @@ import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, isAdmin } = useAuth();
 
   // Function to fetch data based on filters
   useEffect(() => {
@@ -54,8 +56,8 @@ const useBudgetData = (filters: FilterSelection) => {
           const transformedData: BudgetItem[] = data.map((item: any) => {
             const jumlahSemula = Number(item.jumlah_semula || 0);
             const jumlahMenjadi = Number(item.jumlah_menjadi || 0);
-            // Calculate selisih as Jumlah Semula - Jumlah Menjadi
-            const calculatedSelisih = jumlahSemula - jumlahMenjadi;
+            // Calculate selisih as Jumlah Menjadi - Jumlah Semula
+            const calculatedSelisih = jumlahMenjadi - jumlahSemula;
             
             return {
               id: item.id,
@@ -68,7 +70,7 @@ const useBudgetData = (filters: FilterSelection) => {
               satuanMenjadi: item.satuan_menjadi,
               hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
               jumlahMenjadi: roundToThousands(jumlahMenjadi),
-              selisih: roundToThousands(calculatedSelisih), // Use the calculated selisih
+              selisih: roundToThousands(calculatedSelisih), // Changed: Jumlah Menjadi - Jumlah Semula
               status: item.status as "unchanged" | "changed" | "new" | "deleted",
               isApproved: item.is_approved,
               komponenOutput: item.komponen_output,
@@ -76,7 +78,8 @@ const useBudgetData = (filters: FilterSelection) => {
               kegiatan: item.kegiatan || '',
               rincianOutput: item.rincian_output || '',
               subKomponen: item.sub_komponen || '',
-              akun: item.akun || ''
+              akun: item.akun || '',
+              createdBy: item.created_by || null,
             };
           });
 
@@ -94,12 +97,21 @@ const useBudgetData = (filters: FilterSelection) => {
   }, [filters]);
 
   // Add a new budget item
-  const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>) => {
+  const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'createdBy'>) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Anda harus login untuk melakukan tindakan ini.'
+      });
+      return;
+    }
+
     try {
       // Calculate derived values
       const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
       const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-      const selisih = roundToThousands(jumlahSemula - jumlahMenjadi); // Corrected: Jumlah Semula - Jumlah Menjadi
+      const selisih = roundToThousands(jumlahMenjadi - jumlahSemula); // Changed: Jumlah Menjadi - Jumlah Semula
       
       // Create new item data for Supabase
       const newItemData = {
@@ -116,6 +128,8 @@ const useBudgetData = (filters: FilterSelection) => {
         komponen_output: item.komponenOutput,
         status: 'new',
         is_approved: false,
+        created_by: user.id,
+        updated_by: user.id,
         // Include filter values if they exist
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
         kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
@@ -156,7 +170,8 @@ const useBudgetData = (filters: FilterSelection) => {
           kegiatan: data.kegiatan || '',
           rincianOutput: data.rincian_output || '',
           subKomponen: data.sub_komponen || '',
-          akun: data.akun || ''
+          akun: data.akun || '',
+          createdBy: data.created_by || null,
         };
 
         // Add to state
@@ -175,7 +190,25 @@ const useBudgetData = (filters: FilterSelection) => {
   };
 
   // New function to import multiple budget items
-  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
+  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'createdBy'>[]) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Anda harus login untuk melakukan tindakan ini.'
+      });
+      return;
+    }
+
+    if (!isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Hanya admin yang dapat mengimpor data.'
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -184,7 +217,7 @@ const useBudgetData = (filters: FilterSelection) => {
         // Calculate derived values
         const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
         const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-        const selisih = roundToThousands(jumlahSemula - jumlahMenjadi);
+        const selisih = roundToThousands(jumlahMenjadi - jumlahSemula); // Changed: Jumlah Menjadi - Jumlah Semula
         
         return {
           uraian: item.uraian,
@@ -200,6 +233,8 @@ const useBudgetData = (filters: FilterSelection) => {
           komponen_output: item.komponenOutput,
           status: 'new',
           is_approved: false,
+          created_by: user.id,
+          updated_by: user.id,
           // Use values from the item or from current filters
           program_pembebanan: item.programPembebanan || filters.programPembebanan,
           kegiatan: item.kegiatan || filters.kegiatan,
@@ -240,7 +275,8 @@ const useBudgetData = (filters: FilterSelection) => {
           kegiatan: item.kegiatan || '',
           rincianOutput: item.rincian_output || '',
           subKomponen: item.sub_komponen || '',
-          akun: item.akun || ''
+          akun: item.akun || '',
+          createdBy: item.created_by || null,
         }));
 
         // Add to state
@@ -264,6 +300,15 @@ const useBudgetData = (filters: FilterSelection) => {
 
   // Update an existing budget item
   const updateBudgetItem = async (id: string, updates: Partial<BudgetItem>) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Anda harus login untuk melakukan tindakan ini.'
+      });
+      return;
+    }
+
     try {
       // Find the current item to use for calculations
       const currentItem = budgetItems.find(item => item.id === id);
@@ -271,8 +316,43 @@ const useBudgetData = (filters: FilterSelection) => {
         throw new Error('Item not found');
       }
       
+      // Check permissions for non-admin users
+      if (!isAdmin) {
+        // Non-admin users can only update their own unapproved items
+        if (currentItem.createdBy !== user.id || currentItem.isApproved) {
+          toast({
+            variant: "destructive",
+            title: "Akses Ditolak",
+            description: 'Anda tidak memiliki izin untuk mengubah item ini.'
+          });
+          return;
+        }
+        
+        // Non-admin users cannot edit the description of existing items
+        if ('uraian' in updates && currentItem.status !== 'new') {
+          toast({
+            variant: "destructive",
+            title: "Akses Ditolak",
+            description: 'Anda tidak dapat mengubah uraian item yang sudah ada.'
+          });
+          return;
+        }
+        
+        // Non-admin users cannot edit the semula values
+        if ('volumeSemula' in updates || 'satuanSemula' in updates || 'hargaSatuanSemula' in updates) {
+          toast({
+            variant: "destructive",
+            title: "Akses Ditolak",
+            description: 'Anda tidak dapat mengubah nilai Semula.'
+          });
+          return;
+        }
+      }
+      
       // Transform BudgetItem updates to Supabase format
-      const supabaseUpdates: Record<string, any> = {};
+      const supabaseUpdates: Record<string, any> = {
+        updated_by: user.id
+      };
       
       // Handle direct field mappings
       if ('uraian' in updates) supabaseUpdates.uraian = updates.uraian;
@@ -298,7 +378,7 @@ const useBudgetData = (filters: FilterSelection) => {
         updatedItem.jumlahMenjadi = jumlahMenjadi;
         
         // Calculate selisih based on the new jumlah_menjadi
-        const selisih = updatedItem.jumlahSemula - jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
+        const selisih = jumlahMenjadi - updatedItem.jumlahSemula; // Changed: Jumlah Menjadi - Jumlah Semula
         supabaseUpdates.selisih = selisih;
         updatedItem.selisih = selisih;
       }
@@ -313,7 +393,7 @@ const useBudgetData = (filters: FilterSelection) => {
         updatedItem.jumlahSemula = jumlahSemula;
         
         // Recalculate selisih since jumlah_semula changed
-        const selisih = jumlahSemula - updatedItem.jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
+        const selisih = updatedItem.jumlahMenjadi - jumlahSemula; // Changed: Jumlah Menjadi - Jumlah Semula
         supabaseUpdates.selisih = selisih;
         updatedItem.selisih = selisih;
       }
@@ -364,7 +444,35 @@ const useBudgetData = (filters: FilterSelection) => {
 
   // Delete a budget item
   const deleteBudgetItem = async (id: string) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Anda harus login untuk melakukan tindakan ini.'
+      });
+      return;
+    }
+
     try {
+      // Find the current item
+      const currentItem = budgetItems.find(item => item.id === id);
+      if (!currentItem) {
+        throw new Error('Item not found');
+      }
+
+      // Check permissions for non-admin users
+      if (!isAdmin) {
+        // Non-admin users can only delete their own unapproved new items
+        if (currentItem.createdBy !== user.id || currentItem.isApproved || currentItem.status !== 'new') {
+          toast({
+            variant: "destructive",
+            title: "Akses Ditolak",
+            description: 'Anda tidak memiliki izin untuk menghapus item ini.'
+          });
+          return;
+        }
+      }
+      
       // Delete from Supabase
       const { error: supabaseError } = await supabase
         .from('budget_items')
@@ -390,6 +498,24 @@ const useBudgetData = (filters: FilterSelection) => {
 
   // Approve a budget item
   const approveBudgetItem = async (id: string) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Anda harus login untuk melakukan tindakan ini.'
+      });
+      return;
+    }
+
+    if (!isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Hanya admin yang dapat menyetujui item.'
+      });
+      return;
+    }
+
     try {
       // Find the item
       const item = budgetItems.find(item => item.id === id);
@@ -407,7 +533,8 @@ const useBudgetData = (filters: FilterSelection) => {
           jumlah_semula: item.jumlahMenjadi,
           selisih: 0,
           status: 'unchanged',
-          is_approved: true
+          is_approved: true,
+          updated_by: user.id
         })
         .eq('id', id);
       
@@ -446,6 +573,24 @@ const useBudgetData = (filters: FilterSelection) => {
 
   // Reject a budget item - reset "menjadi" values to match "semula" values
   const rejectBudgetItem = async (id: string) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Anda harus login untuk melakukan tindakan ini.'
+      });
+      return;
+    }
+
+    if (!isAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Hanya admin yang dapat menolak item.'
+      });
+      return;
+    }
+
     try {
       // Find the item
       const item = budgetItems.find(item => item.id === id);
@@ -463,7 +608,8 @@ const useBudgetData = (filters: FilterSelection) => {
           jumlah_menjadi: item.jumlahSemula,
           selisih: 0,
           status: 'unchanged',
-          is_approved: false
+          is_approved: false,
+          updated_by: user.id
         })
         .eq('id', id);
       
