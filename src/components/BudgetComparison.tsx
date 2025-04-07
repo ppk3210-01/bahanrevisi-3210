@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -50,7 +49,6 @@ const BudgetComparison: React.FC = () => {
   
   const { 
     budgetItems, 
-    allBudgetItems,
     loading, 
     addBudgetItem, 
     updateBudgetItem, 
@@ -60,12 +58,11 @@ const BudgetComparison: React.FC = () => {
     importBudgetItems
   } = useBudgetData(filters);
 
-  // Use all budget items for the summary calculation, not just filtered ones
   useEffect(() => {
-    if (allBudgetItems) {
-      setBudgetSummary(generateBudgetSummary(allBudgetItems));
+    if (budgetItems) {
+      setBudgetSummary(generateBudgetSummary(budgetItems));
     }
-  }, [allBudgetItems]);
+  }, [budgetItems]);
 
   const areFiltersComplete = () => {
     return (
@@ -283,7 +280,7 @@ const BudgetComparison: React.FC = () => {
                       </AlertDialog>
                     </div>
 
-                    <div className="border rounded-md p-3 text-xs">
+                    {/*<div className="border rounded-md p-3 text-xs">
                       <h4 className="font-medium mb-2">Panduan Import Excel:</h4>
                       <p className="mb-2">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
                       <ol className="list-decimal pl-5 mb-2 space-y-1">
@@ -335,7 +332,7 @@ const BudgetComparison: React.FC = () => {
                           </tbody>
                         </table>
                       </div>
-                    </div>
+                    </div>*/}
                     
                     <div className="mt-4">
                       <ExcelImportExport 

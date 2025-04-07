@@ -19,7 +19,6 @@ export interface BudgetItem {
   rincianOutput?: string;
   subKomponen?: string;
   akun?: string;
-  createdBy?: string | null;
 }
 
 export interface BudgetSummary {

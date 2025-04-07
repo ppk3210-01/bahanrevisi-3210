@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -8,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FileBarChart2, FileSpreadsheet } from "lucide-react";
-import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
+import { formatCurrency } from '@/utils/budgetCalculations';
 import { BudgetItem } from '@/types/budget';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import * as XLSX from 'xlsx';
@@ -21,10 +20,9 @@ interface SummaryDialogProps {
 }
 
 const SummaryDialog: React.FC<SummaryDialogProps> = ({ items, open, onOpenChange }) => {
-  // Calculate totals - not filtered by any conditions
-  const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
-  const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
-  const totalSelisih = totalMenjadi - totalSemula; // Changed: Jumlah Menjadi - Jumlah Semula
+  const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
+  const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+  const totalSelisih = totalMenjadi - totalSemula;
   
   const changedItems = items.filter(item => item.status === 'changed');
   const newItems = items.filter(item => item.status === 'new');
@@ -166,79 +164,67 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items, open, onOpenChange
           </Button>
         </DialogHeader>
         
-        <div className="space-y-4 text-sm">
+        <div className="space-y-8">
           <div className="grid grid-cols-3 gap-4">
-            <div className="border rounded p-3">
-              <h3 className="text-sm font-semibold">Total Pagu Semula</h3>
-              <p className="text-base font-bold">{formatCurrency(totalSemula)}</p>
+            <div className="border rounded p-4">
+              <h3 className="text-lg font-semibold">Total Pagu Semula</h3>
+              <p className="text-xl font-bold">{formatCurrency(totalSemula)}</p>
             </div>
-            <div className="border rounded p-3">
-              <h3 className="text-sm font-semibold">Total Pagu Menjadi</h3>
-              <p className="text-base font-bold">{formatCurrency(totalMenjadi)}</p>
+            <div className="border rounded p-4">
+              <h3 className="text-lg font-semibold">Total Pagu Menjadi</h3>
+              <p className="text-xl font-bold">{formatCurrency(totalMenjadi)}</p>
             </div>
-            <div className={`border rounded p-3 ${totalSelisih === 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-              <h3 className="text-sm font-semibold">Selisih</h3>
-              <p className={`text-base font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`border rounded p-4 ${totalSelisih !== 0 ? 'bg-red-50' : 'bg-green-50'}`}>
+              <h3 className="text-lg font-semibold">Selisih</h3>
+              <p className={`text-xl font-bold ${totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
                 {formatCurrency(totalSelisih)}
               </p>
             </div>
           </div>
           
-          <div className="bg-gray-50 p-3 rounded border text-sm">
-            <h3 className="text-red-600 font-semibold mb-1">Kesimpulan</h3>
-            <p>Total Pagu anggaran semula sebesar <strong>{formatCurrency(totalSemula)}</strong> berubah menjadi <strong>{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}>{formatCurrency(totalSelisih)}</strong>.</p>
-            <p className="mt-1">Terdapat {changedItems.length} detil anggaran yang diubah, {newItems.length} detil anggaran baru, dan {deletedItems.length} detil anggaran yang dihapus.</p>
-            <p className="mt-1">Perubahan ini {totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total Pagu anggaran.</p>
+          <div className="bg-gray-50 p-4 rounded border">
+            <h3 className="text-red-600 font-semibold mb-2">Kesimpulan</h3>
+            <p>Total Pagu anggaran semula sebesar <strong>{formatCurrency(totalSemula)}</strong> berubah menjadi <strong>{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}>{formatCurrency(totalSelisih)}</strong>.</p>
+            <p className="mt-2">Terdapat {changedItems.length} detil anggaran yang diubah, {newItems.length} detil anggaran baru, dan {deletedItems.length} detil anggaran yang dihapus.</p>
+            <p className="mt-2">Perubahan ini {totalSelisih !== 0 ? 'menyebabkan' : 'tidak menyebabkan'} perubahan pada total Pagu anggaran.</p>
           </div>
           
           {changedItems.length > 0 && (
             <div>
-              <h3 className="text-orange-600 font-bold mb-1 text-sm">Pagu Anggaran Berubah</h3>
+              <h3 className="text-orange-600 font-bold mb-2">Pagu Anggaran Berubah</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">No</TableHead>
-                      <TableHead className="whitespace-normal text-xs">Pembebanan</TableHead>
-                      <TableHead className="whitespace-normal text-xs">Uraian</TableHead>
-                      <TableHead className="text-xs">Detail Perubahan</TableHead>
-                      <TableHead className="text-right text-xs">Jumlah Semula</TableHead>
-                      <TableHead className="text-right text-xs">Jumlah Menjadi</TableHead>
-                      <TableHead className="text-right text-xs">Selisih</TableHead>
+                      <TableHead>No</TableHead>
+                      <TableHead className="whitespace-normal">Pembebanan</TableHead>
+                      <TableHead className="whitespace-normal">Uraian</TableHead>
+                      <TableHead>Detail Perubahan</TableHead>
+                      <TableHead className="text-right">Jumlah Semula</TableHead>
+                      <TableHead className="text-right">Jumlah Menjadi</TableHead>
+                      <TableHead className="text-right">Selisih</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {changedItems.map((item, index) => (
                       <TableRow key={item.id}>
-                        <TableCell className="text-xs">{index + 1}</TableCell>
-                        <TableCell className="whitespace-normal break-words max-w-[150px] text-xs">
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[150px]">
                           {formatPembebananCode(item)}
                         </TableCell>
-                        <TableCell className="whitespace-normal break-words max-w-[200px] text-xs">
+                        <TableCell className="whitespace-normal break-words max-w-[200px]">
                           {item.uraian}
                         </TableCell>
-                        <TableCell className="text-xs">{renderDetailPerubahan(item)}</TableCell>
-                        <TableCell className="text-right text-xs">{formatCurrency(item.jumlahSemula)}</TableCell>
-                        <TableCell className="text-right text-xs">{formatCurrency(item.jumlahMenjadi)}</TableCell>
-                        <TableCell className="text-right text-xs">
+                        <TableCell>{renderDetailPerubahan(item)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+                        <TableCell className="text-right">
                           <span className={item.selisih !== 0 ? 'text-red-600' : 'text-green-600'}>
                             {formatCurrency(item.selisih)}
                           </span>
                         </TableCell>
                       </TableRow>
                     ))}
-                    <TableRow className="font-bold bg-gray-50">
-                      <TableCell colSpan={4} className="text-xs">Total</TableCell>
-                      <TableCell className="text-right text-xs">
-                        {formatCurrency(changedItems.reduce((sum, item) => sum + item.jumlahSemula, 0))}
-                      </TableCell>
-                      <TableCell className="text-right text-xs">
-                        {formatCurrency(changedItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0))}
-                      </TableCell>
-                      <TableCell className="text-right text-xs">
-                        {formatCurrency(changedItems.reduce((sum, item) => sum + item.selisih, 0))}
-                      </TableCell>
-                    </TableRow>
                   </TableBody>
                 </Table>
               </div>
@@ -247,42 +233,36 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items, open, onOpenChange
           
           {newItems.length > 0 && (
             <div>
-              <h3 className="text-green-600 font-bold mb-1 text-sm">Pagu Anggaran Baru</h3>
+              <h3 className="text-green-600 font-bold mb-2">Pagu Anggaran Baru</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">No</TableHead>
-                      <TableHead className="whitespace-normal text-xs">Pembebanan</TableHead>
-                      <TableHead className="whitespace-normal text-xs">Uraian</TableHead>
-                      <TableHead className="text-xs">Volume</TableHead>
-                      <TableHead className="text-xs">Satuan</TableHead>
-                      <TableHead className="text-right text-xs">Harga Satuan</TableHead>
-                      <TableHead className="text-right text-xs">Jumlah</TableHead>
+                      <TableHead>No</TableHead>
+                      <TableHead className="whitespace-normal">Pembebanan</TableHead>
+                      <TableHead className="whitespace-normal">Uraian</TableHead>
+                      <TableHead>Volume</TableHead>
+                      <TableHead>Satuan</TableHead>
+                      <TableHead className="text-right">Harga Satuan</TableHead>
+                      <TableHead className="text-right">Jumlah</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {newItems.map((item, index) => (
                       <TableRow key={item.id}>
-                        <TableCell className="text-xs">{index + 1}</TableCell>
-                        <TableCell className="whitespace-normal break-words max-w-[150px] text-xs">
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[150px]">
                           {formatPembebananCode(item)}
                         </TableCell>
-                        <TableCell className="whitespace-normal break-words max-w-[200px] text-xs">
+                        <TableCell className="whitespace-normal break-words max-w-[200px]">
                           {item.uraian}
                         </TableCell>
-                        <TableCell className="text-xs">{item.volumeMenjadi}</TableCell>
-                        <TableCell className="text-xs">{item.satuanMenjadi}</TableCell>
-                        <TableCell className="text-right text-xs">{formatCurrency(item.hargaSatuanMenjadi)}</TableCell>
-                        <TableCell className="text-right text-xs">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+                        <TableCell>{item.volumeMenjadi}</TableCell>
+                        <TableCell>{item.satuanMenjadi}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.hargaSatuanMenjadi)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
                       </TableRow>
                     ))}
-                    <TableRow className="font-bold bg-gray-50">
-                      <TableCell colSpan={6} className="text-xs">Total</TableCell>
-                      <TableCell className="text-right text-xs">
-                        {formatCurrency(newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0))}
-                      </TableCell>
-                    </TableRow>
                   </TableBody>
                 </Table>
               </div>
@@ -291,42 +271,36 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items, open, onOpenChange
           
           {deletedItems.length > 0 && (
             <div>
-              <h3 className="text-gray-600 font-bold mb-1 text-sm">Pagu Anggaran Dihapus</h3>
+              <h3 className="text-lg font-semibold mb-2">Pagu Anggaran Dihapus</h3>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">No</TableHead>
-                      <TableHead className="whitespace-normal text-xs">Pembebanan</TableHead>
-                      <TableHead className="whitespace-normal text-xs">Uraian</TableHead>
-                      <TableHead className="text-xs">Volume</TableHead>
-                      <TableHead className="text-xs">Satuan</TableHead>
-                      <TableHead className="text-right text-xs">Harga Satuan</TableHead>
-                      <TableHead className="text-right text-xs">Jumlah</TableHead>
+                      <TableHead>No</TableHead>
+                      <TableHead className="whitespace-normal">Pembebanan</TableHead>
+                      <TableHead className="whitespace-normal">Uraian</TableHead>
+                      <TableHead>Volume</TableHead>
+                      <TableHead>Satuan</TableHead>
+                      <TableHead className="text-right">Harga Satuan</TableHead>
+                      <TableHead className="text-right">Jumlah</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {deletedItems.map((item, index) => (
                       <TableRow key={item.id}>
-                        <TableCell className="text-xs">{index + 1}</TableCell>
-                        <TableCell className="whitespace-normal break-words max-w-[150px] text-xs">
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="whitespace-normal break-words max-w-[150px]">
                           {formatPembebananCode(item)}
                         </TableCell>
-                        <TableCell className="whitespace-normal break-words max-w-[200px] text-xs">
+                        <TableCell className="whitespace-normal break-words max-w-[200px]">
                           {item.uraian}
                         </TableCell>
-                        <TableCell className="text-xs">{item.volumeSemula}</TableCell>
-                        <TableCell className="text-xs">{item.satuanSemula}</TableCell>
-                        <TableCell className="text-right text-xs">{formatCurrency(item.hargaSatuanSemula)}</TableCell>
-                        <TableCell className="text-right text-xs">{formatCurrency(item.jumlahSemula)}</TableCell>
+                        <TableCell>{item.volumeSemula}</TableCell>
+                        <TableCell>{item.satuanSemula}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.hargaSatuanSemula)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
                       </TableRow>
                     ))}
-                    <TableRow className="font-bold bg-gray-50">
-                      <TableCell colSpan={6} className="text-xs">Total</TableCell>
-                      <TableCell className="text-right text-xs">
-                        {formatCurrency(deletedItems.reduce((sum, item) => sum + item.jumlahSemula, 0))}
-                      </TableCell>
-                    </TableRow>
                   </TableBody>
                 </Table>
               </div>
