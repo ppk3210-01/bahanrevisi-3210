@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/budgetCalculations';
@@ -14,7 +15,6 @@ import { ChevronsUpDown, Download, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
-import { BudgetItem } from '@/types/budget';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,11 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface DetailedSummaryViewProps {
-  items?: BudgetItem[];
-  type?: string;
-}
-
+// Type definitions for our summary data
 type SummaryItem = {
   account_group?: string;
   akun?: string;
@@ -47,62 +43,18 @@ type SummaryItem = {
 type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
 type SortDirection = 'asc' | 'desc';
 
+// Format numbers by rounding to the nearest thousand and using currency format
 const formatToThousands = (value: number): string => {
+  // Round to nearest thousand
   const roundedValue = Math.round(value / 1000) * 1000;
   return formatCurrency(roundedValue);
 };
 
-const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }) => {
+const DetailedSummaryView: React.FC = () => {
   const [accountGroupData, setAccountGroupData] = useState<SummaryItem[]>([]);
   const [komponenData, setKomponenData] = useState<SummaryItem[]>([]);
   const [akunData, setAkunData] = useState<SummaryItem[]>([]);
   const [loading, setLoading] = useState(true);
-
-  if (items && type) {
-    return (
-      <div className="space-y-2">
-        {items.length === 0 ? (
-          <p className="text-center text-gray-500 py-4">Tidak ada data.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Pembebanan</TableHead>
-                <TableHead className="w-[400px]">Uraian</TableHead>
-                <TableHead>Volume</TableHead>
-                <TableHead>Satuan</TableHead>
-                <TableHead className="text-right">Harga Satuan</TableHead>
-                <TableHead className="text-right">Jumlah Semula</TableHead>
-                <TableHead className="text-right">Jumlah Menjadi</TableHead>
-                <TableHead className="text-right">Selisih</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">
-                    {item.komponenOutput && item.subKomponen && item.akun ? 
-                      `${item.komponenOutput}.${item.subKomponen}.A.${item.akun}` : '-'}
-                  </TableCell>
-                  <TableCell className="break-words">{item.uraian}</TableCell>
-                  <TableCell>{type === 'deleted' ? item.volumeSemula : item.volumeMenjadi}</TableCell>
-                  <TableCell>{type === 'deleted' ? item.satuanSemula : item.satuanMenjadi}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(type === 'deleted' ? item.hargaSatuanSemula : item.hargaSatuanMenjadi)}
-                  </TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
-                  <TableCell className={`text-right ${item.selisih >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(Math.abs(item.selisih))}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
-    );
-  }
 
   const [accountGroupSort, setAccountGroupSort] = useState<{field: SortField, direction: SortDirection}>({
     field: 'group',
@@ -119,25 +71,30 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
     direction: 'asc'
   });
 
+  // Fetch data from Supabase
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Fetch account group data using rpc
         const { data: accountGroupResult, error: accountGroupError } = await supabase
           .rpc('get_budget_summary_by_account_group');
         
         if (accountGroupError) throw accountGroupError;
         
+        // Fetch komponen data using rpc
         const { data: komponenResult, error: komponenError } = await supabase
           .rpc('get_budget_summary_by_komponen');
         
         if (komponenError) throw komponenError;
         
+        // Fetch akun data using rpc
         const { data: akunResult, error: akunError } = await supabase
           .rpc('get_budget_summary_by_akun');
         
         if (akunError) throw akunError;
         
+        // Transform to our data format
         setAccountGroupData(accountGroupResult || []);
         setKomponenData(komponenResult || []);
         setAkunData(akunResult || []);
@@ -156,6 +113,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
     fetchData();
   }, []);
 
+  // Sort functions
   const sortData = <T extends SummaryItem>(
     data: T[], 
     field: SortField, 
@@ -206,8 +164,10 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
 
   const exportToExcel = () => {
     try {
+      // Create a workbook with multiple sheets
       const wb = XLSX.utils.book_new();
       
+      // Add account group data
       const accountGroupSheet = XLSX.utils.json_to_sheet(accountGroupData.map(item => ({
         'Kelompok Akun': item.account_group,
         'Pagu Semula': item.total_semula,
@@ -219,6 +179,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
       })));
       XLSX.utils.book_append_sheet(wb, accountGroupSheet, 'Kelompok Akun');
       
+      // Add komponen data
       const komponenSheet = XLSX.utils.json_to_sheet(komponenData.map(item => ({
         'Komponen Output': item.komponen_output,
         'Pagu Semula': item.total_semula,
@@ -230,6 +191,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
       })));
       XLSX.utils.book_append_sheet(wb, komponenSheet, 'Komponen Output');
       
+      // Add akun data
       const akunSheet = XLSX.utils.json_to_sheet(akunData.map(item => ({
         'Akun': item.akun,
         'Pagu Semula': item.total_semula,
@@ -241,6 +203,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
       })));
       XLSX.utils.book_append_sheet(wb, akunSheet, 'Per Akun');
       
+      // Save the file
       XLSX.writeFile(wb, 'Rekap_Anggaran.xlsx');
       
       toast({
@@ -261,6 +224,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
   const sortedKomponenData = sortData(komponenData, komponenSort.field, komponenSort.direction);
   const sortedAkunData = sortData(akunData, akunSort.field, akunSort.direction);
 
+  // Calculate totals
   const accountGroupTotals = {
     total_semula: accountGroupData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
     total_menjadi: accountGroupData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
@@ -313,6 +277,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
       total_items: number;
     }
   ) => {
+    // Choose a different pastel color for each table
     let bgColor = "from-blue-50 to-indigo-50";
     let borderColor = "border-t-blue-400";
     
@@ -404,6 +369,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ items, type }
     );
   };
 
+  // Create additional boxes for the Summary view
   const renderAdditionalBoxes = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
