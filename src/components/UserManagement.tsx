@@ -50,8 +50,8 @@ const UserManagement: React.FC = () => {
         if (error) {
           console.error('Supabase error fetching users:', error);
         } else if (data) {
-          // Ensure proper typing of user data from Supabase
-          const typedData = data.map(user => {
+          // Properly cast data from Supabase to LocalUserProfile
+          const typedData: LocalUserProfile[] = data.map(user => {
             // Ensure that role is either 'admin' or 'user'
             let safeRole: 'admin' | 'user' = 'user';
             if (user.role === 'admin' || user.role === 'user') {
@@ -66,7 +66,7 @@ const UserManagement: React.FC = () => {
               full_name: user.full_name || null,
               created_at: user.created_at,
               updated_at: user.updated_at
-            } as LocalUserProfile;
+            };
           });
           
           const supabaseUserIds = typedData.map(user => user.id);
