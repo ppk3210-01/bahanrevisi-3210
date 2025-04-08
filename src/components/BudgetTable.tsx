@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -880,4 +881,87 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </td>
                 <td className="unit-cell py-1 px-1">
                   <Select 
-                    value={newItem.
+                    value={newItem.satuanMenjadi} 
+                    onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
+                    required
+                    disabled={!isAdmin && !areFiltersComplete}
+                  >
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue placeholder="Satuan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNIT_OPTIONS.map((unit) => (
+                        <SelectItem key={unit} value={unit} className="text-xs">
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+                <td className="number-cell py-1 px-1">
+                  <Input 
+                    type="number" 
+                    placeholder="0" 
+                    value={newItem.hargaSatuanMenjadi || ''} 
+                    onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
+                    min="0"
+                    required
+                    className="h-7 text-xs"
+                    disabled={!isAdmin && !areFiltersComplete}
+                  />
+                </td>
+                <td className="number-cell py-1 px-1">
+                  {formatCurrency(newItemJumlahMenjadi)}
+                </td>
+                <td className="number-cell py-1 px-1">
+                  <span className={newItemSelisih > 0 ? 'text-green-600' : newItemSelisih < 0 ? 'text-red-600' : ''}>
+                    {formatCurrency(newItemSelisih)}
+                  </span>
+                </td>
+                <td className="py-1 px-1" colSpan={2}>
+                  <Button 
+                    onClick={handleAddItem} 
+                    size="sm" 
+                    className="w-full h-7 text-xs"
+                    disabled={!isAdmin && !areFiltersComplete}
+                  >
+                    <PlusCircle className="h-3 w-3 mr-1" />
+                    Tambah
+                  </Button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div className="text-xs text-gray-500">
+          Total halaman ini: {formatCurrency(pageTotalSemula)} → {formatCurrency(pageTotalMenjadi)} 
+          <span className={pageTotalSelisih > 0 ? 'text-green-600 ml-1' : pageTotalSelisih < 0 ? 'text-red-600 ml-1' : 'ml-1'}>
+            ({formatCurrency(pageTotalSelisih)})
+          </span>
+        </div>
+        
+        <div className="text-xs font-medium">
+          Total keseluruhan: {formatCurrency(grandTotalSemula)} → {formatCurrency(grandTotalMenjadi)}
+          <span className={grandTotalSelisih > 0 ? 'text-green-600 ml-1' : grandTotalSelisih < 0 ? 'text-red-600 ml-1' : 'ml-1'}>
+            ({formatCurrency(grandTotalSelisih)})
+          </span>
+        </div>
+      </div>
+      
+      {renderPagination()}
+
+      {detailItem && (
+        <DetailDialog
+          isOpen={isDetailOpen}
+          onClose={() => setIsDetailOpen(false)}
+          item={detailItem}
+        />
+      )}
+    </div>
+  );
+};
+
+export default BudgetTable;
