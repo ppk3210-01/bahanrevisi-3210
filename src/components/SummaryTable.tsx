@@ -1,8 +1,9 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BudgetSummaryRecord } from '@/types/database';
 import { formatCurrency } from '@/utils/budgetCalculations';
+import { ArrowUpDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SummaryTableProps {
   summaryData: BudgetSummaryRecord[];
@@ -10,7 +11,9 @@ interface SummaryTableProps {
 }
 
 const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
-  // Get the appropriate column name based on the view type
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  
   const getColumnName = (): string => {
     switch (view) {
       case 'account_group': return 'Kelompok Akun';
@@ -20,7 +23,6 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     }
   };
 
-  // Get the appropriate value from the record based on view type
   const getValueFromRecord = (record: BudgetSummaryRecord): string | null => {
     if ('account_group' in record && view === 'account_group') {
       return record.account_group || '-';
@@ -31,28 +33,142 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     }
     return '-';
   };
+  
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+  
+  const getGroupedData = () => {
+    let data = [...summaryData];
+    
+    if (view === 'account_group') {
+      const group51Items = data.filter(item => 
+        'account_group' in item && item.account_group?.toString().startsWith('51')
+      );
+      
+      const group52Items = data.filter(item => 
+        'account_group' in item && item.account_group?.toString().startsWith('52')
+      );
+      
+      const group53Items = data.filter(item => 
+        'account_group' in item && item.account_group?.toString().startsWith('53')
+      );
+      
+      const otherItems = data.filter(item => 
+        !('account_group' in item) || 
+        (item.account_group && 
+          !item.account_group.toString().startsWith('51') && 
+          !item.account_group.toString().startsWith('52') && 
+          !item.account_group.toString().startsWith('53'))
+      );
+      
+      data = [...group51Items, ...group52Items, ...group53Items, ...otherItems];
+    }
+    
+    if (sortField) {
+      data.sort((a, b) => {
+        let valA: any;
+        let valB: any;
+        
+        switch (sortField) {
+          case 'category':
+            valA = getValueFromRecord(a) || '';
+            valB = getValueFromRecord(b) || '';
+            break;
+          case 'totalSemula':
+            valA = a.total_semula || 0;
+            valB = b.total_semula || 0;
+            break;
+          case 'totalMenjadi':
+            valA = a.total_menjadi || 0;
+            valB = b.total_menjadi || 0;
+            break;
+          case 'totalSelisih':
+            valA = a.total_selisih || 0;
+            valB = b.total_selisih || 0;
+            break;
+          case 'newItems':
+            valA = a.new_items || 0;
+            valB = b.new_items || 0;
+            break;
+          case 'changedItems':
+            valA = a.changed_items || 0;
+            valB = b.changed_items || 0;
+            break;
+          case 'totalItems':
+            valA = a.total_items || 0;
+            valB = b.total_items || 0;
+            break;
+          default:
+            return 0;
+        }
+        
+        if (valA === valB) return 0;
+        
+        const result = valA > valB ? 1 : -1;
+        return sortDirection === 'asc' ? result : -result;
+      });
+    }
+    
+    return data;
+  };
+  
+  const displayData = getGroupedData();
 
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[300px]">{getColumnName()}</TableHead>
-            <TableHead className="text-right">Total Semula</TableHead>
-            <TableHead className="text-right">Total Menjadi</TableHead>
-            <TableHead className="text-right">Selisih</TableHead>
-            <TableHead className="text-center">Items Baru</TableHead>
-            <TableHead className="text-center">Items Berubah</TableHead>
-            <TableHead className="text-center">Total Items</TableHead>
+            <TableHead className="w-[300px]">
+              <Button variant="ghost" onClick={() => handleSort('category')} className="flex items-center p-0">
+                {getColumnName()} <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead className="text-right">
+              <Button variant="ghost" onClick={() => handleSort('totalSemula')} className="flex items-center justify-end p-0 w-full">
+                Total Semula <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead className="text-right">
+              <Button variant="ghost" onClick={() => handleSort('totalMenjadi')} className="flex items-center justify-end p-0 w-full">
+                Total Menjadi <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead className="text-right">
+              <Button variant="ghost" onClick={() => handleSort('totalSelisih')} className="flex items-center justify-end p-0 w-full">
+                Selisih <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead className="text-center">
+              <Button variant="ghost" onClick={() => handleSort('newItems')} className="flex items-center justify-center p-0 w-full">
+                Items Baru <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead className="text-center">
+              <Button variant="ghost" onClick={() => handleSort('changedItems')} className="flex items-center justify-center p-0 w-full">
+                Items Berubah <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
+            <TableHead className="text-center">
+              <Button variant="ghost" onClick={() => handleSort('totalItems')} className="flex items-center justify-center p-0 w-full">
+                Total Items <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {summaryData.length === 0 ? (
+          {displayData.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} className="text-center">Tidak ada data</TableCell>
             </TableRow>
           ) : (
-            summaryData.map((record, index) => {
+            displayData.map((record, index) => {
               const categoryValue = getValueFromRecord(record);
               const totalSemula = record.total_semula || 0;
               const totalMenjadi = record.total_menjadi || 0;

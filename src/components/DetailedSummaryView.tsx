@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   BarChart3, 
@@ -27,6 +28,18 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   const [chartType, setChartType] = useState<'bar' | 'pie' | 'table'>(defaultView);
 
   const isLoading = loading || !summaryData;
+  
+  // Filter data to remove empty entries
+  const filteredSummaryData = summaryData.filter(item => {
+    if (view === 'account_group') {
+      return 'account_group' in item && item.account_group !== null && item.account_group !== '-';
+    } else if (view === 'komponen_output') {
+      return 'komponen_output' in item && item.komponen_output !== null && item.komponen_output !== '-';
+    } else if (view === 'akun') {
+      return 'akun' in item && item.akun !== null && item.akun !== '-';
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-4">
@@ -76,9 +89,9 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       {isLoading ? (
         <p>Loading summary data...</p>
       ) : chartType === 'table' ? (
-        <SummaryTable summaryData={summaryData} view={view} />
+        <SummaryTable summaryData={filteredSummaryData} view={view} />
       ) : (
-        <SummaryChart summaryData={summaryData} chartType={chartType} view={view} />
+        <SummaryChart summaryData={filteredSummaryData} chartType={chartType} view={view} />
       )}
     </div>
   );

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { FileSpreadsheet, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { BudgetItem } from '@/types/budget';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { BudgetSummaryRecord } from '@/types/database';
 
 interface SummaryDialogProps {
@@ -21,6 +21,20 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
   items,
   summaryData = []
 }) => {
+  // Calculate summary data
+  const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
+  const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+  const totalSelisih = totalMenjadi - totalSemula;
+  const newItems = items.filter(item => item.status === 'new').length;
+  const changedItems = items.filter(item => item.status === 'changed').length;
+  const deletedItems = items.filter(item => item.status === 'deleted').length;
+  
+  const getSelisihDescription = (selisih: number): string => {
+    if (selisih > 0) return 'Bertambah';
+    if (selisih < 0) return 'Berkurang';
+    return 'Tetap';
+  };
+
   const handleExportAll = () => {
     const workbook = XLSX.utils.book_new();
     
@@ -65,30 +79,32 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     
     const newItems = items.filter(item => item.status === 'new').length;
     const changedItems = items.filter(item => item.status === 'changed').length;
+    const deletedItems = items.filter(item => item.status === 'deleted').length;
     
     const data = [
-      ["Ringkasan Total Anggaran", "", ""],
+      ["Ringkasan Perubahan Pagu Anggaran", "", ""],
       ["", "", ""],
-      ["Total Pagu Semula", totalSemula, ""],
-      ["Total Pagu Menjadi", totalMenjadi, ""],
-      ["Total Selisih", totalSelisih, totalSelisih > 0 ? "Bertambah" : totalSelisih < 0 ? "Berkurang" : "Tetap"],
+      ["Total Pagu Semula", roundToThousands(totalSemula), ""],
+      ["Total Pagu Menjadi", roundToThousands(totalMenjadi), ""],
+      ["Selisih", roundToThousands(totalSelisih), totalSelisih > 0 ? "Bertambah" : totalSelisih < 0 ? "Berkurang" : "Tetap"],
       ["", "", ""],
-      ["Jumlah Item Baru", newItems, ""],
-      ["Jumlah Item Berubah", changedItems, ""],
-      ["Total Item", items.length, ""]
+      ["Kesimpulan", "", ""],
+      [`Total Pagu anggaran semula sebesar ${formatCurrency(roundToThousands(totalSemula))} berubah menjadi ${formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih sebesar ${formatCurrency(roundToThousands(totalSelisih))}.`, "", ""],
+      [`Terdapat ${changedItems} detil anggaran yang diubah, ${newItems} detil anggaran baru, dan ${deletedItems} detil anggaran yang dihapus.`, "", ""],
+      ["Perubahan ini menyebabkan perubahan pada total Pagu anggaran.", "", ""],
     ];
     
     const worksheet = XLSX.utils.aoa_to_sheet(data);
     
     // Set column widths
     worksheet['!cols'] = [
-      { wch: 30 }, // Column A width
+      { wch: 50 }, // Column A width
       { wch: 20 }, // Column B width
       { wch: 15 }, // Column C width
     ];
     
     // Apply currency formatting
-    ["C3", "C4", "C5"].forEach(cell => {
+    ["B3", "B4", "B5"].forEach(cell => {
       if (worksheet[cell]) {
         worksheet[cell].z = '#,##0.00';
       }
@@ -129,7 +145,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       item.satuanMenjadi,
       item.hargaSatuanMenjadi,
       item.jumlahMenjadi,
-      item.selisih,
+      item.jumlahMenjadi - item.jumlahSemula, // Ensure calculation is correct
       item.status
     ]);
     
@@ -226,7 +242,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Add total row
     const totalSemula = dataRows.reduce((sum, row) => sum + (row[1] || 0), 0);
     const totalMenjadi = dataRows.reduce((sum, row) => sum + (row[2] || 0), 0);
-    const totalSelisih = totalMenjadi - totalSemula;
+    const totalSelisih = totalMenjadi - totalSemula; // Ensure calculation is correct
     const totalNewItems = dataRows.reduce((sum, row) => sum + (row[4] || 0), 0);
     const totalChangedItems = dataRows.reduce((sum, row) => sum + (row[5] || 0), 0);
     const totalItems = dataRows.reduce((sum, row) => sum + (row[6] || 0), 0);
@@ -273,40 +289,53 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle className="text-xl">Ekspor Ringkasan Anggaran</DialogTitle>
+          <DialogTitle className="text-xl">Ringkasan Perubahan Pagu Anggaran</DialogTitle>
         </DialogHeader>
         
+        {/* Display summary data according to the image */}
         <div className="space-y-4 p-4">
-          <p className="text-sm text-gray-600">
-            Pilih opsi ekspor ringkasan anggaran ke Excel:
-          </p>
+          <div className="flex flex-wrap gap-4">
+            <div className="bg-white border rounded-md p-4 w-full md:w-[30%] flex-grow">
+              <div className="text-sm font-medium mb-2">Total Pagu Semula</div>
+              <div className="text-lg font-bold">{formatCurrency(roundToThousands(totalSemula))}</div>
+            </div>
+            
+            <div className="bg-white border rounded-md p-4 w-full md:w-[30%] flex-grow">
+              <div className="text-sm font-medium mb-2">Total Pagu Menjadi</div>
+              <div className="text-lg font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</div>
+            </div>
+            
+            <div className={`border rounded-md p-4 w-full md:w-[30%] flex-grow ${totalSelisih > 0 ? 'bg-red-50' : totalSelisih < 0 ? 'bg-blue-50' : 'bg-white'}`}>
+              <div className="text-sm font-medium mb-2">Selisih</div>
+              <div className={`text-lg font-bold ${totalSelisih > 0 ? 'text-red-600' : totalSelisih < 0 ? 'text-blue-600' : ''}`}>
+                {formatCurrency(roundToThousands(totalSelisih))}
+              </div>
+            </div>
+          </div>
           
-          <div className="flex flex-col space-y-2">
+          {/* Kesimpulan section */}
+          <div className="bg-gray-50 border rounded-md p-4 mt-4">
+            <h3 className="font-semibold mb-2">Kesimpulan</h3>
+            <p className="text-sm mb-2">
+              Total Pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} berubah menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih sebesar {formatCurrency(roundToThousands(totalSelisih))}.
+            </p>
+            <p className="text-sm mb-2">
+              Terdapat {changedItems} detil anggaran yang diubah, {newItems} detil anggaran baru, dan {deletedItems} detil anggaran yang dihapus.
+            </p>
+            <p className="text-sm">
+              Perubahan ini menyebabkan perubahan pada total Pagu anggaran.
+            </p>
+          </div>
+          
+          <div className="flex justify-end mt-4">
             <Button 
               variant="default"
               onClick={handleExportAll}
               className="flex items-center"
             >
               <FileSpreadsheet className="h-5 w-5 mr-2" />
-              <span>Ekspor Semua Data</span>
-              <span className="ml-2 text-xs text-white opacity-75">
-                (Termasuk Ringkasan Kelompok, Komponen & Akun)
-              </span>
+              <span>Export Excel</span>
             </Button>
-          </div>
-          
-          <div className="pt-4 border-t">
-            <h3 className="font-medium mb-2">Keterangan:</h3>
-            <p className="text-sm text-gray-600">
-              File Excel yang dihasilkan akan berisi beberapa sheet:
-            </p>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 pl-4">
-              <li>Ringkasan Total - Rangkuman total anggaran</li>
-              <li>Detail Anggaran - Semua item anggaran</li>
-              <li>Ringkasan Kelompok Akun - Rangkuman per kelompok akun</li>
-              <li>Ringkasan Komponen Output - Rangkuman per komponen output</li>
-              <li>Ringkasan Akun - Rangkuman per akun</li>
-            </ul>
           </div>
         </div>
       </DialogContent>

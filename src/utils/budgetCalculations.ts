@@ -8,7 +8,7 @@ export const calculateAmount = (volume: number, unitPrice: number): number => {
 
 // Calculate the difference between the initial and new amounts (Jumlah Menjadi - Jumlah Semula)
 export const calculateDifference = (initialAmount: number, newAmount: number): number => {
-  return newAmount - initialAmount; // Changed to newAmount - initialAmount
+  return newAmount - initialAmount; // Ensure the calculation is correct: Menjadi - Semula
 };
 
 // Round to thousands
@@ -70,7 +70,7 @@ export const generateBudgetSummary = (items: BudgetItem[]): BudgetSummary => {
   // Round the totals to thousands
   const totalSemula = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahSemula), 0));
   const totalMenjadi = roundToThousands(items.reduce((total, item) => total + roundToThousands(item.jumlahMenjadi), 0));
-  const totalSelisih = roundToThousands(totalMenjadi - totalSemula); // Changed to Jumlah Menjadi - Jumlah Semula
+  const totalSelisih = roundToThousands(totalMenjadi - totalSemula); // Ensure calculation is correct: Menjadi - Semula
 
   const changedItems = items.filter(item => item.status === 'changed');
   const newItems = items.filter(item => item.status === 'new');

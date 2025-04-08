@@ -59,28 +59,6 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
                 {formatToThousands(totalSelisih)} ({getSelisihDescription(totalSelisih)})
               </span>
             </div>
-            
-            <div className="border-t pt-2 mt-1">
-              <div>
-                <span className="text-gray-600 mr-1">Item Baru:</span>
-                <span className="font-semibold">{newItems} item</span>
-              </div>
-              
-              <div>
-                <span className="text-gray-600 mr-1">Item Diubah:</span>
-                <span className="font-semibold">{changedItems} item</span>
-              </div>
-              
-              <div>
-                <span className="text-gray-600 mr-1">Total Item:</span>
-                <span className="font-semibold">{totalItems} item</span>
-              </div>
-              
-              <div className="text-xs text-gray-500 mt-2 italic">
-                Ringkasan ini menunjukkan perbandingan anggaran dengan total selisih {formatCurrency(totalSelisih)} 
-                yang {getSelisihDescription(totalSelisih).toLowerCase()}
-              </div>
-            </div>
           </>
         )}
       </div>

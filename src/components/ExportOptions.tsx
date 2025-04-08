@@ -30,7 +30,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       'Satuan Menjadi': item.satuanMenjadi,
       'Harga Satuan Menjadi': item.hargaSatuanMenjadi, // Keep original value without rounding
       'Jumlah Menjadi': roundToThousands(item.jumlahMenjadi), // Apply rounding to thousands
-      'Selisih': roundToThousands(item.selisih), // Apply rounding to thousands
+      'Selisih': roundToThousands(item.jumlahMenjadi - item.jumlahSemula), // Ensure calculation is correct
       'Status': item.status
     }));
   };
@@ -55,7 +55,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       // Add footer with totals
       const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
       const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
-      const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
+      const totalSelisih = roundToThousands(totalMenjadi - totalSemula); // Ensure calculation is correct
       
       XLSX.utils.sheet_add_aoa(worksheet, [
         ["", "TOTAL", "", "", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
