@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -138,10 +139,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         matchedUser = HARDCODED_USERS.admin;
       } else if (email === HARDCODED_USERS.user.email && password === HARDCODED_USERS.user.password) {
         matchedUser = HARDCODED_USERS.user;
+      } else {
+        // Check if the user exists in local storage
+        const storedCredentials = JSON.parse(localStorage.getItem('app.credentials') || '[]');
+        const storedUsers = JSON.parse(localStorage.getItem('app.users') || '[]');
+        
+        const matchedCredential = storedCredentials.find(
+          (cred: any) => cred.email === email && cred.password === password
+        );
+        
+        if (matchedCredential) {
+          const matchedStoredProfile = storedUsers.find(
+            (u: any) => u.id === matchedCredential.profileId
+          );
+          
+          if (matchedStoredProfile) {
+            matchedUser = {
+              email,
+              password,
+              profile: matchedStoredProfile
+            };
+          }
+        }
       }
       
       if (matchedUser) {
-        console.log('Login successful with hardcoded user:', matchedUser.email);
+        console.log('Login successful with user:', matchedUser.email);
         
         // Create a fake session and user for the frontend
         const fakeSession = {
@@ -220,33 +243,73 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            username,
-          }
-        }
-      });
+      // Check if email already exists in local storage
+      const storedCredentials = JSON.parse(localStorage.getItem('app.credentials') || '[]');
+      const emailExists = storedCredentials.some((cred: any) => cred.email === email);
       
-      if (error) {
+      if (emailExists) {
         toast({
           title: "Registration failed",
-          description: error.message,
+          description: "Email already exists. Please try another email or login.",
           variant: "destructive",
         });
-        console.error('Registration error:', error);
-        throw error;
+        return;
+      }
+      
+      // Generate a UUID for local storage users
+      const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+      
+      // Create new user in local storage
+      const userId = generateUUID();
+      const newUserProfile = {
+        id: userId,
+        username,
+        role: 'user',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const users = JSON.parse(localStorage.getItem('app.users') || '[]');
+      users.push(newUserProfile);
+      localStorage.setItem('app.users', JSON.stringify(users));
+      
+      storedCredentials.push({
+        email,
+        password,
+        profileId: userId
+      });
+      localStorage.setItem('app.credentials', JSON.stringify(storedCredentials));
+      
+      // Try Supabase signup as well if available
+      try {
+        const { data, error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            data: {
+              username,
+            }
+          }
+        });
+        
+        if (error) {
+          console.error('Supabase registration error:', error);
+        }
+      } catch (err) {
+        console.error('Error with Supabase signup:', err);
       }
 
-      console.log('Registration successful:', data);
       toast({
         title: "Registration successful",
-        description: "Please check your email to confirm your account",
+        description: "Your account has been created. You can now log in.",
       });
       
-      return data;
+      return { user: { id: userId, email }, session: null };
     } catch (error) {
       console.error('Error signing up:', error);
       throw error;

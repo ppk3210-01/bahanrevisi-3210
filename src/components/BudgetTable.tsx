@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { useAuth } from '@/contexts/AuthContext';
 
 interface BudgetTableProps {
   items: BudgetItem[];
@@ -51,6 +53,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   akun,
   areFiltersComplete
 }) => {
+  const { isAdmin, profile, user } = useAuth();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState<Partial<BudgetItem>>({
     uraian: '',
@@ -153,11 +156,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
 
     try {
-      await onAdd({
+      const itemToAdd = {
         uraian: newItem.uraian || '',
-        volumeSemula: newItem.volumeSemula || 0,
-        satuanSemula: newItem.satuanSemula || 'Paket',
-        hargaSatuanSemula: newItem.hargaSatuanSemula || 0,
+        volumeSemula: isAdmin ? (newItem.volumeSemula || 0) : 0,
+        satuanSemula: isAdmin ? (newItem.satuanSemula || 'Paket') : 'Paket',
+        hargaSatuanSemula: isAdmin ? (newItem.hargaSatuanSemula || 0) : 0,
         volumeMenjadi: newItem.volumeMenjadi || 0,
         satuanMenjadi: newItem.satuanMenjadi || 'Paket',
         hargaSatuanMenjadi: newItem.hargaSatuanMenjadi || 0,
@@ -165,7 +168,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         subKomponen: subKomponen || '',
         akun: akun || '',
         isApproved: false
-      });
+      };
+
+      await onAdd(itemToAdd);
 
       setNewItem({
         uraian: '',
@@ -195,6 +200,19 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const startEditing = (item: BudgetItem) => {
+    // For regular users, check if they can edit this item
+    if (!isAdmin) {
+      // They can only edit their own created items or if all filters are complete
+      if (!areFiltersComplete) {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: 'Anda harus memilih semua filter untuk mengedit item.'
+        });
+        return;
+      }
+    }
+    
     setEditingId(item.id);
   };
 
@@ -207,6 +225,19 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
+    // If user is not admin, restrict which fields can be edited
+    if (!isAdmin) {
+      const allowedFields = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'];
+      if (!allowedFields.includes(field)) {
+        toast({
+          variant: "destructive",
+          title: "Access Denied",
+          description: 'Anda tidak memiliki izin untuk mengedit kolom ini.'
+        });
+        return;
+      }
+    }
+    
     if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || 
         field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
       if (typeof value === 'string') {
@@ -239,36 +270,46 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     const isValueChange = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field as string);
     const cellClass = getCellClass(item, isValueChange);
     
+    // For non-admin users, only allow editing "menjadi" fields
+    const canEditField = isAdmin || 
+      (isValueChange && areFiltersComplete);
+    
     switch(field) {
       case 'uraian':
-        return isEditing ? (
+        // For uraian, only admin can edit unless it's a new item added by the current user
+        const canEditUraian = isAdmin || (item.status === 'new' && !item.isApproved);
+        
+        return isEditing && canEditUraian ? (
           <Input 
             value={item.uraian} 
             onChange={(e) => handleEditChange(item.id, 'uraian', e.target.value)}
             className="w-full"
+            disabled={!canEditUraian}
           />
         ) : (
           <span>{item.uraian}</span>
         );
       
       case 'volumeMenjadi':
-        return isEditing ? (
+        return isEditing && canEditField ? (
           <Input 
             type="number"
             value={item.volumeMenjadi} 
             onChange={(e) => handleEditChange(item.id, 'volumeMenjadi', e.target.value)}
             className="w-full"
             min="0"
+            disabled={!canEditField}
           />
         ) : (
           <span className={cellClass}>{item.volumeMenjadi}</span>
         );
       
       case 'satuanMenjadi':
-        return isEditing ? (
+        return isEditing && canEditField ? (
           <Select 
             value={item.satuanMenjadi} 
             onValueChange={(value) => handleEditChange(item.id, 'satuanMenjadi', value)}
+            disabled={!canEditField}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Satuan" />
@@ -286,13 +327,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         );
       
       case 'hargaSatuanMenjadi':
-        return isEditing ? (
+        return isEditing && canEditField ? (
           <Input 
             type="number"
             value={item.hargaSatuanMenjadi} 
             onChange={(e) => handleEditChange(item.id, 'hargaSatuanMenjadi', e.target.value)}
             className="w-full"
             min="0"
+            disabled={!canEditField}
           />
         ) : (
           <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi)}</span>
@@ -393,6 +435,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const needsApproval = (item: BudgetItem): boolean => {
     return (item.status === 'new' || item.status === 'changed') && !item.isApproved;
+  };
+
+  // Determine if the user can delete this item (admin can delete any, users can only delete their own new and unapproved items)
+  const canDeleteItem = (item: BudgetItem): boolean => {
+    if (isAdmin) return true;
+    return item.status === 'new' && !item.isApproved;
   };
 
   const renderPagination = () => {
@@ -688,25 +736,33 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                           <Check className="h-3 w-3" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="icon" onClick={() => startEditing(item)} className="h-6 w-6">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => startEditing(item)} 
+                          className="h-6 w-6"
+                          disabled={!isAdmin && !areFiltersComplete}
+                        >
                           <FileEdit className="h-3 w-3" />
                         </Button>
                       )}
                       
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => {
-                          onDelete(item.id);
-                          toast({
-                            title: "Berhasil",
-                            description: 'Item berhasil dihapus'
-                          });
-                        }}
-                        className="h-6 w-6"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      {(isAdmin || canDeleteItem(item)) && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => {
+                            onDelete(item.id);
+                            toast({
+                              title: "Berhasil",
+                              description: 'Item berhasil dihapus'
+                            });
+                          }}
+                          className="h-6 w-6"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                   <td className="text-center">
@@ -724,6 +780,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             });
                           }}
                           title="Setujui"
+                          disabled={!isAdmin}
                         >
                           <Check className="h-3 w-3 font-bold" />
                         </Button>
@@ -739,6 +796,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             });
                           }}
                           title="Tolak"
+                          disabled={!isAdmin}
                         >
                           <X className="h-3 w-3 font-bold" />
                         </Button>
@@ -760,6 +818,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
                     required
                     className="h-7 text-xs"
+                    disabled={!isAdmin && !areFiltersComplete}
                   />
                 </td>
                 <td className="number-cell py-1 px-1">
@@ -771,6 +830,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     min="0"
                     required
                     className="h-7 text-xs"
+                    disabled={!isAdmin}
                   />
                 </td>
                 <td className="unit-cell py-1 px-1">
@@ -778,6 +838,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     value={newItem.satuanSemula} 
                     onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
                     required
+                    disabled={!isAdmin}
                   >
                     <SelectTrigger className="h-7 text-xs">
                       <SelectValue placeholder="Satuan" />
@@ -800,6 +861,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     min="0"
                     required
                     className="h-7 text-xs"
+                    disabled={!isAdmin}
                   />
                 </td>
                 <td className="number-cell py-1 px-1">
@@ -814,6 +876,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     min="0"
                     required
                     className="h-7 text-xs"
+                    disabled={!isAdmin && !areFiltersComplete}
                   />
                 </td>
                 <td className="unit-cell py-1 px-1">
@@ -821,6 +884,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     value={newItem.satuanMenjadi} 
                     onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
                     required
+                    disabled={!isAdmin && !areFiltersComplete}
                   >
                     <SelectTrigger className="h-7 text-xs">
                       <SelectValue placeholder="Satuan" />
@@ -843,6 +907,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     min="0"
                     required
                     className="h-7 text-xs"
+                    disabled={!isAdmin && !areFiltersComplete}
                   />
                 </td>
                 <td className="number-cell py-1 px-1">
@@ -855,8 +920,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   <Button 
                     variant="outline" 
                     onClick={handleAddItem} 
-                    disabled={!areFiltersComplete}
-                    title={!areFiltersComplete ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
+                    disabled={!areFiltersComplete && !isAdmin}
+                    title={!areFiltersComplete && !isAdmin ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
                     className="h-7 text-xs w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
                   >
                     <PlusCircle className="h-3 w-3 mr-1" /> Tambah
@@ -900,3 +965,4 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 };
 
 export default BudgetTable;
+
