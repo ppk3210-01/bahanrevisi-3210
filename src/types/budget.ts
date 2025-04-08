@@ -1,5 +1,4 @@
 
-// Create or update this file with the following content
 export interface BudgetItem {
   id: string;
   uraian: string;
@@ -20,8 +19,6 @@ export interface BudgetItem {
   rincianOutput?: string;
   subKomponen?: string;
   akun?: string;
-  createdBy?: string; // User ID who created the item
-  updatedBy?: string; // User ID who last updated the item
 }
 
 export interface BudgetSummary {
@@ -31,6 +28,20 @@ export interface BudgetSummary {
   changedItems: BudgetItem[];
   newItems: BudgetItem[];
   deletedItems: BudgetItem[];
+}
+
+export interface FilterOption {
+  id: string;
+  name: string;
+}
+
+export interface HierarchyData {
+  programPembebanan: FilterOption[];
+  kegiatan: Record<string, FilterOption[]>;
+  rincianOutput: Record<string, FilterOption[]>;
+  komponenOutput: Record<string, FilterOption[]>;
+  subKomponen: Record<string, FilterOption[]>;
+  akun: FilterOption[];
 }
 
 export interface FilterSelection {
