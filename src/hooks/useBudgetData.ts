@@ -3,10 +3,21 @@ import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRe
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { BudgetItemRecord, BudgetSummaryRecord } from '@/types/supabase';
+import { 
+  BudgetItemRecord, 
+  BudgetSummaryBase,
+  BudgetSummaryRecord 
+} from '@/types/database';
 
-interface EnhancedBudgetSummaryRecord extends BudgetSummaryRecord {
-  type?: 'account_group' | 'komponen_output' | 'akun';
+interface EnhancedBudgetSummaryRecord extends BudgetSummaryBase {
+  account_group?: string;
+  komponen_output?: string;
+  akun?: string;
+  program_pembebanan?: string;
+  kegiatan?: string;
+  rincian_output?: string;
+  sub_komponen?: string;
+  type?: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 }
 
 const useBudgetData = (filters: FilterSelection) => {

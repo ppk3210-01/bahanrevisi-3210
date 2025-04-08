@@ -27,81 +27,39 @@ export type BudgetSummaryBase = {
   total_items: number | null;
 };
 
-// Summary types by different groupings - removed duplicate type declarations
-export interface BudgetSummaryByAccountGroup {
+// Summary types by different groupings
+export interface BudgetSummaryByAccountGroup extends BudgetSummaryBase {
   account_group: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
   type: 'account_group';
 }
 
-export interface BudgetSummaryByKomponen {
+export interface BudgetSummaryByKomponen extends BudgetSummaryBase {
   komponen_output: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
   type: 'komponen_output';
 }
 
-export interface BudgetSummaryByAkun {
+export interface BudgetSummaryByAkun extends BudgetSummaryBase {
   akun: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
   type: 'akun';
 }
 
-export interface BudgetSummaryByProgramPembebanan {
+export interface BudgetSummaryByProgramPembebanan extends BudgetSummaryBase {
   program_pembebanan: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
   type: 'program_pembebanan';
 }
 
-export interface BudgetSummaryByKegiatan {
+export interface BudgetSummaryByKegiatan extends BudgetSummaryBase {
   kegiatan: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
   type: 'kegiatan';
 }
 
-export interface BudgetSummaryByRincianOutput {
+export interface BudgetSummaryByRincianOutput extends BudgetSummaryBase {
   rincian_output: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
   type: 'rincian_output';
 }
 
-export interface BudgetSummaryBySubKomponen {
+export interface BudgetSummaryBySubKomponen extends BudgetSummaryBase {
   sub_komponen: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
   type: 'sub_komponen';
 }
 
