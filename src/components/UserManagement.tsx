@@ -50,6 +50,7 @@ const UserManagement: React.FC = () => {
         if (error) {
           console.error('Supabase error fetching users:', error);
         } else if (data) {
+          // Ensure proper typing of user data from Supabase
           const typedData = data.map(user => ({
             ...user,
             role: (user.role === 'admin' || user.role === 'user') ? (user.role as 'admin' | 'user') : 'user',

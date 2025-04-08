@@ -16,6 +16,8 @@ import {
 
 interface ExcelImportExportProps {
   onImport: (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => Promise<void>;
+  items?: BudgetItem[];
+  isActive?: boolean;
   komponenOutput?: string;
   subKomponen?: string;
   akun?: string;

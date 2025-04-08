@@ -89,7 +89,6 @@ const BudgetComparison: React.FC = () => {
                 <ExcelImportExport 
                   items={budgetItems}
                   onImport={(items) => {
-                    // Wrap the importBudgetItems call in a function that returns void
                     importBudgetItems(items);
                     return Promise.resolve();
                   }}
