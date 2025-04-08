@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
@@ -51,7 +52,7 @@ const UserManagement: React.FC = () => {
         } else if (data) {
           const typedData = data.map(user => ({
             ...user,
-            role: (user.role === 'admin' || user.role === 'user') ? user.role : 'user',
+            role: (user.role === 'admin' || user.role === 'user') ? (user.role as 'admin' | 'user') : 'user',
             avatar_url: user.avatar_url || null,
             full_name: user.full_name || null
           })) as LocalUserProfile[];
@@ -263,6 +264,12 @@ const UserManagement: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
 
   if (!isAdmin) return null;
 
