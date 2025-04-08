@@ -18,3 +18,14 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 // User role type
 export type UserRole = 'admin' | 'user';
+
+// Auth response type
+export type AuthResponse = {
+  user: any;
+  session: any;
+  weakPassword?: any;
+} | {
+  user: null;
+  session: null;
+  weakPassword?: null;
+};

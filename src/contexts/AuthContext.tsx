@@ -3,15 +3,15 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { UserProfile } from '@/types/database';
+import { UserProfile, AuthResponse } from '@/types/database';
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, username: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<AuthResponse | void>;
+  signUp: (email: string, password: string, username: string) => Promise<AuthResponse | void>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
