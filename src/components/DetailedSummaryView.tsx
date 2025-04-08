@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/budgetCalculations';
@@ -26,19 +25,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Views } from '@/types/database';
 
 // Type definitions for our summary data
-type SummaryItem = {
-  account_group?: string;
-  akun?: string;
-  komponen_output?: string;
-  total_semula: number;
-  total_menjadi: number;
-  total_selisih: number;
-  new_items: number;
-  changed_items: number;
-  total_items: number;
-};
+type SummaryItem = Views['budget_summary_by_account_group']['Row'] | 
+                  Views['budget_summary_by_komponen']['Row'] | 
+                  Views['budget_summary_by_akun']['Row'];
 
 type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
 type SortDirection = 'asc' | 'desc';
@@ -114,20 +106,20 @@ const DetailedSummaryView: React.FC = () => {
   }, []);
 
   // Sort functions
-  const sortData = <T extends SummaryItem>(
-    data: T[], 
+  const sortData = (
+    data: SummaryItem[], 
     field: SortField, 
     direction: SortDirection
-  ): T[] => {
+  ): SummaryItem[] => {
     return [...data].sort((a, b) => {
       let valueA, valueB;
       
       if (field === 'group') {
-        valueA = a.account_group || a.akun || a.komponen_output || '';
-        valueB = b.account_group || b.akun || b.komponen_output || '';
+        valueA = (a.account_group || a.akun || a.komponen_output || '') as string;
+        valueB = (b.account_group || b.akun || b.komponen_output || '') as string;
       } else {
-        valueA = a[field];
-        valueB = b[field];
+        valueA = a[field as keyof SummaryItem];
+        valueB = b[field as keyof SummaryItem];
       }
       
       if (typeof valueA === 'string' && typeof valueB === 'string') {

@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { BudgetItem, FilterSelection } from '@/types/budget';
+import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Tables } from '@/types/database';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -51,33 +52,8 @@ const useBudgetData = (filters: FilterSelection) => {
 
         if (data) {
           // Transform data from Supabase format to our BudgetItem format
-          const transformedData: BudgetItem[] = data.map((item: any) => {
-            const jumlahSemula = Number(item.jumlah_semula || 0);
-            const jumlahMenjadi = Number(item.jumlah_menjadi || 0);
-            // Calculate selisih as Jumlah Semula - Jumlah Menjadi
-            const calculatedSelisih = jumlahSemula - jumlahMenjadi;
-            
-            return {
-              id: item.id,
-              uraian: item.uraian,
-              volumeSemula: Number(item.volume_semula),
-              satuanSemula: item.satuan_semula,
-              hargaSatuanSemula: Number(item.harga_satuan_semula),
-              jumlahSemula: roundToThousands(jumlahSemula),
-              volumeMenjadi: Number(item.volume_menjadi),
-              satuanMenjadi: item.satuan_menjadi,
-              hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
-              jumlahMenjadi: roundToThousands(jumlahMenjadi),
-              selisih: roundToThousands(calculatedSelisih), // Use the calculated selisih
-              status: item.status as "unchanged" | "changed" | "new" | "deleted",
-              isApproved: item.is_approved,
-              komponenOutput: item.komponen_output,
-              programPembebanan: item.program_pembebanan || '',
-              kegiatan: item.kegiatan || '',
-              rincianOutput: item.rincian_output || '',
-              subKomponen: item.sub_komponen || '',
-              akun: item.akun || ''
-            };
+          const transformedData: BudgetItem[] = data.map((item: Tables['budget_items']['Row']) => {
+            return convertToBudgetItem(item);
           });
 
           setBudgetItems(transformedData);
@@ -136,28 +112,8 @@ const useBudgetData = (filters: FilterSelection) => {
       }
 
       if (data) {
-        // Transform data from Supabase format to our BudgetItem format
-        const savedItem: BudgetItem = {
-          id: data.id,
-          uraian: data.uraian,
-          volumeSemula: Number(data.volume_semula),
-          satuanSemula: data.satuan_semula,
-          hargaSatuanSemula: Number(data.harga_satuan_semula),
-          jumlahSemula: roundToThousands(Number(data.jumlah_semula || 0)),
-          volumeMenjadi: Number(data.volume_menjadi),
-          satuanMenjadi: data.satuan_menjadi,
-          hargaSatuanMenjadi: Number(data.harga_satuan_menjadi),
-          jumlahMenjadi: roundToThousands(Number(data.jumlah_menjadi || 0)),
-          selisih: roundToThousands(Number(data.selisih || 0)),
-          status: data.status as "unchanged" | "changed" | "new" | "deleted",
-          isApproved: data.is_approved,
-          komponenOutput: data.komponen_output,
-          programPembebanan: data.program_pembebanan || '',
-          kegiatan: data.kegiatan || '',
-          rincianOutput: data.rincian_output || '',
-          subKomponen: data.sub_komponen || '',
-          akun: data.akun || ''
-        };
+        // Convert the returned data to our BudgetItem format
+        const savedItem = convertToBudgetItem(data);
 
         // Add to state
         setBudgetItems(prev => [...prev, savedItem]);
@@ -221,27 +177,9 @@ const useBudgetData = (filters: FilterSelection) => {
 
       if (data) {
         // Transform the returned data
-        const savedItems: BudgetItem[] = data.map((item: any) => ({
-          id: item.id,
-          uraian: item.uraian,
-          volumeSemula: Number(item.volume_semula),
-          satuanSemula: item.satuan_semula,
-          hargaSatuanSemula: Number(item.harga_satuan_semula),
-          jumlahSemula: roundToThousands(Number(item.jumlah_semula || 0)),
-          volumeMenjadi: Number(item.volume_menjadi),
-          satuanMenjadi: item.satuan_menjadi,
-          hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
-          jumlahMenjadi: roundToThousands(Number(item.jumlah_menjadi || 0)),
-          selisih: roundToThousands(Number(item.selisih || 0)),
-          status: item.status as "unchanged" | "changed" | "new" | "deleted",
-          isApproved: item.is_approved,
-          komponenOutput: item.komponen_output,
-          programPembebanan: item.program_pembebanan || '',
-          kegiatan: item.kegiatan || '',
-          rincianOutput: item.rincian_output || '',
-          subKomponen: item.sub_komponen || '',
-          akun: item.akun || ''
-        }));
+        const savedItems: BudgetItem[] = data.map((item: Tables['budget_items']['Row']) => 
+          convertToBudgetItem(item)
+        );
 
         // Add to state
         setBudgetItems(prev => [...prev, ...savedItems]);
@@ -272,18 +210,7 @@ const useBudgetData = (filters: FilterSelection) => {
       }
       
       // Transform BudgetItem updates to Supabase format
-      const supabaseUpdates: Record<string, any> = {};
-      
-      // Handle direct field mappings
-      if ('uraian' in updates) supabaseUpdates.uraian = updates.uraian;
-      if ('volumeSemula' in updates) supabaseUpdates.volume_semula = updates.volumeSemula;
-      if ('satuanSemula' in updates) supabaseUpdates.satuan_semula = updates.satuanSemula;
-      if ('hargaSatuanSemula' in updates) supabaseUpdates.harga_satuan_semula = updates.hargaSatuanSemula;
-      if ('volumeMenjadi' in updates) supabaseUpdates.volume_menjadi = updates.volumeMenjadi;
-      if ('satuanMenjadi' in updates) supabaseUpdates.satuan_menjadi = updates.satuanMenjadi;
-      if ('hargaSatuanMenjadi' in updates) supabaseUpdates.harga_satuan_menjadi = updates.hargaSatuanMenjadi;
-      if ('subKomponen' in updates) supabaseUpdates.sub_komponen = updates.subKomponen;
-      if ('akun' in updates) supabaseUpdates.akun = updates.akun;
+      const supabaseUpdates = convertToBudgetItemRecord(updates);
       
       // Calculate derived values if relevant fields have been updated
       let updatedItem = { ...currentItem, ...updates };
@@ -453,7 +380,7 @@ const useBudgetData = (filters: FilterSelection) => {
         throw new Error('Item not found');
       }
       
-      // Update in Supabase - reset "menjadi" values to match "semula" values
+      // Update in Supabase
       const { error: supabaseError } = await supabase
         .from('budget_items')
         .update({
