@@ -14,7 +14,7 @@ import ExportOptions from './ExportOptions';
 import SummaryDialog from './SummaryDialog';
 import DetailedSummaryView from './DetailedSummaryView';
 import { Button } from '@/components/ui/button';
-import { FilterSelection, BudgetSummary, BudgetItem } from '@/types/budget';
+import { FilterSelection, BudgetSummary } from '@/types/budget';
 import { generateBudgetSummary } from '@/utils/budgetCalculations';
 import useBudgetData from '@/hooks/useBudgetData';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -55,7 +55,10 @@ const BudgetComparison: React.FC = () => {
     deleteBudgetItem, 
     approveBudgetItem,
     rejectBudgetItem,
-    importBudgetItems
+    importBudgetItems,
+    totalSemula,
+    totalMenjadi,
+    totalSelisih
   } = useBudgetData(filters);
 
   useEffect(() => {
@@ -83,19 +86,14 @@ const BudgetComparison: React.FC = () => {
     setSummaryVisible(true);
   };
 
-  const handleImport = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
-    await importBudgetItems(items);
-  };
-
   return (
     <div className="space-y-2">
-      {budgetSummary && (
-        <BudgetSummaryBox 
-          totalSemula={budgetSummary.totalSemula}
-          totalMenjadi={budgetSummary.totalMenjadi}
-          totalSelisih={budgetSummary.totalSelisih}
-        />
-      )}
+      {/* Use the total values from useBudgetData hook directly */}
+      <BudgetSummaryBox 
+        totalSemula={totalSemula}
+        totalMenjadi={totalMenjadi}
+        totalSelisih={totalSelisih}
+      />
 
       <Card className="shadow-sm">
         <CardContent className="pt-3 pb-3">
@@ -149,7 +147,7 @@ const BudgetComparison: React.FC = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent className="max-w-xl">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-gradient-blue">Panduan Import Excel</AlertDialogTitle>
+                            <AlertDialogTitle className="text-blue-600">Panduan Import Excel</AlertDialogTitle>
                             <AlertDialogDescription className="text-xs">
                               <div className="space-y-2">
                                 <p className="font-medium">Petunjuk cara mengimpor data menggunakan file Excel</p>
@@ -278,90 +276,30 @@ const BudgetComparison: React.FC = () => {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogAction>Tutup</AlertDialogAction>
+                            <AlertDialogAction>OK</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
                     
-                    <div className="mt-4">
-                      <ExcelImportExport 
-                        onImport={handleImport}
-                        komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
-                        subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
-                        akun={filters.akun !== 'all' ? filters.akun : undefined}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <h3 className="text-sm font-medium mb-2">Export Tools</h3>
-                    <ExportOptions 
-                      items={budgetItems} 
-                      komponenOutput={filters.komponenOutput} 
-                    />
+                    <ExcelImportExport onImport={importBudgetItems} items={budgetItems} />
                   </div>
                 </div>
               </div>
             </TabsContent>
             
             <TabsContent value="summary" className="mt-0">
-              <div className="space-y-3">
-                <div className="flex items-center gap-1 mb-2">
-                  <Info className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-sm font-medium">Ringkasan Perubahan Pagu Anggaran</h3>
-                </div>
-                
-                {budgetSummary && (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <Card className="border border-changed-row shadow-sm bg-gradient-to-r from-amber-50 to-yellow-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Diubah</h3>
-                          <p className="text-lg font-bold">{budgetSummary.changedItems.length}</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border border-new-row shadow-sm bg-gradient-to-r from-emerald-50 to-green-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Baru</h3>
-                          <p className="text-lg font-bold">{budgetSummary.newItems.length}</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border border-deleted-row shadow-sm bg-gradient-to-r from-red-50 to-rose-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Dihapus</h3>
-                          <p className="text-lg font-bold">{budgetSummary.deletedItems.length}</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    <Button 
-                      variant="outline" 
-                      onClick={showSummary}
-                      className="w-full md:w-auto h-8 text-xs btn-gradient-blue"
-                    >
-                      <Info className="mr-1 h-3 w-3" /> 
-                      Lihat Detail Ringkasan
-                    </Button>
-                    
-                    <div className="mt-4">
-                      <DetailedSummaryView />
-                    </div>
-                  </div>
-                )}
-              </div>
+              <DetailedSummaryView items={budgetItems} />
             </TabsContent>
           </CardContent>
         </Tabs>
       </Card>
-
+      
       {budgetSummary && (
         <SummaryDialog 
-          items={budgetSummary.changedItems.concat(budgetSummary.newItems).concat(budgetSummary.deletedItems)}
-          open={summaryVisible}
-          onOpenChange={setSummaryVisible}
+          items={budgetItems} 
+          open={summaryVisible} 
+          onOpenChange={setSummaryVisible} 
         />
       )}
     </div>
