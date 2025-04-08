@@ -23,6 +23,8 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { usePermissions } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 interface BudgetTableProps {
   items: BudgetItem[];
@@ -51,6 +53,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   akun,
   areFiltersComplete
 }) => {
+  const { isAuthenticated, isAdmin, isUser, userRole, canEditItems, canApproveBudgetItems, canDeleteItems, canAccessImportExport, canEditUraian } = usePermissions();
+  const { user } = useAuth();
+  
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState<Partial<BudgetItem>>({
     uraian: '',
@@ -147,12 +152,30 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     return '';
   };
 
+  const userCanEdit = canEditItems({
+    programPembebanan: subKomponen || '',
+    kegiatan: subKomponen || '',
+    rincianOutput: subKomponen || '',
+    komponenOutput,
+    subKomponen: subKomponen || '',
+    akun: akun || ''
+  });
+
   const handleAddItem = async () => {
     if (!validateItem(newItem)) {
       return;
     }
 
     try {
+      if (!isUser && !isAdmin) {
+        toast({
+          variant: "destructive",
+          title: "Permission denied",
+          description: "You don't have permission to add items."
+        });
+        return;
+      }
+
       await onAdd({
         uraian: newItem.uraian || '',
         volumeSemula: newItem.volumeSemula || 0,
@@ -207,6 +230,19 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
+    if (isUser && !isAdmin) {
+      const allowedFields = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'];
+      
+      if (!allowedFields.includes(field)) {
+        toast({
+          variant: "destructive",
+          title: "Permission denied",
+          description: "You don't have permission to edit this field"
+        });
+        return;
+      }
+    }
+    
     if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || 
         field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
       if (typeof value === 'string') {
@@ -235,13 +271,16 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const renderItemField = (item: BudgetItem, field: keyof BudgetItem) => {
     const isEditing = editingId === item.id;
-    
     const isValueChange = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field as string);
     const cellClass = getCellClass(item, isValueChange);
     
+    const canEdit = isAdmin || 
+                   (isUser && isValueChange && userCanEdit) || 
+                   (field === 'uraian' && canEditUraian(item.createdBy === user?.id));
+    
     switch(field) {
       case 'uraian':
-        return isEditing ? (
+        return (isEditing && canEdit) ? (
           <Input 
             value={item.uraian} 
             onChange={(e) => handleEditChange(item.id, 'uraian', e.target.value)}
@@ -252,7 +291,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         );
       
       case 'volumeMenjadi':
-        return isEditing ? (
+        return (isEditing && canEdit) ? (
           <Input 
             type="number"
             value={item.volumeMenjadi} 
@@ -265,7 +304,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         );
       
       case 'satuanMenjadi':
-        return isEditing ? (
+        return (isEditing && canEdit) ? (
           <Select 
             value={item.satuanMenjadi} 
             onValueChange={(value) => handleEditChange(item.id, 'satuanMenjadi', value)}
@@ -286,7 +325,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         );
       
       case 'hargaSatuanMenjadi':
-        return isEditing ? (
+        return (isEditing && canEdit) ? (
           <Input 
             type="number"
             value={item.hargaSatuanMenjadi} 
@@ -392,25 +431,22 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const needsApproval = (item: BudgetItem): boolean => {
-    return (item.status === 'new' || item.status === 'changed') && !item.isApproved;
+    return canApproveBudgetItems() && (item.status === 'new' || item.status === 'changed') && !item.isApproved;
   };
 
   const renderPagination = () => {
     if (pageSize === -1 || totalPages <= 1) return null;
     
-    // Calculate which page links to show
-    const showMaxPages = 7; // Maximum number of page links to show
+    const showMaxPages = 7;
     let startPage = Math.max(1, currentPage - Math.floor(showMaxPages / 2));
     let endPage = Math.min(totalPages, startPage + showMaxPages - 1);
     
-    // Adjust if we're near the end of the page list
     if (endPage - startPage + 1 < showMaxPages) {
       startPage = Math.max(1, endPage - showMaxPages + 1);
     }
     
     const pages = [];
     
-    // Add "First" page if not on page 1
     if (startPage > 1) {
       pages.push(
         <PaginationItem key="first">
@@ -429,7 +465,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       );
     }
     
-    // Add "Previous" button
     pages.push(
       <PaginationItem key="prev">
         <PaginationPrevious 
@@ -444,7 +479,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       </PaginationItem>
     );
     
-    // Add page numbers
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <PaginationItem key={i}>
@@ -462,7 +496,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       );
     }
     
-    // Add "Next" button
     pages.push(
       <PaginationItem key="next">
         <PaginationNext 
@@ -477,7 +510,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       </PaginationItem>
     );
     
-    // Add "Last" page if not on last page
     if (endPage < totalPages) {
       pages.push(
         <PaginationItem key="last">
@@ -672,42 +704,48 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
                   <td className="number-cell">{renderItemField(item, 'selisih')}</td>
                   <td>
-                    <div className="flex space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => showDetailDialog(item)}
-                        title="Lihat Detail"
-                        className="h-6 w-6"
-                      >
-                        <Eye className="h-3 w-3" />
-                      </Button>
+                    {isAuthenticated && (
+                      <div className="flex space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => showDetailDialog(item)}
+                          title="Lihat Detail"
+                          className="h-6 w-6"
+                        >
+                          <Eye className="h-3 w-3" />
+                        </Button>
 
-                      {editingId === item.id ? (
-                        <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
-                          <Check className="h-3 w-3" />
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" size="icon" onClick={() => startEditing(item)} className="h-6 w-6">
-                          <FileEdit className="h-3 w-3" />
-                        </Button>
-                      )}
-                      
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => {
-                          onDelete(item.id);
-                          toast({
-                            title: "Berhasil",
-                            description: 'Item berhasil dihapus'
-                          });
-                        }}
-                        className="h-6 w-6"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                        {(isAdmin || (isUser && userCanEdit)) && (
+                          editingId === item.id ? (
+                            <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          ) : (
+                            <Button variant="ghost" size="icon" onClick={() => startEditing(item)} className="h-6 w-6">
+                              <FileEdit className="h-3 w-3" />
+                            </Button>
+                          )
+                        )}
+                        
+                        {(isAdmin || canDeleteItems(item.createdBy === user?.id, item.isApproved)) && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => {
+                              onDelete(item.id);
+                              toast({
+                                title: "Berhasil",
+                                description: 'Item berhasil dihapus'
+                              });
+                            }}
+                            className="h-6 w-6"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td className="text-center">
                     {needsApproval(item) && (
@@ -724,6 +762,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             });
                           }}
                           title="Setujui"
+                          disabled={!isAdmin}
                         >
                           <Check className="h-3 w-3 font-bold" />
                         </Button>
@@ -739,6 +778,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             });
                           }}
                           title="Tolak"
+                          disabled={!isAdmin}
                         >
                           <X className="h-3 w-3 font-bold" />
                         </Button>
@@ -751,118 +791,123 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </tr>
               ))}
 
-              <tr className="bg-gray-50">
-                <td className="py-1 px-1">{filteredItems.length + 1}</td>
-                <td className="uraian-cell py-1 px-1">
-                  <Input 
-                    placeholder="Tambah Uraian Baru" 
-                    value={newItem.uraian || ''} 
-                    onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
-                    required
-                    className="h-7 text-xs"
-                  />
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.volumeSemula || ''} 
-                    onChange={(e) => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                  />
-                </td>
-                <td className="unit-cell py-1 px-1">
-                  <Select 
-                    value={newItem.satuanSemula} 
-                    onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
-                    required
-                  >
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue placeholder="Satuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNIT_OPTIONS.map((unit) => (
-                        <SelectItem key={unit} value={unit} className="text-xs">
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.hargaSatuanSemula || ''} 
-                    onChange={(e) => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                  />
-                </td>
-                <td className="number-cell py-1 px-1">
-                  {formatCurrency(newItemJumlahSemula)}
-                </td>
-                <td className="number-cell py-1 px-1 border-l-2">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.volumeMenjadi || ''} 
-                    onChange={(e) => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                  />
-                </td>
-                <td className="unit-cell py-1 px-1">
-                  <Select 
-                    value={newItem.satuanMenjadi} 
-                    onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
-                    required
-                  >
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue placeholder="Satuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNIT_OPTIONS.map((unit) => (
-                        <SelectItem key={unit} value={unit} className="text-xs">
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.hargaSatuanMenjadi || ''} 
-                    onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                  />
-                </td>
-                <td className="number-cell py-1 px-1">
-                  {formatCurrency(newItemJumlahMenjadi)}
-                </td>
-                <td className="number-cell py-1 px-1">
-                  {formatCurrency(newItemSelisih)}
-                </td>
-                <td colSpan={2} className="py-1 px-1">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleAddItem} 
-                    disabled={!areFiltersComplete}
-                    title={!areFiltersComplete ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
-                    className="h-7 text-xs w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
-                  >
-                    <PlusCircle className="h-3 w-3 mr-1" /> Tambah
-                  </Button>
-                </td>
-              </tr>
+              {(isAdmin || (isUser && userCanEdit)) && (
+                <tr className="bg-gray-50">
+                  <td className="py-1 px-1">{filteredItems.length + 1}</td>
+                  <td className="uraian-cell py-1 px-1">
+                    <Input 
+                      placeholder="Tambah Uraian Baru" 
+                      value={newItem.uraian || ''} 
+                      onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
+                      required
+                      className="h-7 text-xs"
+                    />
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.volumeSemula || ''} 
+                      onChange={(e) => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                      disabled={!isAdmin}
+                    />
+                  </td>
+                  <td className="unit-cell py-1 px-1">
+                    <Select 
+                      value={newItem.satuanSemula} 
+                      onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
+                      required
+                      disabled={!isAdmin}
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue placeholder="Satuan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UNIT_OPTIONS.map((unit) => (
+                          <SelectItem key={unit} value={unit} className="text-xs">
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.hargaSatuanSemula || ''} 
+                      onChange={(e) => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                      disabled={!isAdmin}
+                    />
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    {formatCurrency(newItemJumlahSemula)}
+                  </td>
+                  <td className="number-cell py-1 px-1 border-l-2">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.volumeMenjadi || ''} 
+                      onChange={(e) => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                    />
+                  </td>
+                  <td className="unit-cell py-1 px-1">
+                    <Select 
+                      value={newItem.satuanMenjadi} 
+                      onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
+                      required
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue placeholder="Satuan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UNIT_OPTIONS.map((unit) => (
+                          <SelectItem key={unit} value={unit} className="text-xs">
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.hargaSatuanMenjadi || ''} 
+                      onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                    />
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    {formatCurrency(newItemJumlahMenjadi)}
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    {formatCurrency(newItemSelisih)}
+                  </td>
+                  <td colSpan={2} className="py-1 px-1">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleAddItem} 
+                      disabled={!areFiltersComplete}
+                      title={!areFiltersComplete ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
+                      className="h-7 text-xs w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
+                    >
+                      <PlusCircle className="h-3 w-3 mr-1" /> Tambah
+                    </Button>
+                  </td>
+                </tr>
+              )}
               
               <tr className="font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-xs">
                 <td colSpan={5} className="text-right py-1 px-1">Total Halaman:</td>

@@ -1,420 +1,367 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
-import BudgetFilter from './BudgetFilter';
-import BudgetTable from './BudgetTable';
-import BudgetSummaryBox from './BudgetSummaryBox';
-import ExcelImportExport from './ExcelImportExport';
-import ExportOptions from './ExportOptions';
-import SummaryDialog from './SummaryDialog';
-import DetailedSummaryView from './DetailedSummaryView';
+  Download, 
+  Upload, 
+  ListFilter 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FilterSelection, BudgetSummary, BudgetItem } from '@/types/budget';
-import { generateBudgetSummary, formatCurrency } from '@/utils/budgetCalculations';
-import useBudgetData from '@/hooks/useBudgetData';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Info, HelpCircle } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { 
+  FilterSelection, 
+  BudgetItem, 
+  BudgetSummary 
+} from '@/types/budget';
+import { 
+  generateBudgetSummary, 
+  formatCurrency,
+  roundToThousands
+} from '@/utils/budgetCalculations';
+import BudgetTable from '@/components/BudgetTable';
+import BudgetSummaryBox from '@/components/BudgetSummaryBox';
+import FilterPanel from '@/components/FilterPanel';
+import SummaryDialog from '@/components/SummaryDialog';
+import { useBudgetData } from '@/hooks/useBudgetData';
+import { usePermissions } from '@/hooks/usePermissions';
 
-const DEFAULT_FILTER: FilterSelection = {
-  programPembebanan: 'all',
-  kegiatan: 'all',
-  rincianOutput: 'all',
-  komponenOutput: 'all',
-  subKomponen: 'all',
-  akun: 'all'
-};
-
-const BudgetComparison: React.FC = () => {
-  const [filters, setFilters] = useState<FilterSelection>(DEFAULT_FILTER);
-  const [summaryVisible, setSummaryVisible] = useState(false);
-  const [currentTab, setCurrentTab] = useState('data');
-  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
-  const [allItemsSummary, setAllItemsSummary] = useState<BudgetSummary | null>(null);
-  const isMobile = useIsMobile();
+const BudgetComparison = () => {
+  const [selectedProgramPembebanan, setSelectedProgramPembebanan] = useState<string>('all');
+  const [selectedKegiatan, setSelectedKegiatan] = useState<string>('all');
+  const [selectedRincianOutput, setSelectedRincianOutput] = useState<string>('all');
+  const [selectedKomponenOutput, setSelectedKomponenOutput] = useState<string>('all');
+  const [selectedSubKomponen, setSelectedSubKomponen] = useState<string>('all');
+  const [selectedAkun, setSelectedAkun] = useState<string>('all');
+  const [importData, setImportData] = useState<Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]>([]);
+  const [showImportDialog, setShowImportDialog] = useState<boolean>(false);
+  const [showSummaryDialog, setShowSummaryDialog] = useState<boolean>(false);
   
+  const formatFilterSelection = () => {
+    return `Program: ${selectedProgramPembebanan}, Kegiatan: ${selectedKegiatan}, Rincian: ${selectedRincianOutput}, Komponen: ${selectedKomponenOutput}, SubKomponen: ${selectedSubKomponen}, Akun: ${selectedAkun}`;
+  };
+
+  const handleFilter = (filterType: string, value: string) => {
+    switch (filterType) {
+      case 'programPembebanan':
+        setSelectedProgramPembebanan(value);
+        break;
+      case 'kegiatan':
+        setSelectedKegiatan(value);
+        break;
+      case 'rincianOutput':
+        setSelectedRincianOutput(value);
+        break;
+      case 'komponenOutput':
+        setSelectedKomponenOutput(value);
+        break;
+      case 'subKomponen':
+        setSelectedSubKomponen(value);
+        break;
+      case 'akun':
+        setSelectedAkun(value);
+        break;
+      default:
+        break;
+    }
+  };
+  
+  const areFiltersComplete = 
+    selectedProgramPembebanan !== 'all' &&
+    selectedKegiatan !== 'all' &&
+    selectedRincianOutput !== 'all' &&
+    selectedKomponenOutput !== 'all' &&
+    selectedSubKomponen !== 'all' &&
+    selectedAkun !== 'all';
+
+  const filters: FilterSelection = {
+    programPembebanan: selectedProgramPembebanan,
+    kegiatan: selectedKegiatan,
+    rincianOutput: selectedRincianOutput,
+    komponenOutput: selectedKomponenOutput,
+    subKomponen: selectedSubKomponen,
+    akun: selectedAkun
+  };
+
   const { 
     budgetItems, 
-    loading, 
-    addBudgetItem, 
-    updateBudgetItem, 
-    deleteBudgetItem, 
-    approveBudgetItem,
-    rejectBudgetItem,
+    loading: isLoading, 
+    addBudgetItem: handleAddBudgetItem,
+    updateBudgetItem: handleUpdateBudgetItem,
+    deleteBudgetItem: handleDeleteBudgetItem,
+    approveBudgetItem: handleApproveBudgetItem,
+    rejectBudgetItem: handleRejectBudgetItem,
     importBudgetItems,
     getAllBudgetItems
   } = useBudgetData(filters);
-
-  // Effect to get filtered summary
+  
+  const [summary, setSummary] = useState<BudgetSummary>({
+    totalSemula: 0,
+    totalMenjadi: 0,
+    totalSelisih: 0,
+    changedItems: [],
+    newItems: [],
+    deletedItems: []
+  });
+  
+  const [globalSummary, setGlobalSummary] = useState<BudgetSummary>({
+    totalSemula: 0,
+    totalMenjadi: 0,
+    totalSelisih: 0,
+    changedItems: [],
+    newItems: [],
+    deletedItems: []
+  });
+  
+  const { canAccessImportExport } = usePermissions();
+  
   useEffect(() => {
-    if (budgetItems) {
-      setBudgetSummary(generateBudgetSummary(budgetItems));
-    }
+    const newSummary = generateBudgetSummary(budgetItems);
+    setSummary(newSummary);
   }, [budgetItems]);
-
-  // Effect to get global summary (unfiltered)
+  
   useEffect(() => {
-    const fetchAllItems = async () => {
+    const fetchAllData = async () => {
       const allItems = await getAllBudgetItems();
-      if (allItems) {
-        setAllItemsSummary(generateBudgetSummary(allItems));
-      }
+      const newGlobalSummary = generateBudgetSummary(allItems);
+      setGlobalSummary(newGlobalSummary);
     };
     
-    fetchAllItems();
+    fetchAllData();
   }, [getAllBudgetItems]);
 
-  const areFiltersComplete = () => {
-    return (
-      filters.komponenOutput !== 'all' &&
-      filters.subKomponen !== 'all' &&
-      filters.akun !== 'all'
-    );
+  const handleShowImportDialog = () => {
+    setShowImportDialog(true);
   };
 
-  const handleFilterChange = (filter: Partial<FilterSelection>) => {
-    setFilters(prev => ({
-      ...prev,
-      ...filter
-    }));
+  const handleShowSummaryDialog = () => {
+    setShowSummaryDialog(true);
   };
 
-  const showSummary = () => {
-    setSummaryVisible(true);
+  const handleImportData = async () => {
+    try {
+      await importBudgetItems(importData);
+      setShowImportDialog(false);
+      setImportData([]);
+    } catch (error) {
+      console.error("Failed to import data:", error);
+    }
   };
 
-  const handleImport = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
-    await importBudgetItems(items);
+  const handleExportData = () => {
+    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+      JSON.stringify(budgetItems, null, 2)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = "budget_data.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  // Find the item with the most significant change (largest absolute selisih)
+  const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event: ProgressEvent<FileReader>) => {
+        try {
+          const jsonData = JSON.parse(event.target?.result as string);
+          if (Array.isArray(jsonData)) {
+            // Validate each item in jsonData
+            const validatedData = jsonData.map(item => ({
+              uraian: item.uraian || '',
+              volumeSemula: item.volumeSemula || 0,
+              satuanSemula: item.satuanSemula || 'Paket',
+              hargaSatuanSemula: item.hargaSatuanSemula || 0,
+              volumeMenjadi: item.volumeMenjadi || 0,
+              satuanMenjadi: item.satuanMenjadi || 'Paket',
+              hargaSatuanMenjadi: item.hargaSatuanMenjadi || 0,
+              komponenOutput: item.komponenOutput || selectedKomponenOutput,
+              programPembebanan: item.programPembebanan || selectedProgramPembebanan,
+              kegiatan: item.kegiatan || selectedKegiatan,
+              rincianOutput: item.rincianOutput || selectedRincianOutput,
+              subKomponen: item.subKomponen || selectedSubKomponen,
+              akun: item.akun || selectedAkun
+            }));
+            setImportData(validatedData);
+          } else {
+            console.error("File format is invalid. Harus berupa array JSON.");
+          }
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+  
   const findMostSignificantChange = (): string => {
-    if (!budgetSummary || !budgetSummary.changedItems.length) return "-";
+    if (summary.changedItems.length === 0) {
+      return 'Tidak ada perubahan signifikan.';
+    }
     
-    const mostSignificant = budgetSummary.changedItems.reduce((prev, current) => 
-      Math.abs(prev.selisih) > Math.abs(current.selisih) ? prev : current
-    );
+    // Find the item with the largest absolute difference
+    const mostChangedItem = summary.changedItems.reduce((prev, current) => {
+      const prevChange = Math.abs(prev.selisih);
+      const currentChange = Math.abs(current.selisih);
+      return (prevChange > currentChange) ? prev : current;
+    });
     
-    return mostSignificant.uraian;
+    return mostChangedItem.uraian;
   };
-
-  const getImpactSummary = (): string => {
-    if (!allItemsSummary) return "-";
-    
-    const { totalSelisih, totalSemula } = allItemsSummary;
-    const percentageChange = totalSemula > 0 
-      ? ((totalSelisih / totalSemula) * 100).toFixed(2) 
-      : '0.00';
-    
-    const changeDirection = totalSelisih > 0 ? "meningkatkan" : totalSelisih < 0 ? "menurunkan" : "tidak mengubah";
-    
-    return `Perubahan anggaran ${changeDirection} total anggaran sebesar ${formatCurrency(Math.abs(totalSelisih))} (${percentageChange}%).`;
-  };
-
+  
   return (
-    <div className="space-y-2">
-      {allItemsSummary && (
-        <BudgetSummaryBox 
-          totalSemula={allItemsSummary.totalSemula}
-          totalMenjadi={allItemsSummary.totalMenjadi}
-          totalSelisih={allItemsSummary.totalSelisih}
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FilterPanel 
+          onFilterChange={handleFilter} 
+          isLoading={isLoading} 
         />
-      )}
-
-      <Card className="shadow-sm">
-        <CardContent className="pt-3 pb-3">
-          <BudgetFilter 
-            onFilterChange={handleFilterChange}
-            filters={filters}
-          />
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-sm">
-        <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <div className="flex justify-between items-center px-4 pt-2">
-            <TabsList className="h-8">
-              <TabsTrigger value="data" className="text-xs px-2 py-1">Data Anggaran</TabsTrigger>
-              <TabsTrigger value="import" className="text-xs px-2 py-1">Import/Export</TabsTrigger>
-              <TabsTrigger value="summary" className="text-xs px-2 py-1">Ringkasan</TabsTrigger>
-            </TabsList>
+        
+        <div className="rounded-lg bg-white shadow p-3">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-sm font-medium text-gray-700">Ringkasan Perubahan</h3>
+            
+            {canAccessImportExport() && (
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  className="bg-green-500 hover:bg-green-600 text-xs h-7" 
+                  onClick={handleShowImportDialog}
+                >
+                  <Upload className="h-3 w-3 mr-1" /> Import
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="bg-blue-500 hover:bg-blue-600 text-xs h-7" 
+                  onClick={handleExportData}
+                >
+                  <Download className="h-3 w-3 mr-1" /> Export
+                </Button>
+              </div>
+            )}
           </div>
           
-          <CardContent className="pt-2 px-2">
-            <TabsContent value="data" className="mt-0">
-              <BudgetTable 
-                items={budgetItems}
-                komponenOutput={filters.komponenOutput}
-                onAdd={addBudgetItem}
-                onUpdate={updateBudgetItem}
-                onDelete={deleteBudgetItem}
-                onApprove={approveBudgetItem}
-                onReject={rejectBudgetItem}
-                isLoading={loading}
-                subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
-                akun={filters.akun !== 'all' ? filters.akun : undefined}
-                areFiltersComplete={areFiltersComplete()}
-              />
-            </TabsContent>
-            
-            <TabsContent value="import" className="mt-0">
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xs font-medium">Import Data</h3>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-6 px-2 text-xs gap-1">
-                            <HelpCircle className="h-3 w-3" />
-                            Panduan Import
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="max-w-xl">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-gradient-blue">Panduan Import Excel</AlertDialogTitle>
-                            <AlertDialogDescription className="text-xs">
-                              <div className="space-y-2">
-                                <p className="font-medium">Petunjuk cara mengimpor data menggunakan file Excel</p>
-                                
-                                <div>
-                                  <h3 className="font-medium">Format File</h3>
-                                  <p>File Excel (.xlsx atau .xls) harus memiliki format berikut:</p>
-                                  
-                                  <div className="overflow-x-auto mt-2">
-                                    <table className="w-full border-collapse text-xs">
-                                      <thead>
-                                        <tr className="bg-blue-50">
-                                          <th className="border px-2 py-1 text-left">Kolom</th>
-                                          <th className="border px-2 py-1 text-left">Tipe Data</th>
-                                          <th className="border px-2 py-1 text-left">Format</th>
-                                          <th className="border px-2 py-1 text-left">Contoh</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <tr>
-                                          <td className="border px-2 py-1">Program Pembebanan</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">054.01.GG</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Kegiatan</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">2896</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Rincian Output</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">2896.BMA</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Komponen Output</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">2896.BMA.004</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Sub Komponen</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">005</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Akun</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">522151</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Uraian</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">Belanja Jasa Profesi</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Volume Semula</td>
-                                          <td className="border px-2 py-1">Number</td>
-                                          <td className="border px-2 py-1">General atau Number</td>
-                                          <td className="border px-2 py-1">1</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Satuan Semula</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">Paket</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Harga Satuan Semula</td>
-                                          <td className="border px-2 py-1">Number</td>
-                                          <td className="border px-2 py-1">General, Number atau Currency</td>
-                                          <td className="border px-2 py-1">1000000</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Volume Menjadi</td>
-                                          <td className="border px-2 py-1">Number</td>
-                                          <td className="border px-2 py-1">General atau Number</td>
-                                          <td className="border px-2 py-1">1</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Satuan Menjadi</td>
-                                          <td className="border px-2 py-1">Text</td>
-                                          <td className="border px-2 py-1">-</td>
-                                          <td className="border px-2 py-1">Paket</td>
-                                        </tr>
-                                        <tr>
-                                          <td className="border px-2 py-1">Harga Satuan Menjadi</td>
-                                          <td className="border px-2 py-1">Number</td>
-                                          <td className="border px-2 py-1">General, Number atau Currency</td>
-                                          <td className="border px-2 py-1">1200000</td>
-                                        </tr>
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                                
-                                <div>
-                                  <h3 className="font-medium">Petunjuk Import</h3>
-                                  <ol className="list-decimal ml-5 space-y-1">
-                                    <li>Unduh template dengan klik tombol Download Template.</li>
-                                    <li>Buka file template dengan Microsoft Excel atau aplikasi spreadsheet lainnya.</li>
-                                    <li>Isikan data sesuai format yang telah ditentukan. Pastikan semua kolom terisi dengan benar.</li>
-                                    <li>Simpan file Excel setelah selesai mengisi data.</li>
-                                    <li>Klik tombol Import Excel dan pilih file yang telah diisi.</li>
-                                    <li>Tunggu hingga proses import selesai.</li>
-                                  </ol>
-                                </div>
-                                
-                                <div>
-                                  <h3 className="font-medium">Tips Import</h3>
-                                  <ul className="list-disc ml-5 space-y-1">
-                                    <li>Pastikan format kolom numerik sudah benar (Volume dan Harga Satuan).</li>
-                                    <li>Jangan mengubah nama kolom pada baris pertama.</li>
-                                    <li>Pastikan tidak ada sel yang kosong pada baris data.</li>
-                                    <li>Jika menggunakan template dari aplikasi ini, format kolom sudah diatur dengan benar.</li>
-                                    <li>Pastikan nilai numerik tidak menggunakan tanda pemisah ribuan seperti titik atau koma.</li>
-                                  </ul>
-                                </div>
-                              </div>
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogAction>Tutup</AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                    
-                    <div className="mt-2">
-                      <ExcelImportExport 
-                        onImport={handleImport}
-                        komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
-                        subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
-                        akun={filters.akun !== 'all' ? filters.akun : undefined}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3">
-                    <h3 className="text-xs font-medium mb-2">Export Tools</h3>
-                    <ExportOptions 
-                      items={budgetItems} 
-                      komponenOutput={filters.komponenOutput} 
-                    />
-                  </div>
-                </div>
+          <div className="text-xs space-y-1">
+            {isLoading ? (
+              <div className="h-24 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
               </div>
-            </TabsContent>
-            
-            <TabsContent value="summary" className="mt-0">
-              <div className="space-y-2">
-                <div className="flex items-center gap-1 mb-1">
-                  <Info className="h-3.5 w-3.5 text-blue-500" />
-                  <h3 className="text-xs font-medium">Ringkasan Perubahan Pagu Anggaran</h3>
-                </div>
+            ) : (
+              <>
+                <p>
+                  {summary.totalSelisih > 0 
+                    ? `Perubahan anggaran meningkatkan total anggaran sebesar ${formatCurrency(summary.totalSelisih)} (${((summary.totalSelisih / summary.totalSemula) * 100).toFixed(2)}%).`
+                    : summary.totalSelisih < 0
+                      ? `Perubahan anggaran menurunkan total anggaran sebesar ${formatCurrency(Math.abs(summary.totalSelisih))} (${((summary.totalSelisih / summary.totalSemula) * 100).toFixed(2)}%).`
+                      : 'Perubahan anggaran tidak mengubah total anggaran (0%).'}
+                </p>
                 
-                {budgetSummary && (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <Card className="border border-changed-row shadow-sm bg-gradient-to-r from-amber-50 to-yellow-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Diubah</h3>
-                          <p className="text-base font-bold">{budgetSummary.changedItems.length}</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border border-new-row shadow-sm bg-gradient-to-r from-emerald-50 to-green-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Baru</h3>
-                          <p className="text-base font-bold">{budgetSummary.newItems.length}</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border border-deleted-row shadow-sm bg-gradient-to-r from-red-50 to-rose-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Dihapus</h3>
-                          <p className="text-base font-bold">{budgetSummary.deletedItems.length}</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    <Card className="border shadow-sm bg-blue-50">
-                      <CardContent className="p-2 text-xs">
-                        <h3 className="font-semibold text-blue-700 mb-1">Dampak Perubahan Anggaran:</h3>
-                        <ul className="space-y-1">
-                          <li>- {getImpactSummary()}</li>
-                          <li>- Terdapat {budgetSummary.changedItems.length} item yang dimodifikasi, {budgetSummary.newItems.length} item baru, dan {budgetSummary.deletedItems.length} item yang dihapus.</li>
-                          <li>- Item yang paling signifikan berubah: {findMostSignificantChange()}</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    
-                    <Button 
-                      variant="outline" 
-                      onClick={showSummary}
-                      className="w-full md:w-auto h-7 text-xs btn-gradient-blue"
-                    >
-                      <Info className="mr-1 h-3 w-3" /> 
-                      Lihat Detail Ringkasan
-                    </Button>
-                    
-                    <div className="mt-3">
-                      <DetailedSummaryView />
-                    </div>
-                  </div>
+                <p>
+                  Terdapat {summary.changedItems.length} item yang dimodifikasi, 
+                  {summary.newItems.length} item baru, dan {summary.deletedItems.length} item yang dihapus.
+                </p>
+                
+                {summary.changedItems.length > 0 && (
+                  <p>
+                    Item yang paling signifikan berubah: {findMostSignificantChange()}
+                  </p>
                 )}
-              </div>
-            </TabsContent>
-          </CardContent>
-        </Tabs>
-      </Card>
-
-      {budgetSummary && (
-        <SummaryDialog 
-          items={budgetSummary.changedItems.concat(budgetSummary.newItems).concat(budgetSummary.deletedItems)}
-          open={summaryVisible}
-          onOpenChange={setSummaryVisible}
+                
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleShowSummaryDialog} 
+                    className="text-xs h-7"
+                  >
+                    <ListFilter className="h-3 w-3 mr-1" /> Detail Perubahan
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <BudgetSummaryBox 
+        totalSemula={globalSummary.totalSemula}
+        totalMenjadi={globalSummary.totalMenjadi}
+        totalSelisih={globalSummary.totalSelisih}
+      />
+      
+      <div className="bg-white rounded-lg shadow">
+        <BudgetTable 
+          items={budgetItems}
+          komponenOutput={selectedKomponenOutput}
+          subKomponen={selectedSubKomponen}
+          akun={selectedAkun}
+          onAdd={handleAddBudgetItem}
+          onUpdate={handleUpdateBudgetItem}
+          onDelete={handleDeleteBudgetItem}
+          onApprove={handleApproveBudgetItem}
+          onReject={handleRejectBudgetItem}
+          isLoading={isLoading}
+          areFiltersComplete={areFiltersComplete}
         />
-      )}
+      </div>
+      
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Import Data Anggaran</DialogTitle>
+            <DialogDescription>
+              Upload file untuk mengimpor data anggaran baru.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Input
+            type="file"
+            accept=".json"
+            onChange={handleImportFileChange}
+            className="mb-4"
+          />
+          
+          {importData.length > 0 && (
+            <div className="max-h-48 overflow-y-auto">
+              <Label>Preview Data:</Label>
+              <ul className="list-disc pl-5">
+                {importData.map((item, index) => (
+                  <li key={index} className="text-sm">
+                    {item.uraian} (Vol: {item.volumeMenjadi}, Harga: {item.hargaSatuanMenjadi})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setShowImportDialog(false)}
+            >
+              Batal
+            </Button>
+            <Button 
+              type="button" 
+              onClick={handleImportData} 
+              disabled={!importData.length}
+            >
+              <Upload className="h-4 w-4 mr-2" /> Import Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Summary Dialog */}
+      <SummaryDialog 
+        open={showSummaryDialog} 
+        onOpenChange={setShowSummaryDialog}
+        summary={summary}
+      />
     </div>
   );
 };
