@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -14,6 +15,9 @@ import {
   BudgetSummaryByKomponen,
   BudgetSummaryByAkun
 } from '@/types/database';
+import { Button } from '@/components/ui/button';
+import { FileBarChart2 } from 'lucide-react';
+import SummaryDialog from './SummaryDialog';
 
 const BudgetComparison: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -27,7 +31,8 @@ const BudgetComparison: React.FC = () => {
   });
   
   const [activeTab, setActiveTab] = useState<string>("table");
-  const [summaryView, setSummaryView] = useState<'account_group' | 'komponen' | 'akun'>('account_group');
+  const [summaryView, setSummaryView] = useState<'account_group' | 'komponen_output' | 'akun'>('account_group');
+  const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   
   // Check if all filter values are selected (not 'all')
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
@@ -136,16 +141,27 @@ const BudgetComparison: React.FC = () => {
                 <TabsTrigger value="summary">Ringkasan</TabsTrigger>
               </TabsList>
               
-              {isAdmin && (
-                <ExcelImportExport 
-                  items={budgetItems}
-                  onImport={(items) => {
-                    importBudgetItems(items);
-                    return Promise.resolve();
-                  }}
-                  isActive={activeTab === "table"}
-                />
-              )}
+              <div className="flex gap-2">
+                {activeTab === "summary" && (
+                  <Button variant="outline" onClick={() => setShowSummaryDialog(true)}>
+                    <FileBarChart2 className="h-4 w-4 mr-2" /> 
+                    Ekspor Semua Ringkasan
+                  </Button>
+                )}
+                
+                {isAdmin && activeTab === "table" && (
+                  <ExcelImportExport 
+                    items={budgetItems}
+                    onImport={(items) => {
+                      importBudgetItems(items);
+                      return Promise.resolve();
+                    }}
+                    komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
+                    subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+                    akun={filters.akun !== 'all' ? filters.akun : undefined}
+                  />
+                )}
+              </div>
             </div>
             
             <TabsContent value="table" className="pt-4">
@@ -175,6 +191,12 @@ const BudgetComparison: React.FC = () => {
           </Tabs>
         </div>
       </div>
+      
+      <SummaryDialog
+        items={budgetItems}
+        open={showSummaryDialog}
+        onOpenChange={setShowSummaryDialog}
+      />
     </div>
   );
 };

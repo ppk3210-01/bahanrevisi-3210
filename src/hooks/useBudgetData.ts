@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -6,7 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { BudgetItemRecord, BudgetSummaryRecord } from '@/types/supabase';
 
 interface EnhancedBudgetSummaryRecord extends BudgetSummaryRecord {
-  type?: 'account_group' | 'komponen' | 'akun';
+  type?: 'account_group' | 'komponen_output' | 'akun';
 }
 
 const useBudgetData = (filters: FilterSelection) => {
@@ -85,7 +86,7 @@ const useBudgetData = (filters: FilterSelection) => {
         if (komponenResult.data) {
           summaryData = summaryData.concat(komponenResult.data.map(item => ({
             ...item,
-            type: 'komponen' as const
+            type: 'komponen_output' as const
           })));
         }
         
@@ -181,11 +182,11 @@ const useBudgetData = (filters: FilterSelection) => {
           komponen_output: item.komponenOutput,
           status: 'new',
           is_approved: false,
-          program_pembebanan: item.programPembebanan || filters.programPembebanan,
-          kegiatan: item.kegiatan || filters.kegiatan,
-          rincian_output: item.rincianOutput || filters.rincianOutput,
-          sub_komponen: item.subKomponen || filters.subKomponen,
-          akun: item.akun || filters.akun
+          program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
+          kegiatan: item.kegiatan || (filters.kegiatan !== 'all' ? filters.kegiatan : null),
+          rincian_output: item.rincianOutput || (filters.rincianOutput !== 'all' ? filters.rincianOutput : null),
+          sub_komponen: item.subKomponen || (filters.subKomponen !== 'all' ? filters.subKomponen : null),
+          akun: item.akun || (filters.akun !== 'all' ? filters.akun : null)
         };
       });
       
@@ -204,6 +205,10 @@ const useBudgetData = (filters: FilterSelection) => {
         );
 
         setBudgetItems(prev => [...prev, ...savedItems]);
+        toast({
+          title: "Berhasil",
+          description: `${savedItems.length} item anggaran berhasil diimpor.`
+        });
         setLoading(false);
         return savedItems;
       }

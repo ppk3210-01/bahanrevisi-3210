@@ -107,6 +107,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     setIsLoading(true);
     try {
       const data = await readExcelFile(file);
+      console.log("Parsed Excel data:", data);
       
       if (data.length === 0) {
         toast({
@@ -120,6 +121,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       
       // Validate required fields and structure
       const result = validateExcelData(data);
+      console.log("Validation result:", result);
       
       if (result.validItems.length > 0) {
         await onImport(result.validItems);
@@ -163,6 +165,11 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       reader.onload = (e) => {
         try {
           const data = e.target?.result;
+          if (!data) {
+            reject(new Error("Failed to read file data"));
+            return;
+          }
+          
           const workbook = XLSX.read(data, { type: 'binary' });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
@@ -191,9 +198,6 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     
     // Validate required headers
     const requiredFields = [
-      'Program Pembebanan',
-      'Kegiatan',
-      'Rincian Output',
       'Komponen Output',
       'Sub Komponen',
       'Akun',
@@ -204,6 +208,13 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       'Volume Menjadi',
       'Satuan Menjadi',
       'Harga Satuan Menjadi'
+    ];
+    
+    // Optional fields that should be checked if present
+    const optionalFields = [
+      'Program Pembebanan',
+      'Kegiatan',
+      'Rincian Output'
     ];
 
     // Check if first row has the required headers
@@ -287,9 +298,9 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         satuanMenjadi: String(row['Satuan Menjadi']),
         hargaSatuanMenjadi,
         komponenOutput: String(row['Komponen Output']),
-        programPembebanan: String(row['Program Pembebanan']),
-        kegiatan: String(row['Kegiatan']),
-        rincianOutput: String(row['Rincian Output']),
+        programPembebanan: row['Program Pembebanan'] ? String(row['Program Pembebanan']) : undefined,
+        kegiatan: row['Kegiatan'] ? String(row['Kegiatan']) : undefined,
+        rincianOutput: row['Rincian Output'] ? String(row['Rincian Output']) : undefined,
         subKomponen: String(row['Sub Komponen']),
         akun: String(row['Akun']),
         isApproved: false
