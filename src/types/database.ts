@@ -1,5 +1,6 @@
 
 import { Database } from '@/integrations/supabase/types';
+import { UserRole } from './supabase';
 
 // Export database types
 export type Tables = Database['public']['Tables'];
@@ -15,9 +16,6 @@ export type UserProfile = Tables['profiles']['Row'];
 
 // Helper type to make specific fields optional
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-// User role type
-export type UserRole = 'admin' | 'user';
 
 // Auth response type
 export type AuthResponse = {

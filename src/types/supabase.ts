@@ -56,6 +56,20 @@ export type BudgetSummaryRecord = {
   total_items: number;
 };
 
+// Define user role type to ensure consistency
+export type UserRole = 'admin' | 'user';
+
+// Define profile record type that matches the profiles table
+export type ProfileRecord = {
+  id: string;
+  username: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
+};
+
 // This is a simplified version of the Database type that includes our tables
 export type TemporaryDatabase = {
   public: {
@@ -93,21 +107,13 @@ export type TemporaryDatabase = {
         Update: Partial<AkunRecord>;
       };
       profiles: {
-        Row: {
-          id: string;
-          username: string;
-          full_name: string | null;
-          avatar_url: string | null;
-          role: 'admin' | 'user';
-          created_at: string;
-          updated_at: string;
-        };
+        Row: ProfileRecord;
         Insert: {
           id: string;
           username: string;
           full_name?: string | null;
           avatar_url?: string | null;
-          role?: 'admin' | 'user';
+          role?: UserRole;
           created_at?: string;
           updated_at?: string;
         };
@@ -116,7 +122,7 @@ export type TemporaryDatabase = {
           username: string;
           full_name?: string | null;
           avatar_url?: string | null;
-          role?: 'admin' | 'user';
+          role?: UserRole;
           created_at?: string;
           updated_at?: string;
         }>;

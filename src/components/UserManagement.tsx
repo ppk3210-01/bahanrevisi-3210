@@ -11,11 +11,13 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { UserPlus } from 'lucide-react';
+import { UserRole } from '@/types/supabase';
 
+// Define the LocalUserProfile interface to ensure type safety
 interface LocalUserProfile {
   id: string;
   username: string;
-  role: 'admin' | 'user';
+  role: UserRole;
   avatar_url?: string | null;
   full_name?: string | null;
   created_at: string;
@@ -32,7 +34,7 @@ const UserManagement: React.FC = () => {
     username: '',
     email: '',
     password: '',
-    role: 'user' as 'admin' | 'user'
+    role: 'user' as UserRole
   });
 
   const fetchUsers = async () => {
@@ -50,20 +52,19 @@ const UserManagement: React.FC = () => {
         if (error) {
           console.error('Supabase error fetching users:', error);
         } else if (data) {
-          // Properly cast data from Supabase to LocalUserProfile
+          // Map Supabase data to LocalUserProfile with proper validation
           const typedData: LocalUserProfile[] = data.map(user => {
             // Ensure that role is either 'admin' or 'user'
-            let safeRole: 'admin' | 'user' = 'user';
-            if (user.role === 'admin' || user.role === 'user') {
-              safeRole = user.role as 'admin' | 'user';
-            }
+            const safeRole: UserRole = (user.role === 'admin' || user.role === 'user') 
+              ? user.role as UserRole 
+              : 'user';
             
             return {
               id: user.id,
               username: user.username,
               role: safeRole,
-              avatar_url: user.avatar_url || null,
-              full_name: user.full_name || null,
+              avatar_url: user.avatar_url,
+              full_name: user.full_name,
               created_at: user.created_at,
               updated_at: user.updated_at
             };
@@ -408,7 +409,7 @@ const UserManagement: React.FC = () => {
               <select 
                 id="role"
                 value={newUser.role}
-                onChange={(e) => setNewUser({...newUser, role: e.target.value as 'admin' | 'user'})}
+                onChange={(e) => setNewUser({...newUser, role: e.target.value as UserRole})}
                 className="col-span-3 border border-gray-300 rounded-md px-3 py-2"
               >
                 <option value="user">User</option>
