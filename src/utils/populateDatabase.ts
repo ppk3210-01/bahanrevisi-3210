@@ -34,14 +34,16 @@ export const createAdminUser = async () => {
     const adminPassword = 'Admin123!';
     
     // Check if auth user already exists first
-    const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers();
+    const { data, error: getUserError } = await supabase.auth.admin.listUsers();
     
     if (getUserError) {
       console.error('Error checking for existing users:', getUserError);
       return;
     }
     
-    const existingUser = users?.find(user => user.email === adminEmail);
+    // Fix the typing issue by properly checking the users array
+    const users = data?.users || [];
+    const existingUser = users.find(user => user.email === adminEmail);
     
     if (existingUser) {
       console.log('Admin auth user already exists, ensuring profile exists');
