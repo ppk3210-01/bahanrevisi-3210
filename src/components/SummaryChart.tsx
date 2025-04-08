@@ -85,7 +85,7 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
               interval={0}
             />
             <YAxis 
-              tickFormatter={(value) => formatCurrency(value, false)}
+              tickFormatter={(value) => formatCurrency(value)}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
