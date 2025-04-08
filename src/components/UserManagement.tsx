@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
@@ -51,12 +50,23 @@ const UserManagement: React.FC = () => {
           console.error('Supabase error fetching users:', error);
         } else if (data) {
           // Ensure proper typing of user data from Supabase
-          const typedData = data.map(user => ({
-            ...user,
-            role: (user.role === 'admin' || user.role === 'user') ? (user.role as 'admin' | 'user') : 'user',
-            avatar_url: user.avatar_url || null,
-            full_name: user.full_name || null
-          })) as LocalUserProfile[];
+          const typedData = data.map(user => {
+            // Ensure that role is either 'admin' or 'user'
+            let safeRole: 'admin' | 'user' = 'user';
+            if (user.role === 'admin' || user.role === 'user') {
+              safeRole = user.role as 'admin' | 'user';
+            }
+            
+            return {
+              id: user.id,
+              username: user.username,
+              role: safeRole,
+              avatar_url: user.avatar_url || null,
+              full_name: user.full_name || null,
+              created_at: user.created_at,
+              updated_at: user.updated_at
+            } as LocalUserProfile;
+          });
           
           const supabaseUserIds = typedData.map(user => user.id);
           usersList = [
@@ -80,12 +90,6 @@ const UserManagement: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (isAdmin) {
-      fetchUsers();
-    }
-  }, [isAdmin]);
 
   const handleToggleRole = async (userId: string, currentRole: 'admin' | 'user') => {
     try {
