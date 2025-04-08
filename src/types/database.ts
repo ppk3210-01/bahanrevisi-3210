@@ -1,3 +1,4 @@
+
 import { Database } from '@/integrations/supabase/tempTypes';
 
 // Define user roles as a strict union type
@@ -26,23 +27,7 @@ export type BudgetSummaryBase = {
   total_items: number | null;
 };
 
-// Refined summary types with specific fields
-export type BudgetSummaryByAccountGroup = BudgetSummaryBase & {
-  account_group: string | null;
-  type: 'account_group';
-};
-
-export type BudgetSummaryByKomponen = BudgetSummaryBase & {
-  komponen_output: string | null;
-  type: 'komponen_output';
-};
-
-export type BudgetSummaryByAkun = BudgetSummaryBase & {
-  akun: string | null;
-  type: 'akun';
-};
-
-// Summary types by different groupings
+// Summary types by different groupings - removed duplicate type declarations
 export interface BudgetSummaryByAccountGroup {
   account_group: string;
   total_semula: number;

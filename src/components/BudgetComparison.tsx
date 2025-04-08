@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -24,6 +23,23 @@ import { FileBarChart2 } from 'lucide-react';
 import SummaryDialog from './SummaryDialog';
 import BudgetChangesSummary from './BudgetChangesSummary';
 
+interface EnhancedBudgetSummaryRecord {
+  account_group?: string | null;
+  komponen_output?: string | null;
+  akun?: string | null;
+  program_pembebanan?: string | null;
+  kegiatan?: string | null;
+  rincian_output?: string | null;
+  sub_komponen?: string | null;
+  total_semula: number | null;
+  total_menjadi: number | null;
+  total_selisih: number | null;
+  new_items: number | null;
+  changed_items: number | null;
+  total_items: number | null;
+  type?: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+}
+
 const BudgetComparison: React.FC = () => {
   const { isAdmin, user } = useAuth();
   const [filters, setFilters] = useState<FilterSelection>({
@@ -48,7 +64,6 @@ const BudgetComparison: React.FC = () => {
   >('changes');
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   
-  // Check if all filter values are selected (not 'all')
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
   
   const { 
@@ -64,10 +79,8 @@ const BudgetComparison: React.FC = () => {
     summaryData
   } = useBudgetData(filters);
   
-  // Transform the summary data to match the expected types
-  const transformedSummaryData: DBBudgetSummaryRecord[] = summaryData.map(item => {
+  const transformedSummaryData: EnhancedBudgetSummaryRecord[] = summaryData.map(item => {
     if (item.account_group) {
-      // Create a properly typed account group summary
       const result: BudgetSummaryByAccountGroup = {
         account_group: item.account_group || '',
         total_semula: item.total_semula || 0,
@@ -80,7 +93,6 @@ const BudgetComparison: React.FC = () => {
       };
       return result;
     } else if (item.komponen_output) {
-      // Create a properly typed komponen summary
       const result: BudgetSummaryByKomponen = {
         komponen_output: item.komponen_output || '',
         total_semula: item.total_semula || 0,
@@ -93,7 +105,6 @@ const BudgetComparison: React.FC = () => {
       };
       return result;
     } else if (item.akun) {
-      // Create a properly typed akun summary
       const result: BudgetSummaryByAkun = {
         akun: item.akun || '',
         total_semula: item.total_semula || 0,
@@ -106,7 +117,6 @@ const BudgetComparison: React.FC = () => {
       };
       return result;
     } else if (item.program_pembebanan) {
-      // Create a properly typed program pembebanan summary
       const result: BudgetSummaryByProgramPembebanan = {
         program_pembebanan: item.program_pembebanan || '',
         total_semula: item.total_semula || 0,
@@ -119,7 +129,6 @@ const BudgetComparison: React.FC = () => {
       };
       return result;
     } else if (item.kegiatan) {
-      // Create a properly typed kegiatan summary
       const result: BudgetSummaryByKegiatan = {
         kegiatan: item.kegiatan || '',
         total_semula: item.total_semula || 0,
@@ -132,7 +141,6 @@ const BudgetComparison: React.FC = () => {
       };
       return result;
     } else if (item.rincian_output) {
-      // Create a properly typed rincian output summary
       const result: BudgetSummaryByRincianOutput = {
         rincian_output: item.rincian_output || '',
         total_semula: item.total_semula || 0,
@@ -145,7 +153,6 @@ const BudgetComparison: React.FC = () => {
       };
       return result;
     } else if (item.sub_komponen) {
-      // Create a properly typed sub komponen summary
       const result: BudgetSummaryBySubKomponen = {
         sub_komponen: item.sub_komponen || '',
         total_semula: item.total_semula || 0,
@@ -159,7 +166,6 @@ const BudgetComparison: React.FC = () => {
       return result;
     }
     
-    // Fallback to account group type (should not happen)
     const fallback: BudgetSummaryByAccountGroup = {
       account_group: 'Unknown',
       total_semula: item.total_semula || 0,
@@ -173,12 +179,10 @@ const BudgetComparison: React.FC = () => {
     return fallback;
   });
   
-  // Calculate budget summary totals for the BudgetSummaryBox
   const totalSemula = budgetItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
   
-  // Handle filter changes
   const handleFilterChange = (newFilters: Partial<FilterSelection>) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -186,7 +190,6 @@ const BudgetComparison: React.FC = () => {
     }));
   };
   
-  // Get the filtered summary data based on the current view
   const getFilteredSummaryData = () => {
     if (summarySectionView === 'account_group') {
       return transformedSummaryData.filter(item => 'account_group' in item);
@@ -206,7 +209,6 @@ const BudgetComparison: React.FC = () => {
     return [];
   };
 
-  // Helper to get the display name for the current summary section
   const getSummarySectionName = (): string => {
     switch (summarySectionView) {
       case 'changes': return 'Ringkasan Perubahan Pagu Anggaran';
@@ -224,14 +226,12 @@ const BudgetComparison: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex flex-col-reverse md:flex-row justify-between gap-4">
-        {/* Budget Filter */}
         <div className="w-full md:w-3/4">
           <BudgetFilter 
             onFilterChange={handleFilterChange} 
             filters={filters}
           />
         </div>
-        {/* Budget Summary Box */}
         <div className="w-full md:w-1/4 flex flex-col gap-2">
           <BudgetSummaryBox 
             totalSemula={totalSemula}
