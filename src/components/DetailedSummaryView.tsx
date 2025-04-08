@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/budgetCalculations';
@@ -15,12 +16,16 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import SummaryDialog from './SummaryDialog';
-import { BudgetSummaryRecord, BudgetItemRecord } from '@/types/database';
+import { 
+  BudgetSummaryRecord, 
+  BudgetSummaryByAccountGroup, 
+  BudgetSummaryByKomponen, 
+  BudgetSummaryByAkun,
+  BudgetItemRecord 
+} from '@/types/database';
 import { BudgetItem, convertToBudgetItem } from '@/types/budget';
 
 // Type definitions for our summary data
-type SummaryItem = BudgetSummaryRecord;
-
 type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
 type SortDirection = 'asc' | 'desc';
 
@@ -31,24 +36,37 @@ const formatToThousands = (value: number): string => {
   return formatCurrency(roundedValue);
 };
 
+// Type guard functions to check record types
+const isAccountGroupRecord = (record: BudgetSummaryRecord): record is BudgetSummaryByAccountGroup => 
+  (record as BudgetSummaryByAccountGroup).account_group !== undefined || 
+  (record as any).type === 'account_group';
+
+const isKomponenRecord = (record: BudgetSummaryRecord): record is BudgetSummaryByKomponen => 
+  (record as BudgetSummaryByKomponen).komponen_output !== undefined || 
+  (record as any).type === 'komponen_output';
+
+const isAkunRecord = (record: BudgetSummaryRecord): record is BudgetSummaryByAkun => 
+  (record as BudgetSummaryByAkun).akun !== undefined || 
+  (record as any).type === 'akun';
+
 // Get property from summary item with type safety
-const getGroupValue = (item: SummaryItem, groupField: 'account_group' | 'komponen_output' | 'akun'): string => {
-  if (groupField === 'account_group' && 'account_group' in item) {
+const getGroupValue = (item: BudgetSummaryRecord, groupFieldType: 'account_group' | 'komponen_output' | 'akun'): string => {
+  if (groupFieldType === 'account_group' && isAccountGroupRecord(item)) {
     return item.account_group || '';
   } 
-  if (groupField === 'komponen_output' && 'komponen_output' in item) {
+  if (groupFieldType === 'komponen_output' && isKomponenRecord(item)) {
     return item.komponen_output || '';
   }
-  if (groupField === 'akun' && 'akun' in item) {
+  if (groupFieldType === 'akun' && isAkunRecord(item)) {
     return item.akun || '';
   }
   return '';
 };
 
 const DetailedSummaryView: React.FC = () => {
-  const [accountGroupData, setAccountGroupData] = useState<SummaryItem[]>([]);
-  const [komponenData, setKomponenData] = useState<SummaryItem[]>([]);
-  const [akunData, setAkunData] = useState<SummaryItem[]>([]);
+  const [accountGroupData, setAccountGroupData] = useState<BudgetSummaryByAccountGroup[]>([]);
+  const [komponenData, setKomponenData] = useState<BudgetSummaryByKomponen[]>([]);
+  const [akunData, setAkunData] = useState<BudgetSummaryByAkun[]>([]);
   const [loading, setLoading] = useState(true);
   const [summaryDialogOpen, setSummaryDialogOpen] = useState(false);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -98,10 +116,21 @@ const DetailedSummaryView: React.FC = () => {
         
         if (budgetError) throw budgetError;
         
-        // Transform to our data format
-        setAccountGroupData(accountGroupResult || []);
-        setKomponenData(komponenResult || []);
-        setAkunData(akunResult || []);
+        // Transform to our data format with type information
+        setAccountGroupData((accountGroupResult || []).map(item => ({
+          ...item,
+          type: 'account_group'
+        })));
+        
+        setKomponenData((komponenResult || []).map(item => ({
+          ...item,
+          type: 'komponen_output'
+        })));
+        
+        setAkunData((akunResult || []).map(item => ({
+          ...item,
+          type: 'akun'
+        })));
         
         // Transform budget data to our budget items format
         const transformedBudgetData = (budgetData || []).map((item: BudgetItemRecord) => convertToBudgetItem(item));
@@ -123,20 +152,21 @@ const DetailedSummaryView: React.FC = () => {
   }, []);
 
   // Sort functions
-  const sortData = (
-    data: SummaryItem[], 
+  const sortData = <T extends BudgetSummaryRecord>(
+    data: T[], 
     field: SortField, 
-    direction: SortDirection
-  ): SummaryItem[] => {
+    direction: SortDirection,
+    groupFieldType: 'account_group' | 'komponen_output' | 'akun'
+  ): T[] => {
     return [...data].sort((a, b) => {
       let valueA, valueB;
       
       if (field === 'group') {
-        valueA = getGroupValue(a, groupField as any);
-        valueB = getGroupValue(b, groupField as any);
+        valueA = getGroupValue(a, groupFieldType);
+        valueB = getGroupValue(b, groupFieldType);
       } else {
-        valueA = a[field as keyof SummaryItem];
-        valueB = b[field as keyof SummaryItem];
+        valueA = a[field as keyof typeof a];
+        valueB = b[field as keyof typeof b];
       }
       
       if (typeof valueA === 'string' && typeof valueB === 'string') {
@@ -229,9 +259,9 @@ const DetailedSummaryView: React.FC = () => {
     }
   };
 
-  const sortedAccountGroupData = sortData(accountGroupData, accountGroupSort.field, accountGroupSort.direction);
-  const sortedKomponenData = sortData(komponenData, komponenSort.field, komponenSort.direction);
-  const sortedAkunData = sortData(akunData, akunSort.field, akunSort.direction);
+  const sortedAccountGroupData = sortData(accountGroupData, accountGroupSort.field, accountGroupSort.direction, 'account_group');
+  const sortedKomponenData = sortData(komponenData, komponenSort.field, komponenSort.direction, 'komponen_output');
+  const sortedAkunData = sortData(akunData, akunSort.field, akunSort.direction, 'akun');
 
   // Calculate totals
   const accountGroupTotals = {
@@ -273,8 +303,8 @@ const DetailedSummaryView: React.FC = () => {
 
   const renderTable = (
     title: string,
-    data: SummaryItem[],
-    groupField: 'account_group' | 'komponen_output' | 'akun',
+    data: BudgetSummaryRecord[],
+    groupFieldType: 'account_group' | 'komponen_output' | 'akun',
     currentSort: {field: SortField, direction: SortDirection},
     setSort: React.Dispatch<React.SetStateAction<{field: SortField, direction: SortDirection}>>,
     totals: {
@@ -309,7 +339,7 @@ const DetailedSummaryView: React.FC = () => {
               <TableHeader className={`bg-gradient-to-r ${bgColor} sticky top-0`}>
                 <TableRow className="text-xs h-7">
                   <TableHead className="w-[25%] cursor-pointer py-1 px-2" onClick={() => handleSort('group', currentSort, setSort)}>
-                    {groupField === 'account_group' ? 'Kelompok Akun' : groupField === 'komponen_output' ? 'Komponen Output' : 'Akun'}
+                    {groupFieldType === 'account_group' ? 'Kelompok Akun' : groupFieldType === 'komponen_output' ? 'Komponen Output' : 'Akun'}
                     {renderSortIcon('group', currentSort)}
                   </TableHead>
                   <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_semula', currentSort, setSort)}>
@@ -336,7 +366,7 @@ const DetailedSummaryView: React.FC = () => {
                 {data.map((item, index) => (
                   <TableRow key={index} className={`text-xs h-6 ${index % 2 === 0 ? `bg-gradient-to-r ${bgColor} bg-opacity-30` : ''}`}>
                     <TableCell className="font-medium py-1 px-2">
-                      {getGroupValue(item, groupField) || 'Tidak Terdefinisi'}
+                      {getGroupValue(item, groupFieldType) || 'Tidak Terdefinisi'}
                     </TableCell>
                     <TableCell className="text-right py-1 px-2">
                       {formatToThousands(item.total_semula || 0)}
