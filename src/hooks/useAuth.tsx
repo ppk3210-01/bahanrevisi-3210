@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -39,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
+        console.log('Auth state changed:', event, newSession?.user?.email);
         setSession(newSession);
         setUser(newSession?.user ?? null);
         
@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      console.log('Initial session check:', initialSession?.user?.email);
       setSession(initialSession);
       setUser(initialSession?.user ?? null);
       
@@ -70,6 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for:', userId);
+      
+      // First check if the user profile exists
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -78,10 +82,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error('Error fetching user profile:', error);
-        throw error;
-      }
-      
-      if (data) {
+        
+        // If the profile doesn't exist, attempt to create it from user metadata
+        if (error.code === 'PGRST116') {
+          const { data: userData } = await supabase.auth.getUser();
+          
+          if (userData?.user) {
+            const metadata = userData.user.user_metadata;
+            const email = userData.user.email || '';
+            
+            const newProfile: Omit<UserProfile, 'id'> = {
+              username: email,
+              full_name: metadata?.full_name || email,
+              role: (metadata?.role as UserRole) || 'user'
+            };
+            
+            const { data: insertedProfile, error: insertError } = await supabase
+              .from('user_profiles')
+              .insert([{ id: userId, ...newProfile }])
+              .select()
+              .single();
+            
+            if (insertError) {
+              console.error('Error creating user profile:', insertError);
+            } else {
+              console.log('Created new user profile:', insertedProfile);
+              setProfile(insertedProfile as UserProfile);
+              return;
+            }
+          }
+        }
+        
+        setProfile(null);
+      } else if (data) {
+        console.log('User profile found:', data);
         setProfile(data as UserProfile);
       }
     } catch (error) {
@@ -93,9 +127,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      console.log('Attempting login for:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
+        console.error('Login error:', error);
         toast({
           variant: "destructive",
           title: "Login failed",
@@ -104,6 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
+      console.log('Login successful:', data.user?.email);
       toast({
         title: "Login successful",
         description: "Welcome back!"
@@ -150,9 +188,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (email: string, password: string, fullName: string, role: UserRole = 'user') => {
     try {
       setLoading(true);
+      console.log('Attempting signup for:', email);
       
-      // Create user with metadata
-      const { error } = await supabase.auth.signUp({
+      // Create the auth user first
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -164,6 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
+        console.error('Signup error:', error);
         toast({
           variant: "destructive",
           title: "Signup failed",
@@ -172,6 +212,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       
+      // If we have a new user, create their profile manually (in case the DB trigger fails)
+      if (data.user) {
+        console.log('User created, creating profile for:', data.user.id);
+        
+        const newProfile = {
+          id: data.user.id,
+          username: email,
+          full_name: fullName,
+          role: role
+        };
+        
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert([newProfile]);
+        
+        if (profileError) {
+          console.error('Error creating user profile during signup:', profileError);
+          // We don't throw here as the auth user is already created
+        }
+      }
+      
+      console.log('Signup successful for:', email);
       toast({
         title: "Account created",
         description: "Your account has been created successfully."

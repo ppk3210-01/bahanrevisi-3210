@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { Loader2 } from 'lucide-react';
 
 interface LoginDialogProps {
   open: boolean;
@@ -38,6 +39,10 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [loginError, setLoginError] = useState('');
   const [signupError, setSignupError] = useState('');
   
+  // Loading states
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -48,12 +53,15 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     }
     
     try {
+      setIsLoggingIn(true);
       await login(loginEmail, loginPassword);
       onOpenChange(false); // Close dialog on successful login
       resetForms();
     } catch (error) {
       console.error('Login error:', error);
       setLoginError('Login failed. Please check your credentials and try again.');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
   
@@ -77,12 +85,16 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     }
     
     try {
+      setIsSigningUp(true);
       await signup(signupEmail, signupPassword, signupFullName);
-      onOpenChange(false); // Close dialog on successful signup
+      setActiveTab('login');
       resetForms();
+      // Don't close dialog here, let the user log in with their new credentials
     } catch (error) {
       console.error('Signup error:', error);
       setSignupError('Signup failed. Please try again with a different email.');
+    } finally {
+      setIsSigningUp(false);
     }
   };
   
@@ -101,7 +113,10 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   };
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      if (!newOpen) resetForms();
+      onOpenChange(newOpen);
+    }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Authentication</DialogTitle>
@@ -132,6 +147,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   required
+                  disabled={isLoggingIn}
                 />
               </div>
               
@@ -144,6 +160,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   required
+                  disabled={isLoggingIn}
                 />
               </div>
               
@@ -151,8 +168,13 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 <div className="text-sm text-red-500">{loginError}</div>
               )}
               
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Logging in...' : 'Login'}
+              <Button type="submit" className="w-full" disabled={isLoggingIn}>
+                {isLoggingIn ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Logging in...
+                  </>
+                ) : 'Login'}
               </Button>
             </form>
           </TabsContent>
@@ -168,6 +190,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   value={signupFullName}
                   onChange={(e) => setSignupFullName(e.target.value)}
                   required
+                  disabled={isSigningUp}
                 />
               </div>
               
@@ -180,6 +203,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   value={signupEmail}
                   onChange={(e) => setSignupEmail(e.target.value)}
                   required
+                  disabled={isSigningUp}
                 />
               </div>
               
@@ -192,6 +216,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
                   required
+                  disabled={isSigningUp}
                 />
               </div>
               
@@ -204,6 +229,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   value={signupConfirmPassword}
                   onChange={(e) => setSignupConfirmPassword(e.target.value)}
                   required
+                  disabled={isSigningUp}
                 />
               </div>
               
@@ -211,8 +237,13 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 <div className="text-sm text-red-500">{signupError}</div>
               )}
               
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Creating account...' : 'Create Account'}
+              <Button type="submit" className="w-full" disabled={isSigningUp}>
+                {isSigningUp ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : 'Create Account'}
               </Button>
             </form>
           </TabsContent>

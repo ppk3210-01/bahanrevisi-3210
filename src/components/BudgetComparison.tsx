@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Download, 
   Upload, 
@@ -38,51 +38,39 @@ const BudgetComparison = () => {
   const [showImportDialog, setShowImportDialog] = useState<boolean>(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState<boolean>(false);
   
-  const formatFilterSelection = () => {
-    return `Program: ${selectedProgramPembebanan}, Kegiatan: ${selectedKegiatan}, Rincian: ${selectedRincianOutput}, Komponen: ${selectedKomponenOutput}, SubKomponen: ${selectedSubKomponen}, Akun: ${selectedAkun}`;
-  };
-
-  const handleFilter = (filterType: string, value: string) => {
-    switch (filterType) {
-      case 'programPembebanan':
-        setSelectedProgramPembebanan(value);
-        break;
-      case 'kegiatan':
-        setSelectedKegiatan(value);
-        break;
-      case 'rincianOutput':
-        setSelectedRincianOutput(value);
-        break;
-      case 'komponenOutput':
-        setSelectedKomponenOutput(value);
-        break;
-      case 'subKomponen':
-        setSelectedSubKomponen(value);
-        break;
-      case 'akun':
-        setSelectedAkun(value);
-        break;
-      default:
-        break;
-    }
-  };
-  
-  const areFiltersComplete = 
-    selectedProgramPembebanan !== 'all' &&
-    selectedKegiatan !== 'all' &&
-    selectedRincianOutput !== 'all' &&
-    selectedKomponenOutput !== 'all' &&
-    selectedSubKomponen !== 'all' &&
-    selectedAkun !== 'all';
-
-  const filters: FilterSelection = {
+  // Use useMemo to prevent recreating filters object on every render
+  const filters = useMemo(() => ({
     programPembebanan: selectedProgramPembebanan,
     kegiatan: selectedKegiatan,
     rincianOutput: selectedRincianOutput,
     komponenOutput: selectedKomponenOutput,
     subKomponen: selectedSubKomponen,
     akun: selectedAkun
-  };
+  }), [
+    selectedProgramPembebanan,
+    selectedKegiatan,
+    selectedRincianOutput,
+    selectedKomponenOutput,
+    selectedSubKomponen,
+    selectedAkun
+  ]);
+
+  // Use useMemo for derived state to prevent unnecessary calculations
+  const areFiltersComplete = useMemo(() => 
+    selectedProgramPembebanan !== 'all' &&
+    selectedKegiatan !== 'all' &&
+    selectedRincianOutput !== 'all' &&
+    selectedKomponenOutput !== 'all' &&
+    selectedSubKomponen !== 'all' &&
+    selectedAkun !== 'all',
+  [
+    selectedProgramPembebanan,
+    selectedKegiatan,
+    selectedRincianOutput,
+    selectedKomponenOutput,
+    selectedSubKomponen,
+    selectedAkun
+  ]);
 
   const { 
     budgetItems, 
@@ -116,30 +104,61 @@ const BudgetComparison = () => {
   
   const { canAccessImportExport } = usePermissions();
   
+  // Memoize the budget summary calculation to prevent unnecessary recalculations
   useEffect(() => {
-    const newSummary = generateBudgetSummary(budgetItems);
-    setSummary(newSummary);
-  }, [budgetItems]);
+    if (!isLoading && budgetItems) {
+      const newSummary = generateBudgetSummary(budgetItems);
+      setSummary(newSummary);
+    }
+  }, [budgetItems, isLoading]);
   
-  useEffect(() => {
-    const fetchAllData = async () => {
+  // Use useCallback for functions to prevent them from being recreated on every render
+  const fetchAllData = useCallback(async () => {
+    if (!isLoading) {
       const allItems = await getAllBudgetItems();
       const newGlobalSummary = generateBudgetSummary(allItems);
       setGlobalSummary(newGlobalSummary);
-    };
-    
+    }
+  }, [getAllBudgetItems, isLoading]);
+  
+  useEffect(() => {
     fetchAllData();
-  }, [getAllBudgetItems]);
+  }, [fetchAllData]);
 
-  const handleShowImportDialog = () => {
+  const handleFilter = useCallback((filterType: string, value: string) => {
+    switch (filterType) {
+      case 'programPembebanan':
+        setSelectedProgramPembebanan(value);
+        break;
+      case 'kegiatan':
+        setSelectedKegiatan(value);
+        break;
+      case 'rincianOutput':
+        setSelectedRincianOutput(value);
+        break;
+      case 'komponenOutput':
+        setSelectedKomponenOutput(value);
+        break;
+      case 'subKomponen':
+        setSelectedSubKomponen(value);
+        break;
+      case 'akun':
+        setSelectedAkun(value);
+        break;
+      default:
+        break;
+    }
+  }, []);
+
+  const handleShowImportDialog = useCallback(() => {
     setShowImportDialog(true);
-  };
+  }, []);
 
-  const handleShowSummaryDialog = () => {
+  const handleShowSummaryDialog = useCallback(() => {
     setShowSummaryDialog(true);
-  };
+  }, []);
 
-  const handleImportData = async () => {
+  const handleImportData = useCallback(async () => {
     try {
       await importBudgetItems(importData);
       setShowImportDialog(false);
@@ -147,9 +166,9 @@ const BudgetComparison = () => {
     } catch (error) {
       console.error("Failed to import data:", error);
     }
-  };
+  }, [importData, importBudgetItems]);
 
-  const handleExportData = () => {
+  const handleExportData = useCallback(() => {
     const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
       JSON.stringify(budgetItems, null, 2)
     )}`;
@@ -159,9 +178,9 @@ const BudgetComparison = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+  }, [budgetItems]);
 
-  const handleImportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -196,9 +215,16 @@ const BudgetComparison = () => {
       };
       reader.readAsText(file);
     }
-  };
+  }, [
+    selectedProgramPembebanan,
+    selectedKegiatan,
+    selectedRincianOutput,
+    selectedKomponenOutput,
+    selectedSubKomponen,
+    selectedAkun
+  ]);
   
-  const findMostSignificantChange = (): string => {
+  const findMostSignificantChange = useCallback(() => {
     if (summary.changedItems.length === 0) {
       return 'Tidak ada perubahan signifikan.';
     }
@@ -211,7 +237,52 @@ const BudgetComparison = () => {
     });
     
     return mostChangedItem.uraian;
-  };
+  }, [summary.changedItems]);
+  
+  // Memoize complex JSX to prevent unnecessary re-renders
+  const renderRingkasanContent = useMemo(() => {
+    if (isLoading) {
+      return (
+        <div className="h-24 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+        </div>
+      );
+    }
+    
+    return (
+      <>
+        <p>
+          {summary.totalSelisih > 0 
+            ? `Perubahan anggaran meningkatkan total anggaran sebesar ${formatCurrency(summary.totalSelisih)} (${((summary.totalSelisih / summary.totalSemula) * 100).toFixed(2)}%).`
+            : summary.totalSelisih < 0
+              ? `Perubahan anggaran menurunkan total anggaran sebesar ${formatCurrency(Math.abs(summary.totalSelisih))} (${((summary.totalSelisih / summary.totalSemula) * 100).toFixed(2)}%).`
+              : 'Perubahan anggaran tidak mengubah total anggaran (0%).'}
+        </p>
+        
+        <p>
+          Terdapat {summary.changedItems.length} item yang dimodifikasi, 
+          {summary.newItems.length} item baru, dan {summary.deletedItems.length} item yang dihapus.
+        </p>
+        
+        {summary.changedItems.length > 0 && (
+          <p>
+            Item yang paling signifikan berubah: {findMostSignificantChange()}
+          </p>
+        )}
+        
+        <div className="mt-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleShowSummaryDialog} 
+            className="text-xs h-7"
+          >
+            <ListFilter className="h-3 w-3 mr-1" /> Detail Perubahan
+          </Button>
+        </div>
+      </>
+    );
+  }, [isLoading, summary, findMostSignificantChange, handleShowSummaryDialog]);
   
   return (
     <div className="space-y-4">
@@ -231,6 +302,7 @@ const BudgetComparison = () => {
                   size="sm" 
                   className="bg-green-500 hover:bg-green-600 text-xs h-7" 
                   onClick={handleShowImportDialog}
+                  disabled={isLoading}
                 >
                   <Upload className="h-3 w-3 mr-1" /> Import
                 </Button>
@@ -238,6 +310,7 @@ const BudgetComparison = () => {
                   size="sm" 
                   className="bg-blue-500 hover:bg-blue-600 text-xs h-7" 
                   onClick={handleExportData}
+                  disabled={isLoading}
                 >
                   <Download className="h-3 w-3 mr-1" /> Export
                 </Button>
@@ -246,43 +319,7 @@ const BudgetComparison = () => {
           </div>
           
           <div className="text-xs space-y-1">
-            {isLoading ? (
-              <div className="h-24 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-              </div>
-            ) : (
-              <>
-                <p>
-                  {summary.totalSelisih > 0 
-                    ? `Perubahan anggaran meningkatkan total anggaran sebesar ${formatCurrency(summary.totalSelisih)} (${((summary.totalSelisih / summary.totalSemula) * 100).toFixed(2)}%).`
-                    : summary.totalSelisih < 0
-                      ? `Perubahan anggaran menurunkan total anggaran sebesar ${formatCurrency(Math.abs(summary.totalSelisih))} (${((summary.totalSelisih / summary.totalSemula) * 100).toFixed(2)}%).`
-                      : 'Perubahan anggaran tidak mengubah total anggaran (0%).'}
-                </p>
-                
-                <p>
-                  Terdapat {summary.changedItems.length} item yang dimodifikasi, 
-                  {summary.newItems.length} item baru, dan {summary.deletedItems.length} item yang dihapus.
-                </p>
-                
-                {summary.changedItems.length > 0 && (
-                  <p>
-                    Item yang paling signifikan berubah: {findMostSignificantChange()}
-                  </p>
-                )}
-                
-                <div className="mt-3">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleShowSummaryDialog} 
-                    className="text-xs h-7"
-                  >
-                    <ListFilter className="h-3 w-3 mr-1" /> Detail Perubahan
-                  </Button>
-                </div>
-              </>
-            )}
+            {renderRingkasanContent}
           </div>
         </div>
       </div>
@@ -299,8 +336,8 @@ const BudgetComparison = () => {
           komponenOutput={selectedKomponenOutput}
           subKomponen={selectedSubKomponen}
           akun={selectedAkun}
-          onAdd={async (item) => { await handleAddBudgetItem(item); }}
-          onUpdate={async (id, changes) => { await handleUpdateBudgetItem(id, changes); }}
+          onAdd={handleAddBudgetItem}
+          onUpdate={handleUpdateBudgetItem}
           onDelete={handleDeleteBudgetItem}
           onApprove={handleApproveBudgetItem}
           onReject={handleRejectBudgetItem}
