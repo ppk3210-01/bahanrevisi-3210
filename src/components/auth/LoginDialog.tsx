@@ -57,9 +57,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       await login(loginEmail, loginPassword);
       onOpenChange(false); // Close dialog on successful login
       resetForms();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      setLoginError('Login failed. Please check your credentials and try again.');
+      setLoginError(error?.message || 'Login failed. Please check your credentials and try again.');
     } finally {
       setIsLoggingIn(false);
     }
@@ -90,9 +90,9 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       setActiveTab('login');
       resetForms();
       // Don't close dialog here, let the user log in with their new credentials
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
-      setSignupError('Signup failed. Please try again with a different email.');
+      setSignupError(error?.message || 'Signup failed. Please try again with a different email.');
     } finally {
       setIsSigningUp(false);
     }
@@ -168,13 +168,13 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 <div className="text-sm text-red-500">{loginError}</div>
               )}
               
-              <Button type="submit" className="w-full" disabled={isLoggingIn}>
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoggingIn}>
                 {isLoggingIn ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Logging in...
+                    <span>Logging in...</span>
                   </>
-                ) : 'Login'}
+                ) : <span>Login</span>}
               </Button>
             </form>
           </TabsContent>
@@ -237,13 +237,13 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 <div className="text-sm text-red-500">{signupError}</div>
               )}
               
-              <Button type="submit" className="w-full" disabled={isSigningUp}>
+              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={isSigningUp}>
                 {isSigningUp ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
+                    <span>Creating account...</span>
                   </>
-                ) : 'Create Account'}
+                ) : <span>Create Account</span>}
               </Button>
             </form>
           </TabsContent>

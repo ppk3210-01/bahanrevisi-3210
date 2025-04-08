@@ -60,11 +60,11 @@ const Header = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="text-white border-white hover:bg-blue-500"
+              className="bg-blue-500 border-white hover:bg-blue-600"
               onClick={() => setLoginDialogOpen(true)}
             >
-              <LogIn className="h-4 w-4 mr-1" />
-              <span>Login</span>
+              <LogIn className="h-4 w-4 mr-1 text-white" />
+              <span className="text-white">Login</span>
             </Button>
           )}
         </div>

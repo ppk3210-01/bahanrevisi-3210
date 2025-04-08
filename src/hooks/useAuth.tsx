@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -236,7 +237,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Signup successful for:', email);
       toast({
         title: "Account created",
-        description: "Your account has been created successfully."
+        description: "Your account has been created successfully. You can now log in."
       });
     } catch (error) {
       console.error('Signup error:', error);
