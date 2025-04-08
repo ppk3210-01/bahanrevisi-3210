@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -15,7 +14,7 @@ import ExportOptions from './ExportOptions';
 import SummaryDialog from './SummaryDialog';
 import DetailedSummaryView from './DetailedSummaryView';
 import { Button } from '@/components/ui/button';
-import { FilterSelection, BudgetSummary } from '@/types/budget';
+import { FilterSelection, BudgetSummary, BudgetItem } from '@/types/budget';
 import { generateBudgetSummary } from '@/utils/budgetCalculations';
 import useBudgetData from '@/hooks/useBudgetData';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -84,10 +83,8 @@ const BudgetComparison: React.FC = () => {
     setSummaryVisible(true);
   };
 
-  // Fix 1: Handle the import without returning the Promise result
   const handleImport = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
     await importBudgetItems(items);
-    // No return statement, so it implicitly returns void
   };
 
   return (
@@ -289,7 +286,7 @@ const BudgetComparison: React.FC = () => {
                     
                     <div className="mt-4">
                       <ExcelImportExport 
-                        onImport={handleImport} // Fix: Use our wrapper function that returns void
+                        onImport={handleImport}
                         komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
                         subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
                         akun={filters.akun !== 'all' ? filters.akun : undefined}
@@ -350,7 +347,6 @@ const BudgetComparison: React.FC = () => {
                     </Button>
                     
                     <div className="mt-4">
-                      {/* Fix 2: Remove the items prop if DetailedSummaryView doesn't accept it */}
                       <DetailedSummaryView />
                     </div>
                   </div>
