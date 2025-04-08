@@ -20,10 +20,15 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
   totalMenjadi,
   totalSelisih
 }) => {
+  // Calculate percentage change
+  const percentageChange = totalSemula > 0 
+    ? ((totalSelisih / totalSemula) * 100).toFixed(2) 
+    : '0.00';
+    
   return (
     <div className="sticky top-[65px] z-20 bg-gray-50 py-1 border-b border-gray-200 shadow-sm">
       <div className="flex justify-between items-center text-xs">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div>
             <span className="text-gray-600 mr-1">Pagu Anggaran Semula:</span>
             <span className="font-semibold">{formatToThousands(totalSemula)}</span>
@@ -38,7 +43,7 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
         <div>
           <span className="text-gray-600 mr-1">Selisih:</span>
           <span className={`font-semibold ${totalSelisih === 0 ? 'text-green-600' : totalSelisih > 0 ? 'text-blue-600' : 'text-red-600'}`}>
-            {formatToThousands(totalSelisih)}
+            {formatToThousands(totalSelisih)} ({percentageChange}%)
           </span>
         </div>
       </div>
