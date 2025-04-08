@@ -11,7 +11,7 @@ import ExcelImportExport from './ExcelImportExport';
 import { useAuth } from '@/contexts/AuthContext'; 
 
 const BudgetComparison: React.FC = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [filters, setFilters] = useState<FilterSelection>({
     programPembebanan: 'all',
     kegiatan: 'all',
@@ -38,20 +38,34 @@ const BudgetComparison: React.FC = () => {
     importBudgetItems
   } = useBudgetData(filters);
   
+  // Calculate budget summary totals for the BudgetSummaryBox
+  const totalSemula = budgetItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
+  const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+  const totalSelisih = totalMenjadi - totalSemula;
+  
+  // Handle filter changes by creating a wrapper function with the correct type
+  const handleFilterChange = (newFilters: Partial<FilterSelection>) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      ...newFilters
+    }));
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col-reverse md:flex-row justify-between gap-4">
         {/* Budget Summary Box */}
         <div className="w-full md:w-3/4">
           <BudgetFilter 
-            onFilterChange={setFilters} 
+            onFilterChange={handleFilterChange} 
             filters={filters}
           />
         </div>
         <div className="w-full md:w-1/4 flex flex-col gap-2">
           <BudgetSummaryBox 
-            items={budgetItems}
-            isLoading={loading}
+            totalSemula={totalSemula}
+            totalMenjadi={totalMenjadi}
+            totalSelisih={totalSelisih}
           />
         </div>
       </div>
@@ -73,7 +87,10 @@ const BudgetComparison: React.FC = () => {
               {isAdmin && (
                 <ExcelImportExport 
                   budgetItems={budgetItems}
-                  onImport={importBudgetItems}
+                  onImport={(items) => {
+                    importBudgetItems(items);
+                    return Promise.resolve();
+                  }}
                   isActive={activeTab === "table"}
                 />
               )}
@@ -96,9 +113,7 @@ const BudgetComparison: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="summary" className="pt-4">
-              <DetailedSummaryView 
-                filters={filters}
-              />
+              <DetailedSummaryView />
             </TabsContent>
           </Tabs>
         </div>
@@ -108,4 +123,3 @@ const BudgetComparison: React.FC = () => {
 };
 
 export default BudgetComparison;
-

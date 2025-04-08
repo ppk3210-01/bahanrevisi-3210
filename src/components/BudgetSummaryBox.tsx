@@ -6,6 +6,7 @@ interface BudgetSummaryBoxProps {
   totalSemula: number;
   totalMenjadi: number;
   totalSelisih: number;
+  isLoading?: boolean;
 }
 
 // Format numbers to thousands by rounding to the nearest thousand
@@ -18,32 +19,36 @@ const formatToThousands = (value: number): string => {
 const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({ 
   totalSemula, 
   totalMenjadi,
-  totalSelisih
+  totalSelisih,
+  isLoading = false
 }) => {
-  // Calculate the correct selisih value as Menjadi - Semula
-  const correctSelisih = totalMenjadi - totalSemula;
-  
   return (
     <div className="sticky top-[65px] z-20 bg-gray-50 py-1 border-b border-gray-200 shadow-sm">
       <div className="flex justify-between items-center text-xs">
-        <div className="flex items-center gap-4">
-          <div>
-            <span className="text-gray-600 mr-1">Pagu Anggaran Semula:</span>
-            <span className="font-semibold">{formatToThousands(totalSemula)}</span>
-          </div>
-          
-          <div>
-            <span className="text-gray-600 mr-1">Pagu Anggaran Menjadi:</span>
-            <span className="font-semibold">{formatToThousands(totalMenjadi)}</span>
-          </div>
-        </div>
-        
-        <div>
-          <span className="text-gray-600 mr-1">Selisih:</span>
-          <span className={`font-semibold ${correctSelisih === 0 ? 'text-green-600' : correctSelisih > 0 ? 'text-blue-600' : 'text-red-600'}`}>
-            {formatToThousands(correctSelisih)}
-          </span>
-        </div>
+        {isLoading ? (
+          <div className="w-full text-center py-2">Loading...</div>
+        ) : (
+          <>
+            <div className="flex items-center gap-4">
+              <div>
+                <span className="text-gray-600 mr-1">Pagu Anggaran Semula:</span>
+                <span className="font-semibold">{formatToThousands(totalSemula)}</span>
+              </div>
+              
+              <div>
+                <span className="text-gray-600 mr-1">Pagu Anggaran Menjadi:</span>
+                <span className="font-semibold">{formatToThousands(totalMenjadi)}</span>
+              </div>
+            </div>
+            
+            <div>
+              <span className="text-gray-600 mr-1">Selisih:</span>
+              <span className={`font-semibold ${totalSelisih === 0 ? 'text-green-600' : totalSelisih > 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                {formatToThousands(totalSelisih)}
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

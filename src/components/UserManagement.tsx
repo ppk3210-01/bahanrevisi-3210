@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
@@ -13,9 +12,19 @@ import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Plus, UserPlus } from 'lucide-react';
 
+interface LocalUserProfile {
+  id: string;
+  username: string;
+  role: 'admin' | 'user';
+  avatar_url?: string | null;
+  full_name?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const UserManagement: React.FC = () => {
   const { isAdmin } = useAuth();
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<LocalUserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
@@ -32,21 +41,25 @@ const UserManagement: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // First, get users from local storage
       const localUsers = localStorage.getItem('app.users');
-      let usersList: UserProfile[] = localUsers ? JSON.parse(localUsers) : [];
+      let usersList: LocalUserProfile[] = localUsers ? JSON.parse(localUsers) : [];
       
-      // Then try to fetch from Supabase if available
       try {
         const { data, error } = await supabase.from('profiles').select('*');
         
         if (error) {
           console.error('Supabase error fetching users:', error);
         } else if (data) {
-          // Merge with local users, prefer Supabase data
-          const supabaseUserIds = data.map(user => user.id);
+          const typedData = data.map(user => ({
+            ...user,
+            role: (user.role === 'admin' || user.role === 'user') ? user.role : 'user',
+            avatar_url: user.avatar_url || null,
+            full_name: user.full_name || null
+          })) as LocalUserProfile[];
+          
+          const supabaseUserIds = typedData.map(user => user.id);
           usersList = [
-            ...data,
+            ...typedData,
             ...usersList.filter(user => !supabaseUserIds.includes(user.id))
           ];
         }
@@ -77,14 +90,12 @@ const UserManagement: React.FC = () => {
     try {
       const newRole = currentRole === 'admin' ? 'user' : 'admin';
       
-      // Update in local storage first
       const updatedUsers = users.map(user => 
         user.id === userId ? { ...user, role: newRole } : user
       );
       setUsers(updatedUsers);
       localStorage.setItem('app.users', JSON.stringify(updatedUsers));
       
-      // Then try to update in Supabase
       try {
         const { error } = await supabase
           .from('profiles')
@@ -116,12 +127,10 @@ const UserManagement: React.FC = () => {
     if (!deleteUserId) return;
     
     try {
-      // Remove from local state and storage
       const updatedUsers = users.filter(user => user.id !== deleteUserId);
       setUsers(updatedUsers);
       localStorage.setItem('app.users', JSON.stringify(updatedUsers));
       
-      // Try to delete from Supabase
       try {
         const { error } = await supabase
           .from('profiles')
@@ -150,7 +159,7 @@ const UserManagement: React.FC = () => {
       });
     }
   };
-  
+
   const handleAddUser = async () => {
     if (!newUser.username || !newUser.email || !newUser.password) {
       toast({
@@ -164,7 +173,6 @@ const UserManagement: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Generate a UUID for local storage users
       const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
           const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -172,21 +180,22 @@ const UserManagement: React.FC = () => {
         });
       };
       
-      // Create new user profile
-      const newUserProfile: UserProfile = {
+      const timestamp = new Date().toISOString();
+      
+      const newUserProfile: LocalUserProfile = {
         id: generateUUID(),
         username: newUser.username,
         role: newUser.role,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        avatar_url: null,
+        full_name: null,
+        created_at: timestamp,
+        updated_at: timestamp
       };
       
-      // Add to local storage first
       const updatedUsers = [...users, newUserProfile];
       setUsers(updatedUsers);
       localStorage.setItem('app.users', JSON.stringify(updatedUsers));
       
-      // Store login credentials in a separate area of local storage
       const credentials = JSON.parse(localStorage.getItem('app.credentials') || '[]');
       credentials.push({
         email: newUser.email,
@@ -195,9 +204,7 @@ const UserManagement: React.FC = () => {
       });
       localStorage.setItem('app.credentials', JSON.stringify(credentials));
       
-      // Try to add to Supabase if available
       try {
-        // First create auth user if possible
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newUser.email,
           password: newUser.password,
@@ -212,16 +219,18 @@ const UserManagement: React.FC = () => {
         if (authError) {
           console.error('Supabase auth error creating user:', authError);
         } else if (authData.user) {
-          // If auth user creation succeeded, update our local user with the actual UUID
           newUserProfile.id = authData.user.id;
           
-          // Update the profile manually in case the trigger doesn't work
           const { error: profileError } = await supabase
             .from('profiles')
             .upsert({
               id: authData.user.id,
               username: newUser.username,
-              role: newUser.role
+              role: newUser.role,
+              avatar_url: null,
+              full_name: null,
+              created_at: timestamp,
+              updated_at: timestamp
             });
             
           if (profileError) {
@@ -232,7 +241,6 @@ const UserManagement: React.FC = () => {
         console.error('Error connecting to Supabase:', err);
       }
       
-      // Reset form and close dialog
       setNewUser({
         username: '',
         email: '',
