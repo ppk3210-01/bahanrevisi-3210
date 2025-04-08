@@ -223,6 +223,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           </DialogHeader>
           <ExportOptions 
             items={items} 
+            komponenOutput={komponenOutput || 'Default'}
             onClose={() => setIsExportDialogOpen(false)} 
           />
         </DialogContent>

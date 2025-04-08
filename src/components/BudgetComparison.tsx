@@ -161,7 +161,9 @@ const BudgetComparison: React.FC = () => {
                   <ExcelImportExport 
                     items={budgetItems}
                     onImport={(items) => {
-                      importBudgetItems(items);
+                      // Type assertion to match the expected type
+                      const typedItems = items as unknown as Omit<import('@/types/budget').BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[];
+                      importBudgetItems(typedItems);
                       return Promise.resolve();
                     }}
                     komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}

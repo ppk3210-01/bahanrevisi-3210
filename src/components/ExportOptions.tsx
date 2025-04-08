@@ -10,9 +10,10 @@ import * as XLSX from 'xlsx';
 interface ExportOptionsProps {
   items: BudgetItem[];
   komponenOutput: string;
+  onClose?: () => void; // Added this optional property
 }
 
-const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) => {
+const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, onClose }) => {
   // Prepare data for export
   const prepareExportData = () => {
     return items.map((item, index) => ({
@@ -68,6 +69,11 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput }) 
         title: "Berhasil!",
         description: "Berhasil mengunduh file Excel"
       });
+      
+      // Call onClose if it exists
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       console.error('Error exporting to Excel:', error);
       toast({
