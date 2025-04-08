@@ -13,7 +13,7 @@ interface LoginModalProps {
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
-  const [email, setEmail] = useState('');
+  const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState('');
@@ -27,17 +27,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     
     try {
-      console.log(`Attempting to ${isRegistering ? 'register' : 'login'} with email:`, email);
+      console.log(`Attempting to ${isRegistering ? 'register' : 'login'} with email/username:`, emailOrUsername);
       
       if (isRegistering) {
-        await signUp(email, password, username);
+        await signUp(emailOrUsername, password, username);
       } else {
-        await signIn(email, password);
+        await signIn(emailOrUsername, password);
         onClose();
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
-      setError('Invalid login credentials. Please check your email and password.');
+      setError('Invalid login credentials. Please check your input and password.');
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +47,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setIsRegistering(!isRegistering);
     setError(null);
     // Reset fields when switching modes
-    setEmail('');
+    setEmailOrUsername('');
     setPassword('');
     setUsername('');
   };
@@ -55,10 +55,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   // Add demo account options for easy login
   const useDemoAccount = (type: 'admin' | 'user') => {
     if (type === 'admin') {
-      setEmail('admin@bps3210.id');
+      setEmailOrUsername('admin@bps3210.id');
       setPassword('bps3210admin');
     } else {
-      setEmail('sosial@bps3210.id');
+      setEmailOrUsername('sosial@bps3210.id');
       setPassword('bps3210@');
     }
   };
@@ -98,13 +98,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="emailOrUsername">{isRegistering ? 'Email' : 'Email or Username'}</Label>
             <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              id="emailOrUsername"
+              type="text"
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
+              placeholder={isRegistering ? "Enter your email" : "Enter your email or username"}
               required
             />
           </div>

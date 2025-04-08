@@ -9,6 +9,9 @@ const Header: React.FC = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { user, profile, signOut, isAdmin } = useAuth();
 
+  // Common button style class for login and user management
+  const headerButtonClass = "bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white";
+
   return (
     <header className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-b sticky top-0 z-50">
       <div className="container mx-auto py-3 flex items-center justify-between">
@@ -32,13 +35,13 @@ const Header: React.FC = () => {
                 <p className="text-xs opacity-80">{isAdmin ? 'Admin' : 'User'}</p>
               </div>
               {isAdmin && 
-                <UserManagement />
+                <UserManagement buttonClassName={headerButtonClass} />
               }
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={signOut} 
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
+                className={headerButtonClass}
               >
                 Logout
               </Button>
@@ -48,7 +51,7 @@ const Header: React.FC = () => {
               variant="outline" 
               size="sm" 
               onClick={() => setIsLoginModalOpen(true)}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
+              className={headerButtonClass}
             >
               Login
             </Button>

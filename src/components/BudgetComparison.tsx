@@ -186,6 +186,7 @@ const BudgetComparison: React.FC = () => {
                 loading={loading}
                 view={summaryView}
                 setView={setSummaryView}
+                defaultView="table"
               />
             </TabsContent>
           </Tabs>

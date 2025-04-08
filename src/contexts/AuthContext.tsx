@@ -10,7 +10,7 @@ interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<AuthResponse | void>;
+  signIn: (emailOrUsername: string, password: string) => Promise<AuthResponse | void>;
   signUp: (email: string, password: string, username: string) => Promise<AuthResponse | void>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
@@ -23,6 +23,7 @@ type UserRole = 'admin' | 'user';
 const HARDCODED_USERS = {
   admin: {
     email: 'admin@bps3210.id',
+    username: 'admin',
     password: 'bps3210admin',
     profile: {
       id: '00000000-0000-0000-0000-000000000001',
@@ -35,6 +36,7 @@ const HARDCODED_USERS = {
   },
   user: {
     email: 'sosial@bps3210.id',
+    username: 'sosial',
     password: 'bps3210@',
     profile: {
       id: '00000000-0000-0000-0000-000000000002',
@@ -85,35 +87,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (emailOrUsername: string, password: string) => {
     try {
       setLoading(true);
-      console.log('Signing in with:', email);
+      console.log('Signing in with:', emailOrUsername);
       
-      // Check if the user is one of our hardcoded users
+      // Check if the input is a username or email by checking for @
+      const isEmail = emailOrUsername.includes('@');
       let matchedUser = null;
       
-      if (email === HARDCODED_USERS.admin.email && password === HARDCODED_USERS.admin.password) {
-        matchedUser = HARDCODED_USERS.admin;
-      } else if (email === HARDCODED_USERS.user.email && password === HARDCODED_USERS.user.password) {
-        matchedUser = HARDCODED_USERS.user;
+      // Check for hardcoded users first
+      if (emailOrUsername === HARDCODED_USERS.admin.email || 
+          emailOrUsername === HARDCODED_USERS.admin.username) {
+        if (password === HARDCODED_USERS.admin.password) {
+          matchedUser = HARDCODED_USERS.admin;
+        }
+      } else if (emailOrUsername === HARDCODED_USERS.user.email || 
+                 emailOrUsername === HARDCODED_USERS.user.username) {
+        if (password === HARDCODED_USERS.user.password) {
+          matchedUser = HARDCODED_USERS.user;
+        }
       } else {
         // Check if the user exists in local storage
         const storedCredentials = JSON.parse(localStorage.getItem('app.credentials') || '[]');
         const storedUsers = JSON.parse(localStorage.getItem('app.users') || '[]');
         
-        const matchedCredential = storedCredentials.find(
-          (cred: any) => cred.email === email && cred.password === password
+        // Find by email or username
+        const matchedCredential = storedCredentials.find((cred: any) => 
+          (isEmail && cred.email === emailOrUsername) || 
+          (!isEmail && storedUsers.find((u: any) => 
+            u.id === cred.profileId && u.username.toLowerCase() === emailOrUsername.toLowerCase()
+          ))
         );
         
-        if (matchedCredential) {
+        if (matchedCredential && matchedCredential.password === password) {
           const matchedStoredProfile = storedUsers.find(
             (u: any) => u.id === matchedCredential.profileId
           );
           
           if (matchedStoredProfile) {
             matchedUser = {
-              email,
+              email: matchedCredential.email,
               password,
               profile: matchedStoredProfile
             };
@@ -122,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (matchedUser) {
-        console.log('Login successful with user:', matchedUser.email);
+        console.log('Login successful with user:', matchedUser.email || matchedUser.username);
         
         // Create a fake session and user for the frontend
         const fakeSession = {
@@ -159,42 +173,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { user: fakeSession.user, session: fakeSession } as any;
       }
       
-      // If no hardcoded match, try Supabase authentication as fallback
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        toast({
-          title: "Login failed",
-          description: "Invalid login credentials",
-          variant: "destructive",
-        });
-        console.error('Authentication error:', error);
-        throw error;
-      }
+      // If no hardcoded match and it's an email, try Supabase authentication as fallback
+      if (isEmail) {
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ 
+            email: emailOrUsername, 
+            password 
+          });
+          
+          if (error) {
+            throw error;
+          }
 
-      console.log('Supabase login successful:', data);
-      
-      // Store session and user
-      setSession(data.session);
-      setUser(data.user);
-      
-      // Store in local storage for persistence
-      if (data.session) {
-        localStorage.setItem('app.session', JSON.stringify(data.session));
-        localStorage.setItem('app.user', JSON.stringify(data.user));
+          console.log('Supabase login successful:', data);
+          
+          // Store session and user
+          setSession(data.session);
+          setUser(data.user);
+          
+          // Store in local storage for persistence
+          if (data.session) {
+            localStorage.setItem('app.session', JSON.stringify(data.session));
+            localStorage.setItem('app.user', JSON.stringify(data.user));
+          }
+          
+          // Fetch user profile
+          if (data.user) {
+            await fetchUserProfile(data.user.id);
+          }
+          
+          toast({
+            title: "Login successful",
+            description: "You have been logged in successfully",
+          });
+          
+          return data;
+        } catch (supabaseError) {
+          console.error('Supabase authentication error:', supabaseError);
+        }
       }
       
-      // Fetch user profile
-      if (data.user) {
-        await fetchUserProfile(data.user.id);
-      }
-      
+      // If we reach here, authentication failed
       toast({
-        title: "Login successful",
-        description: "You have been logged in successfully",
+        title: "Login failed",
+        description: "Invalid login credentials",
+        variant: "destructive",
       });
+      throw new Error("Invalid login credentials");
       
-      return data;
     } catch (error) {
       console.error('Error signing in:', error);
       throw error;

@@ -125,7 +125,22 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       
       if (result.validItems.length > 0) {
         try {
-          await onImport(result.validItems);
+          // Convert numeric fields explicitly to ensure they are numbers
+          const processedItems = result.validItems.map(item => ({
+            ...item,
+            volumeSemula: Number(item.volumeSemula),
+            hargaSatuanSemula: Number(item.hargaSatuanSemula),
+            volumeMenjadi: Number(item.volumeMenjadi),
+            hargaSatuanMenjadi: Number(item.hargaSatuanMenjadi),
+            // Ensure these fields are never sent as they are computed
+            jumlahSemula: undefined,
+            jumlahMenjadi: undefined,
+            selisih: undefined
+          }));
+          
+          console.log("Processed items to import:", processedItems);
+          
+          await onImport(processedItems);
           
           if (result.validItems.length === data.length) {
             toast({
@@ -138,12 +153,12 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
               description: `${result.validItems.length} item berhasil diimpor. ${result.invalidCount} item gagal diimpor.`
             });
           }
-        } catch (importError) {
+        } catch (importError: any) {
           console.error('Import processing error:', importError);
           toast({
             variant: "destructive",
             title: "Error",
-            description: "Gagal memproses data. Periksa kembali format data Anda."
+            description: `Gagal memproses data: ${importError.message || 'Periksa kembali format data Anda.'}`
           });
         }
       } else {
@@ -153,12 +168,12 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           description: `Tidak ada data valid dalam file. ${result.errorMessages.join(' ')}`
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Import error:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Gagal mengimpor data. Periksa kembali format file Anda."
+        description: `Gagal mengimpor data: ${error.message || 'Periksa kembali format file Anda.'}`
       });
     } finally {
       setIsLoading(false);
@@ -182,13 +197,14 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           const workbook = XLSX.read(data, { type: 'binary' });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
-          // Force all cells to be read as text initially
+          
+          // Convert all cells to text initially to prevent type conversion issues
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-            defval: "",
-            raw: false,
-            rawNumbers: false 
+            raw: false,  // Return formatted text for all cells
+            defval: ""   // Default empty cells to empty string
           });
-          console.log("Parsed Excel data:", jsonData);
+          
+          console.log("Raw Excel data:", jsonData);
           resolve(jsonData);
         } catch (error) {
           console.error("Error parsing Excel file:", error);
@@ -304,7 +320,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       }
       
       // Create valid item
-      const validItem = {
+      const validItem: any = {
         uraian: String(row['Uraian']),
         volumeSemula,
         satuanSemula: String(row['Satuan Semula']),
@@ -388,20 +404,20 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       </div>
       
       <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Panduan Import Excel</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base">Panduan Import Excel</DialogTitle>
+            <DialogDescription className="text-xs">
               Petunjuk cara mengimpor data menggunakan file Excel
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-3 text-xs">
-            <h3 className="text-sm font-medium">Format File</h3>
-            <p>File Excel (.xlsx atau .xls) harus memiliki format berikut:</p>
+          <div className="space-y-2 text-xs">
+            <h3 className="text-xs font-medium">Format File</h3>
+            <p className="text-xs">File Excel (.xlsx atau .xls) harus memiliki format berikut:</p>
             
             <div className="overflow-x-auto">
-              <table className="w-full border border-gray-200 text-xs">
+              <table className="w-full border border-gray-200 text-[10px]">
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-200 p-1">Kolom</th>
@@ -409,7 +425,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
                     <th className="border border-gray-200 p-1">Contoh</th>
                   </tr>
                 </thead>
-                <tbody className="text-xs">
+                <tbody className="text-[10px]">
                   <tr>
                     <td className="border border-gray-200 p-1">Program Pembebanan</td>
                     <td className="border border-gray-200 p-1">Text</td>
@@ -449,16 +465,16 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
               </table>
             </div>
             
-            <h3 className="text-sm font-medium">Petunjuk Import</h3>
-            <ol className="list-decimal list-inside space-y-1 text-xs">
+            <h3 className="text-xs font-medium mt-2">Petunjuk Import</h3>
+            <ol className="list-decimal list-inside space-y-0.5 text-[10px] pl-1">
               <li>Unduh template dengan klik tombol Download Template</li>
               <li>Isi data sesuai format yang ditentukan</li>
               <li>Klik tombol Import Excel dan pilih file</li>
               <li>Tunggu hingga proses import selesai</li>
             </ol>
             
-            <h3 className="text-sm font-medium">Tips Import</h3>
-            <ul className="list-disc list-inside space-y-1 text-xs">
+            <h3 className="text-xs font-medium mt-2">Tips Import</h3>
+            <ul className="list-disc list-inside space-y-0.5 text-[10px] pl-1">
               <li>Pastikan format kolom numerik sudah benar</li>
               <li>Jangan mengubah nama kolom pada baris pertama</li>
               <li>Pastikan tidak ada sel yang kosong pada baris data</li>
