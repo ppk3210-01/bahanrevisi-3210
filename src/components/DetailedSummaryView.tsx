@@ -10,22 +10,13 @@ import {
   TableCell 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronsUpDown, Download, Info } from 'lucide-react';
+import { ChevronsUpDown, Download, Info, FileBarChart2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { BudgetSummaryRecord } from '@/types/supabase';
+import SummaryDialog from './SummaryDialog';
+import { BudgetSummaryRecord } from '@/types/database';
+import { BudgetItem } from '@/types/budget';
 
 // Type definitions for our summary data
 type SummaryItem = BudgetSummaryRecord;
@@ -45,6 +36,8 @@ const DetailedSummaryView: React.FC = () => {
   const [komponenData, setKomponenData] = useState<SummaryItem[]>([]);
   const [akunData, setAkunData] = useState<SummaryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [summaryDialogOpen, setSummaryDialogOpen] = useState(false);
+  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
 
   const [accountGroupSort, setAccountGroupSort] = useState<{field: SortField, direction: SortDirection}>({
     field: 'group',
@@ -84,10 +77,39 @@ const DetailedSummaryView: React.FC = () => {
         
         if (akunError) throw akunError;
         
+        // Fetch budget items for the SummaryDialog
+        const { data: budgetData, error: budgetError } = await supabase
+          .from('budget_items')
+          .select('*');
+        
+        if (budgetError) throw budgetError;
+        
         // Transform to our data format
         setAccountGroupData(accountGroupResult || []);
         setKomponenData(komponenResult || []);
         setAkunData(akunResult || []);
+        
+        // Transform budget data to our budget items format
+        const transformedBudgetData = budgetData.map(item => ({
+          id: item.id,
+          uraian: item.uraian,
+          komponenOutput: item.komponen_output,
+          subKomponen: item.sub_komponen || '',
+          akun: item.akun || '',
+          volumeSemula: item.volume_semula,
+          satuanSemula: item.satuan_semula,
+          hargaSatuanSemula: item.harga_satuan_semula,
+          volumeMenjadi: item.volume_menjadi,
+          satuanMenjadi: item.satuan_menjadi,
+          hargaSatuanMenjadi: item.harga_satuan_menjadi,
+          jumlahSemula: item.jumlah_semula,
+          jumlahMenjadi: item.jumlah_menjadi,
+          selisih: item.selisih,
+          status: item.status,
+          isApproved: item.is_approved
+        })) as BudgetItem[];
+        
+        setBudgetItems(transformedBudgetData);
       } catch (error) {
         console.error('Error fetching summary data:', error);
         toast({
@@ -494,17 +516,29 @@ const DetailedSummaryView: React.FC = () => {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex flex-col-reverse sm:flex-row justify-between items-center mb-3">
         <h2 className="text-base font-bold text-gradient-blue">Ringkasan Detail Anggaran</h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={exportToExcel}
-          className="flex items-center gap-1 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
-        >
-          <Download className="h-4 w-4" />
-          Lihat Detail Rekap
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setSummaryDialogOpen(true)}
+            className="flex items-center gap-1 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
+          >
+            <FileBarChart2 className="h-4 w-4" />
+            Lihat Perubahan Pagu
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportToExcel}
+            className="flex items-center gap-1 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
+          >
+            <Download className="h-4 w-4" />
+            Lihat Detail Rekap
+          </Button>
+        </div>
       </div>
       
       {renderTable(
@@ -535,6 +569,12 @@ const DetailedSummaryView: React.FC = () => {
       )}
       
       {renderAdditionalBoxes()}
+      
+      <SummaryDialog
+        items={budgetItems}
+        open={summaryDialogOpen}
+        onOpenChange={setSummaryDialogOpen}
+      />
     </div>
   );
 };

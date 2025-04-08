@@ -1,6 +1,8 @@
 
 import { Database } from '@/integrations/supabase/types';
-import { UserRole } from './supabase';
+
+// Define user roles as a strict union type
+export type UserRole = 'admin' | 'user';
 
 // Export database types
 export type Tables = Database['public']['Tables'];

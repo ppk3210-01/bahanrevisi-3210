@@ -23,22 +23,20 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
   isLoading = false
 }) => {
   return (
-    <div className="sticky top-[65px] z-20 bg-gray-50 py-1 border-b border-gray-200 shadow-sm">
-      <div className="flex justify-between items-center text-xs">
+    <div className="sticky top-[65px] z-20 bg-gray-50 py-2 border-b border-gray-200 shadow-sm">
+      <div className="flex flex-col text-xs space-y-1">
         {isLoading ? (
           <div className="w-full text-center py-2">Loading...</div>
         ) : (
           <>
-            <div className="flex items-center gap-4">
-              <div>
-                <span className="text-gray-600 mr-1">Pagu Anggaran Semula:</span>
-                <span className="font-semibold">{formatToThousands(totalSemula)}</span>
-              </div>
-              
-              <div>
-                <span className="text-gray-600 mr-1">Pagu Anggaran Menjadi:</span>
-                <span className="font-semibold">{formatToThousands(totalMenjadi)}</span>
-              </div>
+            <div>
+              <span className="text-gray-600 mr-1">Pagu Anggaran Semula:</span>
+              <span className="font-semibold">{formatToThousands(totalSemula)}</span>
+            </div>
+            
+            <div>
+              <span className="text-gray-600 mr-1">Pagu Anggaran Menjadi:</span>
+              <span className="font-semibold">{formatToThousands(totalMenjadi)}</span>
             </div>
             
             <div>

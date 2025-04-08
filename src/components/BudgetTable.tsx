@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -747,7 +746,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                         </Button>
                       )}
                       
-                      {(isAdmin || canDeleteItem(item)) && (
+                      {canDeleteItem(item) && (
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -881,88 +880,4 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </td>
                 <td className="unit-cell py-1 px-1">
                   <Select 
-                    value={newItem.satuanMenjadi} 
-                    onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
-                    required
-                    disabled={!isAdmin && !areFiltersComplete}
-                  >
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue placeholder="Satuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNIT_OPTIONS.map((unit) => (
-                        <SelectItem key={unit} value={unit} className="text-xs">
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.hargaSatuanMenjadi || ''} 
-                    onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                    disabled={!isAdmin && !areFiltersComplete}
-                  />
-                </td>
-                <td className="number-cell py-1 px-1">
-                  {formatCurrency(newItemJumlahMenjadi)}
-                </td>
-                <td className="number-cell py-1 px-1">
-                  {formatCurrency(newItemSelisih)}
-                </td>
-                <td colSpan={2} className="py-1 px-1">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleAddItem} 
-                    disabled={!areFiltersComplete && !isAdmin}
-                    title={!areFiltersComplete && !isAdmin ? "Pilih semua filter terlebih dahulu" : "Tambah item baru"}
-                    className="h-7 text-xs w-full bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
-                  >
-                    <PlusCircle className="h-3 w-3 mr-1" /> Tambah
-                  </Button>
-                </td>
-              </tr>
-              
-              <tr className="font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-xs">
-                <td colSpan={5} className="text-right py-1 px-1">Total Halaman:</td>
-                <td className="number-cell py-1 px-1">{formatCurrency(pageTotalSemula)}</td>
-                <td colSpan={3} className="border-l-2"></td>
-                <td className="number-cell py-1 px-1">{formatCurrency(pageTotalMenjadi)}</td>
-                <td className="number-cell py-1 px-1">{formatCurrency(pageTotalSelisih)}</td>
-                <td colSpan={2}></td>
-              </tr>
-              
-              {(pageSize !== -1 || searchTerm) && (
-                <tr className="font-bold bg-gradient-to-r from-blue-200 to-indigo-200 text-xs">
-                  <td colSpan={5} className="text-right py-1 px-1">Total Keseluruhan:</td>
-                  <td className="number-cell py-1 px-1">{formatCurrency(grandTotalSemula)}</td>
-                  <td colSpan={3} className="border-l-2"></td>
-                  <td className="number-cell py-1 px-1">{formatCurrency(grandTotalMenjadi)}</td>
-                  <td className="number-cell py-1 px-1">{formatCurrency(grandTotalSelisih)}</td>
-                  <td colSpan={2}></td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      {renderPagination()}
-      
-      <DetailDialog
-        item={detailItem}
-        open={isDetailOpen}
-        onOpenChange={setIsDetailOpen}
-      />
-    </div>
-  );
-};
-
-export default BudgetTable;
-
+                    value={newItem.
