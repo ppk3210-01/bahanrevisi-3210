@@ -32,6 +32,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       if (isRegistering) {
         await signUp(emailOrUsername, password, username);
       } else {
+        // Try login without checking if it's an email
         await signIn(emailOrUsername, password);
         onClose();
       }

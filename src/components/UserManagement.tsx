@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
@@ -13,7 +12,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { UserPlus } from 'lucide-react';
 import { UserRole, UserProfile } from '@/types/database';
 
-// Define the LocalUserProfile interface to ensure type safety
 interface LocalUserProfile {
   id: string;
   username: string;
@@ -24,7 +22,6 @@ interface LocalUserProfile {
   updated_at: string;
 }
 
-// Add buttonClassName to props
 interface UserManagementProps {
   buttonClassName?: string;
 }
@@ -51,7 +48,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
       const localUsers = localStorage.getItem('app.users');
       let parsedLocalUsers: any[] = localUsers ? JSON.parse(localUsers) : [];
       
-      // Convert local storage users to valid LocalUserProfile objects
       const validLocalUsers: LocalUserProfile[] = parsedLocalUsers.map(user => ({
         id: user.id,
         username: user.username,
@@ -70,9 +66,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
         if (error) {
           console.error('Supabase error fetching users:', error);
         } else if (data) {
-          // Map Supabase data to LocalUserProfile with proper validation
           const typedData: LocalUserProfile[] = (data || []).map(user => {
-            // Ensure that role is either 'admin' or 'user'
             const safeRole: UserRole = (user.role === 'admin' || user.role === 'user') 
               ? user.role as UserRole 
               : 'user';
@@ -308,7 +302,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
     <>
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className={buttonClassName}>Manage Users</Button>
+          <Button variant="default" size="sm" className={buttonClassName}>Manage Users</Button>
         </SheetTrigger>
         <SheetContent className="w-full sm:w-3/4 md:w-2/3 lg:max-w-2xl">
           <SheetHeader>

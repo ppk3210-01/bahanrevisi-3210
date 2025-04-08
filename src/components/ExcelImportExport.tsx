@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -126,17 +125,21 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       if (result.validItems.length > 0) {
         try {
           // Convert numeric fields explicitly to ensure they are numbers
-          const processedItems = result.validItems.map(item => ({
-            ...item,
-            volumeSemula: Number(item.volumeSemula),
-            hargaSatuanSemula: Number(item.hargaSatuanSemula),
-            volumeMenjadi: Number(item.volumeMenjadi),
-            hargaSatuanMenjadi: Number(item.hargaSatuanMenjadi),
-            // Ensure these fields are never sent as they are computed
-            jumlahSemula: undefined,
-            jumlahMenjadi: undefined,
-            selisih: undefined
-          }));
+          const processedItems = result.validItems.map(item => {
+            // Normalize and clean numeric values
+            const volumeSemula = parseNumericValue(item.volumeSemula);
+            const hargaSatuanSemula = parseNumericValue(item.hargaSatuanSemula);
+            const volumeMenjadi = parseNumericValue(item.volumeMenjadi);
+            const hargaSatuanMenjadi = parseNumericValue(item.hargaSatuanMenjadi);
+            
+            return {
+              ...item,
+              volumeSemula,
+              hargaSatuanSemula,
+              volumeMenjadi,
+              hargaSatuanMenjadi
+            };
+          });
           
           console.log("Processed items to import:", processedItems);
           
@@ -208,10 +211,10 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           resolve(jsonData);
         } catch (error) {
           console.error("Error parsing Excel file:", error);
-          reject(error);
+          reject(new Error("Format file tidak valid atau rusak. Pastikan file Excel (.xlsx atau .xls) yang valid."));
         }
       };
-      reader.onerror = (error) => reject(error);
+      reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsBinaryString(file);
     });
   };
@@ -257,6 +260,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       }
     }
     
+    // Process each row in the data
     data.forEach((row, index) => {
       console.log(`Processing row ${index}:`, row);
       let isRowValid = true;
@@ -273,44 +277,53 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         rowErrors.push(`Baris ${index + 1}: Field yang diperlukan tidak diisi: ${missingFields.join(', ')}.`);
       }
       
-      // Convert and validate numeric fields
-      let volumeSemula: number;
-      let hargaSatuanSemula: number;
-      let volumeMenjadi: number;
-      let hargaSatuanMenjadi: number;
-      
+      // Try to create the valid item before validating numeric fields
+      // This helps identify if we can at least extract all necessary fields
+      let itemToPush: any = {};
       try {
-        // Parse numeric values, handling different formats
-        volumeSemula = parseNumericValue(row['Volume Semula']);
-        hargaSatuanSemula = parseNumericValue(row['Harga Satuan Semula']);
-        volumeMenjadi = parseNumericValue(row['Volume Menjadi']);
-        hargaSatuanMenjadi = parseNumericValue(row['Harga Satuan Menjadi']);
+        // Map fields from Excel to the expected format
+        itemToPush = {
+          uraian: String(row['Uraian'] || ''),
+          volumeSemula: row['Volume Semula'],
+          satuanSemula: String(row['Satuan Semula'] || ''),
+          hargaSatuanSemula: row['Harga Satuan Semula'],
+          volumeMenjadi: row['Volume Menjadi'],
+          satuanMenjadi: String(row['Satuan Menjadi'] || ''),
+          hargaSatuanMenjadi: row['Harga Satuan Menjadi'],
+          komponenOutput: String(row['Komponen Output'] || ''),
+          programPembebanan: row['Program Pembebanan'] ? String(row['Program Pembebanan']) : undefined,
+          kegiatan: row['Kegiatan'] ? String(row['Kegiatan']) : undefined,
+          rincianOutput: row['Rincian Output'] ? String(row['Rincian Output']) : undefined,
+          subKomponen: String(row['Sub Komponen'] || ''),
+          akun: String(row['Akun'] || ''),
+          isApproved: false
+        };
+      } catch (err) {
+        isRowValid = false;
+        rowErrors.push(`Baris ${index + 1}: Format data tidak valid.`);
+      }
+      
+      // Now validate numeric fields
+      try {
+        // We'll validate without modifying the original values yet
+        const volumeSemula = cleanNumericString(row['Volume Semula']);
+        const hargaSatuanSemula = cleanNumericString(row['Harga Satuan Semula']);
+        const volumeMenjadi = cleanNumericString(row['Volume Menjadi']);
+        const hargaSatuanMenjadi = cleanNumericString(row['Harga Satuan Menjadi']);
         
-        console.log(`Parsed values for row ${index}:`, {
-          volumeSemula,
-          hargaSatuanSemula,
-          volumeMenjadi,
-          hargaSatuanMenjadi
-        });
+        // Check if any of these are not valid numbers after cleaning
+        if (
+          isNaN(parseFloat(volumeSemula)) || 
+          isNaN(parseFloat(hargaSatuanSemula)) || 
+          isNaN(parseFloat(volumeMenjadi)) || 
+          isNaN(parseFloat(hargaSatuanMenjadi))
+        ) {
+          isRowValid = false;
+          rowErrors.push(`Baris ${index + 1}: Nilai volume atau harga satuan bukan angka yang valid.`);
+        }
       } catch (e) {
         isRowValid = false;
         rowErrors.push(`Baris ${index + 1}: Format angka tidak valid.`);
-        volumeSemula = 0;
-        hargaSatuanSemula = 0;
-        volumeMenjadi = 0;
-        hargaSatuanMenjadi = 0;
-      }
-      
-      // Validate numeric fields
-      if (isNaN(volumeSemula) || isNaN(hargaSatuanSemula) || isNaN(volumeMenjadi) || isNaN(hargaSatuanMenjadi)) {
-        isRowValid = false;
-        rowErrors.push(`Baris ${index + 1}: Kolom numerik berisi nilai yang bukan angka.`);
-      }
-      
-      // Make sure numeric values are positive
-      if (volumeSemula < 0 || hargaSatuanSemula < 0 || volumeMenjadi < 0 || hargaSatuanMenjadi < 0) {
-        isRowValid = false;
-        rowErrors.push(`Baris ${index + 1}: Nilai volume dan harga satuan tidak boleh negatif.`);
       }
       
       if (!isRowValid) {
@@ -319,29 +332,28 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         return;
       }
       
-      // Create valid item
-      const validItem: any = {
-        uraian: String(row['Uraian']),
-        volumeSemula,
-        satuanSemula: String(row['Satuan Semula']),
-        hargaSatuanSemula,
-        volumeMenjadi,
-        satuanMenjadi: String(row['Satuan Menjadi']),
-        hargaSatuanMenjadi,
-        komponenOutput: String(row['Komponen Output']),
-        programPembebanan: row['Program Pembebanan'] ? String(row['Program Pembebanan']) : undefined,
-        kegiatan: row['Kegiatan'] ? String(row['Kegiatan']) : undefined,
-        rincianOutput: row['Rincian Output'] ? String(row['Rincian Output']) : undefined,
-        subKomponen: String(row['Sub Komponen']),
-        akun: String(row['Akun']),
-        isApproved: false
-      };
-      
-      console.log(`Valid item for row ${index}:`, validItem);
-      validItems.push(validItem);
+      // Item is valid, add it to the list
+      validItems.push(itemToPush);
+      console.log(`Valid item for row ${index}:`, itemToPush);
     });
     
     return { validItems, invalidCount, errorMessages };
+  };
+
+  // Helper function to clean numeric strings before parsing
+  const cleanNumericString = (value: any): string => {
+    if (value === null || value === undefined || value === '') {
+      return '0';
+    }
+    
+    // Convert to string
+    const stringValue = String(value);
+    
+    // Remove thousands separators and other non-numeric characters
+    // Keep decimal point and minus sign
+    return stringValue
+      .replace(/[^\d.-]/g, '') // Remove any non-numeric character except decimal point and minus sign
+      .replace(/,/g, '.'); // Replace comma with dot for decimal separator
   };
 
   // Helper function to parse numeric values from different formats
@@ -350,17 +362,15 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       return 0;
     }
     
-    // Convert to string first
-    const stringValue = String(value);
-    
-    // Remove any non-numeric characters except decimal point and minus sign
-    const cleanedValue = stringValue.replace(/[^\d.-]/g, '');
+    // First clean the string
+    const cleanedValue = cleanNumericString(value);
     
     // Parse to float
     const numValue = parseFloat(cleanedValue);
     
+    // Return 0 if not a valid number
     if (isNaN(numValue)) {
-      throw new Error(`Invalid numeric value: ${value}`);
+      return 0;
     }
     
     return numValue;
@@ -372,8 +382,9 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         <Button 
           variant="outline" 
           onClick={downloadTemplate}
+          size="sm"
         >
-          <Download className="h-4 w-4 mr-2" /> 
+          <Download className="h-3 w-3 mr-1" /> 
           Download Template
         </Button>
         
@@ -388,8 +399,9 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           <Button 
             variant="outline" 
             disabled={isLoading}
+            size="sm"
           >
-            <FilePlus2 className="h-4 w-4 mr-2" /> 
+            <FilePlus2 className="h-3 w-3 mr-1" /> 
             {isLoading ? 'Importing...' : 'Import Excel'}
           </Button>
         </div>
@@ -397,16 +409,17 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         <Button 
           variant="outline" 
           onClick={() => setShowHelpDialog(true)}
+          size="sm"
         >
-          <AlertCircle className="h-4 w-4 mr-2" /> 
+          <AlertCircle className="h-3 w-3 mr-1" /> 
           Panduan Import
         </Button>
       </div>
       
       <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-sm max-h-[70vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-base">Panduan Import Excel</DialogTitle>
+            <DialogTitle className="text-sm">Panduan Import Excel</DialogTitle>
             <DialogDescription className="text-xs">
               Petunjuk cara mengimpor data menggunakan file Excel
             </DialogDescription>
