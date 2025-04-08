@@ -99,7 +99,7 @@ const useBudgetData = (filters: FilterSelection) => {
       // Calculate derived values
       const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
       const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-      const selisih = roundToThousands(jumlahSemula - jumlahMenjadi); // Corrected: Jumlah Semula - Jumlah Menjadi
+      const selisih = roundToThousands(jumlahMenjadi - jumlahSemula); // Corrected: Jumlah Menjadi - Jumlah Semula
       
       // Create new item data for Supabase
       const newItemData = {
@@ -184,7 +184,7 @@ const useBudgetData = (filters: FilterSelection) => {
         // Calculate derived values
         const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
         const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-        const selisih = roundToThousands(jumlahSemula - jumlahMenjadi);
+        const selisih = roundToThousands(jumlahMenjadi - jumlahSemula); // Corrected: Jumlah Menjadi - Jumlah Semula
         
         return {
           uraian: item.uraian,
@@ -298,7 +298,7 @@ const useBudgetData = (filters: FilterSelection) => {
         updatedItem.jumlahMenjadi = jumlahMenjadi;
         
         // Calculate selisih based on the new jumlah_menjadi
-        const selisih = updatedItem.jumlahSemula - jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
+        const selisih = jumlahMenjadi - updatedItem.jumlahSemula; // Corrected: Jumlah Menjadi - Jumlah Semula
         supabaseUpdates.selisih = selisih;
         updatedItem.selisih = selisih;
       }
@@ -313,7 +313,7 @@ const useBudgetData = (filters: FilterSelection) => {
         updatedItem.jumlahSemula = jumlahSemula;
         
         // Recalculate selisih since jumlah_semula changed
-        const selisih = jumlahSemula - updatedItem.jumlahMenjadi; // Corrected: Jumlah Semula - Jumlah Menjadi
+        const selisih = updatedItem.jumlahMenjadi - jumlahSemula; // Corrected: Jumlah Menjadi - Jumlah Semula
         supabaseUpdates.selisih = selisih;
         updatedItem.selisih = selisih;
       }

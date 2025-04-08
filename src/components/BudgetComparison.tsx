@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -81,6 +82,12 @@ const BudgetComparison: React.FC = () => {
 
   const showSummary = () => {
     setSummaryVisible(true);
+  };
+
+  // Fix 1: Handle the import without returning the Promise result
+  const handleImport = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
+    await importBudgetItems(items);
+    // No return statement, so it implicitly returns void
   };
 
   return (
@@ -279,67 +286,10 @@ const BudgetComparison: React.FC = () => {
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
-
-                    {/*<div className="border rounded-md p-3 text-xs">
-                      <h4 className="font-medium mb-2">Panduan Import Excel:</h4>
-                      <p className="mb-2">Format file Excel yang dapat diimport harus memiliki kolom sebagai berikut:</p>
-                      <ol className="list-decimal pl-5 mb-2 space-y-1">
-                        <li>uraian (string): Uraian/nama item anggaran</li>
-                        <li>volumeSemula (numeric): Volume semula</li>
-                        <li>satuanSemula (string): Satuan semula - contoh: "Paket", "Kegiatan", "Bulan", dll</li>
-                        <li>hargaSatuanSemula (numeric): Harga satuan semula</li>
-                        <li>volumeMenjadi (numeric): Volume menjadi</li>
-                        <li>satuanMenjadi (string): Satuan menjadi</li>
-                        <li>hargaSatuanMenjadi (numeric): Harga satuan menjadi</li>
-                        <li>subKomponen (string, optional): Sub komponen anggaran</li>
-                        <li>akun (string, optional): Kode akun</li>
-                      </ol>
-                      <p className="mb-2">Catatan penting:</p>
-                      <ul className="list-disc pl-5 mb-2 space-y-1">
-                        <li>Jumlah Semula dan Jumlah Menjadi dihitung otomatis</li>
-                        <li>Selisih dihitung otomatis (Jumlah Semula - Jumlah Menjadi)</li>
-                        <li>Status akan otomatis terisi sebagai 'new' untuk data baru</li>
-                        <li>Data akan ditambahkan sesuai dengan filter yang dipilih</li>
-                      </ul>
-                      <div className="mb-2">
-                        <p className="font-medium">Contoh Format Excel:</p>
-                        <table className="w-full text-xs border-collapse">
-                          <thead>
-                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50">
-                              <th className="border border-gray-300 px-1 py-1">uraian</th>
-                              <th className="border border-gray-300 px-1 py-1">volumeSemula</th>
-                              <th className="border border-gray-300 px-1 py-1">satuanSemula</th>
-                              <th className="border border-gray-300 px-1 py-1">hargaSatuanSemula</th>
-                              <th className="border border-gray-300 px-1 py-1">volumeMenjadi</th>
-                              <th className="border border-gray-300 px-1 py-1">satuanMenjadi</th>
-                              <th className="border border-gray-300 px-1 py-1">hargaSatuanMenjadi</th>
-                              <th className="border border-gray-300 px-1 py-1">subKomponen</th>
-                              <th className="border border-gray-300 px-1 py-1">akun</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr className="bg-white">
-                              <td className="border border-gray-300 px-1 py-1">Belanja ATK</td>
-                              <td className="border border-gray-300 px-1 py-1">1</td>
-                              <td className="border border-gray-300 px-1 py-1">Paket</td>
-                              <td className="border border-gray-300 px-1 py-1">5000000</td>
-                              <td className="border border-gray-300 px-1 py-1">1</td>
-                              <td className="border border-gray-300 px-1 py-1">Paket</td>
-                              <td className="border border-gray-300 px-1 py-1">4500000</td>
-                              <td className="border border-gray-300 px-1 py-1">Layanan Perkantoran</td>
-                              <td className="border border-gray-300 px-1 py-1">521111</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>*/}
                     
                     <div className="mt-4">
                       <ExcelImportExport 
-                        onImport={(items) => {
-                          importBudgetItems(items);
-                          return Promise.resolve();
-                        }}
+                        onImport={handleImport} // Fix: Use our wrapper function that returns void
                         komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
                         subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
                         akun={filters.akun !== 'all' ? filters.akun : undefined}
@@ -400,6 +350,7 @@ const BudgetComparison: React.FC = () => {
                     </Button>
                     
                     <div className="mt-4">
+                      {/* Fix 2: Remove the items prop if DetailedSummaryView doesn't accept it */}
                       <DetailedSummaryView />
                     </div>
                   </div>
