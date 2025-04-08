@@ -16,6 +16,9 @@ interface AuthContextType {
   isAdmin: boolean;
 }
 
+// Define UserRole type since it was missing
+type UserRole = 'admin' | 'user';
+
 // Hardcoded users for direct access without database dependency
 const HARDCODED_USERS = {
   admin: {
@@ -47,73 +50,14 @@ const HARDCODED_USERS = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Declare all state variables at the top level of the component
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    // Check for existing session in local storage
-    const storedSession = localStorage.getItem('app.session');
-    const storedUser = localStorage.getItem('app.user');
-    const storedProfile = localStorage.getItem('app.profile');
-    
-    if (storedSession && storedUser && storedProfile) {
-      try {
-        const parsedSession = JSON.parse(storedSession);
-        const parsedUser = JSON.parse(storedUser);
-        const parsedProfile = JSON.parse(storedProfile);
-        
-        setSession(parsedSession);
-        setUser(parsedUser);
-        setProfile(parsedProfile);
-        setIsAdmin(parsedProfile.role === 'admin');
-      } catch (error) {
-        console.error('Error parsing stored auth data:', error);
-        // Clear invalid stored data
-        localStorage.removeItem('app.session');
-        localStorage.removeItem('app.user');
-        localStorage.removeItem('app.profile');
-      }
-    }
-    
-    setLoading(false);
-    
-    // Set up auth state listener for Supabase auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log('Auth state changed:', event, newSession);
-        
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          if (newSession) {
-            setSession(newSession);
-            setUser(newSession.user);
-            
-            // Fetch user profile
-            if (newSession.user) {
-              fetchUserProfile(newSession.user.id);
-            }
-          }
-        } else if (event === 'SIGNED_OUT') {
-          // Clear local storage on sign out
-          localStorage.removeItem('app.session');
-          localStorage.removeItem('app.user');
-          localStorage.removeItem('app.profile');
-          
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setIsAdmin(false);
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
+  // Define other functions
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('Fetching user profile for ID:', userId);
@@ -422,6 +366,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   };
+
+  // Use useEffect for initialization
+  useEffect(() => {
+    // Check for existing session in local storage
+    const storedSession = localStorage.getItem('app.session');
+    const storedUser = localStorage.getItem('app.user');
+    const storedProfile = localStorage.getItem('app.profile');
+    
+    if (storedSession && storedUser && storedProfile) {
+      try {
+        const parsedSession = JSON.parse(storedSession);
+        const parsedUser = JSON.parse(storedUser);
+        const parsedProfile = JSON.parse(storedProfile);
+        
+        setSession(parsedSession);
+        setUser(parsedUser);
+        setProfile(parsedProfile);
+        setIsAdmin(parsedProfile.role === 'admin');
+      } catch (error) {
+        console.error('Error parsing stored auth data:', error);
+        // Clear invalid stored data
+        localStorage.removeItem('app.session');
+        localStorage.removeItem('app.user');
+        localStorage.removeItem('app.profile');
+      }
+    }
+    
+    setLoading(false);
+    
+    // Set up auth state listener for Supabase auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        console.log('Auth state changed:', event, newSession);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (newSession) {
+            setSession(newSession);
+            setUser(newSession.user);
+            
+            // Fetch user profile
+            if (newSession.user) {
+              fetchUserProfile(newSession.user.id);
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+          // Clear local storage on sign out
+          localStorage.removeItem('app.session');
+          localStorage.removeItem('app.user');
+          localStorage.removeItem('app.profile');
+          
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setIsAdmin(false);
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const value = {
     session,

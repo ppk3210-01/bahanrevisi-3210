@@ -32,13 +32,7 @@ const Header: React.FC = () => {
                 <p className="text-xs opacity-80">{isAdmin ? 'Admin' : 'User'}</p>
               </div>
               {isAdmin && 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
-                >
-                  Manage Users
-                </Button>
+                <UserManagement />
               }
               <Button 
                 variant="outline" 

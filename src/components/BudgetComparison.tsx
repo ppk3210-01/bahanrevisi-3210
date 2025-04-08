@@ -22,6 +22,7 @@ const BudgetComparison: React.FC = () => {
   });
   
   const [activeTab, setActiveTab] = useState<string>("table");
+  const [summaryView, setSummaryView] = useState<'account' | 'component' | 'detailed'>('account');
   
   // Check if all filter values are selected (not 'all')
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
@@ -35,7 +36,8 @@ const BudgetComparison: React.FC = () => {
     deleteBudgetItem,
     approveBudgetItem,
     rejectBudgetItem,
-    importBudgetItems
+    importBudgetItems,
+    summaryData
   } = useBudgetData(filters);
   
   // Calculate budget summary totals for the BudgetSummaryBox
@@ -114,7 +116,12 @@ const BudgetComparison: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="summary" className="pt-4">
-              <DetailedSummaryView />
+              <DetailedSummaryView 
+                summaryData={summaryData}
+                loading={loading}
+                view={summaryView}
+                setView={setSummaryView}
+              />
             </TabsContent>
           </Tabs>
         </div>
