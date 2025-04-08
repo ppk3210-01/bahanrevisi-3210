@@ -68,7 +68,9 @@ const useBudgetData = (filters: FilterSelection) => {
               kegiatan: item.kegiatan || '',
               rincianOutput: item.rincian_output || '',
               subKomponen: item.sub_komponen || '',
-              akun: item.akun || ''
+              akun: item.akun || '',
+              createdBy: item.created_by || '',
+              updatedBy: item.updated_by || ''
             };
           });
 
@@ -120,7 +122,9 @@ const useBudgetData = (filters: FilterSelection) => {
             kegiatan: item.kegiatan || '',
             rincianOutput: item.rincian_output || '',
             subKomponen: item.sub_komponen || '',
-            akun: item.akun || ''
+            akun: item.akun || '',
+            createdBy: item.created_by || '',
+            updatedBy: item.updated_by || ''
           };
         });
 
@@ -192,7 +196,9 @@ const useBudgetData = (filters: FilterSelection) => {
           kegiatan: data.kegiatan || '',
           rincianOutput: data.rincian_output || '',
           subKomponen: data.sub_komponen || '',
-          akun: data.akun || ''
+          akun: data.akun || '',
+          createdBy: data.created_by || '',
+          updatedBy: data.updated_by || ''
         };
 
         setBudgetItems(prev => [...prev, savedItem]);
@@ -209,7 +215,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
-  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
+  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'isApproved'>[]) => {
     try {
       setLoading(true);
       
@@ -236,7 +242,9 @@ const useBudgetData = (filters: FilterSelection) => {
           kegiatan: item.kegiatan || filters.kegiatan,
           rincian_output: item.rincianOutput || filters.rincianOutput,
           sub_komponen: item.subKomponen || filters.subKomponen,
-          akun: item.akun || filters.akun
+          akun: item.akun || filters.akun,
+          created_by: user?.id || null,
+          updated_by: user?.id || null
         };
       });
       
@@ -269,7 +277,9 @@ const useBudgetData = (filters: FilterSelection) => {
           kegiatan: item.kegiatan || '',
           rincianOutput: item.rincian_output || '',
           subKomponen: item.sub_komponen || '',
-          akun: item.akun || ''
+          akun: item.akun || '',
+          createdBy: item.created_by || '',
+          updatedBy: item.updated_by || ''
         }));
 
         setBudgetItems(prev => [...prev, ...savedItems]);

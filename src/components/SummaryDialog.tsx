@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Dialog,
@@ -8,25 +9,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { FileBarChart2, FileSpreadsheet } from "lucide-react";
 import { formatCurrency } from '@/utils/budgetCalculations';
-import { BudgetItem } from '@/types/budget';
+import { BudgetItem, BudgetSummary } from '@/types/budget';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import * as XLSX from 'xlsx';
 import { toast } from '@/hooks/use-toast';
 
 interface SummaryDialogProps {
-  items: BudgetItem[];
+  items?: BudgetItem[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  summary: BudgetSummary;  // Add the summary prop
 }
 
-const SummaryDialog: React.FC<SummaryDialogProps> = ({ items, open, onOpenChange }) => {
-  const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
-  const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-  const totalSelisih = totalMenjadi - totalSemula;
+const SummaryDialog: React.FC<SummaryDialogProps> = ({ items = [], open, onOpenChange, summary }) => {
+  const totalSemula = summary.totalSemula;
+  const totalMenjadi = summary.totalMenjadi;
+  const totalSelisih = summary.totalSelisih;
   
-  const changedItems = items.filter(item => item.status === 'changed');
-  const newItems = items.filter(item => item.status === 'new');
-  const deletedItems = items.filter(item => item.status === 'deleted');
+  const changedItems = summary.changedItems;
+  const newItems = summary.newItems;
+  const deletedItems = summary.deletedItems;
   
   const formatPembebananCode = (item: BudgetItem) => {
     if (!item.komponenOutput || !item.subKomponen || !item.akun) return '-';
@@ -231,6 +233,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({ items, open, onOpenChange
             </div>
           )}
           
+          {/* Continue with existing code for newItems and deletedItems */}
           {newItems.length > 0 && (
             <div>
               <h3 className="text-green-600 font-bold mb-2">Pagu Anggaran Baru</h3>

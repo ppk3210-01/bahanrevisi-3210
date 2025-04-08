@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Download, 
@@ -23,7 +24,7 @@ import BudgetTable from '@/components/BudgetTable';
 import BudgetSummaryBox from '@/components/BudgetSummaryBox';
 import FilterPanel from '@/components/FilterPanel';
 import SummaryDialog from '@/components/SummaryDialog';
-import { useBudgetData } from '@/hooks/useBudgetData';
+import useBudgetData from '@/hooks/useBudgetData';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const BudgetComparison = () => {
@@ -33,7 +34,7 @@ const BudgetComparison = () => {
   const [selectedKomponenOutput, setSelectedKomponenOutput] = useState<string>('all');
   const [selectedSubKomponen, setSelectedSubKomponen] = useState<string>('all');
   const [selectedAkun, setSelectedAkun] = useState<string>('all');
-  const [importData, setImportData] = useState<Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]>([]);
+  const [importData, setImportData] = useState<Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'isApproved'>[]>([]);
   const [showImportDialog, setShowImportDialog] = useState<boolean>(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState<boolean>(false);
   
@@ -182,7 +183,8 @@ const BudgetComparison = () => {
               kegiatan: item.kegiatan || selectedKegiatan,
               rincianOutput: item.rincianOutput || selectedRincianOutput,
               subKomponen: item.subKomponen || selectedSubKomponen,
-              akun: item.akun || selectedAkun
+              akun: item.akun || selectedAkun,
+              isApproved: false
             }));
             setImportData(validatedData);
           } else {
