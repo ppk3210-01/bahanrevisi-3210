@@ -103,18 +103,13 @@ const DetailDialog: React.FC<DetailDialogProps> = ({ item, open, onOpenChange })
             </div>
           </div>
           
-          <div className="flex justify-end">
-            <div className={`p-3 rounded-lg ${item.selisih !== 0 ? 'bg-red-50' : 'bg-green-50'} w-1/3`}>
+          <div className="grid grid-cols-1">
+            <div className={`p-3 rounded-lg ${item.selisih > 0 ? 'bg-green-100' : item.selisih < 0 ? 'bg-red-100' : 'bg-gray-100'}`}>
               <h3 className="text-sm font-semibold text-gray-500">Selisih</h3>
-              <p className={`text-base font-semibold ${item.selisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
+              <p className={`text-lg font-bold ${item.selisih > 0 ? 'text-green-600' : item.selisih < 0 ? 'text-red-600' : 'text-gray-600'}`}>
                 {formatCurrency(item.selisih)}
               </p>
             </div>
-          </div>
-          
-          <div>
-            <h3 className="text-sm font-semibold text-gray-500">Status Persetujuan</h3>
-            <p className="text-base">{item.isApproved ? 'Disetujui' : 'Belum Disetujui PPK'}</p>
           </div>
         </div>
       </DialogContent>

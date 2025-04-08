@@ -941,7 +941,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       {detailItem && (
         <DetailDialog
           open={isDetailOpen}
-          onClose={() => setIsDetailOpen(false)}
+          onOpenChange={setIsDetailOpen}
           item={detailItem}
         />
       )}

@@ -11,9 +11,17 @@ export type BudgetItemRecord = Tables['budget_items']['Row'];
 export type KomponenOutputRecord = Tables['komponen_output']['Row'];
 export type SubKomponenRecord = Tables['sub_komponen']['Row'];
 export type AkunRecord = Tables['akun']['Row'];
-export type BudgetSummaryRecord = Views['budget_summary_by_account_group']['Row'] | 
-                                 Views['budget_summary_by_komponen']['Row'] | 
-                                 Views['budget_summary_by_akun']['Row'];
+
+// Create union types for different summary records
+export type BudgetSummaryByAccountGroupRecord = Views['budget_summary_by_account_group']['Row'];
+export type BudgetSummaryByKomponenRecord = Views['budget_summary_by_komponen']['Row'];
+export type BudgetSummaryByAkunRecord = Views['budget_summary_by_akun']['Row'];
+
+// Union type that accounts for all possible fields
+export type BudgetSummaryRecord = BudgetSummaryByAccountGroupRecord | 
+                                 BudgetSummaryByKomponenRecord | 
+                                 BudgetSummaryByAkunRecord;
+
 export type UserProfile = Tables['profiles']['Row'];
 
 // Helper type to make specific fields optional

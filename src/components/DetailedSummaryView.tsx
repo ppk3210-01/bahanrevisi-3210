@@ -31,6 +31,20 @@ const formatToThousands = (value: number): string => {
   return formatCurrency(roundedValue);
 };
 
+// Get property from summary item with type safety
+const getGroupValue = (item: SummaryItem, groupField: 'account_group' | 'komponen_output' | 'akun'): string => {
+  if (groupField === 'account_group' && 'account_group' in item) {
+    return item.account_group || '';
+  } 
+  if (groupField === 'komponen_output' && 'komponen_output' in item) {
+    return item.komponen_output || '';
+  }
+  if (groupField === 'akun' && 'akun' in item) {
+    return item.akun || '';
+  }
+  return '';
+};
+
 const DetailedSummaryView: React.FC = () => {
   const [accountGroupData, setAccountGroupData] = useState<SummaryItem[]>([]);
   const [komponenData, setKomponenData] = useState<SummaryItem[]>([]);
@@ -118,8 +132,8 @@ const DetailedSummaryView: React.FC = () => {
       let valueA, valueB;
       
       if (field === 'group') {
-        valueA = (a.account_group || a.akun || a.komponen_output || '') as string;
-        valueB = (b.account_group || b.akun || b.komponen_output || '') as string;
+        valueA = getGroupValue(a, groupField as any);
+        valueB = getGroupValue(b, groupField as any);
       } else {
         valueA = a[field as keyof SummaryItem];
         valueB = b[field as keyof SummaryItem];
@@ -322,7 +336,7 @@ const DetailedSummaryView: React.FC = () => {
                 {data.map((item, index) => (
                   <TableRow key={index} className={`text-xs h-6 ${index % 2 === 0 ? `bg-gradient-to-r ${bgColor} bg-opacity-30` : ''}`}>
                     <TableCell className="font-medium py-1 px-2">
-                      {item[groupField] || 'Tidak Terdefinisi'}
+                      {getGroupValue(item, groupField) || 'Tidak Terdefinisi'}
                     </TableCell>
                     <TableCell className="text-right py-1 px-2">
                       {formatToThousands(item.total_semula || 0)}
@@ -438,7 +452,8 @@ const DetailedSummaryView: React.FC = () => {
                 <span>Komponen dengan Perubahan Terbesar:</span>
                 <span className="font-semibold text-teal-600">{
                   komponenData.length > 0 ? 
-                  (komponenData.sort((a, b) => Math.abs(b.total_selisih) - Math.abs(a.total_selisih))[0].komponen_output || '-').substring(0, 20) + '...' : 
+                  (getGroupValue(komponenData.sort((a, b) => 
+                    Math.abs((b.total_selisih || 0)) - Math.abs((a.total_selisih || 0)))[0], 'komponen_output') || '-').substring(0, 20) + '...' : 
                   '-'
                 }</span>
               </div>
@@ -446,7 +461,8 @@ const DetailedSummaryView: React.FC = () => {
                 <span>Akun dengan Penambahan Terbanyak:</span>
                 <span className="font-semibold text-green-600">{
                   akunData.length > 0 ?
-                  (akunData.sort((a, b) => b.new_items - a.new_items)[0].akun || '-') :
+                  (getGroupValue(akunData.sort((a, b) => 
+                    (b.new_items || 0) - (a.new_items || 0))[0], 'akun') || '-') :
                   '-'
                 }</span>
               </div>
@@ -454,7 +470,8 @@ const DetailedSummaryView: React.FC = () => {
                 <span>Akun dengan Perubahan Terbanyak:</span>
                 <span className="font-semibold text-blue-600">{
                   akunData.length > 0 ?
-                  (akunData.sort((a, b) => b.changed_items - a.changed_items)[0].akun || '-') :
+                  (getGroupValue(akunData.sort((a, b) => 
+                    (b.changed_items || 0) - (a.changed_items || 0))[0], 'akun') || '-') :
                   '-'
                 }</span>
               </div>
