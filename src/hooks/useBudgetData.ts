@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -6,9 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { BudgetItemRecord, BudgetSummaryRecord } from '@/types/supabase';
 
+interface EnhancedBudgetSummaryRecord extends BudgetSummaryRecord {
+  type?: 'account_group' | 'komponen' | 'akun';
+}
+
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
-  const [summaryData, setSummaryData] = useState<BudgetSummaryRecord[]>([]);
+  const [summaryData, setSummaryData] = useState<EnhancedBudgetSummaryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +55,6 @@ const useBudgetData = (filters: FilterSelection) => {
           setBudgetItems(transformedData);
         }
         
-        // Fetch summary data based on the selected view
         await fetchSummaryData();
         
         setLoading(false);
@@ -65,14 +67,13 @@ const useBudgetData = (filters: FilterSelection) => {
     
     const fetchSummaryData = async () => {
       try {
-        // Fetch summary data from all summary views
         const [accountGroupResult, komponenResult, akunResult] = await Promise.all([
           supabase.from('budget_summary_by_account_group').select('*'),
           supabase.from('budget_summary_by_komponen').select('*'),
           supabase.from('budget_summary_by_akun').select('*')
         ]);
         
-        let summaryData: BudgetSummaryRecord[] = [];
+        let summaryData: EnhancedBudgetSummaryRecord[] = [];
         
         if (accountGroupResult.data) {
           summaryData = summaryData.concat(accountGroupResult.data.map(item => ({

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DetailedSummaryView from './DetailedSummaryView';
 import ExcelImportExport from './ExcelImportExport';
 import { useAuth } from '@/contexts/AuthContext'; 
+import { BudgetSummaryRecord as DBBudgetSummaryRecord } from '@/types/database';
 
 const BudgetComparison: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -39,6 +40,44 @@ const BudgetComparison: React.FC = () => {
     importBudgetItems,
     summaryData
   } = useBudgetData(filters);
+  
+  // Transform the summary data to match the expected type
+  const transformedSummaryData: DBBudgetSummaryRecord[] = summaryData.map(item => {
+    if (item.account_group) {
+      return {
+        account_group: item.account_group,
+        total_semula: item.total_semula,
+        total_menjadi: item.total_menjadi,
+        total_selisih: item.total_selisih,
+        new_items: item.new_items,
+        changed_items: item.changed_items,
+        total_items: item.total_items,
+        type: 'account_group'
+      };
+    } else if (item.komponen_output) {
+      return {
+        komponen_output: item.komponen_output,
+        total_semula: item.total_semula,
+        total_menjadi: item.total_menjadi,
+        total_selisih: item.total_selisih,
+        new_items: item.new_items,
+        changed_items: item.changed_items,
+        total_items: item.total_items,
+        type: 'komponen'
+      };
+    } else {
+      return {
+        akun: item.akun,
+        total_semula: item.total_semula,
+        total_menjadi: item.total_menjadi,
+        total_selisih: item.total_selisih,
+        new_items: item.new_items,
+        changed_items: item.changed_items,
+        total_items: item.total_items,
+        type: 'akun'
+      };
+    }
+  });
   
   // Calculate budget summary totals for the BudgetSummaryBox
   const totalSemula = budgetItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
@@ -117,7 +156,7 @@ const BudgetComparison: React.FC = () => {
             
             <TabsContent value="summary" className="pt-4">
               <DetailedSummaryView 
-                summaryData={summaryData}
+                summaryData={transformedSummaryData}
                 loading={loading}
                 view={summaryView}
                 setView={setSummaryView}
