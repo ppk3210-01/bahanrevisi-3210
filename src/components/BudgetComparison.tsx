@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -9,7 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DetailedSummaryView from './DetailedSummaryView';
 import ExcelImportExport from './ExcelImportExport';
 import { useAuth } from '@/contexts/AuthContext'; 
-import { BudgetSummaryRecord as DBBudgetSummaryRecord } from '@/types/database';
+import { 
+  BudgetSummaryRecord as DBBudgetSummaryRecord,
+  BudgetSummaryByAccountGroup,
+  BudgetSummaryByKomponen,
+  BudgetSummaryByAkun
+} from '@/types/database';
 
 const BudgetComparison: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -44,38 +48,44 @@ const BudgetComparison: React.FC = () => {
   // Transform the summary data to match the expected type
   const transformedSummaryData: DBBudgetSummaryRecord[] = summaryData.map(item => {
     if (item.account_group) {
-      return {
-        account_group: item.account_group,
-        total_semula: item.total_semula,
-        total_menjadi: item.total_menjadi,
-        total_selisih: item.total_selisih,
-        new_items: item.new_items,
-        changed_items: item.changed_items,
-        total_items: item.total_items,
+      // Create a properly typed account group summary
+      const result: BudgetSummaryByAccountGroup = {
+        account_group: item.account_group || '',
+        total_semula: item.total_semula || 0,
+        total_menjadi: item.total_menjadi || 0,
+        total_selisih: item.total_selisih || 0,
+        new_items: item.new_items || 0,
+        changed_items: item.changed_items || 0,
+        total_items: item.total_items || 0,
         type: 'account_group'
       };
+      return result;
     } else if (item.komponen_output) {
-      return {
-        komponen_output: item.komponen_output,
-        total_semula: item.total_semula,
-        total_menjadi: item.total_menjadi,
-        total_selisih: item.total_selisih,
-        new_items: item.new_items,
-        changed_items: item.changed_items,
-        total_items: item.total_items,
-        type: 'komponen'
+      // Create a properly typed komponen summary
+      const result: BudgetSummaryByKomponen = {
+        komponen_output: item.komponen_output || '',
+        total_semula: item.total_semula || 0,
+        total_menjadi: item.total_menjadi || 0,
+        total_selisih: item.total_selisih || 0,
+        new_items: item.new_items || 0,
+        changed_items: item.changed_items || 0,
+        total_items: item.total_items || 0,
+        type: 'komponen_output'
       };
+      return result;
     } else {
-      return {
-        akun: item.akun,
-        total_semula: item.total_semula,
-        total_menjadi: item.total_menjadi,
-        total_selisih: item.total_selisih,
-        new_items: item.new_items,
-        changed_items: item.changed_items,
-        total_items: item.total_items,
+      // Create a properly typed akun summary
+      const result: BudgetSummaryByAkun = {
+        akun: item.akun || '',
+        total_semula: item.total_semula || 0,
+        total_menjadi: item.total_menjadi || 0,
+        total_selisih: item.total_selisih || 0,
+        new_items: item.new_items || 0,
+        changed_items: item.changed_items || 0,
+        total_items: item.total_items || 0,
         type: 'akun'
       };
+      return result;
     }
   });
   
