@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   
   const [detailItem, setDetailItem] = useState<BudgetItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+
+  // Determine if user is a viewer (not authenticated)
+  const isViewer = !user;
 
   useEffect(() => {
     setNewItem(prev => ({
@@ -199,6 +203,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const startEditing = (item: BudgetItem) => {
+    if (isViewer) return;
+    
     if (!isAdmin) {
       if (!areFiltersComplete) {
         toast({
@@ -260,13 +266,27 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     setIsDetailOpen(true);
   };
 
+  // Check if user can delete an item based on role and item status
+  const canDeleteItem = (item: BudgetItem): boolean => {
+    if (isAdmin) return true;
+    if (isViewer) return false;
+    return item.status === 'new' && !item.isApproved;
+  };
+
   const renderItemField = (item: BudgetItem, field: keyof BudgetItem) => {
     const isEditing = editingId === item.id;
     
     const isValueChange = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field as string);
     const cellClass = getCellClass(item, isValueChange);
     
-    if (isEditing && !isAdmin) {
+    // Don't render edit fields if user is a viewer
+    if (isViewer && isEditing) {
+      return;
+    }
+    
+    // For non-admin users, only allow editing of specific fields when all filters are selected
+    if (isEditing && !isAdmin && !areFiltersComplete && 
+        ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'].includes(field as string)) {
       return;
     }
     
@@ -291,7 +311,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             onChange={(e) => handleEditChange(item.id, 'volumeMenjadi', e.target.value)}
             className="w-full"
             min="0"
-            disabled={!isAdmin}
+            disabled={!isAdmin && !areFiltersComplete}
           />
         ) : (
           <span className={cellClass}>{item.volumeMenjadi}</span>
@@ -302,7 +322,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
           <Select 
             value={item.satuanMenjadi} 
             onValueChange={(value) => handleEditChange(item.id, 'satuanMenjadi', value)}
-            disabled={!isAdmin}
+            disabled={!isAdmin && !areFiltersComplete}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Satuan" />
@@ -327,7 +347,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             onChange={(e) => handleEditChange(item.id, 'hargaSatuanMenjadi', e.target.value)}
             className="w-full"
             min="0"
-            disabled={!isAdmin}
+            disabled={!isAdmin && !areFiltersComplete}
           />
         ) : (
           <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi)}</span>
@@ -428,11 +448,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const needsApproval = (item: BudgetItem): boolean => {
     return (item.status === 'new' || item.status === 'changed') && !item.isApproved;
-  };
-
-  const canDeleteItem = (item: BudgetItem): boolean => {
-    if (isAdmin) return true;
-    return item.status === 'new' && !item.isApproved;
   };
 
   const renderPagination = () => {
@@ -685,8 +700,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="py-2 px-1 w-[7%]">Aksi SM/PJK</th>
-                <th className="py-2 px-1 w-[7%]">PPK</th>
+                {!isViewer && <th className="py-2 px-1 w-[7%]">Aksi SM/PJK</th>}
+                {!isViewer && <th className="py-2 px-1 w-[7%]">PPK</th>}
               </tr>
             </thead>
             
@@ -704,217 +719,229 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   <td className="number-cell">{renderItemField(item, 'hargaSatuanMenjadi')}</td>
                   <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
                   <td className="number-cell">{renderItemField(item, 'selisih')}</td>
-                  <td>
-                    <div className="flex space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => showDetailDialog(item)}
-                        title="Lihat Detail"
-                        className="h-6 w-6"
-                      >
-                        <Eye className="h-3 w-3" />
-                      </Button>
+                  
+                  {!isViewer && (
+                    <td>
+                      <div className="flex space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => showDetailDialog(item)}
+                          title="Lihat Detail"
+                          className="h-6 w-6"
+                        >
+                          <Eye className="h-3 w-3" />
+                        </Button>
 
-                      {editingId === item.id ? (
-                        <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
-                          <Check className="h-3 w-3" />
-                        </Button>
-                      ) : (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => startEditing(item)} 
-                          className="h-6 w-6"
-                          disabled={!isAdmin && !areFiltersComplete}
-                        >
-                          <FileEdit className="h-3 w-3" />
-                        </Button>
-                      )}
-                      
-                      {canDeleteItem(item) && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => {
-                            onDelete(item.id);
-                            toast({
-                              title: "Berhasil",
-                              description: 'Item berhasil dihapus'
-                            });
-                          }}
-                          className="h-6 w-6"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    {needsApproval(item) && (
-                      <div className="flex space-x-1 justify-center">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-green-600 h-6 w-6" 
-                          onClick={() => {
-                            onApprove(item.id);
-                            toast({
-                              title: "Berhasil",
-                              description: 'Item disetujui oleh PPK'
-                            });
-                          }}
-                          title="Setujui"
-                          disabled={!isAdmin}
-                        >
-                          <Check className="h-3 w-3 font-bold" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-red-600 h-6 w-6" 
-                          onClick={() => {
-                            onReject(item.id);
-                            toast({
-                              title: "Info",
-                              description: 'Item ditolak oleh PPK'
-                            });
-                          }}
-                          title="Tolak"
-                          disabled={!isAdmin}
-                        >
-                          <X className="h-3 w-3 font-bold" />
-                        </Button>
+                        {editingId === item.id ? (
+                          <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                            <Check className="h-3 w-3" />
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => startEditing(item)} 
+                            className="h-6 w-6"
+                            disabled={!isAdmin && !areFiltersComplete}
+                          >
+                            <FileEdit className="h-3 w-3" />
+                          </Button>
+                        )}
+                        
+                        {canDeleteItem(item) && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => {
+                              onDelete(item.id);
+                              toast({
+                                title: "Berhasil",
+                                description: 'Item berhasil dihapus'
+                              });
+                            }}
+                            className="h-6 w-6"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
                       </div>
-                    )}
-                    {item.isApproved && (
-                      <span className="text-green-600 font-medium">OK</span>
-                    )}
-                  </td>
+                    </td>
+                  )}
+                  
+                  {!isViewer && (
+                    <td className="text-center">
+                      {needsApproval(item) && (
+                        <div className="flex space-x-1 justify-center">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-green-600 h-6 w-6" 
+                            onClick={() => {
+                              if (isAdmin) {
+                                onApprove(item.id);
+                                toast({
+                                  title: "Berhasil",
+                                  description: 'Item disetujui oleh PPK'
+                                });
+                              }
+                            }}
+                            title="Setujui"
+                            disabled={!isAdmin}
+                          >
+                            <Check className="h-3 w-3 font-bold" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-red-600 h-6 w-6" 
+                            onClick={() => {
+                              if (isAdmin) {
+                                onReject(item.id);
+                                toast({
+                                  title: "Info",
+                                  description: 'Item ditolak oleh PPK'
+                                });
+                              }
+                            }}
+                            title="Tolak"
+                            disabled={!isAdmin}
+                          >
+                            <X className="h-3 w-3 font-bold" />
+                          </Button>
+                        </div>
+                      )}
+                      {item.isApproved && (
+                        <span className="text-green-600 font-medium">OK</span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
 
-              <tr className="bg-gray-50">
-                <td className="py-1 px-1">{filteredItems.length + 1}</td>
-                <td className="uraian-cell py-1 px-1">
-                  <Input 
-                    placeholder="Tambah Uraian Baru" 
-                    value={newItem.uraian || ''} 
-                    onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
-                    required
-                    className="h-7 text-xs"
-                    disabled={!isAdmin && !areFiltersComplete}
-                  />
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.volumeSemula || ''} 
-                    onChange={(e) => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                    disabled={!isAdmin}
-                  />
-                </td>
-                <td className="unit-cell py-1 px-1">
-                  <Select 
-                    value={newItem.satuanSemula} 
-                    onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
-                    required
-                    disabled={!isAdmin}
-                  >
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue placeholder="Satuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNIT_OPTIONS.map((unit) => (
-                        <SelectItem key={unit} value={unit} className="text-xs">
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.hargaSatuanSemula || ''} 
-                    onChange={(e) => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                    disabled={!isAdmin}
-                  />
-                </td>
-                <td className="number-cell py-1 px-1">
-                  {formatCurrency(newItemJumlahSemula)}
-                </td>
-                <td className="number-cell py-1 px-1 border-l-2">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.volumeMenjadi || ''} 
-                    onChange={(e) => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                    disabled={!isAdmin && !areFiltersComplete}
-                  />
-                </td>
-                <td className="unit-cell py-1 px-1">
-                  <Select 
-                    value={newItem.satuanMenjadi} 
-                    onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
-                    required
-                    disabled={!isAdmin && !areFiltersComplete}
-                  >
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue placeholder="Satuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {UNIT_OPTIONS.map((unit) => (
-                        <SelectItem key={unit} value={unit} className="text-xs">
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={newItem.hargaSatuanMenjadi || ''} 
-                    onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
-                    min="0"
-                    required
-                    className="h-7 text-xs"
-                    disabled={!isAdmin && !areFiltersComplete}
-                  />
-                </td>
-                <td className="number-cell py-1 px-1">
-                  {formatCurrency(newItemJumlahMenjadi)}
-                </td>
-                <td className="number-cell py-1 px-1">
-                  <span className={newItemSelisih > 0 ? 'text-green-600' : newItemSelisih < 0 ? 'text-red-600' : ''}>
-                    {formatCurrency(newItemSelisih)}
-                  </span>
-                </td>
-                <td className="py-1 px-1" colSpan={2}>
-                  <Button 
-                    onClick={handleAddItem} 
-                    size="sm" 
-                    className="w-full h-7 text-xs"
-                    disabled={!isAdmin && !areFiltersComplete}
-                  >
-                    <PlusCircle className="h-3 w-3 mr-1" />
-                    Tambah
-                  </Button>
-                </td>
-              </tr>
+              {!isViewer && (
+                <tr className="bg-gray-50">
+                  <td className="py-1 px-1">{filteredItems.length + 1}</td>
+                  <td className="uraian-cell py-1 px-1">
+                    <Input 
+                      placeholder="Tambah Uraian Baru" 
+                      value={newItem.uraian || ''} 
+                      onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
+                      required
+                      className="h-7 text-xs"
+                      disabled={!isAdmin && !areFiltersComplete}
+                    />
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.volumeSemula || ''} 
+                      onChange={(e) => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                      disabled={!isAdmin}
+                    />
+                  </td>
+                  <td className="unit-cell py-1 px-1">
+                    <Select 
+                      value={newItem.satuanSemula} 
+                      onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
+                      required
+                      disabled={!isAdmin}
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue placeholder="Satuan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UNIT_OPTIONS.map((unit) => (
+                          <SelectItem key={unit} value={unit} className="text-xs">
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.hargaSatuanSemula || ''} 
+                      onChange={(e) => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                      disabled={!isAdmin}
+                    />
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    {formatCurrency(newItemJumlahSemula)}
+                  </td>
+                  <td className="number-cell py-1 px-1 border-l-2">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.volumeMenjadi || ''} 
+                      onChange={(e) => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                      disabled={!isAdmin && !areFiltersComplete}
+                    />
+                  </td>
+                  <td className="unit-cell py-1 px-1">
+                    <Select 
+                      value={newItem.satuanMenjadi} 
+                      onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
+                      required
+                      disabled={!isAdmin && !areFiltersComplete}
+                    >
+                      <SelectTrigger className="h-7 text-xs">
+                        <SelectValue placeholder="Satuan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {UNIT_OPTIONS.map((unit) => (
+                          <SelectItem key={unit} value={unit} className="text-xs">
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    <Input 
+                      type="number" 
+                      placeholder="0" 
+                      value={newItem.hargaSatuanMenjadi || ''} 
+                      onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
+                      min="0"
+                      required
+                      className="h-7 text-xs"
+                      disabled={!isAdmin && !areFiltersComplete}
+                    />
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    {formatCurrency(newItemJumlahMenjadi)}
+                  </td>
+                  <td className="number-cell py-1 px-1">
+                    <span className={newItemSelisih > 0 ? 'text-green-600' : newItemSelisih < 0 ? 'text-red-600' : ''}>
+                      {formatCurrency(newItemSelisih)}
+                    </span>
+                  </td>
+                  <td className="py-1 px-1" colSpan={2}>
+                    <Button 
+                      onClick={handleAddItem} 
+                      size="sm" 
+                      className="w-full h-7 text-xs"
+                      disabled={!isAdmin && !areFiltersComplete}
+                    >
+                      <PlusCircle className="h-3 w-3 mr-1" />
+                      Tambah
+                    </Button>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import LoginModal from './LoginModal';
@@ -18,8 +19,8 @@ const Header: React.FC = () => {
             className="h-9 w-9 mr-3" 
           />
           <div>
-            <h1 className="text-xl font-bold">Bahan Revisi-3210</h1>
-            <p className="text-white text-sm opacity-90">Aplikasi Bahan Revisi Pagu Anggaran "Semula vs Menjadi"</p>
+            <h1 className="text-xl font-bold text-gray-800">Bahan Revisi-3210</h1>
+            <p className="text-gray-600 text-sm">Aplikasi Bahan Revisi Pagu Anggaran "Semula vs Menjadi"</p>
           </div>
         </div>
         
@@ -31,7 +32,7 @@ const Header: React.FC = () => {
           {user ? (
             <>
               <div className="text-right">
-                <p className="font-medium">{profile?.username}</p>
+                <p className="font-medium">{profile?.username || 'User'}</p>
                 <p className="text-xs opacity-80">{isAdmin ? 'Admin' : 'User'}</p>
               </div>
               <Button 

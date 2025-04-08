@@ -99,6 +99,11 @@ const BudgetComparison: React.FC = () => {
   const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
   
+  // Calculate metrics for BudgetSummaryBox
+  const newItems = budgetItems.filter(item => item.status === 'new').length;
+  const changedItems = budgetItems.filter(item => item.status === 'changed').length;
+  const totalItems = budgetItems.length;
+  
   // Handle filter changes
   const handleFilterChange = (newFilters: Partial<FilterSelection>) => {
     setFilters(prevFilters => ({
@@ -123,6 +128,9 @@ const BudgetComparison: React.FC = () => {
             totalMenjadi={totalMenjadi}
             totalSelisih={totalSelisih}
             isLoading={loading}
+            newItems={newItems}
+            changedItems={changedItems}
+            totalItems={totalItems}
           />
         </div>
       </div>
@@ -159,6 +167,7 @@ const BudgetComparison: React.FC = () => {
                     komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
                     subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
                     akun={filters.akun !== 'all' ? filters.akun : undefined}
+                    smallText={true}
                   />
                 )}
               </div>

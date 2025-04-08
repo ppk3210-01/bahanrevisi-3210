@@ -25,7 +25,25 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
 
   // Transform data for charts
   const transformChartData = () => {
-    return summaryData.map(record => {
+    // Sort the data based on view type
+    const sortedData = [...summaryData].sort((a, b) => {
+      if (view === 'account_group') {
+        const aGroup = 'account_group' in a ? a.account_group || '' : '';
+        const bGroup = 'account_group' in b ? b.account_group || '' : '';
+        return aGroup.localeCompare(bGroup);
+      } else if (view === 'komponen_output') {
+        const aKomponen = 'komponen_output' in a ? a.komponen_output || '' : '';
+        const bKomponen = 'komponen_output' in b ? b.komponen_output || '' : '';
+        return aKomponen.localeCompare(bKomponen);
+      } else if (view === 'akun') {
+        const aAkun = 'akun' in a ? a.akun || '' : '';
+        const bAkun = 'akun' in b ? b.akun || '' : '';
+        return aAkun.localeCompare(bAkun);
+      }
+      return 0;
+    });
+
+    return sortedData.map(record => {
       const name = getValueFromRecord(record);
       const totalSemula = record.total_semula || 0;
       const totalMenjadi = record.total_menjadi || 0;
