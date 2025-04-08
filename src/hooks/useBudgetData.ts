@@ -1,12 +1,14 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { BudgetItemRecord } from '@/types/supabase';
+import { BudgetItemRecord, BudgetSummaryRecord } from '@/types/supabase';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+  const [summaryData, setSummaryData] = useState<BudgetSummaryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,11 +51,53 @@ const useBudgetData = (filters: FilterSelection) => {
 
           setBudgetItems(transformedData);
         }
+        
+        // Fetch summary data based on the selected view
+        await fetchSummaryData();
+        
         setLoading(false);
       } catch (err) {
         console.error('Error fetching budget data:', err);
         setError('Failed to load budget data. Please try again.');
         setLoading(false);
+      }
+    };
+    
+    const fetchSummaryData = async () => {
+      try {
+        // Fetch summary data from all summary views
+        const [accountGroupResult, komponenResult, akunResult] = await Promise.all([
+          supabase.from('budget_summary_by_account_group').select('*'),
+          supabase.from('budget_summary_by_komponen').select('*'),
+          supabase.from('budget_summary_by_akun').select('*')
+        ]);
+        
+        let summaryData: BudgetSummaryRecord[] = [];
+        
+        if (accountGroupResult.data) {
+          summaryData = summaryData.concat(accountGroupResult.data.map(item => ({
+            ...item,
+            type: 'account_group' as const
+          })));
+        }
+        
+        if (komponenResult.data) {
+          summaryData = summaryData.concat(komponenResult.data.map(item => ({
+            ...item,
+            type: 'komponen' as const
+          })));
+        }
+        
+        if (akunResult.data) {
+          summaryData = summaryData.concat(akunResult.data.map(item => ({
+            ...item,
+            type: 'akun' as const
+          })));
+        }
+        
+        setSummaryData(summaryData);
+      } catch (err) {
+        console.error('Error fetching summary data:', err);
       }
     };
 
@@ -389,7 +433,8 @@ const useBudgetData = (filters: FilterSelection) => {
     deleteBudgetItem,
     approveBudgetItem,
     rejectBudgetItem,
-    importBudgetItems
+    importBudgetItems,
+    summaryData
   };
 };
 

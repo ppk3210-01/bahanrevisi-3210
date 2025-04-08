@@ -45,6 +45,13 @@ const COLORS = [
   '#58508d', '#003f5c', '#7a5195', '#ef5675', '#ffa600'
 ];
 
+// Chart configuration
+const chartConfig = {
+  semula: { color: '#8884d8', label: 'Semula' },
+  menjadi: { color: '#82ca9d', label: 'Menjadi' },
+  selisih: { color: '#ff8042', label: 'Selisih' },
+};
+
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ 
   summaryData, 
   loading, 
@@ -180,7 +187,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                   </Table>
                 </div>
               ) : chartType === 'bar' ? (
-                <ChartContainer className="mt-4 h-96">
+                <ChartContainer className="mt-4 h-96" config={chartConfig}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={chartData}
@@ -206,7 +213,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
               ) : (
                 <div className="flex flex-col items-center">
                   <h3 className="text-lg font-semibold mb-2">Distribusi Pagu Menjadi</h3>
-                  <ChartContainer className="mt-4 h-96">
+                  <ChartContainer className="mt-4 h-96" config={chartConfig}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                         <Pie
@@ -270,7 +277,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                   </Table>
                 </div>
               ) : chartType === 'bar' ? (
-                <ChartContainer className="mt-4 h-96">
+                <ChartContainer className="mt-4 h-96" config={chartConfig}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={chartData}
@@ -296,7 +303,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
               ) : (
                 <div className="flex flex-col items-center">
                   <h3 className="text-lg font-semibold mb-2">Distribusi Pagu Menjadi</h3>
-                  <ChartContainer className="mt-4 h-96">
+                  <ChartContainer className="mt-4 h-96" config={chartConfig}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                         <Pie
@@ -360,7 +367,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                   </Table>
                 </div>
               ) : chartType === 'bar' ? (
-                <ChartContainer className="mt-4 h-96">
+                <ChartContainer className="mt-4 h-96" config={chartConfig}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={chartData}
@@ -386,7 +393,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
               ) : (
                 <div className="flex flex-col items-center">
                   <h3 className="text-lg font-semibold mb-2">Distribusi Pagu Menjadi</h3>
-                  <ChartContainer className="mt-4 h-96">
+                  <ChartContainer className="mt-4 h-96" config={chartConfig}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                         <Pie

@@ -22,7 +22,7 @@ const BudgetComparison: React.FC = () => {
   });
   
   const [activeTab, setActiveTab] = useState<string>("table");
-  const [summaryView, setSummaryView] = useState<'account' | 'component' | 'detailed'>('account');
+  const [summaryView, setSummaryView] = useState<'account_group' | 'komponen' | 'akun'>('account_group');
   
   // Check if all filter values are selected (not 'all')
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
