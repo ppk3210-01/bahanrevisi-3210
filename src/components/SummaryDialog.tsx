@@ -42,6 +42,14 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     const summarySheet = createSummarySheet(items);
     XLSX.utils.book_append_sheet(workbook, summarySheet, "Ringkasan Total");
     
+    // Create changed items sheet
+    const changedItemsSheet = createChangedItemsSheet(items);
+    XLSX.utils.book_append_sheet(workbook, changedItemsSheet, "Anggaran Berubah");
+    
+    // Create new items sheet
+    const newItemsSheet = createNewItemsSheet(items);
+    XLSX.utils.book_append_sheet(workbook, newItemsSheet, "Anggaran Baru");
+    
     // Create detailed items sheet
     const itemsSheet = createItemsSheet(items);
     XLSX.utils.book_append_sheet(workbook, itemsSheet, "Detail Anggaran");
@@ -53,11 +61,39 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       XLSX.utils.book_append_sheet(workbook, accountGroupSheet, "Ringkasan Kelompok Akun");
     }
     
+    // Create program_pembebanan summary sheet if available
+    const programItems = summaryData.filter(item => 'program_pembebanan' in item);
+    if (programItems.length > 0) {
+      const programSheet = createGroupSummarySheet(programItems, 'Program Pembebanan');
+      XLSX.utils.book_append_sheet(workbook, programSheet, "Ringkasan Program");
+    }
+    
+    // Create kegiatan summary sheet if available
+    const kegiatanItems = summaryData.filter(item => 'kegiatan' in item);
+    if (kegiatanItems.length > 0) {
+      const kegiatanSheet = createGroupSummarySheet(kegiatanItems, 'Kegiatan');
+      XLSX.utils.book_append_sheet(workbook, kegiatanSheet, "Ringkasan Kegiatan");
+    }
+    
+    // Create rincian_output summary sheet if available
+    const rincianItems = summaryData.filter(item => 'rincian_output' in item);
+    if (rincianItems.length > 0) {
+      const rincianSheet = createGroupSummarySheet(rincianItems, 'Rincian Output');
+      XLSX.utils.book_append_sheet(workbook, rincianSheet, "Ringkasan Rincian Output");
+    }
+    
     // Create komponen summary sheet if available
     const komponentItems = summaryData.filter(item => 'komponen_output' in item);
     if (komponentItems.length > 0) {
       const komponenSheet = createGroupSummarySheet(komponentItems, 'Komponen Output');
       XLSX.utils.book_append_sheet(workbook, komponenSheet, "Ringkasan Komponen Output");
+    }
+    
+    // Create sub_komponen summary sheet if available
+    const subKomponenItems = summaryData.filter(item => 'sub_komponen' in item);
+    if (subKomponenItems.length > 0) {
+      const subKomponenSheet = createGroupSummarySheet(subKomponenItems, 'Sub Komponen');
+      XLSX.utils.book_append_sheet(workbook, subKomponenSheet, "Ringkasan Sub Komponen");
     }
     
     // Create akun summary sheet if available
@@ -98,9 +134,9 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     
     // Set column widths
     worksheet['!cols'] = [
-      { wch: 50 }, // Column A width
-      { wch: 20 }, // Column B width
-      { wch: 15 }, // Column C width
+      { wch: 50 },  // Column A width
+      { wch: 20 },  // Column B width
+      { wch: 15 },  // Column C width
     ];
     
     // Apply currency formatting
@@ -109,6 +145,97 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
         worksheet[cell].z = '#,##0.00';
       }
     });
+    
+    return worksheet;
+  };
+
+  // Create a sheet with changed items
+  const createChangedItemsSheet = (items: BudgetItem[]) => {
+    const headers = [
+      "No",
+      "Pembebanan",
+      "Uraian",
+      "Detail Perubahan",
+      "Jumlah Semula",
+      "Jumlah Menjadi",
+      "Selisih"
+    ];
+    
+    const changedItems = items.filter(item => item.status === 'changed');
+    
+    const data = changedItems.map((item, index) => {
+      const volumeChanged = item.volumeSemula !== item.volumeMenjadi;
+      const satuanChanged = item.satuanSemula !== item.satuanMenjadi;
+      const hargaChanged = item.hargaSatuanSemula !== item.hargaSatuanMenjadi;
+      
+      let detailPerubahan = "";
+      if (volumeChanged) detailPerubahan += `Volume: ${item.volumeSemula} → ${item.volumeMenjadi}\n`;
+      if (satuanChanged) detailPerubahan += `Satuan: ${item.satuanSemula} → ${item.satuanMenjadi}\n`;
+      if (hargaChanged) detailPerubahan += `Harga: ${item.hargaSatuanSemula} → ${item.hargaSatuanMenjadi}`;
+      
+      return [
+        index + 1,
+        item.programPembebanan || '-',
+        item.uraian,
+        detailPerubahan,
+        item.jumlahSemula,
+        item.jumlahMenjadi,
+        item.jumlahMenjadi - item.jumlahSemula
+      ];
+    });
+    
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 5 },   // No
+      { wch: 20 },  // Pembebanan
+      { wch: 40 },  // Uraian
+      { wch: 40 },  // Detail Perubahan
+      { wch: 20 },  // Jumlah Semula
+      { wch: 20 },  // Jumlah Menjadi
+      { wch: 20 },  // Selisih
+    ];
+    
+    return worksheet;
+  };
+
+  // Create a sheet with new budget items
+  const createNewItemsSheet = (items: BudgetItem[]) => {
+    const headers = [
+      "No",
+      "Pembebanan",
+      "Uraian",
+      "Volume",
+      "Satuan",
+      "Harga Satuan",
+      "Jumlah"
+    ];
+    
+    const newItems = items.filter(item => item.status === 'new');
+    
+    const data = newItems.map((item, index) => [
+      index + 1,
+      item.programPembebanan || '-',
+      item.uraian,
+      item.volumeMenjadi,
+      item.satuanMenjadi,
+      item.hargaSatuanMenjadi,
+      item.jumlahMenjadi
+    ]);
+    
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 5 },   // No
+      { wch: 20 },  // Pembebanan
+      { wch: 40 },  // Uraian
+      { wch: 10 },  // Volume
+      { wch: 15 },  // Satuan
+      { wch: 20 },  // Harga Satuan
+      { wch: 20 },  // Jumlah
+    ];
     
     return worksheet;
   };
@@ -145,7 +272,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       item.satuanMenjadi,
       item.hargaSatuanMenjadi,
       item.jumlahMenjadi,
-      item.jumlahMenjadi - item.jumlahSemula, // Ensure calculation is correct
+      item.jumlahMenjadi - item.jumlahSemula, // Calculate selisih correctly
       item.status
     ]);
     
@@ -232,6 +359,46 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
           record.changed_items,
           record.total_items
         ];
+      } else if ('program_pembebanan' in record) {
+        rowData = [
+          record.program_pembebanan,
+          record.total_semula,
+          record.total_menjadi,
+          record.total_selisih,
+          record.new_items,
+          record.changed_items,
+          record.total_items
+        ];
+      } else if ('kegiatan' in record) {
+        rowData = [
+          record.kegiatan,
+          record.total_semula,
+          record.total_menjadi,
+          record.total_selisih,
+          record.new_items,
+          record.changed_items,
+          record.total_items
+        ];
+      } else if ('rincian_output' in record) {
+        rowData = [
+          record.rincian_output,
+          record.total_semula,
+          record.total_menjadi,
+          record.total_selisih,
+          record.new_items,
+          record.changed_items,
+          record.total_items
+        ];
+      } else if ('sub_komponen' in record) {
+        rowData = [
+          record.sub_komponen,
+          record.total_semula,
+          record.total_menjadi,
+          record.total_selisih,
+          record.new_items,
+          record.changed_items,
+          record.total_items
+        ];
       }
       
       if (rowData.length > 0) {
@@ -242,7 +409,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Add total row
     const totalSemula = dataRows.reduce((sum, row) => sum + (row[1] || 0), 0);
     const totalMenjadi = dataRows.reduce((sum, row) => sum + (row[2] || 0), 0);
-    const totalSelisih = totalMenjadi - totalSemula; // Ensure calculation is correct
+    const totalSelisih = totalMenjadi - totalSemula; // Calculate total selisih correctly
     const totalNewItems = dataRows.reduce((sum, row) => sum + (row[4] || 0), 0);
     const totalChangedItems = dataRows.reduce((sum, row) => sum + (row[5] || 0), 0);
     const totalItems = dataRows.reduce((sum, row) => sum + (row[6] || 0), 0);
@@ -261,7 +428,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     
     // Set column widths
     worksheet['!cols'] = [
-      { wch: 30 }, // Group name (account_group, komponen_output, or akun)
+      { wch: 30 }, // Group name
       { wch: 20 }, // Pagu Semula
       { wch: 20 }, // Pagu Menjadi
       { wch: 20 }, // Selisih

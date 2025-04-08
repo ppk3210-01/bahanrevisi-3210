@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { 
   BarChart3, 
-  PieChart, 
   Table2 
 } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -13,9 +12,9 @@ import SummaryChart from './SummaryChart';
 interface DetailedSummaryViewProps {
   summaryData: BudgetSummaryRecord[];
   loading: boolean;
-  view: 'account_group' | 'komponen_output' | 'akun';
-  setView: (view: 'account_group' | 'komponen_output' | 'akun') => void;
-  defaultView?: 'table' | 'bar' | 'pie';
+  view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+  setView: (view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen') => void;
+  defaultView?: 'table' | 'bar';
 }
 
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ 
@@ -25,7 +24,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   setView,
   defaultView = 'table' 
 }) => {
-  const [chartType, setChartType] = useState<'bar' | 'pie' | 'table'>(defaultView);
+  const [chartType, setChartType] = useState<'bar' | 'table'>(defaultView);
 
   const isLoading = loading || !summaryData;
   
@@ -37,6 +36,14 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       return 'komponen_output' in item && item.komponen_output !== null && item.komponen_output !== '-';
     } else if (view === 'akun') {
       return 'akun' in item && item.akun !== null && item.akun !== '-';
+    } else if (view === 'program_pembebanan') {
+      return 'program_pembebanan' in item && item.program_pembebanan !== null && item.program_pembebanan !== '-';
+    } else if (view === 'kegiatan') {
+      return 'kegiatan' in item && item.kegiatan !== null && item.kegiatan !== '-';
+    } else if (view === 'rincian_output') {
+      return 'rincian_output' in item && item.rincian_output !== null && item.rincian_output !== '-';
+    } else if (view === 'sub_komponen') {
+      return 'sub_komponen' in item && item.sub_komponen !== null && item.sub_komponen !== '-';
     }
     return true;
   });
@@ -44,28 +51,14 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div>
-          <ToggleGroup 
-            type="single" 
-            value={view} 
-            onValueChange={(value) => {
-              if (value) setView(value as 'account_group' | 'komponen_output' | 'akun');
-            }}
-            size="sm" // Smaller size
-            className="border p-0.5 rounded-md"
-          >
-            <ToggleGroupItem value="account_group" className="text-xs h-7 px-2">Kelompok Akun</ToggleGroupItem>
-            <ToggleGroupItem value="komponen_output" className="text-xs h-7 px-2">Kelompok Output</ToggleGroupItem>
-            <ToggleGroupItem value="akun" className="text-xs h-7 px-2">Akun</ToggleGroupItem>
-          </ToggleGroup>
-        </div>
+        <div></div>
         
         <div>
           <ToggleGroup 
             type="single" 
             value={chartType} 
             onValueChange={(value) => {
-              if (value) setChartType(value as 'bar' | 'pie' | 'table');
+              if (value) setChartType(value as 'bar' | 'table');
             }}
             size="sm" // Smaller size
             className="border p-0.5 rounded-md"
@@ -73,10 +66,6 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
             <ToggleGroupItem value="bar" className="text-xs h-7 px-2">
               <BarChart3 className="h-3 w-3" />
               <span className="ml-1">Bar</span>
-            </ToggleGroupItem>
-            <ToggleGroupItem value="pie" className="text-xs h-7 px-2">
-              <PieChart className="h-3 w-3" />
-              <span className="ml-1">Pie</span>
             </ToggleGroupItem>
             <ToggleGroupItem value="table" className="text-xs h-7 px-2">
               <Table2 className="h-3 w-3" />
@@ -91,7 +80,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       ) : chartType === 'table' ? (
         <SummaryTable summaryData={filteredSummaryData} view={view} />
       ) : (
-        <SummaryChart summaryData={filteredSummaryData} chartType={chartType} view={view} />
+        <SummaryChart summaryData={filteredSummaryData} chartType="bar" view={view} />
       )}
     </div>
   );

@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { BudgetSummaryRecord } from '@/types/database';
 import { formatCurrency } from '@/utils/budgetCalculations';
 import { ArrowUpDown } from 'lucide-react';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 
 interface SummaryTableProps {
   summaryData: BudgetSummaryRecord[];
-  view: 'account_group' | 'komponen_output' | 'akun';
+  view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 }
 
 const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
@@ -19,6 +20,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       case 'account_group': return 'Kelompok Akun';
       case 'komponen_output': return 'Komponen Output';
       case 'akun': return 'Akun';
+      case 'program_pembebanan': return 'Program Pembebanan';
+      case 'kegiatan': return 'Kegiatan';
+      case 'rincian_output': return 'Rincian Output';
+      case 'sub_komponen': return 'Sub Komponen';
       default: return 'Kategori';
     }
   };
@@ -30,6 +35,14 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       return record.komponen_output || '-';
     } else if ('akun' in record && view === 'akun') {
       return record.akun || '-';
+    } else if ('program_pembebanan' in record && view === 'program_pembebanan') {
+      return record.program_pembebanan || '-';
+    } else if ('kegiatan' in record && view === 'kegiatan') {
+      return record.kegiatan || '-';
+    } else if ('rincian_output' in record && view === 'rincian_output') {
+      return record.rincian_output || '-';
+    } else if ('sub_komponen' in record && view === 'sub_komponen') {
+      return record.sub_komponen || '-';
     }
     return '-';
   };
@@ -47,6 +60,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     let data = [...summaryData];
     
     if (view === 'account_group') {
+      // Group by first 2 digits of account_group - specifically 51, 52, and 53
       const group51Items = data.filter(item => 
         'account_group' in item && item.account_group?.toString().startsWith('51')
       );
@@ -119,6 +133,14 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   };
   
   const displayData = getGroupedData();
+
+  // Calculate totals for footer row
+  const totalSemula = displayData.reduce((sum, record) => sum + (record.total_semula || 0), 0);
+  const totalMenjadi = displayData.reduce((sum, record) => sum + (record.total_menjadi || 0), 0);
+  const totalSelisih = totalMenjadi - totalSemula;
+  const totalNewItems = displayData.reduce((sum, record) => sum + (record.new_items || 0), 0);
+  const totalChangedItems = displayData.reduce((sum, record) => sum + (record.changed_items || 0), 0);
+  const totalItems = displayData.reduce((sum, record) => sum + (record.total_items || 0), 0);
 
   return (
     <div className="rounded-md border">
@@ -193,6 +215,19 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
             })
           )}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell className="font-bold">TOTAL</TableCell>
+            <TableCell className="text-right font-bold">{formatCurrency(totalSemula)}</TableCell>
+            <TableCell className="text-right font-bold">{formatCurrency(totalMenjadi)}</TableCell>
+            <TableCell className={`text-right font-bold ${totalSelisih > 0 ? 'text-green-600' : totalSelisih < 0 ? 'text-red-600' : ''}`}>
+              {formatCurrency(totalSelisih)}
+            </TableCell>
+            <TableCell className="text-center font-bold">{totalNewItems}</TableCell>
+            <TableCell className="text-center font-bold">{totalChangedItems}</TableCell>
+            <TableCell className="text-center font-bold">{totalItems}</TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );

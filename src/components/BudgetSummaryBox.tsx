@@ -23,10 +23,7 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
   totalSemula, 
   totalMenjadi,
   totalSelisih,
-  isLoading = false,
-  newItems = 0,
-  changedItems = 0,
-  totalItems = 0
+  isLoading = false
 }) => {
   const getSelisihDescription = (selisih: number): string => {
     if (selisih > 0) return 'Bertambah';

@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BudgetSummaryRecord } from '@/types/database';
 import { formatCurrency } from '@/utils/budgetCalculations';
 
 interface SummaryChartProps {
   summaryData: BudgetSummaryRecord[];
-  chartType: 'bar' | 'pie';
-  view: 'account_group' | 'komponen_output' | 'akun';
+  chartType: 'bar';
+  view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 }
 
 const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, view }) => {
@@ -19,6 +19,14 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
       return record.komponen_output || 'Tidak ada data';
     } else if ('akun' in record && view === 'akun') {
       return record.akun || 'Tidak ada data';
+    } else if ('program_pembebanan' in record && view === 'program_pembebanan') {
+      return record.program_pembebanan || 'Tidak ada data';
+    } else if ('kegiatan' in record && view === 'kegiatan') {
+      return record.kegiatan || 'Tidak ada data';
+    } else if ('rincian_output' in record && view === 'rincian_output') {
+      return record.rincian_output || 'Tidak ada data';
+    } else if ('sub_komponen' in record && view === 'sub_komponen') {
+      return record.sub_komponen || 'Tidak ada data';
     }
     return 'Tidak ada data';
   };
@@ -39,6 +47,22 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
         const aAkun = 'akun' in a ? a.akun || '' : '';
         const bAkun = 'akun' in b ? b.akun || '' : '';
         return aAkun.localeCompare(bAkun);
+      } else if (view === 'program_pembebanan') {
+        const aProgram = 'program_pembebanan' in a ? a.program_pembebanan || '' : '';
+        const bProgram = 'program_pembebanan' in b ? b.program_pembebanan || '' : '';
+        return aProgram.localeCompare(bProgram);
+      } else if (view === 'kegiatan') {
+        const aKegiatan = 'kegiatan' in a ? a.kegiatan || '' : '';
+        const bKegiatan = 'kegiatan' in b ? b.kegiatan || '' : '';
+        return aKegiatan.localeCompare(bKegiatan);
+      } else if (view === 'rincian_output') {
+        const aRincian = 'rincian_output' in a ? a.rincian_output || '' : '';
+        const bRincian = 'rincian_output' in b ? b.rincian_output || '' : '';
+        return aRincian.localeCompare(bRincian);
+      } else if (view === 'sub_komponen') {
+        const aSubKomponen = 'sub_komponen' in a ? a.sub_komponen || '' : '';
+        const bSubKomponen = 'sub_komponen' in b ? b.sub_komponen || '' : '';
+        return aSubKomponen.localeCompare(bSubKomponen);
       }
       return 0;
     });
@@ -61,9 +85,6 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
 
   const chartData = transformChartData();
   
-  // Colors for the pie chart
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#83a6ed', '#8dd1e1', '#a4de6c'];
-
   // Custom tooltip formatter for better display
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -86,57 +107,29 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
     return <div className="p-4 text-center">Tidak ada data untuk ditampilkan.</div>;
   }
 
-  if (chartType === 'bar') {
-    return (
-      <div className="h-[400px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="name" 
-              angle={-45} 
-              textAnchor="end" 
-              height={70}
-              interval={0}
-            />
-            <YAxis 
-              tickFormatter={(value) => formatCurrency(value)}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Bar dataKey="totalSemula" name="Total Semula" fill="#8884d8" />
-            <Bar dataKey="totalMenjadi" name="Total Menjadi" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    );
-  }
-
-  // Pie chart visualization
   return (
     <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={chartData}
-            dataKey="totalMenjadi"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={120}
-            fill="#8884d8"
-            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
+        <BarChart
+          data={chartData}
+          margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="name" 
+            angle={-45} 
+            textAnchor="end" 
+            height={70}
+            interval={0}
+          />
+          <YAxis 
+            tickFormatter={(value) => formatCurrency(value)}
+          />
           <Tooltip content={<CustomTooltip />} />
-          <Legend layout="vertical" align="right" verticalAlign="middle" />
-        </PieChart>
+          <Legend />
+          <Bar dataKey="totalSemula" name="Total Semula" fill="#8884d8" />
+          <Bar dataKey="totalMenjadi" name="Total Menjadi" fill="#82ca9d" />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );

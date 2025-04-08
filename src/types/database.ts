@@ -1,4 +1,3 @@
-
 import { Database } from '@/integrations/supabase/tempTypes';
 
 // Define user roles as a strict union type
@@ -43,11 +42,93 @@ export type BudgetSummaryByAkun = BudgetSummaryBase & {
   type: 'akun';
 };
 
-// Union type for all summary types
+// Summary types by different groupings
+export interface BudgetSummaryByAccountGroup {
+  account_group: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+  type: 'account_group';
+}
+
+export interface BudgetSummaryByKomponen {
+  komponen_output: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+  type: 'komponen_output';
+}
+
+export interface BudgetSummaryByAkun {
+  akun: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+  type: 'akun';
+}
+
+export interface BudgetSummaryByProgramPembebanan {
+  program_pembebanan: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+  type: 'program_pembebanan';
+}
+
+export interface BudgetSummaryByKegiatan {
+  kegiatan: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+  type: 'kegiatan';
+}
+
+export interface BudgetSummaryByRincianOutput {
+  rincian_output: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+  type: 'rincian_output';
+}
+
+export interface BudgetSummaryBySubKomponen {
+  sub_komponen: string;
+  total_semula: number;
+  total_menjadi: number;
+  total_selisih: number;
+  new_items: number;
+  changed_items: number;
+  total_items: number;
+  type: 'sub_komponen';
+}
+
+// Union type for all budget summary types
 export type BudgetSummaryRecord = 
-  BudgetSummaryByAccountGroup | 
-  BudgetSummaryByKomponen | 
-  BudgetSummaryByAkun;
+  | BudgetSummaryByAccountGroup 
+  | BudgetSummaryByKomponen 
+  | BudgetSummaryByAkun
+  | BudgetSummaryByProgramPembebanan
+  | BudgetSummaryByKegiatan
+  | BudgetSummaryByRincianOutput
+  | BudgetSummaryBySubKomponen;
 
 export type UserProfile = Tables['profiles']['Row'];
 
