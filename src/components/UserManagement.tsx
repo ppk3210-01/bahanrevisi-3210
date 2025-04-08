@@ -3,14 +3,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { UserProfile } from '@/types/database';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { Plus, UserPlus } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { UserPlus } from 'lucide-react';
 
 interface LocalUserProfile {
   id: string;
@@ -309,7 +308,7 @@ const UserManagement: React.FC = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleToggleRole(user.id, user.role as 'admin' | 'user')}
+                          onClick={() => handleToggleRole(user.id, user.role)}
                         >
                           {user.role === 'admin' ? 'Make User' : 'Make Admin'}
                         </Button>

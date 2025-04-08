@@ -43,7 +43,7 @@ const BudgetComparison: React.FC = () => {
   const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
   
-  // Handle filter changes by creating a wrapper function with the correct type
+  // Handle filter changes
   const handleFilterChange = (newFilters: Partial<FilterSelection>) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -66,6 +66,7 @@ const BudgetComparison: React.FC = () => {
             totalSemula={totalSemula}
             totalMenjadi={totalMenjadi}
             totalSelisih={totalSelisih}
+            isLoading={loading}
           />
         </div>
       </div>
@@ -86,10 +87,9 @@ const BudgetComparison: React.FC = () => {
               
               {isAdmin && (
                 <ExcelImportExport 
-                  budgetItems={budgetItems}
+                  items={budgetItems}
                   onImport={(items) => {
-                    importBudgetItems(items);
-                    return Promise.resolve();
+                    return importBudgetItems(items);
                   }}
                   isActive={activeTab === "table"}
                 />
