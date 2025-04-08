@@ -92,6 +92,35 @@ export type TemporaryDatabase = {
         Insert: AkunRecord;
         Update: Partial<AkunRecord>;
       };
+      profiles: {
+        Row: {
+          id: string;
+          username: string;
+          full_name: string | null;
+          avatar_url: string | null;
+          role: 'admin' | 'user';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          username: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          role?: 'admin' | 'user';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          id: string;
+          username: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          role?: 'admin' | 'user';
+          created_at?: string;
+          updated_at?: string;
+        }>;
+      };
     };
     Views: {
       budget_summary_by_account_group: {

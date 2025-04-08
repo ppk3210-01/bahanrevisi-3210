@@ -1,5 +1,5 @@
 
-import { BudgetItemRecord, KomponenOutputRecord, SubKomponenRecord, AkunRecord, BudgetSummaryRecord } from './database';
+import { BudgetItemRecord, KomponenOutputRecord, SubKomponenRecord, AkunRecord, BudgetSummaryRecord } from './supabase';
 
 export interface BudgetItem {
   id: string;

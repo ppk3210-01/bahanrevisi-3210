@@ -4,7 +4,7 @@ import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRe
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Tables } from '@/types/database';
+import { BudgetItemRecord } from '@/types/supabase';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -52,7 +52,7 @@ const useBudgetData = (filters: FilterSelection) => {
 
         if (data) {
           // Transform data from Supabase format to our BudgetItem format
-          const transformedData: BudgetItem[] = data.map((item: Tables['budget_items']['Row']) => {
+          const transformedData: BudgetItem[] = data.map((item: BudgetItemRecord) => {
             return convertToBudgetItem(item);
           });
 

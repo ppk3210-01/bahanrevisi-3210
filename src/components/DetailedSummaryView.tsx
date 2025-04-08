@@ -25,12 +25,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Views } from '@/types/database';
+import { BudgetSummaryRecord } from '@/types/supabase';
 
 // Type definitions for our summary data
-type SummaryItem = Views['budget_summary_by_account_group']['Row'] | 
-                  Views['budget_summary_by_komponen']['Row'] | 
-                  Views['budget_summary_by_akun']['Row'];
+type SummaryItem = BudgetSummaryRecord;
 
 type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
 type SortDirection = 'asc' | 'desc';
@@ -361,7 +359,6 @@ const DetailedSummaryView: React.FC = () => {
     );
   };
 
-  // Create additional boxes for the Summary view
   const renderAdditionalBoxes = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
