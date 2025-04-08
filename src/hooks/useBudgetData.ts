@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
+// Fix for the hook by properly typing the return values
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,6 +88,7 @@ const useBudgetData = (filters: FilterSelection) => {
     fetchData();
   }, [filters]);
 
+  
   const getAllBudgetItems = useCallback(async (): Promise<BudgetItem[]> => {
     try {
       const { data, error: supabaseError } = await supabase
@@ -214,6 +216,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
+  
   const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'isApproved' | 'createdBy' | 'updatedBy'>[]): Promise<void> => {
     try {
       setLoading(true);
@@ -282,11 +285,10 @@ const useBudgetData = (filters: FilterSelection) => {
         }));
 
         setBudgetItems(prev => [...prev, ...savedItems]);
-        setLoading(false);
-        return savedItems;
       }
       
       setLoading(false);
+      
     } catch (err) {
       console.error('Error importing budget items:', err);
       setLoading(false);
@@ -299,6 +301,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
+  
   const updateBudgetItem = async (id: string, updates: Partial<BudgetItem>): Promise<void> => {
     try {
       const currentItem = budgetItems.find(item => item.id === id);
