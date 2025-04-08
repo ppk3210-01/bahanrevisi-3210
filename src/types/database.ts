@@ -1,5 +1,5 @@
 
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/integrations/supabase/tempTypes';
 
 // Define user roles as a strict union type
 export type UserRole = 'admin' | 'user';

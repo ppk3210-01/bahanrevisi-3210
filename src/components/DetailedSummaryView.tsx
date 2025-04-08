@@ -15,8 +15,8 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 import SummaryDialog from './SummaryDialog';
-import { BudgetSummaryRecord } from '@/types/database';
-import { BudgetItem } from '@/types/budget';
+import { BudgetSummaryRecord, BudgetItemRecord } from '@/types/database';
+import { BudgetItem, convertToBudgetItem } from '@/types/budget';
 
 // Type definitions for our summary data
 type SummaryItem = BudgetSummaryRecord;
@@ -90,24 +90,7 @@ const DetailedSummaryView: React.FC = () => {
         setAkunData(akunResult || []);
         
         // Transform budget data to our budget items format
-        const transformedBudgetData = budgetData.map(item => ({
-          id: item.id,
-          uraian: item.uraian,
-          komponenOutput: item.komponen_output,
-          subKomponen: item.sub_komponen || '',
-          akun: item.akun || '',
-          volumeSemula: item.volume_semula,
-          satuanSemula: item.satuan_semula,
-          hargaSatuanSemula: item.harga_satuan_semula,
-          volumeMenjadi: item.volume_menjadi,
-          satuanMenjadi: item.satuan_menjadi,
-          hargaSatuanMenjadi: item.harga_satuan_menjadi,
-          jumlahSemula: item.jumlah_semula,
-          jumlahMenjadi: item.jumlah_menjadi,
-          selisih: item.selisih,
-          status: item.status,
-          isApproved: item.is_approved
-        })) as BudgetItem[];
+        const transformedBudgetData = (budgetData || []).map((item: BudgetItemRecord) => convertToBudgetItem(item));
         
         setBudgetItems(transformedBudgetData);
       } catch (error) {

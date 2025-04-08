@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -200,9 +199,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const startEditing = (item: BudgetItem) => {
-    // For regular users, check if they can edit this item
     if (!isAdmin) {
-      // They can only edit their own created items or if all filters are complete
       if (!areFiltersComplete) {
         toast({
           variant: "destructive",
@@ -225,7 +222,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
-    // If user is not admin, restrict which fields can be edited
     if (!isAdmin) {
       const allowedFields = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'];
       if (!allowedFields.includes(field)) {
@@ -270,46 +266,43 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     const isValueChange = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field as string);
     const cellClass = getCellClass(item, isValueChange);
     
-    // For non-admin users, only allow editing "menjadi" fields
-    const canEditField = isAdmin || 
-      (isValueChange && areFiltersComplete);
+    if (isEditing && !isAdmin) {
+      return;
+    }
     
     switch(field) {
       case 'uraian':
-        // For uraian, only admin can edit unless it's a new item added by the current user
-        const canEditUraian = isAdmin || (item.status === 'new' && !item.isApproved);
-        
-        return isEditing && canEditUraian ? (
+        return isEditing ? (
           <Input 
             value={item.uraian} 
             onChange={(e) => handleEditChange(item.id, 'uraian', e.target.value)}
             className="w-full"
-            disabled={!canEditUraian}
+            disabled={!isAdmin}
           />
         ) : (
           <span>{item.uraian}</span>
         );
       
       case 'volumeMenjadi':
-        return isEditing && canEditField ? (
+        return isEditing ? (
           <Input 
             type="number"
             value={item.volumeMenjadi} 
             onChange={(e) => handleEditChange(item.id, 'volumeMenjadi', e.target.value)}
             className="w-full"
             min="0"
-            disabled={!canEditField}
+            disabled={!isAdmin}
           />
         ) : (
           <span className={cellClass}>{item.volumeMenjadi}</span>
         );
       
       case 'satuanMenjadi':
-        return isEditing && canEditField ? (
+        return isEditing ? (
           <Select 
             value={item.satuanMenjadi} 
             onValueChange={(value) => handleEditChange(item.id, 'satuanMenjadi', value)}
-            disabled={!canEditField}
+            disabled={!isAdmin}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Satuan" />
@@ -327,14 +320,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         );
       
       case 'hargaSatuanMenjadi':
-        return isEditing && canEditField ? (
+        return isEditing ? (
           <Input 
             type="number"
             value={item.hargaSatuanMenjadi} 
             onChange={(e) => handleEditChange(item.id, 'hargaSatuanMenjadi', e.target.value)}
             className="w-full"
             min="0"
-            disabled={!canEditField}
+            disabled={!isAdmin}
           />
         ) : (
           <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi)}</span>
@@ -437,7 +430,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     return (item.status === 'new' || item.status === 'changed') && !item.isApproved;
   };
 
-  // Determine if the user can delete this item (admin can delete any, users can only delete their own new and unapproved items)
   const canDeleteItem = (item: BudgetItem): boolean => {
     if (isAdmin) return true;
     return item.status === 'new' && !item.isApproved;
@@ -446,19 +438,16 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const renderPagination = () => {
     if (pageSize === -1 || totalPages <= 1) return null;
     
-    // Calculate which page links to show
-    const showMaxPages = 7; // Maximum number of page links to show
+    const showMaxPages = 7;
     let startPage = Math.max(1, currentPage - Math.floor(showMaxPages / 2));
     let endPage = Math.min(totalPages, startPage + showMaxPages - 1);
     
-    // Adjust if we're near the end of the page list
     if (endPage - startPage + 1 < showMaxPages) {
       startPage = Math.max(1, endPage - showMaxPages + 1);
     }
     
     const pages = [];
     
-    // Add "First" page if not on page 1
     if (startPage > 1) {
       pages.push(
         <PaginationItem key="first">
@@ -477,7 +466,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       );
     }
     
-    // Add "Previous" button
     pages.push(
       <PaginationItem key="prev">
         <PaginationPrevious 
@@ -492,7 +480,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       </PaginationItem>
     );
     
-    // Add page numbers
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <PaginationItem key={i}>
@@ -510,7 +497,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       );
     }
     
-    // Add "Next" button
     pages.push(
       <PaginationItem key="next">
         <PaginationNext 
@@ -525,7 +511,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       </PaginationItem>
     );
     
-    // Add "Last" page if not on last page
     if (endPage < totalPages) {
       pages.push(
         <PaginationItem key="last">
@@ -952,10 +937,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       </div>
       
       {renderPagination()}
-
+      
       {detailItem && (
         <DetailDialog
-          isOpen={isDetailOpen}
+          open={isDetailOpen}
           onClose={() => setIsDetailOpen(false)}
           item={detailItem}
         />

@@ -11,7 +11,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { UserPlus } from 'lucide-react';
-import { UserRole } from '@/types/supabase';
+import { UserRole, UserProfile } from '@/types/database';
 
 // Define the LocalUserProfile interface to ensure type safety
 interface LocalUserProfile {
@@ -66,20 +66,20 @@ const UserManagement: React.FC = () => {
           console.error('Supabase error fetching users:', error);
         } else if (data) {
           // Map Supabase data to LocalUserProfile with proper validation
-          const typedData: LocalUserProfile[] = data.map(user => {
+          const typedData: LocalUserProfile[] = (data || []).map(user => {
             // Ensure that role is either 'admin' or 'user'
             const safeRole: UserRole = (user.role === 'admin' || user.role === 'user') 
               ? user.role as UserRole 
               : 'user';
             
             return {
-              id: user.id,
-              username: user.username,
+              id: user.id || '',
+              username: user.username || '',
               role: safeRole,
               avatar_url: user.avatar_url,
               full_name: user.full_name,
-              created_at: user.created_at,
-              updated_at: user.updated_at
+              created_at: user.created_at || '',
+              updated_at: user.updated_at || ''
             };
           });
           
