@@ -68,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for ID:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -79,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      console.log('User profile data:', data);
       if (data) {
         setProfile(data);
         setIsAdmin(data.role === 'admin');
@@ -91,6 +93,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+      console.log('Signing in with:', email);
+      
+      // Fixed credentials for testing purposes - REMOVE IN PRODUCTION
+      if (email === 'admin@bps3210.id' && password === 'bps3210admin') {
+        // Special case for admin test account
+        email = 'admin@bps3210.id';
+        password = 'bps3210admin';
+      } else if (email === 'sosial@bps3210.id' && password === 'bps3210@') {
+        // Special case for user test account
+        email = 'sosial@bps3210.id';
+        password = 'bps3210@';
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
@@ -99,9 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
+        console.error('Authentication error:', error);
         throw error;
       }
 
+      console.log('Login successful:', data);
       toast({
         title: "Login successful",
         description: "You have been logged in successfully",
@@ -119,6 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, username: string) => {
     try {
       setLoading(true);
+      console.log('Signing up with:', email, username);
+      
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
@@ -135,9 +154,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
+        console.error('Registration error:', error);
         throw error;
       }
 
+      console.log('Registration successful:', data);
       toast({
         title: "Registration successful",
         description: "Please check your email to confirm your account",

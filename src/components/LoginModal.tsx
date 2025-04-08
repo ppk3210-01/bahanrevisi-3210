@@ -24,6 +24,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     
     try {
+      console.log(`Attempting to ${isRegistering ? 'register' : 'login'} with email:`, email);
+      
       if (isRegistering) {
         await signUp(email, password, username);
       } else {

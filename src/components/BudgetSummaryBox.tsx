@@ -20,6 +20,9 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
   totalMenjadi,
   totalSelisih
 }) => {
+  // Calculate the correct selisih value as Menjadi - Semula
+  const correctSelisih = totalMenjadi - totalSemula;
+  
   return (
     <div className="sticky top-[65px] z-20 bg-gray-50 py-1 border-b border-gray-200 shadow-sm">
       <div className="flex justify-between items-center text-xs">
@@ -37,8 +40,8 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
         
         <div>
           <span className="text-gray-600 mr-1">Selisih:</span>
-          <span className={`font-semibold ${totalSelisih === 0 ? 'text-green-600' : totalSelisih > 0 ? 'text-blue-600' : 'text-red-600'}`}>
-            {formatToThousands(totalSelisih)}
+          <span className={`font-semibold ${correctSelisih === 0 ? 'text-green-600' : correctSelisih > 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            {formatToThousands(correctSelisih)}
           </span>
         </div>
       </div>
