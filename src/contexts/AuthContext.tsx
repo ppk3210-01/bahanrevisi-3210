@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +15,34 @@ interface AuthContextType {
   isAdmin: boolean;
 }
 
+// Hardcoded users for direct access without database dependency
+const HARDCODED_USERS = {
+  admin: {
+    email: 'admin@bps3210.id',
+    password: 'bps3210admin',
+    profile: {
+      id: '00000000-0000-0000-0000-000000000001',
+      username: 'admin',
+      full_name: 'Administrator',
+      role: 'admin',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+  },
+  user: {
+    email: 'sosial@bps3210.id',
+    password: 'bps3210@',
+    profile: {
+      id: '00000000-0000-0000-0000-000000000002',
+      username: 'sosial 3210',
+      full_name: 'User Sosial',
+      role: 'user',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+  }
+};
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -26,40 +53,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Check for existing session in local storage
+    const storedSession = localStorage.getItem('app.session');
+    const storedUser = localStorage.getItem('app.user');
+    const storedProfile = localStorage.getItem('app.profile');
+    
+    if (storedSession && storedUser && storedProfile) {
+      try {
+        const parsedSession = JSON.parse(storedSession);
+        const parsedUser = JSON.parse(storedUser);
+        const parsedProfile = JSON.parse(storedProfile);
+        
+        setSession(parsedSession);
+        setUser(parsedUser);
+        setProfile(parsedProfile);
+        setIsAdmin(parsedProfile.role === 'admin');
+      } catch (error) {
+        console.error('Error parsing stored auth data:', error);
+        // Clear invalid stored data
+        localStorage.removeItem('app.session');
+        localStorage.removeItem('app.user');
+        localStorage.removeItem('app.profile');
+      }
+    }
+    
+    setLoading(false);
+    
+    // Set up auth state listener for Supabase auth changes (still keep this for future use)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         console.log('Auth state changed:', event);
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        
-        // Use setTimeout to avoid Supabase deadlocks
-        if (newSession?.user) {
-          setTimeout(() => {
-            fetchUserProfile(newSession.user.id);
-          }, 0);
-        } else {
+        if (event === 'SIGNED_OUT') {
+          // Clear local storage on sign out
+          localStorage.removeItem('app.session');
+          localStorage.removeItem('app.user');
+          localStorage.removeItem('app.profile');
+          
+          setSession(null);
+          setUser(null);
           setProfile(null);
           setIsAdmin(false);
         }
       }
     );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      if (currentSession?.user) {
-        fetchUserProfile(currentSession.user.id);
-      }
-      setLoading(false);
-    });
-
-    // Store user session in localStorage (already handled by Supabase but we make sure)
-    if (session) {
-      localStorage.setItem('supabase.auth.token', JSON.stringify(session));
-    }
 
     return () => {
       subscription.unsubscribe();
@@ -95,30 +131,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       console.log('Signing in with:', email);
       
-      // Fixed credentials for testing purposes - REMOVE IN PRODUCTION
-      if (email === 'admin@bps3210.id' && password === 'bps3210admin') {
-        // Special case for admin test account
-        email = 'admin@bps3210.id';
-        password = 'bps3210admin';
-      } else if (email === 'sosial@bps3210.id' && password === 'bps3210@') {
-        // Special case for user test account
-        email = 'sosial@bps3210.id';
-        password = 'bps3210@';
+      // Check if the user is one of our hardcoded users
+      let matchedUser = null;
+      
+      if (email === HARDCODED_USERS.admin.email && password === HARDCODED_USERS.admin.password) {
+        matchedUser = HARDCODED_USERS.admin;
+      } else if (email === HARDCODED_USERS.user.email && password === HARDCODED_USERS.user.password) {
+        matchedUser = HARDCODED_USERS.user;
       }
       
+      if (matchedUser) {
+        console.log('Login successful with hardcoded user:', matchedUser.email);
+        
+        // Create a fake session and user for the frontend
+        const fakeSession = {
+          access_token: `fake-token-${Date.now()}`,
+          refresh_token: `fake-refresh-${Date.now()}`,
+          expires_at: Date.now() + 3600 * 1000,
+          user: {
+            id: matchedUser.profile.id,
+            email: matchedUser.email,
+            user_metadata: {
+              username: matchedUser.profile.username,
+              full_name: matchedUser.profile.full_name,
+              role: matchedUser.profile.role
+            }
+          }
+        };
+        
+        // Store auth data
+        setSession(fakeSession as any);
+        setUser(fakeSession.user as any);
+        setProfile(matchedUser.profile as any);
+        setIsAdmin(matchedUser.profile.role === 'admin');
+        
+        // Store in local storage for persistence
+        localStorage.setItem('app.session', JSON.stringify(fakeSession));
+        localStorage.setItem('app.user', JSON.stringify(fakeSession.user));
+        localStorage.setItem('app.profile', JSON.stringify(matchedUser.profile));
+        
+        toast({
+          title: "Login successful",
+          description: "You have been logged in successfully",
+        });
+        
+        return { user: fakeSession.user, session: fakeSession } as any;
+      }
+      
+      // If no hardcoded match, try Supabase authentication as fallback
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
         toast({
           title: "Login failed",
-          description: error.message,
+          description: "Invalid login credentials",
           variant: "destructive",
         });
         console.error('Authentication error:', error);
         throw error;
       }
 
-      console.log('Login successful:', data);
+      console.log('Supabase login successful:', data);
       toast({
         title: "Login successful",
         description: "You have been logged in successfully",
@@ -137,6 +210,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       console.log('Signing up with:', email, username);
+      
+      // If trying to sign up with hardcoded credentials, show success but don't actually create account
+      if (email === HARDCODED_USERS.admin.email || email === HARDCODED_USERS.user.email) {
+        toast({
+          title: "Registration successful",
+          description: "This account already exists. Please login instead.",
+        });
+        return;
+      }
       
       const { data, error } = await supabase.auth.signUp({ 
         email, 
@@ -176,14 +258,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
+      
+      // Clear local storage
+      localStorage.removeItem('app.session');
+      localStorage.removeItem('app.user');
+      localStorage.removeItem('app.profile');
+      
+      // Reset state
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setIsAdmin(false);
+      
+      // Also sign out from Supabase (for cases where the user was authenticated with Supabase)
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         throw error;
       }
-
-      // Clear local storage (Supabase handles this, but we do it again to be sure)
-      localStorage.removeItem('supabase.auth.token');
       
       toast({
         title: "Logout successful",

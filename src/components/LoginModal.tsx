@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from '@/contexts/AuthContext';
+import { AlertCircle } from 'lucide-react';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -17,10 +18,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
     
     try {
@@ -32,8 +35,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         await signIn(email, password);
         onClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Authentication error:", error);
+      setError('Invalid login credentials. Please check your email and password.');
     } finally {
       setIsLoading(false);
     }
@@ -41,10 +45,22 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
   const toggleMode = () => {
     setIsRegistering(!isRegistering);
+    setError(null);
     // Reset fields when switching modes
     setEmail('');
     setPassword('');
     setUsername('');
+  };
+
+  // Add demo account options for easy login
+  const useDemoAccount = (type: 'admin' | 'user') => {
+    if (type === 'admin') {
+      setEmail('admin@bps3210.id');
+      setPassword('bps3210admin');
+    } else {
+      setEmail('sosial@bps3210.id');
+      setPassword('bps3210@');
+    }
   };
 
   return (
@@ -58,6 +74,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               : 'Enter your credentials to access your account.'}
           </DialogDescription>
         </DialogHeader>
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           {isRegistering && (
@@ -97,6 +120,32 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               required
             />
           </div>
+          
+          {!isRegistering && (
+            <div className="flex flex-col space-y-2">
+              <p className="text-xs text-gray-500">Demo accounts:</p>
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs py-1 h-7"
+                  onClick={() => useDemoAccount('admin')}
+                >
+                  Use Admin Account
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs py-1 h-7"
+                  onClick={() => useDemoAccount('user')}
+                >
+                  Use User Account
+                </Button>
+              </div>
+            </div>
+          )}
           
           <div className="flex justify-between pt-2">
             <Button 
