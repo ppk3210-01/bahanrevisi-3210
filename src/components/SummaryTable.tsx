@@ -6,9 +6,11 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+type SummaryViewType = 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+
 interface SummaryTableProps {
   summaryData: BudgetSummaryRecord[];
-  view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+  view: SummaryViewType;
 }
 
 const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
@@ -29,20 +31,42 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   };
 
   const getValueFromRecord = (record: BudgetSummaryRecord): string | null => {
-    if ('account_group' in record && view === 'account_group') {
-      return record.account_group || '-';
-    } else if ('komponen_output' in record && view === 'komponen_output') {
-      return record.komponen_output || '-';
-    } else if ('akun' in record && view === 'akun') {
-      return record.akun || '-';
-    } else if ('program_pembebanan' in record && view === 'program_pembebanan') {
-      return record.program_pembebanan || '-';
-    } else if ('kegiatan' in record && view === 'kegiatan') {
-      return record.kegiatan || '-';
-    } else if ('rincian_output' in record && view === 'rincian_output') {
-      return record.rincian_output || '-';
-    } else if ('sub_komponen' in record && view === 'sub_komponen') {
-      return record.sub_komponen || '-';
+    switch (record.type) {
+      case 'account_group': 
+        if (view === 'account_group' && 'account_group' in record) {
+          return record.account_group || '-';
+        }
+        break;
+      case 'komponen_output': 
+        if (view === 'komponen_output' && 'komponen_output' in record) {
+          return record.komponen_output || '-';
+        }
+        break;
+      case 'akun': 
+        if (view === 'akun' && 'akun' in record) {
+          return record.akun || '-';
+        }
+        break;
+      case 'program_pembebanan': 
+        if (view === 'program_pembebanan' && 'program_pembebanan' in record) {
+          return record.program_pembebanan || '-';
+        }
+        break;
+      case 'kegiatan': 
+        if (view === 'kegiatan' && 'kegiatan' in record) {
+          return record.kegiatan || '-';
+        }
+        break;
+      case 'rincian_output': 
+        if (view === 'rincian_output' && 'rincian_output' in record) {
+          return record.rincian_output || '-';
+        }
+        break;
+      case 'sub_komponen': 
+        if (view === 'sub_komponen' && 'sub_komponen' in record) {
+          return record.sub_komponen || '-';
+        }
+        break;
     }
     return '-';
   };
@@ -62,20 +86,20 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     if (view === 'account_group') {
       // Group by first 2 digits of account_group - specifically 51, 52, and 53
       const group51Items = data.filter(item => 
-        'account_group' in item && item.account_group?.toString().startsWith('51')
+        item.type === 'account_group' && 'account_group' in item && item.account_group?.toString().startsWith('51')
       );
       
       const group52Items = data.filter(item => 
-        'account_group' in item && item.account_group?.toString().startsWith('52')
+        item.type === 'account_group' && 'account_group' in item && item.account_group?.toString().startsWith('52')
       );
       
       const group53Items = data.filter(item => 
-        'account_group' in item && item.account_group?.toString().startsWith('53')
+        item.type === 'account_group' && 'account_group' in item && item.account_group?.toString().startsWith('53')
       );
       
       const otherItems = data.filter(item => 
-        !('account_group' in item) || 
-        (item.account_group && 
+        item.type !== 'account_group' || 
+        ('account_group' in item && item.account_group && 
           !item.account_group.toString().startsWith('51') && 
           !item.account_group.toString().startsWith('52') && 
           !item.account_group.toString().startsWith('53'))

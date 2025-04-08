@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -10,30 +11,23 @@ import ExcelImportExport from './ExcelImportExport';
 import { useAuth } from '@/contexts/AuthContext'; 
 import { 
   BudgetSummaryRecord,
-  BudgetSummaryBase,
-  BudgetSummaryByAccountGroup,
-  BudgetSummaryByKomponen,
-  BudgetSummaryByAkun,
-  BudgetSummaryByProgramPembebanan,
-  BudgetSummaryByKegiatan,
-  BudgetSummaryByRincianOutput,
-  BudgetSummaryBySubKomponen
+  BudgetSummaryBase
 } from '@/types/database';
 import { Button } from '@/components/ui/button';
 import { FileBarChart2 } from 'lucide-react';
 import SummaryDialog from './SummaryDialog';
 import BudgetChangesSummary from './BudgetChangesSummary';
 
-interface EnhancedBudgetSummaryRecord extends BudgetSummaryBase {
-  account_group?: string;
-  komponen_output?: string;
-  akun?: string;
-  program_pembebanan?: string;
-  kegiatan?: string;
-  rincian_output?: string;
-  sub_komponen?: string;
-  type?: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
-}
+// Define the type for summary section view
+type SummarySectionView = 
+  'changes' |
+  'account_group' | 
+  'komponen_output' | 
+  'akun' | 
+  'program_pembebanan' | 
+  'kegiatan' | 
+  'rincian_output' | 
+  'sub_komponen';
 
 const BudgetComparison: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -47,16 +41,7 @@ const BudgetComparison: React.FC = () => {
   });
   
   const [activeTab, setActiveTab] = useState<string>("table");
-  const [summarySectionView, setSummarySectionView] = useState<
-    'changes' |
-    'account_group' | 
-    'komponen_output' | 
-    'akun' | 
-    'program_pembebanan' | 
-    'kegiatan' | 
-    'rincian_output' | 
-    'sub_komponen'
-  >('changes');
+  const [summarySectionView, setSummarySectionView] = useState<SummarySectionView>('changes');
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
@@ -74,106 +59,6 @@ const BudgetComparison: React.FC = () => {
     summaryData
   } = useBudgetData(filters);
   
-  const transformedSummaryData: EnhancedBudgetSummaryRecord[] = summaryData.map(item => {
-    if (item.account_group) {
-      const result: BudgetSummaryByAccountGroup = {
-        account_group: item.account_group || '',
-        total_semula: item.total_semula || 0,
-        total_menjadi: item.total_menjadi || 0,
-        total_selisih: item.total_selisih || 0,
-        new_items: item.new_items || 0,
-        changed_items: item.changed_items || 0,
-        total_items: item.total_items || 0,
-        type: 'account_group'
-      };
-      return result;
-    } else if (item.komponen_output) {
-      const result: BudgetSummaryByKomponen = {
-        komponen_output: item.komponen_output || '',
-        total_semula: item.total_semula || 0,
-        total_menjadi: item.total_menjadi || 0,
-        total_selisih: item.total_selisih || 0,
-        new_items: item.new_items || 0,
-        changed_items: item.changed_items || 0,
-        total_items: item.total_items || 0,
-        type: 'komponen_output'
-      };
-      return result;
-    } else if (item.akun) {
-      const result: BudgetSummaryByAkun = {
-        akun: item.akun || '',
-        total_semula: item.total_semula || 0,
-        total_menjadi: item.total_menjadi || 0,
-        total_selisih: item.total_selisih || 0,
-        new_items: item.new_items || 0,
-        changed_items: item.changed_items || 0,
-        total_items: item.total_items || 0,
-        type: 'akun'
-      };
-      return result;
-    } else if (item.program_pembebanan) {
-      const result: BudgetSummaryByProgramPembebanan = {
-        program_pembebanan: item.program_pembebanan || '',
-        total_semula: item.total_semula || 0,
-        total_menjadi: item.total_menjadi || 0,
-        total_selisih: item.total_selisih || 0,
-        new_items: item.new_items || 0,
-        changed_items: item.changed_items || 0,
-        total_items: item.total_items || 0,
-        type: 'program_pembebanan'
-      };
-      return result;
-    } else if (item.kegiatan) {
-      const result: BudgetSummaryByKegiatan = {
-        kegiatan: item.kegiatan || '',
-        total_semula: item.total_semula || 0,
-        total_menjadi: item.total_menjadi || 0,
-        total_selisih: item.total_selisih || 0,
-        new_items: item.new_items || 0,
-        changed_items: item.changed_items || 0,
-        total_items: item.total_items || 0,
-        type: 'kegiatan'
-      };
-      return result;
-    } else if (item.rincian_output) {
-      const result: BudgetSummaryByRincianOutput = {
-        rincian_output: item.rincian_output || '',
-        total_semula: item.total_semula || 0,
-        total_menjadi: item.total_menjadi || 0,
-        total_selisih: item.total_selisih || 0,
-        new_items: item.new_items || 0,
-        changed_items: item.changed_items || 0,
-        total_items: item.total_items || 0,
-        type: 'rincian_output'
-      };
-      return result;
-    } else if (item.sub_komponen) {
-      const result: BudgetSummaryBySubKomponen = {
-        sub_komponen: item.sub_komponen || '',
-        total_semula: item.total_semula || 0,
-        total_menjadi: item.total_menjadi || 0,
-        total_selisih: item.total_selisih || 0,
-        new_items: item.new_items || 0,
-        changed_items: item.changed_items || 0,
-        total_items: item.total_items || 0,
-        type: 'sub_komponen'
-      };
-      return result;
-    }
-    
-    const fallback: BudgetSummaryByAccountGroup = {
-      account_group: 'Unknown',
-      total_semula: item.total_semula || 0,
-      total_menjadi: item.total_menjadi || 0,
-      total_selisih: item.total_selisih || 0,
-      new_items: item.new_items || 0,
-      changed_items: item.changed_items || 0,
-      total_items: item.total_items || 0,
-      type: 'account_group'
-    };
-    return fallback;
-  });
-  
   const totalSemula = budgetItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalMenjadi = budgetItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
@@ -187,19 +72,19 @@ const BudgetComparison: React.FC = () => {
   
   const getFilteredSummaryData = (): BudgetSummaryRecord[] => {
     if (summarySectionView === 'account_group') {
-      return transformedSummaryData.filter(item => 'account_group' in item) as BudgetSummaryByAccountGroup[];
+      return summaryData.filter(item => item.type === 'account_group');
     } else if (summarySectionView === 'komponen_output') {
-      return transformedSummaryData.filter(item => 'komponen_output' in item) as BudgetSummaryByKomponen[];
+      return summaryData.filter(item => item.type === 'komponen_output');
     } else if (summarySectionView === 'akun') {
-      return transformedSummaryData.filter(item => 'akun' in item) as BudgetSummaryByAkun[];
+      return summaryData.filter(item => item.type === 'akun');
     } else if (summarySectionView === 'program_pembebanan') {
-      return transformedSummaryData.filter(item => 'program_pembebanan' in item) as BudgetSummaryByProgramPembebanan[];
+      return summaryData.filter(item => item.type === 'program_pembebanan');
     } else if (summarySectionView === 'kegiatan') {
-      return transformedSummaryData.filter(item => 'kegiatan' in item) as BudgetSummaryByKegiatan[];
+      return summaryData.filter(item => item.type === 'kegiatan');
     } else if (summarySectionView === 'rincian_output') {
-      return transformedSummaryData.filter(item => 'rincian_output' in item) as BudgetSummaryByRincianOutput[];
+      return summaryData.filter(item => item.type === 'rincian_output');
     } else if (summarySectionView === 'sub_komponen') {
-      return transformedSummaryData.filter(item => 'sub_komponen' in item) as BudgetSummaryBySubKomponen[];
+      return summaryData.filter(item => item.type === 'sub_komponen');
     }
     return [];
   };
@@ -377,7 +262,7 @@ const BudgetComparison: React.FC = () => {
         items={budgetItems}
         open={showSummaryDialog}
         onOpenChange={setShowSummaryDialog}
-        summaryData={transformedSummaryData as BudgetSummaryRecord[]} 
+        summaryData={summaryData} 
       />
     </div>
   );

@@ -9,11 +9,13 @@ import { BudgetSummaryRecord } from '@/types/database';
 import SummaryTable from './SummaryTable';
 import SummaryChart from './SummaryChart';
 
+type SummaryViewType = 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+
 interface DetailedSummaryViewProps {
   summaryData: BudgetSummaryRecord[];
   loading: boolean;
-  view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
-  setView: (view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen') => void;
+  view: SummaryViewType;
+  setView: (view: SummaryViewType) => void;
   defaultView?: 'table' | 'bar';
 }
 
@@ -31,19 +33,19 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   // Filter data to remove empty entries
   const filteredSummaryData = summaryData.filter(item => {
     if (view === 'account_group') {
-      return 'account_group' in item && item.account_group !== null && item.account_group !== '-';
+      return item.type === 'account_group' && 'account_group' in item && item.account_group !== null && item.account_group !== '-';
     } else if (view === 'komponen_output') {
-      return 'komponen_output' in item && item.komponen_output !== null && item.komponen_output !== '-';
+      return item.type === 'komponen_output' && 'komponen_output' in item && item.komponen_output !== null && item.komponen_output !== '-';
     } else if (view === 'akun') {
-      return 'akun' in item && item.akun !== null && item.akun !== '-';
+      return item.type === 'akun' && 'akun' in item && item.akun !== null && item.akun !== '-';
     } else if (view === 'program_pembebanan') {
-      return 'program_pembebanan' in item && item.program_pembebanan !== null && item.program_pembebanan !== '-';
+      return item.type === 'program_pembebanan' && 'program_pembebanan' in item && item.program_pembebanan !== null && item.program_pembebanan !== '-';
     } else if (view === 'kegiatan') {
-      return 'kegiatan' in item && item.kegiatan !== null && item.kegiatan !== '-';
+      return item.type === 'kegiatan' && 'kegiatan' in item && item.kegiatan !== null && item.kegiatan !== '-';
     } else if (view === 'rincian_output') {
-      return 'rincian_output' in item && item.rincian_output !== null && item.rincian_output !== '-';
+      return item.type === 'rincian_output' && 'rincian_output' in item && item.rincian_output !== null && item.rincian_output !== '-';
     } else if (view === 'sub_komponen') {
-      return 'sub_komponen' in item && item.sub_komponen !== null && item.sub_komponen !== '-';
+      return item.type === 'sub_komponen' && 'sub_komponen' in item && item.sub_komponen !== null && item.sub_komponen !== '-';
     }
     return true;
   });

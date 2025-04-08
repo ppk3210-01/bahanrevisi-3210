@@ -16,6 +16,10 @@ export type AkunRecord = Tables['akun']['Row'];
 export type BudgetSummaryByAccountGroupRecord = Views['budget_summary_by_account_group']['Row'];
 export type BudgetSummaryByKomponenRecord = Views['budget_summary_by_komponen']['Row'];
 export type BudgetSummaryByAkunRecord = Views['budget_summary_by_akun']['Row'];
+export type BudgetSummaryByProgramPembebananRecord = Views['budget_summary_by_program_pembebanan']['Row'];
+export type BudgetSummaryByKegiatanRecord = Views['budget_summary_by_kegiatan']['Row']; 
+export type BudgetSummaryByRincianOutputRecord = Views['budget_summary_by_rincian_output']['Row']; 
+export type BudgetSummaryBySubKomponenRecord = Views['budget_summary_by_sub_komponen']['Row']; 
 
 // Base type with common fields
 export type BudgetSummaryBase = {

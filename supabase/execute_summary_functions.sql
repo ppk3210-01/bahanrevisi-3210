@@ -18,3 +18,27 @@ CREATE OR REPLACE FUNCTION get_budget_summary_by_akun()
 RETURNS SETOF budget_summary_by_akun AS $$
   SELECT * FROM budget_summary_by_akun;
 $$ LANGUAGE SQL;
+
+-- Function to get budget summary by program pembebanan
+CREATE OR REPLACE FUNCTION get_budget_summary_by_program_pembebanan()
+RETURNS SETOF budget_summary_by_program_pembebanan AS $$
+  SELECT * FROM budget_summary_by_program_pembebanan;
+$$ LANGUAGE SQL;
+
+-- Function to get budget summary by kegiatan
+CREATE OR REPLACE FUNCTION get_budget_summary_by_kegiatan()
+RETURNS SETOF budget_summary_by_kegiatan AS $$
+  SELECT * FROM budget_summary_by_kegiatan;
+$$ LANGUAGE SQL;
+
+-- Function to get budget summary by rincian output
+CREATE OR REPLACE FUNCTION get_budget_summary_by_rincian_output()
+RETURNS SETOF budget_summary_by_rincian_output AS $$
+  SELECT * FROM budget_summary_by_rincian_output;
+$$ LANGUAGE SQL;
+
+-- Function to get budget summary by sub komponen
+CREATE OR REPLACE FUNCTION get_budget_summary_by_sub_komponen()
+RETURNS SETOF budget_summary_by_sub_komponen AS $$
+  SELECT * FROM budget_summary_by_sub_komponen;
+$$ LANGUAGE SQL;

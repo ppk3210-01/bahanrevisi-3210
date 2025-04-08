@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -6,23 +7,21 @@ import { toast } from '@/hooks/use-toast';
 import { 
   BudgetItemRecord, 
   BudgetSummaryBase,
-  BudgetSummaryRecord 
+  BudgetSummaryRecord,
+  BudgetSummaryByAccountGroup,
+  BudgetSummaryByKomponen,
+  BudgetSummaryByAkun,
+  BudgetSummaryByProgramPembebanan,
+  BudgetSummaryByKegiatan,
+  BudgetSummaryByRincianOutput,
+  BudgetSummaryBySubKomponen
 } from '@/types/database';
 
-interface EnhancedBudgetSummaryRecord extends BudgetSummaryBase {
-  account_group?: string;
-  komponen_output?: string;
-  akun?: string;
-  program_pembebanan?: string;
-  kegiatan?: string;
-  rincian_output?: string;
-  sub_komponen?: string;
-  type?: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
-}
+type SummaryType = 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
-  const [summaryData, setSummaryData] = useState<EnhancedBudgetSummaryRecord[]>([]);
+  const [summaryData, setSummaryData] = useState<BudgetSummaryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,36 +77,125 @@ const useBudgetData = (filters: FilterSelection) => {
     
     const fetchSummaryData = async () => {
       try {
-        const [accountGroupResult, komponenResult, akunResult] = await Promise.all([
+        const [
+          accountGroupResult, 
+          komponenResult, 
+          akunResult,
+          programPembebananResult,
+          kegiatanResult,
+          rincianOutputResult,
+          subKomponenResult
+        ] = await Promise.all([
           supabase.from('budget_summary_by_account_group').select('*'),
           supabase.from('budget_summary_by_komponen').select('*'),
-          supabase.from('budget_summary_by_akun').select('*')
+          supabase.from('budget_summary_by_akun').select('*'),
+          supabase.from('budget_summary_by_program_pembebanan').select('*'),
+          supabase.from('budget_summary_by_kegiatan').select('*'),
+          supabase.from('budget_summary_by_rincian_output').select('*'),
+          supabase.from('budget_summary_by_sub_komponen').select('*')
         ]);
         
-        let summaryData: EnhancedBudgetSummaryRecord[] = [];
+        let allSummaryData: BudgetSummaryRecord[] = [];
         
         if (accountGroupResult.data) {
-          summaryData = summaryData.concat(accountGroupResult.data.map(item => ({
-            ...item,
-            type: 'account_group' as const
-          })));
+          const accountGroupData: BudgetSummaryByAccountGroup[] = accountGroupResult.data.map(item => ({
+            account_group: item.account_group || '',
+            total_semula: item.total_semula,
+            total_menjadi: item.total_menjadi,
+            total_selisih: item.total_selisih,
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'account_group'
+          }));
+          allSummaryData = [...allSummaryData, ...accountGroupData];
         }
         
         if (komponenResult.data) {
-          summaryData = summaryData.concat(komponenResult.data.map(item => ({
-            ...item,
-            type: 'komponen_output' as const
-          })));
+          const komponenData: BudgetSummaryByKomponen[] = komponenResult.data.map(item => ({
+            komponen_output: item.komponen_output || '',
+            total_semula: item.total_semula,
+            total_menjadi: item.total_menjadi,
+            total_selisih: item.total_selisih,
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'komponen_output'
+          }));
+          allSummaryData = [...allSummaryData, ...komponenData];
         }
         
         if (akunResult.data) {
-          summaryData = summaryData.concat(akunResult.data.map(item => ({
-            ...item,
-            type: 'akun' as const
-          })));
+          const akunData: BudgetSummaryByAkun[] = akunResult.data.map(item => ({
+            akun: item.akun || '',
+            total_semula: item.total_semula,
+            total_menjadi: item.total_menjadi,
+            total_selisih: item.total_selisih,
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'akun'
+          }));
+          allSummaryData = [...allSummaryData, ...akunData];
+        }
+
+        if (programPembebananResult.data) {
+          const programPembebananData: BudgetSummaryByProgramPembebanan[] = programPembebananResult.data.map(item => ({
+            program_pembebanan: item.program_pembebanan || '',
+            total_semula: item.total_semula,
+            total_menjadi: item.total_menjadi,
+            total_selisih: item.total_selisih,
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'program_pembebanan'
+          }));
+          allSummaryData = [...allSummaryData, ...programPembebananData];
         }
         
-        setSummaryData(summaryData);
+        if (kegiatanResult.data) {
+          const kegiatanData: BudgetSummaryByKegiatan[] = kegiatanResult.data.map(item => ({
+            kegiatan: item.kegiatan || '',
+            total_semula: item.total_semula,
+            total_menjadi: item.total_menjadi,
+            total_selisih: item.total_selisih,
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'kegiatan'
+          }));
+          allSummaryData = [...allSummaryData, ...kegiatanData];
+        }
+        
+        if (rincianOutputResult.data) {
+          const rincianOutputData: BudgetSummaryByRincianOutput[] = rincianOutputResult.data.map(item => ({
+            rincian_output: item.rincian_output || '',
+            total_semula: item.total_semula,
+            total_menjadi: item.total_menjadi,
+            total_selisih: item.total_selisih,
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'rincian_output'
+          }));
+          allSummaryData = [...allSummaryData, ...rincianOutputData];
+        }
+        
+        if (subKomponenResult.data) {
+          const subKomponenData: BudgetSummaryBySubKomponen[] = subKomponenResult.data.map(item => ({
+            sub_komponen: item.sub_komponen || '',
+            total_semula: item.total_semula,
+            total_menjadi: item.total_menjadi,
+            total_selisih: item.total_selisih,
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'sub_komponen'
+          }));
+          allSummaryData = [...allSummaryData, ...subKomponenData];
+        }
+        
+        setSummaryData(allSummaryData);
       } catch (err) {
         console.error('Error fetching summary data:', err);
       }
