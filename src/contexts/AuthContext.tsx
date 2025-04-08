@@ -80,11 +80,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     setLoading(false);
     
-    // Set up auth state listener for Supabase auth changes (still keep this for future use)
+    // Set up auth state listener for Supabase auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
-        console.log('Auth state changed:', event);
-        if (event === 'SIGNED_OUT') {
+        console.log('Auth state changed:', event, newSession);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (newSession) {
+            setSession(newSession);
+            setUser(newSession.user);
+            
+            // Fetch user profile
+            if (newSession.user) {
+              fetchUserProfile(newSession.user.id);
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
           // Clear local storage on sign out
           localStorage.removeItem('app.session');
           localStorage.removeItem('app.user');
@@ -121,6 +132,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data) {
         setProfile(data);
         setIsAdmin(data.role === 'admin');
+        
+        // Store in local storage for persistence
+        localStorage.setItem('app.profile', JSON.stringify(data));
       }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
@@ -215,6 +229,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       console.log('Supabase login successful:', data);
+      
+      // Store session and user
+      setSession(data.session);
+      setUser(data.user);
+      
+      // Store in local storage for persistence
+      if (data.session) {
+        localStorage.setItem('app.session', JSON.stringify(data.session));
+        localStorage.setItem('app.user', JSON.stringify(data.user));
+      }
+      
+      // Fetch user profile
+      if (data.user) {
+        await fetchUserProfile(data.user.id);
+      }
+      
       toast({
         title: "Login successful",
         description: "You have been logged in successfully",
@@ -269,9 +299,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const newUserProfile = {
         id: userId,
         username,
-        role: 'user',
+        role: 'user' as UserRole,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        full_name: null,
+        avatar_url: null
       };
       
       const users = JSON.parse(localStorage.getItem('app.users') || '[]');
@@ -299,6 +331,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (error) {
           console.error('Supabase registration error:', error);
+        } else if (data && data.user) {
+          // Override the local user id with the Supabase user id
+          newUserProfile.id = data.user.id;
+          
+          // Update the local users array with the new ID
+          const updatedUsers = users.map((u: any) => 
+            u.id === userId ? { ...u, id: data.user!.id } : u
+          );
+          localStorage.setItem('app.users', JSON.stringify(updatedUsers));
+          
+          // Update credentials with new user ID
+          const updatedCredentials = storedCredentials.map((c: any) => 
+            c.profileId === userId ? { ...c, profileId: data.user!.id } : c
+          );
+          localStorage.setItem('app.credentials', JSON.stringify(updatedCredentials));
+          
+          // Create profile in Supabase
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: data.user.id,
+              username,
+              role: 'user',
+              avatar_url: null,
+              full_name: null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+            
+          if (profileError) {
+            console.error('Supabase error creating profile:', profileError);
+          }
+          
+          // Immediately sign in the user after registration
+          await signIn(email, password);
         }
       } catch (err) {
         console.error('Error with Supabase signup:', err);

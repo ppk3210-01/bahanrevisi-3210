@@ -31,8 +31,21 @@ const Header: React.FC = () => {
                 <p className="font-medium">{profile?.username}</p>
                 <p className="text-xs opacity-80">{isAdmin ? 'Admin' : 'User'}</p>
               </div>
-              {isAdmin && <UserManagement />}
-              <Button variant="outline" size="sm" onClick={signOut} className="text-white border-white hover:bg-white/20 hover:text-white">
+              {isAdmin && 
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
+                >
+                  Manage Users
+                </Button>
+              }
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={signOut} 
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
+              >
                 Logout
               </Button>
             </>
@@ -41,7 +54,7 @@ const Header: React.FC = () => {
               variant="outline" 
               size="sm" 
               onClick={() => setIsLoginModalOpen(true)}
-              className="text-white border-white hover:bg-white/20 hover:text-white"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
             >
               Login
             </Button>
@@ -58,4 +71,3 @@ const Header: React.FC = () => {
 };
 
 export default Header;
-

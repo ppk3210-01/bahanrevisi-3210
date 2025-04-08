@@ -167,8 +167,10 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+          console.log("Parsed Excel data:", jsonData);
           resolve(jsonData);
         } catch (error) {
+          console.error("Error parsing Excel file:", error);
           reject(error);
         }
       };
@@ -207,6 +209,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     // Check if first row has the required headers
     if (data.length > 0) {
       const firstRow = data[0];
+      console.log("First row data:", firstRow);
       const missingHeaders = requiredFields.filter(field => !(field in firstRow));
       if (missingHeaders.length > 0) {
         errorMessages.push(`Kolom yang diperlukan tidak ditemukan: ${missingHeaders.join(', ')}.`);
@@ -214,11 +217,15 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     }
     
     data.forEach((row, index) => {
+      console.log(`Processing row ${index}:`, row);
       let isRowValid = true;
       const rowErrors: string[] = [];
       
       // Check required fields
-      const missingFields = requiredFields.filter(field => !row[field] && row[field] !== 0);
+      const missingFields = requiredFields.filter(field => {
+        const value = row[field];
+        return value === undefined || value === "" || value === null;
+      });
       
       if (missingFields.length > 0) {
         isRowValid = false;
@@ -232,10 +239,17 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       let hargaSatuanMenjadi: number;
       
       try {
-        volumeSemula = typeof row['Volume Semula'] === 'number' ? row['Volume Semula'] : Number(String(row['Volume Semula']).replace(/,/g, ''));
-        hargaSatuanSemula = typeof row['Harga Satuan Semula'] === 'number' ? row['Harga Satuan Semula'] : Number(String(row['Harga Satuan Semula']).replace(/,/g, ''));
-        volumeMenjadi = typeof row['Volume Menjadi'] === 'number' ? row['Volume Menjadi'] : Number(String(row['Volume Menjadi']).replace(/,/g, ''));
-        hargaSatuanMenjadi = typeof row['Harga Satuan Menjadi'] === 'number' ? row['Harga Satuan Menjadi'] : Number(String(row['Harga Satuan Menjadi']).replace(/,/g, ''));
+        volumeSemula = parseFloat(String(row['Volume Semula']).replace(/[^\d.-]/g, ''));
+        hargaSatuanSemula = parseFloat(String(row['Harga Satuan Semula']).replace(/[^\d.-]/g, ''));
+        volumeMenjadi = parseFloat(String(row['Volume Menjadi']).replace(/[^\d.-]/g, ''));
+        hargaSatuanMenjadi = parseFloat(String(row['Harga Satuan Menjadi']).replace(/[^\d.-]/g, ''));
+        
+        console.log(`Parsed values for row ${index}:`, {
+          volumeSemula,
+          hargaSatuanSemula,
+          volumeMenjadi,
+          hargaSatuanMenjadi
+        });
       } catch (e) {
         isRowValid = false;
         rowErrors.push(`Baris ${index + 1}: Format angka tidak valid.`);
@@ -281,6 +295,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         isApproved: false
       };
       
+      console.log(`Valid item for row ${index}:`, validItem);
       validItems.push(validItem);
     });
     

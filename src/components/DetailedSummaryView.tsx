@@ -1,610 +1,433 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatCurrency } from '@/utils/budgetCalculations';
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableRow, 
-  TableHead, 
-  TableCell 
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { ChevronsUpDown, Download, Info, FileBarChart2 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import * as XLSX from 'xlsx';
-import SummaryDialog from './SummaryDialog';
-import { 
-  BudgetSummaryRecord, 
-  BudgetSummaryByAccountGroup, 
-  BudgetSummaryByKomponen, 
-  BudgetSummaryByAkun,
-  BudgetItemRecord 
-} from '@/types/database';
-import { BudgetItem, convertToBudgetItem } from '@/types/budget';
+import { ChartContainer } from './ui/chart';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BudgetSummaryRecord, BudgetSummaryByAccountGroup, BudgetSummaryByKomponen, BudgetSummaryByAkun } from '@/types/database';
+import { Button } from './ui/button';
+import { FileBarChart2, FilePieChart, FileText } from 'lucide-react';
 
-// Type definitions for our summary data
-type SortField = 'group' | 'total_semula' | 'total_menjadi' | 'total_selisih' | 'new_items' | 'changed_items' | 'total_items';
-type SortDirection = 'asc' | 'desc';
+interface DetailedSummaryViewProps {
+  summaryData: BudgetSummaryRecord[];
+  loading: boolean;
+  view: 'account_group' | 'komponen' | 'akun';
+  setView: (view: 'account_group' | 'komponen' | 'akun') => void;
+}
 
-// Format numbers by rounding to the nearest thousand and using currency format
-const formatToThousands = (value: number): string => {
-  // Round to nearest thousand
-  const roundedValue = Math.round(value / 1000) * 1000;
-  return formatCurrency(roundedValue);
+// Type guard functions for each budget summary type
+const isAccountGroupSummary = (record: BudgetSummaryRecord): record is BudgetSummaryByAccountGroup => {
+  return (record as BudgetSummaryByAccountGroup).account_group !== undefined;
 };
 
-// Type guard functions to check record types
-const isAccountGroupRecord = (record: BudgetSummaryRecord): record is BudgetSummaryByAccountGroup => 
-  (record as BudgetSummaryByAccountGroup).account_group !== undefined || 
-  (record as any).type === 'account_group';
+const isKomponenSummary = (record: BudgetSummaryRecord): record is BudgetSummaryByKomponen => {
+  return (record as BudgetSummaryByKomponen).komponen_output !== undefined;
+};
 
-const isKomponenRecord = (record: BudgetSummaryRecord): record is BudgetSummaryByKomponen => 
-  (record as BudgetSummaryByKomponen).komponen_output !== undefined || 
-  (record as any).type === 'komponen_output';
+const isAkunSummary = (record: BudgetSummaryRecord): record is BudgetSummaryByAkun => {
+  return (record as BudgetSummaryByAkun).akun !== undefined;
+};
 
-const isAkunRecord = (record: BudgetSummaryRecord): record is BudgetSummaryByAkun => 
-  (record as BudgetSummaryByAkun).akun !== undefined || 
-  (record as any).type === 'akun';
-
-// Get property from summary item with type safety
-const getGroupValue = (item: BudgetSummaryRecord, groupFieldType: 'account_group' | 'komponen_output' | 'akun'): string => {
-  if (groupFieldType === 'account_group' && isAccountGroupRecord(item)) {
-    return item.account_group || '';
-  } 
-  if (groupFieldType === 'komponen_output' && isKomponenRecord(item)) {
-    return item.komponen_output || '';
-  }
-  if (groupFieldType === 'akun' && isAkunRecord(item)) {
-    return item.akun || '';
-  }
+// Safe accessor function for getting group field
+const getGroupField = (record: BudgetSummaryRecord): string => {
+  if (isAccountGroupSummary(record)) return record.account_group || '';
+  if (isKomponenSummary(record)) return record.komponen_output || '';
+  if (isAkunSummary(record)) return record.akun || '';
   return '';
 };
 
-const DetailedSummaryView: React.FC = () => {
-  const [accountGroupData, setAccountGroupData] = useState<BudgetSummaryByAccountGroup[]>([]);
-  const [komponenData, setKomponenData] = useState<BudgetSummaryByKomponen[]>([]);
-  const [akunData, setAkunData] = useState<BudgetSummaryByAkun[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [summaryDialogOpen, setSummaryDialogOpen] = useState(false);
-  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+// COLORS
+const COLORS = [
+  '#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', 
+  '#d0ed57', '#ffc658', '#ff8042', '#ff6361', '#bc5090', 
+  '#58508d', '#003f5c', '#7a5195', '#ef5675', '#ffa600'
+];
 
-  const [accountGroupSort, setAccountGroupSort] = useState<{field: SortField, direction: SortDirection}>({
-    field: 'group',
-    direction: 'asc'
-  });
-  
-  const [komponenSort, setKomponenSort] = useState<{field: SortField, direction: SortDirection}>({
-    field: 'group',
-    direction: 'asc'
-  });
-  
-  const [akunSort, setAkunSort] = useState<{field: SortField, direction: SortDirection}>({
-    field: 'group',
-    direction: 'asc'
-  });
+const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ 
+  summaryData, 
+  loading, 
+  view, 
+  setView 
+}) => {
+  const [chartType, setChartType] = useState<'bar' | 'pie' | 'table'>('bar');
 
-  // Fetch data from Supabase
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch account group data using rpc
-        const { data: accountGroupResult, error: accountGroupError } = await supabase
-          .rpc('get_budget_summary_by_account_group');
-        
-        if (accountGroupError) throw accountGroupError;
-        
-        // Fetch komponen data using rpc
-        const { data: komponenResult, error: komponenError } = await supabase
-          .rpc('get_budget_summary_by_komponen');
-        
-        if (komponenError) throw komponenError;
-        
-        // Fetch akun data using rpc
-        const { data: akunResult, error: akunError } = await supabase
-          .rpc('get_budget_summary_by_akun');
-        
-        if (akunError) throw akunError;
-        
-        // Fetch budget items for the SummaryDialog
-        const { data: budgetData, error: budgetError } = await supabase
-          .from('budget_items')
-          .select('*');
-        
-        if (budgetError) throw budgetError;
-        
-        // Transform to our data format with type information
-        setAccountGroupData((accountGroupResult || []).map(item => ({
-          ...item,
-          type: 'account_group'
-        })));
-        
-        setKomponenData((komponenResult || []).map(item => ({
-          ...item,
-          type: 'komponen_output'
-        })));
-        
-        setAkunData((akunResult || []).map(item => ({
-          ...item,
-          type: 'akun'
-        })));
-        
-        // Transform budget data to our budget items format
-        const transformedBudgetData = (budgetData || []).map((item: BudgetItemRecord) => convertToBudgetItem(item));
-        
-        setBudgetItems(transformedBudgetData);
-      } catch (error) {
-        console.error('Error fetching summary data:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: 'Gagal mengambil data ringkasan. Silakan coba lagi.'
-        });
-      } finally {
-        setLoading(false);
-      }
+  // Total calculations
+  const totalSemula = summaryData.reduce((sum, item) => sum + (item.total_semula || 0), 0);
+  const totalMenjadi = summaryData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0);
+  const totalSelisih = summaryData.reduce((sum, item) => sum + (item.total_selisih || 0), 0);
+  
+  // Prepare data for charts - ensure each record has the appropriate type property
+  const chartData = summaryData.map((record) => {
+    const groupName = getGroupField(record);
+    return {
+      name: groupName || 'Unknown',
+      semula: record.total_semula || 0,
+      menjadi: record.total_menjadi || 0,
+      selisih: record.total_selisih || 0,
+      newItems: record.new_items || 0,
+      changedItems: record.changed_items || 0,
+      totalItems: record.total_items || 0
     };
+  });
 
-    fetchData();
-  }, []);
-
-  // Sort functions
-  const sortData = <T extends BudgetSummaryRecord>(
-    data: T[], 
-    field: SortField, 
-    direction: SortDirection,
-    groupFieldType: 'account_group' | 'komponen_output' | 'akun'
-  ): T[] => {
-    return [...data].sort((a, b) => {
-      let valueA, valueB;
-      
-      if (field === 'group') {
-        valueA = getGroupValue(a, groupFieldType);
-        valueB = getGroupValue(b, groupFieldType);
-      } else {
-        valueA = a[field as keyof typeof a];
-        valueB = b[field as keyof typeof b];
-      }
-      
-      if (typeof valueA === 'string' && typeof valueB === 'string') {
-        return direction === 'asc' 
-          ? valueA.localeCompare(valueB) 
-          : valueB.localeCompare(valueA);
-      }
-      
-      if (typeof valueA === 'number' && typeof valueB === 'number') {
-        return direction === 'asc' ? valueA - valueB : valueB - valueA;
-      }
-      
-      return 0;
-    });
-  };
-
-  const handleSort = (
-    field: SortField, 
-    currentSort: {field: SortField, direction: SortDirection},
-    setSort: React.Dispatch<React.SetStateAction<{field: SortField, direction: SortDirection}>>
-  ) => {
-    if (currentSort.field === field) {
-      setSort({
-        field,
-        direction: currentSort.direction === 'asc' ? 'desc' : 'asc'
-      });
-    } else {
-      setSort({
-        field,
-        direction: 'asc'
-      });
-    }
-  };
-
-  const exportToExcel = () => {
-    try {
-      // Create a workbook with multiple sheets
-      const wb = XLSX.utils.book_new();
-      
-      // Add account group data
-      const accountGroupSheet = XLSX.utils.json_to_sheet(accountGroupData.map(item => ({
-        'Kelompok Akun': item.account_group,
-        'Pagu Semula': item.total_semula,
-        'Pagu Menjadi': item.total_menjadi,
-        'Selisih': item.total_selisih,
-        'Item Bertambah': item.new_items,
-        'Item Berubah': item.changed_items,
-        'Jumlah Item': item.total_items
-      })));
-      XLSX.utils.book_append_sheet(wb, accountGroupSheet, 'Kelompok Akun');
-      
-      // Add komponen data
-      const komponenSheet = XLSX.utils.json_to_sheet(komponenData.map(item => ({
-        'Komponen Output': item.komponen_output,
-        'Pagu Semula': item.total_semula,
-        'Pagu Menjadi': item.total_menjadi,
-        'Selisih': item.total_selisih,
-        'Item Bertambah': item.new_items,
-        'Item Berubah': item.changed_items,
-        'Jumlah Item': item.total_items
-      })));
-      XLSX.utils.book_append_sheet(wb, komponenSheet, 'Komponen Output');
-      
-      // Add akun data
-      const akunSheet = XLSX.utils.json_to_sheet(akunData.map(item => ({
-        'Akun': item.akun,
-        'Pagu Semula': item.total_semula,
-        'Pagu Menjadi': item.total_menjadi,
-        'Selisih': item.total_selisih,
-        'Item Bertambah': item.new_items,
-        'Item Berubah': item.changed_items,
-        'Jumlah Item': item.total_items
-      })));
-      XLSX.utils.book_append_sheet(wb, akunSheet, 'Per Akun');
-      
-      // Save the file
-      XLSX.writeFile(wb, 'Rekap_Anggaran.xlsx');
-      
-      toast({
-        title: "Berhasil",
-        description: 'Rekap anggaran berhasil diunduh'
-      });
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: 'Gagal mengunduh rekap anggaran. Silakan coba lagi.'
-      });
-    }
-  };
-
-  const sortedAccountGroupData = sortData(accountGroupData, accountGroupSort.field, accountGroupSort.direction, 'account_group');
-  const sortedKomponenData = sortData(komponenData, komponenSort.field, komponenSort.direction, 'komponen_output');
-  const sortedAkunData = sortData(akunData, akunSort.field, akunSort.direction, 'akun');
-
-  // Calculate totals
-  const accountGroupTotals = {
-    total_semula: accountGroupData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
-    total_menjadi: accountGroupData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
-    total_selisih: accountGroupData.reduce((sum, item) => sum + (item.total_selisih || 0), 0),
-    new_items: accountGroupData.reduce((sum, item) => sum + (item.new_items || 0), 0),
-    changed_items: accountGroupData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
-    total_items: accountGroupData.reduce((sum, item) => sum + (item.total_items || 0), 0)
-  };
-  
-  const komponenTotals = {
-    total_semula: komponenData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
-    total_menjadi: komponenData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
-    total_selisih: komponenData.reduce((sum, item) => sum + (item.total_selisih || 0), 0),
-    new_items: komponenData.reduce((sum, item) => sum + (item.new_items || 0), 0),
-    changed_items: komponenData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
-    total_items: komponenData.reduce((sum, item) => sum + (item.total_items || 0), 0)
-  };
-  
-  const akunTotals = {
-    total_semula: akunData.reduce((sum, item) => sum + (item.total_semula || 0), 0),
-    total_menjadi: akunData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0),
-    total_selisih: akunData.reduce((sum, item) => sum + (item.total_selisih || 0), 0),
-    new_items: akunData.reduce((sum, item) => sum + (item.new_items || 0), 0),
-    changed_items: akunData.reduce((sum, item) => sum + (item.changed_items || 0), 0),
-    total_items: akunData.reduce((sum, item) => sum + (item.total_items || 0), 0)
-  };
-
-  if (loading) {
-    return <div className="text-center py-4">Memuat data rekap anggaran...</div>;
-  }
-
-  const renderSortIcon = (field: SortField, currentSort: {field: SortField, direction: SortDirection}) => {
-    return (
-      <ChevronsUpDown className={`inline h-4 w-4 ml-1 ${currentSort.field === field ? 'opacity-100' : 'opacity-50'}`} />
-    );
-  };
-
-  const renderTable = (
-    title: string,
-    data: BudgetSummaryRecord[],
-    groupFieldType: 'account_group' | 'komponen_output' | 'akun',
-    currentSort: {field: SortField, direction: SortDirection},
-    setSort: React.Dispatch<React.SetStateAction<{field: SortField, direction: SortDirection}>>,
-    totals: {
-      total_semula: number;
-      total_menjadi: number;
-      total_selisih: number;
-      new_items: number;
-      changed_items: number;
-      total_items: number;
-    }
-  ) => {
-    // Choose a different pastel color for each table
-    let bgColor = "from-blue-50 to-indigo-50";
-    let borderColor = "border-t-blue-400";
-    
-    if (title.includes("Komponen")) {
-      bgColor = "from-purple-50 to-pink-50";
-      borderColor = "border-t-purple-400";
-    } else if (title.includes("Akun")) {
-      bgColor = "from-green-50 to-teal-50";
-      borderColor = "border-t-green-400";
-    }
-    
-    return (
-      <Card className={`shadow-sm mb-3 border-t-4 ${borderColor}`}>
-        <CardHeader className="pb-1 pt-2">
-          <CardTitle className="text-sm">{title}</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className={`bg-gradient-to-r ${bgColor} sticky top-0`}>
-                <TableRow className="text-xs h-7">
-                  <TableHead className="w-[25%] cursor-pointer py-1 px-2" onClick={() => handleSort('group', currentSort, setSort)}>
-                    {groupFieldType === 'account_group' ? 'Kelompok Akun' : groupFieldType === 'komponen_output' ? 'Komponen Output' : 'Akun'}
-                    {renderSortIcon('group', currentSort)}
-                  </TableHead>
-                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_semula', currentSort, setSort)}>
-                    Pagu Semula {renderSortIcon('total_semula', currentSort)}
-                  </TableHead>
-                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_menjadi', currentSort, setSort)}>
-                    Pagu Menjadi {renderSortIcon('total_menjadi', currentSort)}
-                  </TableHead>
-                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_selisih', currentSort, setSort)}>
-                    Selisih {renderSortIcon('total_selisih', currentSort)}
-                  </TableHead>
-                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('new_items', currentSort, setSort)}>
-                    Item Bertambah {renderSortIcon('new_items', currentSort)}
-                  </TableHead>
-                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('changed_items', currentSort, setSort)}>
-                    Item Berubah {renderSortIcon('changed_items', currentSort)}
-                  </TableHead>
-                  <TableHead className="text-right cursor-pointer py-1 px-2" onClick={() => handleSort('total_items', currentSort, setSort)}>
-                    Jumlah Item {renderSortIcon('total_items', currentSort)}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((item, index) => (
-                  <TableRow key={index} className={`text-xs h-6 ${index % 2 === 0 ? `bg-gradient-to-r ${bgColor} bg-opacity-30` : ''}`}>
-                    <TableCell className="font-medium py-1 px-2">
-                      {getGroupValue(item, groupFieldType) || 'Tidak Terdefinisi'}
-                    </TableCell>
-                    <TableCell className="text-right py-1 px-2">
-                      {formatToThousands(item.total_semula || 0)}
-                    </TableCell>
-                    <TableCell className="text-right py-1 px-2">
-                      {formatToThousands(item.total_menjadi || 0)}
-                    </TableCell>
-                    <TableCell className={`text-right py-1 px-2 ${item.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatToThousands(item.total_selisih || 0)}
-                    </TableCell>
-                    <TableCell className="text-right py-1 px-2">
-                      {item.new_items || 0}
-                    </TableCell>
-                    <TableCell className="text-right py-1 px-2">
-                      {item.changed_items || 0}
-                    </TableCell>
-                    <TableCell className="text-right py-1 px-2">
-                      {item.total_items || 0}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                
-                <TableRow className={`bg-gradient-to-r from-${bgColor.split('-')[1]}-100 to-${bgColor.split('-')[3]}-100 font-bold text-xs h-7`}>
-                  <TableCell className="py-1 px-2">TOTAL</TableCell>
-                  <TableCell className="text-right py-1 px-2">{formatToThousands(totals.total_semula)}</TableCell>
-                  <TableCell className="text-right py-1 px-2">{formatToThousands(totals.total_menjadi)}</TableCell>
-                  <TableCell className={`text-right py-1 px-2 ${totals.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatToThousands(totals.total_selisih)}
-                  </TableCell>
-                  <TableCell className="text-right py-1 px-2">{totals.new_items}</TableCell>
-                  <TableCell className="text-right py-1 px-2">{totals.changed_items}</TableCell>
-                  <TableCell className="text-right py-1 px-2">{totals.total_items}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderAdditionalBoxes = () => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-        <Card className="shadow-sm card-gradient-blue">
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-sm">Tren Perubahan Anggaran</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3">
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span>Kenaikan Anggaran:</span>
-                <span className="font-semibold text-green-600">{
-                  formatToThousands(accountGroupData.reduce((sum, item) => 
-                    item.total_selisih > 0 ? sum + item.total_selisih : sum, 0)
-                  )
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Penurunan Anggaran:</span>
-                <span className="font-semibold text-red-600">{
-                  formatToThousands(accountGroupData.reduce((sum, item) => 
-                    item.total_selisih < 0 ? sum + Math.abs(item.total_selisih) : sum, 0)
-                  )
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Total Perubahan Signifikan:</span>
-                <span className="font-semibold text-blue-600">{
-                  accountGroupData.filter(item => Math.abs(item.total_selisih) > 1000000).length
-                }</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm card-gradient-purple">
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-sm">Status Anggaran</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3">
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span>Total Akun yang Berubah:</span>
-                <span className="font-semibold text-purple-600">{
-                  akunData.filter(item => item.total_selisih !== 0).length
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Persentase Perubahan:</span>
-                <span className="font-semibold text-blue-600">{
-                  accountGroupTotals.total_semula === 0 ? "0%" : 
-                  ((Math.abs(accountGroupTotals.total_selisih) / accountGroupTotals.total_semula) * 100).toFixed(2) + "%"
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Total Item yang Disetujui:</span>
-                <span className="font-semibold text-green-600">{
-                  akunData.reduce((sum, item) => sum + item.total_items, 0)
-                }</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm card-gradient-green">
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-sm">Analisis Perubahan</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3">
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span>Komponen dengan Perubahan Terbesar:</span>
-                <span className="font-semibold text-teal-600">{
-                  komponenData.length > 0 ? 
-                  (getGroupValue(komponenData.sort((a, b) => 
-                    Math.abs((b.total_selisih || 0)) - Math.abs((a.total_selisih || 0)))[0], 'komponen_output') || '-').substring(0, 20) + '...' : 
-                  '-'
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Akun dengan Penambahan Terbanyak:</span>
-                <span className="font-semibold text-green-600">{
-                  akunData.length > 0 ?
-                  (getGroupValue(akunData.sort((a, b) => 
-                    (b.new_items || 0) - (a.new_items || 0))[0], 'akun') || '-') :
-                  '-'
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Akun dengan Perubahan Terbanyak:</span>
-                <span className="font-semibold text-blue-600">{
-                  akunData.length > 0 ?
-                  (getGroupValue(akunData.sort((a, b) => 
-                    (b.changed_items || 0) - (a.changed_items || 0))[0], 'akun') || '-') :
-                  '-'
-                }</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm card-gradient-orange">
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-sm">Dampak Perubahan Anggaran</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3">
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span>Efisiensi Anggaran:</span>
-                <span className={`font-semibold ${accountGroupTotals.total_selisih < 0 ? 'text-green-600' : 'text-orange-600'}`}>{
-                  accountGroupTotals.total_selisih < 0 ? 
-                  formatToThousands(Math.abs(accountGroupTotals.total_selisih)) : 
-                  formatToThousands(0)
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Penambahan Anggaran:</span>
-                <span className={`font-semibold ${accountGroupTotals.total_selisih > 0 ? 'text-green-600' : 'text-orange-600'}`}>{
-                  accountGroupTotals.total_selisih > 0 ? 
-                  formatToThousands(accountGroupTotals.total_selisih) : 
-                  formatToThousands(0)
-                }</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Status Keseimbangan:</span>
-                <span className={`font-semibold ${accountGroupTotals.total_selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>{
-                  accountGroupTotals.total_selisih === 0 ? 'Seimbang' : 'Tidak Seimbang'
-                }</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  };
+  // Prepare data for pie chart
+  const pieChartData = chartData.map(item => ({
+    name: item.name,
+    value: Math.abs(item.menjadi)
+  }));
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-col-reverse sm:flex-row justify-between items-center mb-3">
-        <h2 className="text-base font-bold text-gradient-blue">Ringkasan Detail Anggaran</h2>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Ringkasan Anggaran</h2>
         <div className="flex items-center gap-2">
           <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setSummaryDialogOpen(true)}
-            className="flex items-center gap-1 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
-          >
-            <FileBarChart2 className="h-4 w-4" />
-            Lihat Perubahan Pagu
-          </Button>
-          
-          <Button 
-            variant="outline" 
+            variant={chartType === 'bar' ? "default" : "outline"} 
             size="sm" 
-            onClick={exportToExcel}
-            className="flex items-center gap-1 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100"
+            onClick={() => setChartType('bar')}
           >
-            <Download className="h-4 w-4" />
-            Lihat Detail Rekap
+            <FileBarChart2 className="h-4 w-4 mr-1" /> Bar Chart
+          </Button>
+          <Button 
+            variant={chartType === 'pie' ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setChartType('pie')}
+          >
+            <FilePieChart className="h-4 w-4 mr-1" /> Pie Chart
+          </Button>
+          <Button 
+            variant={chartType === 'table' ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setChartType('table')}
+          >
+            <FileText className="h-4 w-4 mr-1" /> Table
           </Button>
         </div>
       </div>
       
-      {renderTable(
-        'Rekap Per Kelompok Akun', 
-        sortedAccountGroupData, 
-        'account_group', 
-        accountGroupSort, 
-        setAccountGroupSort,
-        accountGroupTotals
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className={totalSemula === 0 ? "bg-gray-50" : "bg-blue-50"}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-blue-700">Total Pagu Semula</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-blue-800">{formatCurrency(totalSemula)}</p>
+          </CardContent>
+        </Card>
+        
+        <Card className={totalMenjadi === 0 ? "bg-gray-50" : "bg-green-50"}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-green-700">Total Pagu Menjadi</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-green-800">{formatCurrency(totalMenjadi)}</p>
+          </CardContent>
+        </Card>
+        
+        <Card className={totalSelisih === 0 ? "bg-gray-50" : totalSelisih > 0 ? "bg-green-50" : "bg-red-50"}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-700">Selisih</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className={`text-2xl font-bold ${totalSelisih > 0 ? 'text-green-600' : totalSelisih < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+              {formatCurrency(totalSelisih)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
       
-      {renderTable(
-        'Rekap Per Komponen Output', 
-        sortedKomponenData, 
-        'komponen_output', 
-        komponenSort, 
-        setKomponenSort,
-        komponenTotals
-      )}
-      
-      {renderTable(
-        'Rekap Per Akun', 
-        sortedAkunData, 
-        'akun', 
-        akunSort, 
-        setAkunSort,
-        akunTotals
-      )}
-      
-      {renderAdditionalBoxes()}
-      
-      <SummaryDialog
-        items={budgetItems}
-        open={summaryDialogOpen}
-        onOpenChange={setSummaryDialogOpen}
-      />
+      <Tabs defaultValue={view} onValueChange={(v) => setView(v as 'account_group' | 'komponen' | 'akun')}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="account_group">Kelompok Akun</TabsTrigger>
+          <TabsTrigger value="komponen">Komponen Output</TabsTrigger>
+          <TabsTrigger value="akun">Akun</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="account_group" className="border rounded-md p-4 shadow-sm">
+          {loading ? (
+            <p>Loading data...</p>
+          ) : (
+            <div>
+              {chartType === 'table' ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Kelompok Akun</TableHead>
+                        <TableHead className="text-right">Semula</TableHead>
+                        <TableHead className="text-right">Menjadi</TableHead>
+                        <TableHead className="text-right">Selisih</TableHead>
+                        <TableHead className="text-right">Items</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {summaryData
+                        .filter(isAccountGroupSummary)
+                        .map((record, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{record.account_group}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(record.total_semula || 0)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(record.total_menjadi || 0)}</TableCell>
+                            <TableCell className={`text-right ${(record.total_selisih || 0) > 0 ? 'text-green-600' : (record.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
+                              {formatCurrency(record.total_selisih || 0)}
+                            </TableCell>
+                            <TableCell className="text-right">{record.total_items}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : chartType === 'bar' ? (
+                <ChartContainer className="mt-4 h-96">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={chartData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                    >
+                      <XAxis 
+                        dataKey="name" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={70}
+                      />
+                      <YAxis tickFormatter={(value) => `${(value / 1000000).toFixed(0)} Jt`} />
+                      <Tooltip 
+                        formatter={(value: number) => formatCurrency(value)}
+                        labelFormatter={(label) => `Kelompok: ${label}`}
+                      />
+                      <Legend />
+                      <Bar dataKey="semula" name="Semula" fill="#8884d8" />
+                      <Bar dataKey="menjadi" name="Menjadi" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold mb-2">Distribusi Pagu Menjadi</h3>
+                  <ChartContainer className="mt-4 h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                        <Pie
+                          data={pieChartData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={150}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          label={(entry) => entry.name}
+                        >
+                          {pieChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="komponen" className="border rounded-md p-4 shadow-sm">
+          {loading ? (
+            <p>Loading data...</p>
+          ) : (
+            <div>
+              {chartType === 'table' ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Komponen Output</TableHead>
+                        <TableHead className="text-right">Semula</TableHead>
+                        <TableHead className="text-right">Menjadi</TableHead>
+                        <TableHead className="text-right">Selisih</TableHead>
+                        <TableHead className="text-right">Items</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {summaryData
+                        .filter(isKomponenSummary)
+                        .map((record, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{record.komponen_output}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(record.total_semula || 0)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(record.total_menjadi || 0)}</TableCell>
+                            <TableCell className={`text-right ${(record.total_selisih || 0) > 0 ? 'text-green-600' : (record.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
+                              {formatCurrency(record.total_selisih || 0)}
+                            </TableCell>
+                            <TableCell className="text-right">{record.total_items}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : chartType === 'bar' ? (
+                <ChartContainer className="mt-4 h-96">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={chartData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                    >
+                      <XAxis 
+                        dataKey="name" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={70}
+                      />
+                      <YAxis tickFormatter={(value) => `${(value / 1000000).toFixed(0)} Jt`} />
+                      <Tooltip 
+                        formatter={(value: number) => formatCurrency(value)}
+                        labelFormatter={(label) => `Komponen: ${label}`}
+                      />
+                      <Legend />
+                      <Bar dataKey="semula" name="Semula" fill="#8884d8" />
+                      <Bar dataKey="menjadi" name="Menjadi" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold mb-2">Distribusi Pagu Menjadi</h3>
+                  <ChartContainer className="mt-4 h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                        <Pie
+                          data={pieChartData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={150}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          label={(entry) => entry.name}
+                        >
+                          {pieChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="akun" className="border rounded-md p-4 shadow-sm">
+          {loading ? (
+            <p>Loading data...</p>
+          ) : (
+            <div>
+              {chartType === 'table' ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Akun</TableHead>
+                        <TableHead className="text-right">Semula</TableHead>
+                        <TableHead className="text-right">Menjadi</TableHead>
+                        <TableHead className="text-right">Selisih</TableHead>
+                        <TableHead className="text-right">Items</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {summaryData
+                        .filter(isAkunSummary)
+                        .map((record, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-medium">{record.akun}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(record.total_semula || 0)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(record.total_menjadi || 0)}</TableCell>
+                            <TableCell className={`text-right ${(record.total_selisih || 0) > 0 ? 'text-green-600' : (record.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
+                              {formatCurrency(record.total_selisih || 0)}
+                            </TableCell>
+                            <TableCell className="text-right">{record.total_items}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : chartType === 'bar' ? (
+                <ChartContainer className="mt-4 h-96">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={chartData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+                    >
+                      <XAxis 
+                        dataKey="name" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={70}
+                      />
+                      <YAxis tickFormatter={(value) => `${(value / 1000000).toFixed(0)} Jt`} />
+                      <Tooltip 
+                        formatter={(value: number) => formatCurrency(value)}
+                        labelFormatter={(label) => `Akun: ${label}`}
+                      />
+                      <Legend />
+                      <Bar dataKey="semula" name="Semula" fill="#8884d8" />
+                      <Bar dataKey="menjadi" name="Menjadi" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold mb-2">Distribusi Pagu Menjadi</h3>
+                  <ChartContainer className="mt-4 h-96">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                        <Pie
+                          data={pieChartData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={150}
+                          fill="#8884d8"
+                          dataKey="value"
+                          nameKey="name"
+                          label={(entry) => entry.name}
+                        >
+                          {pieChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      <Card className="border border-blue-100">
+        <CardHeader className="bg-blue-50">
+          <CardTitle className="text-blue-800 text-lg">Kesimpulan Anggaran</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4 space-y-2">
+          <p>Total Pagu anggaran <strong>semula</strong> sebesar <strong className="text-blue-600">{formatCurrency(totalSemula)}</strong> berubah menjadi <strong className="text-green-600">{formatCurrency(totalMenjadi)}</strong>, dengan selisih sebesar <strong className={totalSelisih < 0 ? "text-red-600" : "text-green-600"}>{formatCurrency(totalSelisih)}</strong>.</p>
+          
+          <p>Terdapat <strong>{summaryData.reduce((sum, item) => sum + (item.changed_items || 0), 0)}</strong> detil anggaran yang diubah dan <strong>{summaryData.reduce((sum, item) => sum + (item.new_items || 0), 0)}</strong> detil anggaran baru.</p>
+          
+          <p>Perubahan ini {totalSelisih !== 0 ? <strong className="text-red-600">menyebabkan</strong> : <strong className="text-green-600">tidak menyebabkan</strong>} perubahan pada total Pagu anggaran.</p>
+        </CardContent>
+      </Card>
     </div>
   );
 };
