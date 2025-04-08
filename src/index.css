@@ -60,7 +60,7 @@
 }
 
 .data-table th {
-  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700 text-xs;
+  @apply bg-gray-100 text-gray-700 text-xs;
 }
 
 .data-table .uraian-cell {
@@ -105,80 +105,80 @@
 
 /* Row styling for data tables */
 .row-changed {
-  @apply bg-gradient-to-r from-amber-50 to-yellow-50;
+  @apply bg-yellow-50;
 }
 
 .row-new {
-  @apply bg-gradient-to-r from-emerald-50 to-green-50;
+  @apply bg-green-50;
 }
 
 .row-deleted {
-  @apply bg-gradient-to-r from-red-50 to-rose-50;
+  @apply bg-red-50;
 }
 
-/* Add gradient text classes */
+/* Add gradient text classes with more subtle colors */
 .text-gradient-blue {
-  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text;
+  @apply bg-gradient-to-r from-blue-500 to-blue-700 text-transparent bg-clip-text;
 }
 
 .text-gradient-green {
-  @apply bg-gradient-to-r from-green-600 to-teal-600 text-transparent bg-clip-text;
+  @apply bg-gradient-to-r from-green-500 to-green-700 text-transparent bg-clip-text;
 }
 
 .text-gradient-purple {
-  @apply bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text;
+  @apply bg-gradient-to-r from-purple-500 to-purple-700 text-transparent bg-clip-text;
 }
 
-/* Add button gradient classes */
+/* Add button gradient classes with more subtle colors */
 .btn-gradient-blue {
-  @apply bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white;
+  @apply bg-blue-500 hover:bg-blue-600 text-white;
 }
 
 .btn-gradient-green {
-  @apply bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white;
+  @apply bg-green-500 hover:bg-green-600 text-white;
 }
 
 .btn-gradient-purple {
-  @apply bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white;
+  @apply bg-purple-500 hover:bg-purple-600 text-white;
 }
 
-/* Add card gradient classes */
+/* Add card gradient classes with more subtle colors */
 .card-gradient-blue {
-  @apply bg-gradient-to-br from-blue-50 to-indigo-50 border-t-4 border-t-blue-400;
+  @apply bg-blue-50 border-t-4 border-t-blue-400;
 }
 
 .card-gradient-green {
-  @apply bg-gradient-to-br from-green-50 to-teal-50 border-t-4 border-t-green-400;
+  @apply bg-green-50 border-t-4 border-t-green-400;
 }
 
 .card-gradient-purple {
-  @apply bg-gradient-to-br from-purple-50 to-pink-50 border-t-4 border-t-purple-400;
+  @apply bg-purple-50 border-t-4 border-t-purple-400;
 }
 
 .card-gradient-orange {
-  @apply bg-gradient-to-br from-orange-50 to-amber-50 border-t-4 border-t-orange-400;
+  @apply bg-orange-50 border-t-4 border-t-orange-400;
 }
 
-/* Add table styling improvements */
+/* Add table styling improvements with more subtle colors */
 .data-table tr:nth-child(even) {
-  @apply bg-gradient-to-r from-blue-50/30 to-indigo-50/30;
+  @apply bg-gray-50;
 }
 
 .data-table tr:hover {
-  @apply bg-gradient-to-r from-blue-100/50 to-indigo-100/50;
+  @apply bg-gray-100;
 }
 
 .data-table thead tr {
-  @apply bg-gradient-to-r from-blue-100 to-indigo-100;
+  @apply bg-gray-100;
 }
 
 .data-table tfoot tr {
-  @apply bg-gradient-to-r from-blue-100 to-indigo-100 font-semibold;
+  @apply bg-gray-100 font-semibold;
 }
 
 /* Add colorful alert dialog */
 .alert-dialog-gradient {
-  @apply bg-gradient-to-br from-blue-50 to-indigo-50;
+  @apply bg-gray-50;
 }
 
 /* Add enhanced button styles */
@@ -186,9 +186,9 @@
   @apply shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
 }
 
-/* Animated background for important elements */
+/* Animated background for important elements - more subtle */
 .animated-bg {
-  background: linear-gradient(-45deg, #4f46e5, #3b82f6, #8b5cf6, #6366f1);
+  background: linear-gradient(-45deg, #f0f4f8, #e6f0f9, #ecf4fd, #f8fafc);
   background-size: 400% 400%;
   animation: gradientAnimation 15s ease infinite;
 }

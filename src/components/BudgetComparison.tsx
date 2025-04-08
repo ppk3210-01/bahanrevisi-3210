@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
@@ -15,8 +14,8 @@ import ExportOptions from './ExportOptions';
 import SummaryDialog from './SummaryDialog';
 import DetailedSummaryView from './DetailedSummaryView';
 import { Button } from '@/components/ui/button';
-import { FilterSelection, BudgetSummary, BudgetItem } from '@/types/budget';
-import { generateBudgetSummary, formatCurrency } from '@/utils/budgetCalculations';
+import { FilterSelection, BudgetSummary } from '@/types/budget';
+import { generateBudgetSummary } from '@/utils/budgetCalculations';
 import useBudgetData from '@/hooks/useBudgetData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Info, HelpCircle } from 'lucide-react';
@@ -46,7 +45,6 @@ const BudgetComparison: React.FC = () => {
   const [summaryVisible, setSummaryVisible] = useState(false);
   const [currentTab, setCurrentTab] = useState('data');
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
-  const [allItemsSummary, setAllItemsSummary] = useState<BudgetSummary | null>(null);
   const isMobile = useIsMobile();
   
   const { 
@@ -58,27 +56,16 @@ const BudgetComparison: React.FC = () => {
     approveBudgetItem,
     rejectBudgetItem,
     importBudgetItems,
-    getAllBudgetItems
+    totalSemula,
+    totalMenjadi,
+    totalSelisih
   } = useBudgetData(filters);
 
-  // Effect to get filtered summary
   useEffect(() => {
     if (budgetItems) {
       setBudgetSummary(generateBudgetSummary(budgetItems));
     }
   }, [budgetItems]);
-
-  // Effect to get global summary (unfiltered)
-  useEffect(() => {
-    const fetchAllItems = async () => {
-      const allItems = await getAllBudgetItems();
-      if (allItems) {
-        setAllItemsSummary(generateBudgetSummary(allItems));
-      }
-    };
-    
-    fetchAllItems();
-  }, [getAllBudgetItems]);
 
   const areFiltersComplete = () => {
     return (
@@ -99,43 +86,14 @@ const BudgetComparison: React.FC = () => {
     setSummaryVisible(true);
   };
 
-  const handleImport = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
-    await importBudgetItems(items);
-  };
-
-  // Find the item with the most significant change (largest absolute selisih)
-  const findMostSignificantChange = (): string => {
-    if (!budgetSummary || !budgetSummary.changedItems.length) return "-";
-    
-    const mostSignificant = budgetSummary.changedItems.reduce((prev, current) => 
-      Math.abs(prev.selisih) > Math.abs(current.selisih) ? prev : current
-    );
-    
-    return mostSignificant.uraian;
-  };
-
-  const getImpactSummary = (): string => {
-    if (!allItemsSummary) return "-";
-    
-    const { totalSelisih, totalSemula } = allItemsSummary;
-    const percentageChange = totalSemula > 0 
-      ? ((totalSelisih / totalSemula) * 100).toFixed(2) 
-      : '0.00';
-    
-    const changeDirection = totalSelisih > 0 ? "meningkatkan" : totalSelisih < 0 ? "menurunkan" : "tidak mengubah";
-    
-    return `Perubahan anggaran ${changeDirection} total anggaran sebesar ${formatCurrency(Math.abs(totalSelisih))} (${percentageChange}%).`;
-  };
-
   return (
     <div className="space-y-2">
-      {allItemsSummary && (
-        <BudgetSummaryBox 
-          totalSemula={allItemsSummary.totalSemula}
-          totalMenjadi={allItemsSummary.totalMenjadi}
-          totalSelisih={allItemsSummary.totalSelisih}
-        />
-      )}
+      {/* Use the total values from useBudgetData hook directly */}
+      <BudgetSummaryBox 
+        totalSemula={totalSemula}
+        totalMenjadi={totalMenjadi}
+        totalSelisih={totalSelisih}
+      />
 
       <Card className="shadow-sm">
         <CardContent className="pt-3 pb-3">
@@ -178,18 +136,18 @@ const BudgetComparison: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xs font-medium">Import Data</h3>
+                      <h3 className="text-sm font-medium">Import Data</h3>
                       
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-6 px-2 text-xs gap-1">
+                          <Button variant="outline" size="sm" className="h-7 px-2 text-xs gap-1">
                             <HelpCircle className="h-3 w-3" />
                             Panduan Import
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="max-w-xl">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-gradient-blue">Panduan Import Excel</AlertDialogTitle>
+                            <AlertDialogTitle className="text-blue-600">Panduan Import Excel</AlertDialogTitle>
                             <AlertDialogDescription className="text-xs">
                               <div className="space-y-2">
                                 <p className="font-medium">Petunjuk cara mengimpor data menggunakan file Excel</p>
@@ -318,101 +276,30 @@ const BudgetComparison: React.FC = () => {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogAction>Tutup</AlertDialogAction>
+                            <AlertDialogAction>OK</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
                     
-                    <div className="mt-2">
-                      <ExcelImportExport 
-                        onImport={handleImport}
-                        komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
-                        subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
-                        akun={filters.akun !== 'all' ? filters.akun : undefined}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3">
-                    <h3 className="text-xs font-medium mb-2">Export Tools</h3>
-                    <ExportOptions 
-                      items={budgetItems} 
-                      komponenOutput={filters.komponenOutput} 
-                    />
+                    <ExcelImportExport onImport={importBudgetItems} items={budgetItems} />
                   </div>
                 </div>
               </div>
             </TabsContent>
             
             <TabsContent value="summary" className="mt-0">
-              <div className="space-y-2">
-                <div className="flex items-center gap-1 mb-1">
-                  <Info className="h-3.5 w-3.5 text-blue-500" />
-                  <h3 className="text-xs font-medium">Ringkasan Perubahan Pagu Anggaran</h3>
-                </div>
-                
-                {budgetSummary && (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <Card className="border border-changed-row shadow-sm bg-gradient-to-r from-amber-50 to-yellow-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Diubah</h3>
-                          <p className="text-base font-bold">{budgetSummary.changedItems.length}</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border border-new-row shadow-sm bg-gradient-to-r from-emerald-50 to-green-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Baru</h3>
-                          <p className="text-base font-bold">{budgetSummary.newItems.length}</p>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border border-deleted-row shadow-sm bg-gradient-to-r from-red-50 to-rose-50">
-                        <CardContent className="p-2">
-                          <h3 className="text-xs font-semibold text-gray-700">Detil Dihapus</h3>
-                          <p className="text-base font-bold">{budgetSummary.deletedItems.length}</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    
-                    <Card className="border shadow-sm bg-blue-50">
-                      <CardContent className="p-2 text-xs">
-                        <h3 className="font-semibold text-blue-700 mb-1">Dampak Perubahan Anggaran:</h3>
-                        <ul className="space-y-1">
-                          <li>- {getImpactSummary()}</li>
-                          <li>- Terdapat {budgetSummary.changedItems.length} item yang dimodifikasi, {budgetSummary.newItems.length} item baru, dan {budgetSummary.deletedItems.length} item yang dihapus.</li>
-                          <li>- Item yang paling signifikan berubah: {findMostSignificantChange()}</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    
-                    <Button 
-                      variant="outline" 
-                      onClick={showSummary}
-                      className="w-full md:w-auto h-7 text-xs btn-gradient-blue"
-                    >
-                      <Info className="mr-1 h-3 w-3" /> 
-                      Lihat Detail Ringkasan
-                    </Button>
-                    
-                    <div className="mt-3">
-                      <DetailedSummaryView />
-                    </div>
-                  </div>
-                )}
-              </div>
+              <DetailedSummaryView items={budgetItems} />
             </TabsContent>
           </CardContent>
         </Tabs>
       </Card>
-
+      
       {budgetSummary && (
         <SummaryDialog 
-          items={budgetSummary.changedItems.concat(budgetSummary.newItems).concat(budgetSummary.deletedItems)}
-          open={summaryVisible}
-          onOpenChange={setSummaryVisible}
+          items={budgetItems} 
+          open={summaryVisible} 
+          onOpenChange={setSummaryVisible} 
         />
       )}
     </div>
