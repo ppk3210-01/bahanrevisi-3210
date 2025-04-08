@@ -196,6 +196,7 @@ const BudgetComparison: React.FC = () => {
         items={budgetItems}
         open={showSummaryDialog}
         onOpenChange={setShowSummaryDialog}
+        summaryData={transformedSummaryData} 
       />
     </div>
   );

@@ -124,17 +124,26 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       console.log("Validation result:", result);
       
       if (result.validItems.length > 0) {
-        await onImport(result.validItems);
-        
-        if (result.validItems.length === data.length) {
+        try {
+          await onImport(result.validItems);
+          
+          if (result.validItems.length === data.length) {
+            toast({
+              title: "Berhasil",
+              description: `${result.validItems.length} item berhasil diimpor`
+            });
+          } else {
+            toast({
+              title: "Perhatian",
+              description: `${result.validItems.length} item berhasil diimpor. ${result.invalidCount} item gagal diimpor.`
+            });
+          }
+        } catch (importError) {
+          console.error('Import processing error:', importError);
           toast({
-            title: "Berhasil",
-            description: `${result.validItems.length} item berhasil diimpor`
-          });
-        } else {
-          toast({
-            title: "Perhatian",
-            description: `${result.validItems.length} item berhasil diimpor. ${result.invalidCount} item gagal diimpor.`
+            variant: "destructive",
+            title: "Error",
+            description: "Gagal memproses data. Periksa kembali format data Anda."
           });
         }
       } else {
@@ -173,7 +182,12 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           const workbook = XLSX.read(data, { type: 'binary' });
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+          // Force all cells to be read as text initially
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+            defval: "",
+            raw: false,
+            rawNumbers: false 
+          });
           console.log("Parsed Excel data:", jsonData);
           resolve(jsonData);
         } catch (error) {
@@ -250,10 +264,11 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       let hargaSatuanMenjadi: number;
       
       try {
-        volumeSemula = parseFloat(String(row['Volume Semula']).replace(/[^\d.-]/g, ''));
-        hargaSatuanSemula = parseFloat(String(row['Harga Satuan Semula']).replace(/[^\d.-]/g, ''));
-        volumeMenjadi = parseFloat(String(row['Volume Menjadi']).replace(/[^\d.-]/g, ''));
-        hargaSatuanMenjadi = parseFloat(String(row['Harga Satuan Menjadi']).replace(/[^\d.-]/g, ''));
+        // Parse numeric values, handling different formats
+        volumeSemula = parseNumericValue(row['Volume Semula']);
+        hargaSatuanSemula = parseNumericValue(row['Harga Satuan Semula']);
+        volumeMenjadi = parseNumericValue(row['Volume Menjadi']);
+        hargaSatuanMenjadi = parseNumericValue(row['Harga Satuan Menjadi']);
         
         console.log(`Parsed values for row ${index}:`, {
           volumeSemula,
@@ -313,6 +328,28 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     return { validItems, invalidCount, errorMessages };
   };
 
+  // Helper function to parse numeric values from different formats
+  const parseNumericValue = (value: any): number => {
+    if (value === null || value === undefined || value === '') {
+      return 0;
+    }
+    
+    // Convert to string first
+    const stringValue = String(value);
+    
+    // Remove any non-numeric characters except decimal point and minus sign
+    const cleanedValue = stringValue.replace(/[^\d.-]/g, '');
+    
+    // Parse to float
+    const numValue = parseFloat(cleanedValue);
+    
+    if (isNaN(numValue)) {
+      throw new Error(`Invalid numeric value: ${value}`);
+    }
+    
+    return numValue;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -351,7 +388,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
       </div>
       
       <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Panduan Import Excel</DialogTitle>
             <DialogDescription>
@@ -359,120 +396,72 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Format File</h3>
+          <div className="space-y-3 text-xs">
+            <h3 className="text-sm font-medium">Format File</h3>
             <p>File Excel (.xlsx atau .xls) harus memiliki format berikut:</p>
             
             <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-200">
+              <table className="w-full border border-gray-200 text-xs">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-200 p-2">Kolom</th>
-                    <th className="border border-gray-200 p-2">Tipe Data</th>
-                    <th className="border border-gray-200 p-2">Format</th>
-                    <th className="border border-gray-200 p-2">Contoh</th>
+                    <th className="border border-gray-200 p-1">Kolom</th>
+                    <th className="border border-gray-200 p-1">Tipe Data</th>
+                    <th className="border border-gray-200 p-1">Contoh</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-xs">
                   <tr>
-                    <td className="border border-gray-200 p-2">Program Pembebanan</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">054.01.GG</td>
+                    <td className="border border-gray-200 p-1">Program Pembebanan</td>
+                    <td className="border border-gray-200 p-1">Text</td>
+                    <td className="border border-gray-200 p-1">054.01.GG</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 p-2">Kegiatan</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">2896</td>
+                    <td className="border border-gray-200 p-1">Kegiatan</td>
+                    <td className="border border-gray-200 p-1">Text</td>
+                    <td className="border border-gray-200 p-1">2896</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 p-2">Rincian Output</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">2896.BMA</td>
+                    <td className="border border-gray-200 p-1">Komponen Output</td>
+                    <td className="border border-gray-200 p-1">Text</td>
+                    <td className="border border-gray-200 p-1">2896.BMA.004</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 p-2">Komponen Output</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">2896.BMA.004</td>
+                    <td className="border border-gray-200 p-1">Uraian</td>
+                    <td className="border border-gray-200 p-1">Text</td>
+                    <td className="border border-gray-200 p-1">Belanja Jasa</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 p-2">Sub Komponen</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">005</td>
+                    <td className="border border-gray-200 p-1">Volume</td>
+                    <td className="border border-gray-200 p-1">Number</td>
+                    <td className="border border-gray-200 p-1">1</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 p-2">Akun</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">522151</td>
+                    <td className="border border-gray-200 p-1">Satuan</td>
+                    <td className="border border-gray-200 p-1">Text</td>
+                    <td className="border border-gray-200 p-1">Paket</td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-200 p-2">Uraian</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">Belanja Jasa Profesi</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 p-2">Volume Semula</td>
-                    <td className="border border-gray-200 p-2">Number</td>
-                    <td className="border border-gray-200 p-2">General atau Number</td>
-                    <td className="border border-gray-200 p-2">1</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 p-2">Satuan Semula</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">Paket</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 p-2">Harga Satuan Semula</td>
-                    <td className="border border-gray-200 p-2">Number</td>
-                    <td className="border border-gray-200 p-2">General, Number atau Currency</td>
-                    <td className="border border-gray-200 p-2">1000000</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 p-2">Volume Menjadi</td>
-                    <td className="border border-gray-200 p-2">Number</td>
-                    <td className="border border-gray-200 p-2">General atau Number</td>
-                    <td className="border border-gray-200 p-2">1</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 p-2">Satuan Menjadi</td>
-                    <td className="border border-gray-200 p-2">Text</td>
-                    <td className="border border-gray-200 p-2">-</td>
-                    <td className="border border-gray-200 p-2">Paket</td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-200 p-2">Harga Satuan Menjadi</td>
-                    <td className="border border-gray-200 p-2">Number</td>
-                    <td className="border border-gray-200 p-2">General, Number atau Currency</td>
-                    <td className="border border-gray-200 p-2">1200000</td>
+                    <td className="border border-gray-200 p-1">Harga Satuan</td>
+                    <td className="border border-gray-200 p-1">Number</td>
+                    <td className="border border-gray-200 p-1">1000000</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             
-            <h3 className="text-lg font-medium">Petunjuk Import</h3>
-            <ol className="list-decimal list-inside space-y-2">
-              <li>Unduh template dengan klik tombol <strong>Download Template</strong>.</li>
-              <li>Buka file template dengan Microsoft Excel atau aplikasi spreadsheet lainnya.</li>
-              <li>Isikan data sesuai format yang telah ditentukan. Pastikan semua kolom terisi dengan benar.</li>
-              <li>Simpan file Excel setelah selesai mengisi data.</li>
-              <li>Klik tombol <strong>Import Excel</strong> dan pilih file yang telah diisi.</li>
-              <li>Tunggu hingga proses import selesai.</li>
+            <h3 className="text-sm font-medium">Petunjuk Import</h3>
+            <ol className="list-decimal list-inside space-y-1 text-xs">
+              <li>Unduh template dengan klik tombol Download Template</li>
+              <li>Isi data sesuai format yang ditentukan</li>
+              <li>Klik tombol Import Excel dan pilih file</li>
+              <li>Tunggu hingga proses import selesai</li>
             </ol>
             
-            <h3 className="text-lg font-medium">Tips Import</h3>
-            <ul className="list-disc list-inside space-y-2">
-              <li>Pastikan format kolom numerik sudah benar (Volume dan Harga Satuan).</li>
-              <li>Jangan mengubah nama kolom pada baris pertama.</li>
-              <li>Pastikan tidak ada sel yang kosong pada baris data.</li>
-              <li>Jika menggunakan template dari aplikasi ini, format kolom sudah diatur dengan benar.</li>
-              <li>Pastikan nilai numerik tidak menggunakan tanda pemisah ribuan seperti titik atau koma.</li>
+            <h3 className="text-sm font-medium">Tips Import</h3>
+            <ul className="list-disc list-inside space-y-1 text-xs">
+              <li>Pastikan format kolom numerik sudah benar</li>
+              <li>Jangan mengubah nama kolom pada baris pertama</li>
+              <li>Pastikan tidak ada sel yang kosong pada baris data</li>
             </ul>
           </div>
         </DialogContent>

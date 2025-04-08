@@ -58,7 +58,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   view, 
   setView 
 }) => {
-  const [chartType, setChartType] = useState<'bar' | 'pie' | 'table'>('bar');
+  const [chartType, setChartType] = useState<'bar' | 'pie' | 'table'>('table'); // Changed default to table
 
   // Total calculations
   const totalSemula = summaryData.reduce((sum, item) => sum + (item.total_semula || 0), 0);
@@ -163,10 +163,12 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                     <TableHeader>
                       <TableRow>
                         <TableHead>Kelompok Akun</TableHead>
-                        <TableHead className="text-right">Semula</TableHead>
-                        <TableHead className="text-right">Menjadi</TableHead>
+                        <TableHead className="text-right">Pagu Semula</TableHead>
+                        <TableHead className="text-right">Pagu Menjadi</TableHead>
                         <TableHead className="text-right">Selisih</TableHead>
-                        <TableHead className="text-right">Items</TableHead>
+                        <TableHead className="text-right">Item Bertambah</TableHead>
+                        <TableHead className="text-right">Item Berubah</TableHead>
+                        <TableHead className="text-right">Jumlah Item</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -180,7 +182,9 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                             <TableCell className={`text-right ${(record.total_selisih || 0) > 0 ? 'text-green-600' : (record.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
                               {formatCurrency(record.total_selisih || 0)}
                             </TableCell>
-                            <TableCell className="text-right">{record.total_items}</TableCell>
+                            <TableCell className="text-right">{record.new_items || 0}</TableCell>
+                            <TableCell className="text-right">{record.changed_items || 0}</TableCell>
+                            <TableCell className="text-right">{record.total_items || 0}</TableCell>
                           </TableRow>
                         ))}
                     </TableBody>
@@ -253,10 +257,12 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                     <TableHeader>
                       <TableRow>
                         <TableHead>Komponen Output</TableHead>
-                        <TableHead className="text-right">Semula</TableHead>
-                        <TableHead className="text-right">Menjadi</TableHead>
+                        <TableHead className="text-right">Pagu Semula</TableHead>
+                        <TableHead className="text-right">Pagu Menjadi</TableHead>
                         <TableHead className="text-right">Selisih</TableHead>
-                        <TableHead className="text-right">Items</TableHead>
+                        <TableHead className="text-right">Item Bertambah</TableHead>
+                        <TableHead className="text-right">Item Berubah</TableHead>
+                        <TableHead className="text-right">Jumlah Item</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -270,7 +276,9 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                             <TableCell className={`text-right ${(record.total_selisih || 0) > 0 ? 'text-green-600' : (record.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
                               {formatCurrency(record.total_selisih || 0)}
                             </TableCell>
-                            <TableCell className="text-right">{record.total_items}</TableCell>
+                            <TableCell className="text-right">{record.new_items || 0}</TableCell>
+                            <TableCell className="text-right">{record.changed_items || 0}</TableCell>
+                            <TableCell className="text-right">{record.total_items || 0}</TableCell>
                           </TableRow>
                         ))}
                     </TableBody>
@@ -343,10 +351,12 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                     <TableHeader>
                       <TableRow>
                         <TableHead>Akun</TableHead>
-                        <TableHead className="text-right">Semula</TableHead>
-                        <TableHead className="text-right">Menjadi</TableHead>
+                        <TableHead className="text-right">Pagu Semula</TableHead>
+                        <TableHead className="text-right">Pagu Menjadi</TableHead>
                         <TableHead className="text-right">Selisih</TableHead>
-                        <TableHead className="text-right">Items</TableHead>
+                        <TableHead className="text-right">Item Bertambah</TableHead>
+                        <TableHead className="text-right">Item Berubah</TableHead>
+                        <TableHead className="text-right">Jumlah Item</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -360,7 +370,9 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                             <TableCell className={`text-right ${(record.total_selisih || 0) > 0 ? 'text-green-600' : (record.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
                               {formatCurrency(record.total_selisih || 0)}
                             </TableCell>
-                            <TableCell className="text-right">{record.total_items}</TableCell>
+                            <TableCell className="text-right">{record.new_items || 0}</TableCell>
+                            <TableCell className="text-right">{record.changed_items || 0}</TableCell>
+                            <TableCell className="text-right">{record.total_items || 0}</TableCell>
                           </TableRow>
                         ))}
                     </TableBody>
