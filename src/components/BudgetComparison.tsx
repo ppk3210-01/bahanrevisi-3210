@@ -34,7 +34,7 @@ const BudgetComparison = () => {
   const [selectedKomponenOutput, setSelectedKomponenOutput] = useState<string>('all');
   const [selectedSubKomponen, setSelectedSubKomponen] = useState<string>('all');
   const [selectedAkun, setSelectedAkun] = useState<string>('all');
-  const [importData, setImportData] = useState<Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'isApproved'>[]>([]);
+  const [importData, setImportData] = useState<Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'isApproved' | 'createdBy' | 'updatedBy'>[]>([]);
   const [showImportDialog, setShowImportDialog] = useState<boolean>(false);
   const [showSummaryDialog, setShowSummaryDialog] = useState<boolean>(false);
   
@@ -299,8 +299,8 @@ const BudgetComparison = () => {
           komponenOutput={selectedKomponenOutput}
           subKomponen={selectedSubKomponen}
           akun={selectedAkun}
-          onAdd={handleAddBudgetItem}
-          onUpdate={handleUpdateBudgetItem}
+          onAdd={async (item) => { await handleAddBudgetItem(item); }}
+          onUpdate={async (id, changes) => { await handleUpdateBudgetItem(id, changes); }}
           onDelete={handleDeleteBudgetItem}
           onApprove={handleApproveBudgetItem}
           onReject={handleRejectBudgetItem}

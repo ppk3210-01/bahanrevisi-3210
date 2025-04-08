@@ -137,7 +137,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   }, []);
 
-  const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>) => {
+  const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>): Promise<void> => {
     try {
       const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
       const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
@@ -202,7 +202,6 @@ const useBudgetData = (filters: FilterSelection) => {
         };
 
         setBudgetItems(prev => [...prev, savedItem]);
-        return savedItem;
       }
     } catch (err) {
       console.error('Error adding budget item:', err);
@@ -215,7 +214,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
-  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'isApproved'>[]) => {
+  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status' | 'isApproved' | 'createdBy' | 'updatedBy'>[]): Promise<void> => {
     try {
       setLoading(true);
       
@@ -300,7 +299,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
-  const updateBudgetItem = async (id: string, updates: Partial<BudgetItem>) => {
+  const updateBudgetItem = async (id: string, updates: Partial<BudgetItem>): Promise<void> => {
     try {
       const currentItem = budgetItems.find(item => item.id === id);
       if (!currentItem) {
@@ -376,8 +375,6 @@ const useBudgetData = (filters: FilterSelection) => {
           return item;
         })
       );
-      
-      return updatedItem;
     } catch (err) {
       console.error('Error updating budget item:', err);
       toast({
@@ -389,7 +386,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
-  const deleteBudgetItem = async (id: string) => {
+  const deleteBudgetItem = async (id: string): Promise<void> => {
     try {
       const { error: supabaseError } = await supabase
         .from('budget_items')
@@ -412,7 +409,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
-  const approveBudgetItem = async (id: string) => {
+  const approveBudgetItem = async (id: string): Promise<void> => {
     try {
       const item = budgetItems.find(item => item.id === id);
       if (!item) {
@@ -464,7 +461,7 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
-  const rejectBudgetItem = async (id: string) => {
+  const rejectBudgetItem = async (id: string): Promise<void> => {
     try {
       const item = budgetItems.find(item => item.id === id);
       if (!item) {

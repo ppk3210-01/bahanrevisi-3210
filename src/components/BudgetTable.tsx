@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Edit, Trash2, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -70,26 +71,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       rincianOutput: '',
       subKomponen: subKomponen,
       akun: akun,
-      isApproved: false
+      isApproved: false,
+      createdBy: user?.id || '',
+      updatedBy: user?.id || '',
     };
     
     await onAdd(newItem);
-  };
-  
-  const handleUpdateItem = async (id: string, changes: Partial<BudgetItem>) => {
-    await onUpdate(id, changes);
-  };
-  
-  const handleDeleteItem = async (id: string) => {
-    await onDelete(id);
-  };
-  
-  const handleApproveItem = async (id: string) => {
-    await onApprove(id);
-  };
-  
-  const handleRejectItem = async (id: string) => {
-    await onReject(id);
   };
   
   const formatPembebananCode = (item: BudgetItem) => {
@@ -156,7 +143,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleApproveItem(item.id)}
+                        onClick={() => onApprove(item.id)}
                       >
                         <CheckCircle className="h-4 w-4 text-green-500" />
                       </Button>
@@ -166,7 +153,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleRejectItem(item.id)}
+                        onClick={() => onReject(item.id)}
                       >
                         <XCircle className="h-4 w-4 text-orange-500" />
                       </Button>
@@ -176,7 +163,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleDeleteItem(item.id)}
+                        onClick={() => onDelete(item.id)}
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
@@ -202,7 +189,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         open={detailDialogOpen}
         onOpenChange={handleCloseDetailDialog}
         item={selectedItem}
-        onUpdate={handleUpdateItem}
+        onUpdate={onUpdate}
         canEditUraian={canEditUraian(selectedItem?.createdBy === user?.id)}
         canEditItems={canEditItems({
           programPembebanan: selectedItem?.programPembebanan || 'all',
