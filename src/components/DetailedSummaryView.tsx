@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,8 +13,8 @@ import { FileBarChart2, FilePieChart, FileText } from 'lucide-react';
 interface DetailedSummaryViewProps {
   summaryData: BudgetSummaryRecord[];
   loading: boolean;
-  view: 'account_group' | 'komponen' | 'akun';
-  setView: (view: 'account_group' | 'komponen' | 'akun') => void;
+  view: 'account_group' | 'komponen_output' | 'akun';
+  setView: (view: 'account_group' | 'komponen_output' | 'akun') => void;
 }
 
 // Type guard functions for each budget summary type
@@ -144,10 +145,10 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
         </Card>
       </div>
       
-      <Tabs defaultValue={view} onValueChange={(v) => setView(v as 'account_group' | 'komponen' | 'akun')}>
+      <Tabs defaultValue={view} onValueChange={(v) => setView(v as 'account_group' | 'komponen_output' | 'akun')}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="account_group">Kelompok Akun</TabsTrigger>
-          <TabsTrigger value="komponen">Komponen Output</TabsTrigger>
+          <TabsTrigger value="komponen_output">Komponen Output</TabsTrigger>
           <TabsTrigger value="akun">Akun</TabsTrigger>
         </TabsList>
         
@@ -241,7 +242,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           )}
         </TabsContent>
         
-        <TabsContent value="komponen" className="border rounded-md p-4 shadow-sm">
+        <TabsContent value="komponen_output" className="border rounded-md p-4 shadow-sm">
           {loading ? (
             <p>Loading data...</p>
           ) : (
