@@ -9,46 +9,242 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      akun: {
+        Row: {
+          created_at: string | null
+          id: string
+          nama: string
+          urutan: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nama: string
+          urutan: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nama?: string
+          urutan?: number
+        }
+        Relationships: []
+      }
+      budget_items: {
+        Row: {
+          akun: string | null
+          created_at: string | null
+          harga_satuan_menjadi: number
+          harga_satuan_semula: number
+          id: string
+          is_approved: boolean
+          jumlah_menjadi: number | null
+          jumlah_semula: number | null
+          kegiatan: string | null
+          komponen_output: string
+          program_pembebanan: string | null
+          rincian_output: string | null
+          satuan_menjadi: string
+          satuan_semula: string
+          selisih: number | null
+          status: string
+          sub_komponen: string | null
+          updated_at: string | null
+          uraian: string
+          volume_menjadi: number
+          volume_semula: number
+        }
+        Insert: {
+          akun?: string | null
+          created_at?: string | null
+          harga_satuan_menjadi: number
+          harga_satuan_semula: number
+          id?: string
+          is_approved?: boolean
+          jumlah_menjadi?: number | null
+          jumlah_semula?: number | null
+          kegiatan?: string | null
+          komponen_output: string
+          program_pembebanan?: string | null
+          rincian_output?: string | null
+          satuan_menjadi: string
+          satuan_semula: string
+          selisih?: number | null
+          status?: string
+          sub_komponen?: string | null
+          updated_at?: string | null
+          uraian: string
+          volume_menjadi: number
+          volume_semula: number
+        }
+        Update: {
+          akun?: string | null
+          created_at?: string | null
+          harga_satuan_menjadi?: number
+          harga_satuan_semula?: number
+          id?: string
+          is_approved?: boolean
+          jumlah_menjadi?: number | null
+          jumlah_semula?: number | null
+          kegiatan?: string | null
+          komponen_output?: string
+          program_pembebanan?: string | null
+          rincian_output?: string | null
+          satuan_menjadi?: string
+          satuan_semula?: string
+          selisih?: number | null
+          status?: string
+          sub_komponen?: string | null
+          updated_at?: string | null
+          uraian?: string
+          volume_menjadi?: number
+          volume_semula?: number
+        }
+        Relationships: []
+      }
+      komponen_output: {
+        Row: {
+          created_at: string | null
+          id: string
+          nama: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nama: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nama?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          role?: string
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      sub_komponen: {
+        Row: {
+          created_at: string | null
+          id: string
+          nama: string
+          program_pembebanan: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nama: string
+          program_pembebanan: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nama?: string
+          program_pembebanan?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      budget_summary_by_account_group: {
+        Row: {
+          account_group: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_akun: {
+        Row: {
+          akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_komponen: {
+        Row: {
+          changed_items: number | null
+          komponen_output: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_budget_summary_by_account_group: {
         Args: Record<PropertyKey, never>
         Returns: {
-          account_group: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          account_group: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_akun: {
         Args: Record<PropertyKey, never>
         Returns: {
-          akun: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_komponen: {
         Args: Record<PropertyKey, never>
         Returns: {
-          komponen_output: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          changed_items: number | null
+          komponen_output: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_current_user_profile: {
