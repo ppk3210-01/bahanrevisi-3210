@@ -44,7 +44,20 @@ const UserManagement: React.FC = () => {
       setIsLoading(true);
       
       const localUsers = localStorage.getItem('app.users');
-      let usersList: LocalUserProfile[] = localUsers ? JSON.parse(localUsers) : [];
+      let parsedLocalUsers: any[] = localUsers ? JSON.parse(localUsers) : [];
+      
+      // Convert local storage users to valid LocalUserProfile objects
+      const validLocalUsers: LocalUserProfile[] = parsedLocalUsers.map(user => ({
+        id: user.id,
+        username: user.username,
+        role: (user.role === 'admin' || user.role === 'user') ? user.role as UserRole : 'user',
+        avatar_url: user.avatar_url,
+        full_name: user.full_name,
+        created_at: user.created_at,
+        updated_at: user.updated_at
+      }));
+      
+      let usersList: LocalUserProfile[] = validLocalUsers;
       
       try {
         const { data, error } = await supabase.from('profiles').select('*');
@@ -99,9 +112,9 @@ const UserManagement: React.FC = () => {
     }
   }, [isAdmin]);
 
-  const handleToggleRole = async (userId: string, currentRole: 'admin' | 'user') => {
+  const handleToggleRole = async (userId: string, currentRole: UserRole) => {
     try {
-      const newRole = currentRole === 'admin' ? 'user' : 'admin';
+      const newRole: UserRole = currentRole === 'admin' ? 'user' : 'admin';
       
       const updatedUsers = users.map(user => 
         user.id === userId ? { ...user, role: newRole } : user
