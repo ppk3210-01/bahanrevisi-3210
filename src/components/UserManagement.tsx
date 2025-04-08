@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
@@ -90,6 +91,12 @@ const UserManagement: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
 
   const handleToggleRole = async (userId: string, currentRole: 'admin' | 'user') => {
     try {
