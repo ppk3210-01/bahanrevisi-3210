@@ -24,7 +24,12 @@ interface LocalUserProfile {
   updated_at: string;
 }
 
-const UserManagement: React.FC = () => {
+// Add buttonClassName to props
+interface UserManagementProps {
+  buttonClassName?: string;
+}
+
+const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
   const { isAdmin } = useAuth();
   const [users, setUsers] = useState<LocalUserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -303,7 +308,7 @@ const UserManagement: React.FC = () => {
     <>
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" size="sm">Manage Users</Button>
+          <Button variant="outline" size="sm" className={buttonClassName}>Manage Users</Button>
         </SheetTrigger>
         <SheetContent className="w-full sm:w-3/4 md:w-2/3 lg:max-w-2xl">
           <SheetHeader>

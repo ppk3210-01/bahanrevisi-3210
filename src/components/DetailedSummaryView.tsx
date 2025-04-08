@@ -15,6 +15,7 @@ interface DetailedSummaryViewProps {
   loading: boolean;
   view: 'account_group' | 'komponen_output' | 'akun';
   setView: (view: 'account_group' | 'komponen_output' | 'akun') => void;
+  defaultView?: 'bar' | 'pie' | 'table';
 }
 
 // Type guard functions for each budget summary type
@@ -56,9 +57,10 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   summaryData, 
   loading, 
   view, 
-  setView 
+  setView,
+  defaultView = 'table'  // Added defaultView prop with default value 'table'
 }) => {
-  const [chartType, setChartType] = useState<'bar' | 'pie' | 'table'>('table'); // Changed default to table
+  const [chartType, setChartType] = useState<'bar' | 'pie' | 'table'>(defaultView as 'bar' | 'pie' | 'table');
 
   // Total calculations
   const totalSemula = summaryData.reduce((sum, item) => sum + (item.total_semula || 0), 0);
