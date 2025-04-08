@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,8 +54,8 @@ const useBudgetData = (filters: FilterSelection) => {
           const transformedData: BudgetItem[] = data.map((item: any) => {
             const jumlahSemula = Number(item.jumlah_semula || 0);
             const jumlahMenjadi = Number(item.jumlah_menjadi || 0);
-            // Calculate selisih as Jumlah Menjadi - Jumlah Semula
-            const calculatedSelisih = jumlahMenjadi - jumlahSemula;
+            // Calculate selisih as Jumlah Semula - Jumlah Menjadi
+            const calculatedSelisih = jumlahSemula - jumlahMenjadi;
             
             return {
               id: item.id,
@@ -67,7 +68,7 @@ const useBudgetData = (filters: FilterSelection) => {
               satuanMenjadi: item.satuan_menjadi,
               hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
               jumlahMenjadi: roundToThousands(jumlahMenjadi),
-              selisih: roundToThousands(calculatedSelisih), // Use the corrected selisih calculation
+              selisih: roundToThousands(calculatedSelisih), // Use the calculated selisih
               status: item.status as "unchanged" | "changed" | "new" | "deleted",
               isApproved: item.is_approved,
               komponenOutput: item.komponen_output,
@@ -91,57 +92,6 @@ const useBudgetData = (filters: FilterSelection) => {
 
     fetchData();
   }, [filters]);
-
-  // Function to fetch all budget items regardless of filters
-  const getAllBudgetItems = useCallback(async (): Promise<BudgetItem[]> => {
-    try {
-      const { data, error: supabaseError } = await supabase
-        .from('budget_items')
-        .select('*');
-      
-      if (supabaseError) {
-        throw supabaseError;
-      }
-
-      if (data) {
-        // Transform data from Supabase format to our BudgetItem format
-        const transformedData: BudgetItem[] = data.map((item: any) => {
-          const jumlahSemula = Number(item.jumlah_semula || 0);
-          const jumlahMenjadi = Number(item.jumlah_menjadi || 0);
-          // Calculate selisih as Jumlah Menjadi - Jumlah Semula
-          const calculatedSelisih = jumlahMenjadi - jumlahSemula;
-          
-          return {
-            id: item.id,
-            uraian: item.uraian,
-            volumeSemula: Number(item.volume_semula),
-            satuanSemula: item.satuan_semula,
-            hargaSatuanSemula: Number(item.harga_satuan_semula),
-            jumlahSemula: roundToThousands(jumlahSemula),
-            volumeMenjadi: Number(item.volume_menjadi),
-            satuanMenjadi: item.satuan_menjadi,
-            hargaSatuanMenjadi: Number(item.harga_satuan_menjadi),
-            jumlahMenjadi: roundToThousands(jumlahMenjadi),
-            selisih: roundToThousands(calculatedSelisih), // Use the corrected selisih calculation
-            status: item.status as "unchanged" | "changed" | "new" | "deleted",
-            isApproved: item.is_approved,
-            komponenOutput: item.komponen_output,
-            programPembebanan: item.program_pembebanan || '',
-            kegiatan: item.kegiatan || '',
-            rincianOutput: item.rincian_output || '',
-            subKomponen: item.sub_komponen || '',
-            akun: item.akun || ''
-          };
-        });
-
-        return transformedData;
-      }
-      return [];
-    } catch (err) {
-      console.error('Error fetching all budget data:', err);
-      return [];
-    }
-  }, []);
 
   // Add a new budget item
   const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>) => {
@@ -559,8 +509,7 @@ const useBudgetData = (filters: FilterSelection) => {
     deleteBudgetItem,
     approveBudgetItem,
     rejectBudgetItem,
-    importBudgetItems,
-    getAllBudgetItems
+    importBudgetItems
   };
 };
 
