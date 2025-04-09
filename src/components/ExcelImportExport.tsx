@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
@@ -34,6 +34,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isGuideDialogOpen, setIsGuideDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const buttonClass = smallText 
     ? "text-xs px-2 py-1 h-8" 
@@ -113,6 +114,13 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     XLSX.writeFile(wb, "Budget_Import_Template.xlsx");
   };
 
+  // Trigger file input click when the import button is clicked
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -168,7 +176,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
             variant: "destructive",
           });
           setIsImporting(false);
-          event.target.value = '';
+          if (event.target) event.target.value = '';
           return;
         }
         
@@ -207,7 +215,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
             variant: "destructive",
           });
           setIsImporting(false);
-          event.target.value = '';
+          if (event.target) event.target.value = '';
           return;
         }
         
@@ -254,7 +262,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
             variant: "destructive",
           });
           setIsImporting(false);
-          event.target.value = '';
+          if (event.target) event.target.value = '';
           return;
         }
         
@@ -265,7 +273,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
               description: `Berhasil mengimport ${dataRows.length} item anggaran.`,
             });
             setIsImporting(false);
-            event.target.value = '';
+            if (event.target) event.target.value = '';
           })
           .catch((error) => {
             console.error("Import error:", error);
@@ -275,7 +283,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
               variant: "destructive",
             });
             setIsImporting(false);
-            event.target.value = '';
+            if (event.target) event.target.value = '';
           });
       } catch (error) {
         console.error('Error importing Excel file:', error);
@@ -285,7 +293,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           variant: "destructive",
         });
         setIsImporting(false);
-        event.target.value = '';
+        if (event.target) event.target.value = '';
       }
     };
     
@@ -297,7 +305,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         variant: "destructive",
       });
       setIsImporting(false);
-      event.target.value = '';
+      if (event.target) event.target.value = '';
     };
     
     reader.readAsArrayBuffer(file);
@@ -316,24 +324,24 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           <span>Download Template</span>
         </Button>
         
-        <label htmlFor="excel-import">
-          <Button 
-            variant="outline" 
-            className={`flex items-center cursor-pointer ${buttonClass}`}
-            size={smallText ? "sm" : undefined}
-          >
-            <Upload className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
-            <span>Import Excel</span>
-          </Button>
-          <input
-            id="excel-import"
-            type="file"
-            accept=".xlsx, .xls"
-            onChange={handleImport}
-            className="sr-only"
-            disabled={isImporting}
-          />
-        </label>
+        <Button 
+          variant="outline" 
+          className={`flex items-center cursor-pointer ${buttonClass}`}
+          size={smallText ? "sm" : undefined}
+          onClick={triggerFileInput}
+          disabled={isImporting}
+        >
+          <Upload className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
+          <span>Import Excel</span>
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={handleImport}
+          className="hidden"
+          disabled={isImporting}
+        />
         
         <Button
           variant="ghost"
