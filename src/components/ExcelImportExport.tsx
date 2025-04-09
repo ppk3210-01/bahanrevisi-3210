@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -167,14 +166,14 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           uraian: ["uraian", "keterangan", "item", "description"],
           volumeSemula: ["volumesemula", "volume semula", "volume awal", "jumlah semula", "volume1"],
           satuanSemula: ["satuansemula", "satuan semula", "satuan awal", "unit semula", "satuan1"],
-          hargaSatuanSemula: ["hargasatuansemula", "harga satuan semula", "harga awal", "price semula", "hargasatuan1"],
+          hargaSatuanSemula: ["hargasatuansemula", "harga satuan semula", "harga semula", "harga awal", "price semula", "hargasatuan1", "hargasemula"],
           volumeMenjadi: ["volumemenjadi", "volume menjadi", "volume akhir", "jumlah menjadi", "volume2"],
           satuanMenjadi: ["satuanmenjadi", "satuan menjadi", "satuan akhir", "unit menjadi", "satuan2"],
-          hargaSatuanMenjadi: ["hargasatuanmenjadi", "harga satuan menjadi", "harga akhir", "price menjadi", "hargasatuan2"],
+          hargaSatuanMenjadi: ["hargasatuanmenjadi", "harga satuan menjadi", "harga menjadi", "harga akhir", "price menjadi", "hargasatuan2", "hargamenjadi"],
           programPembebanan: ["programpembebanan", "program pembebanan", "program"],
           kegiatan: ["kegiatan", "activity"],
           rincianOutput: ["rincianoutput", "rincian output", "output", "detail output"],
-          komponenOutput: ["komponenoutput", "komponen output", "component"],
+          komponenOutput: ["komponenoutput", "komponen output", "component", "komponen"],
           subKomponen: ["subkomponen", "sub komponen", "subcomponent", "subcomp"],
           akun: ["akun", "account"]
         };
@@ -243,12 +242,19 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           let matched = false;
           
           for (const [key, variations] of Object.entries(expectedColumns)) {
-            if (variations.some(v => normalizedHeader.includes(normalizeColumnName(v)))) {
-              columnIndices[key] = index;
-              matched = true;
-              console.log(`Matched column "${header}" at index ${index} to "${key}"`);
-              break;
+            // Perbaikan: Gunakan metode contains/includes untuk menangani variasi nama kolom
+            for (const variation of variations) {
+              const normalizedVariation = normalizeColumnName(variation);
+              // Check for exact match first, then fallback to include
+              if (normalizedHeader === normalizedVariation || 
+                  normalizedHeader.includes(normalizedVariation)) {
+                columnIndices[key] = index;
+                matched = true;
+                console.log(`Matched column "${header}" at index ${index} to "${key}"`);
+                break;
+              }
             }
+            if (matched) break;
           }
           
           if (!matched) {
@@ -266,7 +272,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         });
         
         if (missingRequiredColumns.length > 0) {
-          const friendlyNames = {
+          const friendlyNames: Record<string, string> = {
             uraian: "Uraian",
             volumeSemula: "Volume Semula", 
             satuanSemula: "Satuan Semula",
@@ -277,7 +283,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           };
           
           const missingColumnsDisplay = missingRequiredColumns
-            .map(col => friendlyNames[col as keyof typeof friendlyNames])
+            .map(col => friendlyNames[col])
             .join(', ');
           
           toast({
