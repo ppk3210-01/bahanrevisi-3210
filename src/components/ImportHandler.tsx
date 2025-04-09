@@ -18,13 +18,14 @@ interface ImportHandlerProps {
   onComplete: () => void;
 }
 
-const ImportHandler: React.FC<ImportHandlerProps> = ({
+// Changed from FC to hook function
+export const useImportHandler = ({
   onImport,
   komponenOutput,
   subKomponen,
   akun,
   onComplete
-}) => {
+}: ImportHandlerProps) => {
   const handleImportFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -137,5 +138,3 @@ const ImportHandler: React.FC<ImportHandlerProps> = ({
 
   return { handleImportFile };
 };
-
-export default ImportHandler;

@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { createTemplateWorkbook } from '@/utils/excelUtils';
-import ImportHandler from './ImportHandler';
+import { useImportHandler } from './ImportHandler';
 
 interface ExcelImportExportProps {
   items: BudgetItem[];
@@ -39,7 +39,9 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const buttonClass = smallText ? "text-xs px-2 py-1 h-8" : "";
-  const { handleImportFile } = ImportHandler({
+  
+  // Now using the hook instead of the component
+  const { handleImportFile } = useImportHandler({
     onImport,
     komponenOutput,
     subKomponen,
