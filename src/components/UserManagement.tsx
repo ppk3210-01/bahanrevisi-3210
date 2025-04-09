@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
@@ -206,9 +207,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
       };
       
       const timestamp = new Date().toISOString();
+      const userId = generateUUID();
       
       const newUserProfile: LocalUserProfile = {
-        id: generateUUID(),
+        id: userId,
         username: newUser.username,
         role: newUser.role,
         avatar_url: null,
@@ -230,6 +232,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
       localStorage.setItem('app.credentials', JSON.stringify(credentials));
       
       try {
+        // First attempt to sign up the user with Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: newUser.email,
           password: newUser.password,
@@ -243,12 +246,15 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
         
         if (authError) {
           console.error('Supabase auth error creating user:', authError);
+          // Continue with local storage only if Supabase auth fails
         } else if (authData.user) {
+          // Use the user ID from Supabase Auth
           newUserProfile.id = authData.user.id;
           
+          // Manually create the profile since the trigger might not work in some environments
           const { error: profileError } = await supabase
             .from('profiles')
-            .upsert({
+            .insert({
               id: authData.user.id,
               username: newUser.username,
               role: newUser.role,
@@ -289,12 +295,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (isAdmin) {
-      fetchUsers();
-    }
-  }, [isAdmin]);
 
   if (!isAdmin) return null;
 

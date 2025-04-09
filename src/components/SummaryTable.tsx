@@ -84,34 +84,41 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     let data = [...summaryData];
     
     if (view === 'account_group') {
-      // Group by first 2 digits of account_group - specifically 51, 52, and 53
-      const group51Items = data.filter(item => 
-        item.type === 'account_group' && 'account_group' in item && 
-        item.account_group?.toString().substring(0, 2) === '51'
-      );
+      // Convert account_group values to prefixes for proper grouping
+      const groupedData: Map<string, BudgetSummaryRecord> = new Map();
       
-      const group52Items = data.filter(item => 
-        item.type === 'account_group' && 'account_group' in item && 
-        item.account_group?.toString().substring(0, 2) === '52'
-      );
+      data.forEach(item => {
+        if (item.type === 'account_group' && 'account_group' in item && item.account_group) {
+          // Extract the first two digits for grouping
+          const accountGroupStr = item.account_group.toString();
+          if (accountGroupStr.length >= 2) {
+            const prefix = accountGroupStr.substring(0, 2);
+            
+            if (groupedData.has(prefix)) {
+              // Add to existing group
+              const existingItem = groupedData.get(prefix)!;
+              existingItem.total_semula = (existingItem.total_semula || 0) + (item.total_semula || 0);
+              existingItem.total_menjadi = (existingItem.total_menjadi || 0) + (item.total_menjadi || 0);
+              existingItem.total_selisih = (existingItem.total_selisih || 0) + (item.total_selisih || 0);
+              existingItem.new_items = (existingItem.new_items || 0) + (item.new_items || 0);
+              existingItem.changed_items = (existingItem.changed_items || 0) + (item.changed_items || 0);
+              existingItem.total_items = (existingItem.total_items || 0) + (item.total_items || 0);
+            } else {
+              // Create new group
+              groupedData.set(prefix, {
+                ...item,
+                account_group: prefix,
+                type: 'account_group'
+              });
+            }
+          } else {
+            // Handle items with short account group codes
+            groupedData.set(accountGroupStr, item);
+          }
+        }
+      });
       
-      const group53Items = data.filter(item => 
-        item.type === 'account_group' && 'account_group' in item && 
-        item.account_group?.toString().substring(0, 2) === '53'
-      );
-      
-      const otherItems = data.filter(item => 
-        item.type !== 'account_group' || 
-        !('account_group' in item) ||
-        !item.account_group ||
-        !(
-          item.account_group.toString().substring(0, 2) === '51' || 
-          item.account_group.toString().substring(0, 2) === '52' || 
-          item.account_group.toString().substring(0, 2) === '53'
-        )
-      );
-      
-      data = [...group51Items, ...group52Items, ...group53Items, ...otherItems];
+      data = Array.from(groupedData.values());
     }
     
     if (sortField) {
