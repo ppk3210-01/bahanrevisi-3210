@@ -34,93 +34,15 @@ const HARDCODED_USERS = {
       updated_at: new Date().toISOString(),
     }
   },
-  sosial: {
+  user: {
     email: 'sosial@bps3210.id',
-    username: 'sosial3210',
+    username: 'sosial',
     password: 'bps3210@',
     profile: {
       id: '00000000-0000-0000-0000-000000000002',
-      username: 'sosial3210',
-      full_name: 'Elitya Tri Permana',
+      username: 'sosial 3210',
+      full_name: 'User Sosial',
       role: 'user',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  },
-  produksi: {
-    email: 'produksi@bps3210.id',
-    username: 'produksi3210',
-    password: 'bps3210@',
-    profile: {
-      id: '00000000-0000-0000-0000-000000000003',
-      username: 'produksi3210',
-      full_name: 'Deni Sarantika',
-      role: 'user',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  },
-  distribusi: {
-    email: 'distribusi@bps3210.id',
-    username: 'distribusi3210',
-    password: 'bps3210@',
-    profile: {
-      id: '00000000-0000-0000-0000-000000000004',
-      username: 'distribusi3210',
-      full_name: 'Devane S.W',
-      role: 'user',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  },
-  ipds: {
-    email: 'ipds@bps3210.id',
-    username: 'ipds3210',
-    password: 'bps3210@',
-    profile: {
-      id: '00000000-0000-0000-0000-000000000005',
-      username: 'ipds3210',
-      full_name: 'Aep Saepudin',
-      role: 'user',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  },
-  neraca: {
-    email: 'neraca@bps3210.id',
-    username: 'neraca3210',
-    password: 'bps3210@',
-    profile: {
-      id: '00000000-0000-0000-0000-000000000006',
-      username: 'neraca3210',
-      full_name: 'Fenty Jimika',
-      role: 'user',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  },
-  tu: {
-    email: 'tu@bps3210.id',
-    username: 'tu3210',
-    password: 'bps3210@',
-    profile: {
-      id: '00000000-0000-0000-0000-000000000007',
-      username: 'tu3210',
-      full_name: 'Nia Kania',
-      role: 'user',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  },
-  ppk: {
-    email: 'ppk@bps3210.id',
-    username: 'ppk3210',
-    password: 'bellamy',
-    profile: {
-      id: '00000000-0000-0000-0000-000000000008',
-      username: 'ppk3210',
-      full_name: 'Andries Kurniawan',
-      role: 'admin',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
