@@ -87,17 +87,17 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       // Group by first 2 digits of account_group - specifically 51, 52, and 53
       const group51Items = data.filter(item => 
         item.type === 'account_group' && 'account_group' in item && 
-        item.account_group?.toString().startsWith('51')
+        item.account_group?.toString().substring(0, 2) === '51'
       );
       
       const group52Items = data.filter(item => 
         item.type === 'account_group' && 'account_group' in item && 
-        item.account_group?.toString().startsWith('52')
+        item.account_group?.toString().substring(0, 2) === '52'
       );
       
       const group53Items = data.filter(item => 
         item.type === 'account_group' && 'account_group' in item && 
-        item.account_group?.toString().startsWith('53')
+        item.account_group?.toString().substring(0, 2) === '53'
       );
       
       const otherItems = data.filter(item => 
@@ -105,9 +105,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
         !('account_group' in item) ||
         !item.account_group ||
         !(
-          item.account_group.toString().startsWith('51') || 
-          item.account_group.toString().startsWith('52') || 
-          item.account_group.toString().startsWith('53')
+          item.account_group.toString().substring(0, 2) === '51' || 
+          item.account_group.toString().substring(0, 2) === '52' || 
+          item.account_group.toString().substring(0, 2) === '53'
         )
       );
       

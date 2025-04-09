@@ -18,10 +18,13 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
   const prepareExportData = () => {
     return items.map((item, index) => ({
       'No': index + 1,
-      'Uraian': item.uraian,
-      'Pembebanan': item.komponenOutput,
+      'Program Pembebanan': item.programPembebanan || '-',
+      'Kegiatan': item.kegiatan || '-',
+      'Rincian Output': item.rincianOutput || '-',
+      'Komponen Output': item.komponenOutput || '-',
       'Sub Komponen': item.subKomponen || '-',
       'Akun': item.akun || '-',
+      'Uraian': item.uraian,
       'Volume Semula': item.volumeSemula,
       'Satuan Semula': item.satuanSemula,
       'Harga Satuan Semula': item.hargaSatuanSemula, // Keep original value without rounding
@@ -58,7 +61,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       const totalSelisih = roundToThousands(totalMenjadi - totalSemula); // Ensure calculation is correct
       
       XLSX.utils.sheet_add_aoa(worksheet, [
-        ["", "TOTAL", "", "", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
+        ["", "TOTAL", "", "", "", "", "", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
       ], {origin: -1});
       
       // Generate Excel file
