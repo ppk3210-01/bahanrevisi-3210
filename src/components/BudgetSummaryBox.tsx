@@ -32,7 +32,7 @@ const BudgetSummaryBox: React.FC<BudgetSummaryBoxProps> = ({
   };
 
   return (
-    <div className="sticky top-[65px] z-20 bg-white py-3 px-4 border rounded-md shadow-sm">
+    <div className="bg-white py-3 px-4 border rounded-md shadow-sm">
       <div className="flex flex-col text-xs space-y-2">
         {isLoading ? (
           <div className="w-full text-center py-2">Loading...</div>

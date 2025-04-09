@@ -178,60 +178,68 @@ const BudgetComparison: React.FC = () => {
             
             <TabsContent value="summary" className="pt-4">
               <div className="space-y-6">
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   <Button 
                     variant={summarySectionView === 'changes' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('changes')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Ringkasan Perubahan
                   </Button>
                   <Button 
                     variant={summarySectionView === 'account_group' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('account_group')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Kelompok Akun
                   </Button>
                   <Button 
                     variant={summarySectionView === 'program_pembebanan' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('program_pembebanan')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Program Pembebanan
                   </Button>
                   <Button 
                     variant={summarySectionView === 'kegiatan' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('kegiatan')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Kegiatan
                   </Button>
                   <Button 
                     variant={summarySectionView === 'rincian_output' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('rincian_output')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Rincian Output
                   </Button>
                   <Button 
                     variant={summarySectionView === 'komponen_output' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('komponen_output')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Komponen Output
                   </Button>
                   <Button 
                     variant={summarySectionView === 'sub_komponen' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('sub_komponen')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Sub Komponen
                   </Button>
                   <Button 
                     variant={summarySectionView === 'akun' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('akun')}
-                    size="sm"
+                    size="xs"
+                    className="text-xs"
                   >
                     Akun
                   </Button>

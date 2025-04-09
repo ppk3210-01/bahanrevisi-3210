@@ -204,3 +204,35 @@
     background-position: 0% 50%;
   }
 }
+
+/* Add sticky header for budget table */
+.budget-table-container {
+  @apply overflow-auto max-h-[calc(100vh-300px)];
+}
+
+.budget-table-container table thead {
+  @apply sticky top-0 z-10 bg-white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.budget-table-container table thead th {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700;
+}
+
+/* Make all selisih values red if not 0 */
+.selisih-value {
+  @apply font-semibold;
+}
+
+.selisih-value:not(.selisih-zero) {
+  @apply text-red-600;
+}
+
+.selisih-zero {
+  @apply text-gray-600;
+}
+
+/* Add size xs for buttons */
+.btn-xs {
+  @apply h-7 px-2 text-xs;
+}

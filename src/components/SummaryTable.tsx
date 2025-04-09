@@ -86,23 +86,29 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     if (view === 'account_group') {
       // Group by first 2 digits of account_group - specifically 51, 52, and 53
       const group51Items = data.filter(item => 
-        item.type === 'account_group' && 'account_group' in item && item.account_group?.toString().startsWith('51')
+        item.type === 'account_group' && 'account_group' in item && 
+        item.account_group?.toString().startsWith('51')
       );
       
       const group52Items = data.filter(item => 
-        item.type === 'account_group' && 'account_group' in item && item.account_group?.toString().startsWith('52')
+        item.type === 'account_group' && 'account_group' in item && 
+        item.account_group?.toString().startsWith('52')
       );
       
       const group53Items = data.filter(item => 
-        item.type === 'account_group' && 'account_group' in item && item.account_group?.toString().startsWith('53')
+        item.type === 'account_group' && 'account_group' in item && 
+        item.account_group?.toString().startsWith('53')
       );
       
       const otherItems = data.filter(item => 
         item.type !== 'account_group' || 
-        ('account_group' in item && item.account_group && 
-          !item.account_group.toString().startsWith('51') && 
-          !item.account_group.toString().startsWith('52') && 
-          !item.account_group.toString().startsWith('53'))
+        !('account_group' in item) ||
+        !item.account_group ||
+        !(
+          item.account_group.toString().startsWith('51') || 
+          item.account_group.toString().startsWith('52') || 
+          item.account_group.toString().startsWith('53')
+        )
       );
       
       data = [...group51Items, ...group52Items, ...group53Items, ...otherItems];
@@ -228,7 +234,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
                   <TableCell className="font-medium">{categoryValue}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalSemula)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalMenjadi)}</TableCell>
-                  <TableCell className={`text-right ${totalSelisih > 0 ? 'text-green-600' : totalSelisih < 0 ? 'text-red-600' : ''}`}>
+                  <TableCell className={`text-right ${totalSelisih !== 0 ? 'text-red-600' : ''}`}>
                     {formatCurrency(totalSelisih)}
                   </TableCell>
                   <TableCell className="text-center">{newItems}</TableCell>
@@ -244,7 +250,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
             <TableCell className="font-bold">TOTAL</TableCell>
             <TableCell className="text-right font-bold">{formatCurrency(totalSemula)}</TableCell>
             <TableCell className="text-right font-bold">{formatCurrency(totalMenjadi)}</TableCell>
-            <TableCell className={`text-right font-bold ${totalSelisih > 0 ? 'text-green-600' : totalSelisih < 0 ? 'text-red-600' : ''}`}>
+            <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'text-red-600' : ''}`}>
               {formatCurrency(totalSelisih)}
             </TableCell>
             <TableCell className="text-center font-bold">{totalNewItems}</TableCell>
