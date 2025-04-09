@@ -1,48 +1,10 @@
 
-// Temporary type definitions that match our database schema
-// This will be replaced by the Supabase generated types once they are available
+import { Database } from '@/integrations/supabase/types';
 
-export type BudgetItemRecord = {
-  id: string;
-  uraian: string;
-  volume_semula: number;
-  satuan_semula: string;
-  harga_satuan_semula: number;
-  jumlah_semula: number | null;
-  volume_menjadi: number;
-  satuan_menjadi: string;
-  harga_satuan_menjadi: number;
-  jumlah_menjadi: number | null;
-  selisih: number | null;
-  status: string;
-  is_approved: boolean;
-  komponen_output: string;
-  program_pembebanan: string | null;
-  kegiatan: string | null;
-  rincian_output: string | null;
-  sub_komponen: string | null;
-  akun: string | null;
-  created_at?: string | null;
-  updated_at?: string | null;
-};
-
-export type KomponenOutputRecord = {
-  id: string;
-  nama: string;
-  created_at?: string | null;
-};
-
-export type SubKomponenRecord = {
-  id: string;
-  nama: string;
-  program_pembebanan: string;
-};
-
-export type AkunRecord = {
-  id: string;
-  nama: string;
-  urutan: number;
-};
+export type BudgetItemRecord = Database['public']['Tables']['budget_items']['Row'];
+export type KomponenOutputRecord = Database['public']['Tables']['komponen_output']['Row'];
+export type SubKomponenRecord = Database['public']['Tables']['sub_komponen']['Row'];
+export type AkunRecord = Database['public']['Tables']['akun']['Row'];
 
 export type BudgetSummaryRecord = {
   account_group?: string;
@@ -60,15 +22,7 @@ export type BudgetSummaryRecord = {
 export type UserRole = 'admin' | 'user';
 
 // Define profile record type that matches the profiles table
-export type ProfileRecord = {
-  id: string;
-  username: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  role: UserRole;
-  created_at: string;
-  updated_at: string;
-};
+export type ProfileRecord = Database['public']['Tables']['profiles']['Row'];
 
 // This is a simplified version of the Database type that includes our tables
 export type TemporaryDatabase = {
@@ -130,27 +84,167 @@ export type TemporaryDatabase = {
     };
     Views: {
       budget_summary_by_account_group: {
-        Row: BudgetSummaryRecord;
+        Row: {
+          account_group: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
       };
       budget_summary_by_komponen: {
-        Row: BudgetSummaryRecord;
+        Row: {
+          komponen_output: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
       };
       budget_summary_by_akun: {
-        Row: BudgetSummaryRecord;
+        Row: {
+          akun: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
+      };
+      budget_summary_by_program_pembebanan: {
+        Row: {
+          program_pembebanan: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
+      };
+      budget_summary_by_kegiatan: {
+        Row: {
+          kegiatan: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
+      };
+      budget_summary_by_rincian_output: {
+        Row: {
+          rincian_output: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
+      };
+      budget_summary_by_sub_komponen: {
+        Row: {
+          sub_komponen: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
       };
     };
     Functions: {
       get_budget_summary_by_account_group: {
         Args: Record<string, never>;
-        Returns: BudgetSummaryRecord[];
+        Returns: {
+          account_group: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
       };
       get_budget_summary_by_komponen: {
         Args: Record<string, never>;
-        Returns: BudgetSummaryRecord[];
+        Returns: {
+          komponen_output: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
       };
       get_budget_summary_by_akun: {
         Args: Record<string, never>;
-        Returns: BudgetSummaryRecord[];
+        Returns: {
+          akun: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
+      };
+      get_budget_summary_by_program_pembebanan: {
+        Args: Record<string, never>;
+        Returns: {
+          program_pembebanan: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
+      };
+      get_budget_summary_by_kegiatan: {
+        Args: Record<string, never>;
+        Returns: {
+          kegiatan: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
+      };
+      get_budget_summary_by_rincian_output: {
+        Args: Record<string, never>;
+        Returns: {
+          rincian_output: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
+      };
+      get_budget_summary_by_sub_komponen: {
+        Args: Record<string, never>;
+        Returns: {
+          sub_komponen: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
       };
     };
   };

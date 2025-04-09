@@ -1,5 +1,5 @@
 
-import { Database } from '@/integrations/supabase/tempTypes';
+import { Database } from '@/integrations/supabase/types';
 
 // Define user roles as a strict union type
 export type UserRole = 'admin' | 'user';
@@ -33,37 +33,37 @@ export type BudgetSummaryBase = {
 
 // Summary types by different groupings
 export interface BudgetSummaryByAccountGroup extends BudgetSummaryBase {
-  account_group: string;
+  account_group: string | null;
   type: 'account_group';
 }
 
 export interface BudgetSummaryByKomponen extends BudgetSummaryBase {
-  komponen_output: string;
+  komponen_output: string | null;
   type: 'komponen_output';
 }
 
 export interface BudgetSummaryByAkun extends BudgetSummaryBase {
-  akun: string;
+  akun: string | null;
   type: 'akun';
 }
 
 export interface BudgetSummaryByProgramPembebanan extends BudgetSummaryBase {
-  program_pembebanan: string;
+  program_pembebanan: string | null;
   type: 'program_pembebanan';
 }
 
 export interface BudgetSummaryByKegiatan extends BudgetSummaryBase {
-  kegiatan: string;
+  kegiatan: string | null;
   type: 'kegiatan';
 }
 
 export interface BudgetSummaryByRincianOutput extends BudgetSummaryBase {
-  rincian_output: string;
+  rincian_output: string | null;
   type: 'rincian_output';
 }
 
 export interface BudgetSummaryBySubKomponen extends BudgetSummaryBase {
-  sub_komponen: string;
+  sub_komponen: string | null;
   type: 'sub_komponen';
 }
 
