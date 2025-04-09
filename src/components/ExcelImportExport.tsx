@@ -121,6 +121,15 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     }
   };
 
+  // Helper function to normalize column names for matching
+  const normalizeColumnName = (name: string): string => {
+    return name.toString()
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[-_]/g, '')
+      .trim();
+  };
+
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -140,39 +149,12 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         // Convert to array of objects and validate
         const rows: any[] = XLSX.utils.sheet_to_json(ws, { header: 1 });
         
-        // Look for the header row - search for column names we expect
-        const expectedHeaders = [
-          "uraian", "volume semula", "satuan semula", "harga satuan semula", 
-          "volume menjadi", "satuan menjadi", "harga satuan menjadi"
-        ];
+        console.log("Excel rows:", rows);
         
-        let headerRowIndex = -1;
-        
-        // Find the header row by looking for expected headers (case insensitive)
-        for (let i = 0; i < Math.min(10, rows.length); i++) {
-          const row = rows[i];
-          if (!row || row.length < 7) continue;
-          
-          // Convert row items to lowercase strings for comparison
-          const lowercaseRow = row.map(item => 
-            typeof item === 'string' ? item.toLowerCase() : String(item).toLowerCase()
-          );
-          
-          // Check if any of the expected headers are found in this row
-          const foundHeaders = expectedHeaders.filter(header => 
-            lowercaseRow.some(cell => cell.includes(header))
-          );
-          
-          if (foundHeaders.length >= 3) { // If we find at least 3 of the expected headers
-            headerRowIndex = i;
-            break;
-          }
-        }
-        
-        if (headerRowIndex === -1) {
+        if (rows.length <= 1) {
           toast({
-            title: "Format tidak valid",
-            description: "File Excel tidak berisi header yang diharapkan. Gunakan template yang disediakan.",
+            title: "Data tidak lengkap",
+            description: "File Excel tidak berisi data yang cukup.",
             variant: "destructive",
           });
           setIsImporting(false);
@@ -180,38 +162,127 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           return;
         }
         
-        // Extract column indices based on header names
+        // Expected column names and their variations
+        const expectedColumns = {
+          uraian: ["uraian", "keterangan", "item", "description"],
+          volumeSemula: ["volumesemula", "volume semula", "volume awal", "jumlah semula", "volume1"],
+          satuanSemula: ["satuansemula", "satuan semula", "satuan awal", "unit semula", "satuan1"],
+          hargaSatuanSemula: ["hargasatuansemula", "harga satuan semula", "harga awal", "price semula", "hargasatuan1"],
+          volumeMenjadi: ["volumemenjadi", "volume menjadi", "volume akhir", "jumlah menjadi", "volume2"],
+          satuanMenjadi: ["satuanmenjadi", "satuan menjadi", "satuan akhir", "unit menjadi", "satuan2"],
+          hargaSatuanMenjadi: ["hargasatuanmenjadi", "harga satuan menjadi", "harga akhir", "price menjadi", "hargasatuan2"],
+          programPembebanan: ["programpembebanan", "program pembebanan", "program"],
+          kegiatan: ["kegiatan", "activity"],
+          rincianOutput: ["rincianoutput", "rincian output", "output", "detail output"],
+          komponenOutput: ["komponenoutput", "komponen output", "component"],
+          subKomponen: ["subkomponen", "sub komponen", "subcomponent", "subcomp"],
+          akun: ["akun", "account"]
+        };
+        
+        // Find header row
+        let headerRowIndex = -1;
+        let headerRowMatches = 0;
+        let bestHeaderMatches = 0;
+        
+        // Check each of the first several rows to find the one with most column matches
+        for (let i = 0; i < Math.min(10, rows.length); i++) {
+          const row = rows[i];
+          if (!row || row.length < 5) continue;
+          
+          let matches = 0;
+          for (let j = 0; j < row.length; j++) {
+            const cellValue = row[j];
+            if (!cellValue || typeof cellValue !== 'string') continue;
+            
+            const normalizedCell = normalizeColumnName(cellValue);
+            
+            // Check if this cell matches any of our expected column names
+            for (const [key, variations] of Object.entries(expectedColumns)) {
+              if (variations.some(v => normalizedCell.includes(normalizeColumnName(v)))) {
+                matches++;
+                break;
+              }
+            }
+          }
+          
+          if (matches > bestHeaderMatches) {
+            bestHeaderMatches = matches;
+            headerRowIndex = i;
+            headerRowMatches = matches;
+          }
+        }
+        
+        console.log("Header row found at index:", headerRowIndex, "with", headerRowMatches, "matches");
+        
+        if (headerRowIndex === -1 || headerRowMatches < 3) {
+          toast({
+            title: "Format tidak valid",
+            description: "File Excel tidak berisi header kolom yang diharapkan. Gunakan template yang disediakan.",
+            variant: "destructive",
+          });
+          setIsImporting(false);
+          if (event.target) event.target.value = '';
+          return;
+        }
+        
+        // Map column indices to column types
         const headerRow = rows[headerRowIndex];
         const columnIndices: Record<string, number> = {};
+        const missingRequiredColumns: string[] = [];
         
+        const requiredColumns = ['uraian', 'volumeSemula', 'satuanSemula', 'hargaSatuanSemula', 
+                              'volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'];
+        
+        console.log("Header row contents:", headerRow);
+        
+        // Match header cells to expected columns
         headerRow.forEach((header: any, index: number) => {
-          const headerText = String(header).toLowerCase().trim();
+          if (!header) return;
           
-          if (headerText.includes("program pembebanan")) columnIndices.programPembebanan = index;
-          else if (headerText.includes("kegiatan")) columnIndices.kegiatan = index;
-          else if (headerText.includes("rincian output")) columnIndices.rincianOutput = index;
-          else if (headerText.includes("komponen output")) columnIndices.komponenOutput = index;
-          else if (headerText.includes("sub komponen")) columnIndices.subKomponen = index;
-          else if (headerText.includes("akun")) columnIndices.akun = index;
-          else if (headerText.includes("uraian")) columnIndices.uraian = index;
-          else if (headerText.includes("volume semula")) columnIndices.volumeSemula = index;
-          else if (headerText.includes("satuan semula")) columnIndices.satuanSemula = index;
-          else if (headerText.includes("harga satuan semula")) columnIndices.hargaSatuanSemula = index;
-          else if (headerText.includes("volume menjadi")) columnIndices.volumeMenjadi = index;
-          else if (headerText.includes("satuan menjadi")) columnIndices.satuanMenjadi = index;
-          else if (headerText.includes("harga satuan menjadi")) columnIndices.hargaSatuanMenjadi = index;
+          const normalizedHeader = normalizeColumnName(header);
+          let matched = false;
+          
+          for (const [key, variations] of Object.entries(expectedColumns)) {
+            if (variations.some(v => normalizedHeader.includes(normalizeColumnName(v)))) {
+              columnIndices[key] = index;
+              matched = true;
+              console.log(`Matched column "${header}" at index ${index} to "${key}"`);
+              break;
+            }
+          }
+          
+          if (!matched) {
+            console.log(`Could not match column "${header}" at index ${index}`);
+          }
         });
         
-        // Validate that we have the required columns
-        const requiredColumns = ['uraian', 'volumeSemula', 'satuanSemula', 'hargaSatuanSemula', 
-                                'volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'];
+        console.log("Mapped column indices:", columnIndices);
         
-        const missingColumns = requiredColumns.filter(col => typeof columnIndices[col] === 'undefined');
+        // Check for missing required columns
+        requiredColumns.forEach(col => {
+          if (typeof columnIndices[col] === 'undefined') {
+            missingRequiredColumns.push(col);
+          }
+        });
         
-        if (missingColumns.length > 0) {
+        if (missingRequiredColumns.length > 0) {
+          const friendlyNames = {
+            uraian: "Uraian",
+            volumeSemula: "Volume Semula", 
+            satuanSemula: "Satuan Semula",
+            hargaSatuanSemula: "Harga Satuan Semula",
+            volumeMenjadi: "Volume Menjadi",
+            satuanMenjadi: "Satuan Menjadi",
+            hargaSatuanMenjadi: "Harga Satuan Menjadi"
+          };
+          
+          const missingColumnsDisplay = missingRequiredColumns
+            .map(col => friendlyNames[col as keyof typeof friendlyNames])
+            .join(', ');
+          
           toast({
             title: "Kolom tidak lengkap",
-            description: `Kolom berikut tidak ditemukan: ${missingColumns.join(', ')}`,
+            description: `Kolom berikut tidak ditemukan: ${missingColumnsDisplay}`,
             variant: "destructive",
           });
           setIsImporting(false);
@@ -221,16 +292,20 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
         
         // Skip header row and process data rows
         const dataRows = rows.slice(headerRowIndex + 1)
-          .filter(row => row?.length >= Math.max(...Object.values(columnIndices)) && row[columnIndices.uraian])
+          .filter(row => {
+            if (!row || row.length < Math.max(...Object.values(columnIndices))) return false;
+            // Ensure uraian exists and is not empty
+            return row[columnIndices.uraian] && String(row[columnIndices.uraian]).trim() !== '';
+          })
           .map(row => {
             const item: Partial<BudgetItem> = {
               uraian: String(row[columnIndices.uraian] || ''),
-              volumeSemula: Number(row[columnIndices.volumeSemula]) || 0,
+              volumeSemula: parseFloat(row[columnIndices.volumeSemula]) || 0,
               satuanSemula: String(row[columnIndices.satuanSemula] || 'Paket'),
-              hargaSatuanSemula: Number(row[columnIndices.hargaSatuanSemula]) || 0,
-              volumeMenjadi: Number(row[columnIndices.volumeMenjadi]) || 0,
+              hargaSatuanSemula: parseFloat(row[columnIndices.hargaSatuanSemula]) || 0,
+              volumeMenjadi: parseFloat(row[columnIndices.volumeMenjadi]) || 0,
               satuanMenjadi: String(row[columnIndices.satuanMenjadi] || 'Paket'),
-              hargaSatuanMenjadi: Number(row[columnIndices.hargaSatuanMenjadi]) || 0
+              hargaSatuanMenjadi: parseFloat(row[columnIndices.hargaSatuanMenjadi]) || 0
             };
             
             // Add optional fields if they exist in the file
@@ -254,6 +329,8 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
             
             return item;
           });
+        
+        console.log("Processed data rows:", dataRows);
         
         if (dataRows.length === 0) {
           toast({
