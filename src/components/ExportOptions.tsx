@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   FileSpreadsheet, 
   FileImage, 
-  FilePdf 
+  FileText 
 } from 'lucide-react';
 import { BudgetItem } from '@/types/budget';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
@@ -21,7 +20,6 @@ interface ExportOptionsProps {
 }
 
 const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, onClose }) => {
-  // Prepare data for export
   const prepareExportData = () => {
     return items.map((item, index) => ({
       'No': index + 1,
@@ -45,7 +43,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
     }));
   };
 
-  // Function to export to Excel
   const exportToExcel = () => {
     if (items.length === 0) {
       toast({
@@ -62,7 +59,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Budget");
       
-      // Add footer with totals
       const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
       const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
       const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
@@ -71,7 +67,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         ["", "TOTAL", "", "", "", "", "", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
       ], {origin: -1});
       
-      // Generate Excel file
       const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(workbook, fileName);
       
@@ -93,7 +88,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
     }
   };
 
-  // Function to export table as JPEG
   const exportToJPEG = async () => {
     if (items.length === 0) {
       toast({
@@ -110,14 +104,12 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         description: "Menyiapkan gambar..."
       });
 
-      // Create a temporary table to capture
       const tempTable = document.createElement('table');
       tempTable.style.borderCollapse = 'collapse';
       tempTable.style.width = '100%';
       tempTable.style.fontFamily = 'Arial, sans-serif';
       tempTable.style.fontSize = '12px';
       
-      // Create header row
       const headerRow = document.createElement('tr');
       headerRow.style.backgroundColor = '#f0f0f0';
       
@@ -138,7 +130,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       
       tempTable.appendChild(headerRow);
       
-      // Add data rows
       items.forEach((item, index) => {
         const row = document.createElement('tr');
         row.style.backgroundColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9';
@@ -169,7 +160,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         tempTable.appendChild(row);
       });
       
-      // Add footer row with totals
       const footerRow = document.createElement('tr');
       footerRow.style.backgroundColor = '#f0f0f0';
       footerRow.style.fontWeight = 'bold';
@@ -199,35 +189,30 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       
       tempTable.appendChild(footerRow);
       
-      // Add title
       const titleDiv = document.createElement('div');
       titleDiv.style.fontWeight = 'bold';
       titleDiv.style.fontSize = '16px';
       titleDiv.style.marginBottom = '10px';
       titleDiv.textContent = `Anggaran ${komponenOutput || ''}`;
       
-      // Create container with title and table
       const container = document.createElement('div');
       container.style.padding = '20px';
       container.style.maxWidth = '1200px';
       container.appendChild(titleDiv);
       container.appendChild(tempTable);
       
-      // Temporarily append to body but hide it
       container.style.position = 'fixed';
       container.style.left = '-9999px';
       document.body.appendChild(container);
       
-      // Use html2canvas with better settings
       const canvas = await html2canvas(container, {
-        scale: 2, // Higher scale for better quality
+        scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff'
       });
       
-      // Create download link
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const link = document.createElement('a');
       link.href = dataUrl;
@@ -235,7 +220,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       document.body.appendChild(link);
       link.click();
       
-      // Clean up
       document.body.removeChild(link);
       document.body.removeChild(container);
       
@@ -257,7 +241,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
     }
   };
 
-  // Function to export to PDF
   const exportToPDF = () => {
     if (items.length === 0) {
       toast({
@@ -276,11 +259,9 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
 
       const pdf = new jsPDF('landscape', 'pt', 'a4');
       
-      // Add title
       pdf.setFontSize(16);
       pdf.text(`Anggaran ${komponenOutput || ''}`, 40, 40);
       
-      // Prepare table data
       const tableData = items.map((item, index) => [
         index + 1,
         item.uraian,
@@ -296,14 +277,12 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         item.status
       ]);
       
-      // Prepare column headers
       const headers = [
         'No', 'Uraian', 'Vol Semula', 'Sat Semula', 'HS Semula', 
         'Jml Semula', 'Vol Menjadi', 'Sat Menjadi', 'HS Menjadi', 
         'Jml Menjadi', 'Selisih', 'Status'
       ];
       
-      // Add total row
       const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
       const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
       const totalSelisih = totalMenjadi - totalSemula;
@@ -314,17 +293,14 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         formatCurrency(totalMenjadi), formatCurrency(totalSelisih), ''
       ]);
       
-      // Add table
-      // @ts-ignore - jsPDF-AutoTable
       pdf.autoTable({
         head: [headers],
         body: tableData,
         startY: 60,
         styles: { fontSize: 8, cellPadding: 2 },
         columnStyles: {
-          0: { cellWidth: 30 }, // No
-          1: { cellWidth: 120 }, // Uraian
-          // Let other columns auto-size
+          0: { cellWidth: 30 },
+          1: { cellWidth: 120 }
         },
         headStyles: {
           fillColor: [240, 240, 240],
@@ -339,7 +315,6 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         }
       });
       
-      // Save PDF
       pdf.save(`Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast({
@@ -371,7 +346,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         JPEG
       </Button>
       <Button variant="outline" onClick={exportToPDF}>
-        <FilePdf className="mr-2 h-4 w-4" />
+        <FileText className="mr-2 h-4 w-4" />
         PDF
       </Button>
     </div>
