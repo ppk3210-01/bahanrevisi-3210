@@ -207,7 +207,7 @@ const useBudgetData = (filters: FilterSelection) => {
     try {
       const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
       const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-      const selisih = roundToThousands(jumlahMenjadi - jumlahSemula);
+      // No need to calculate selisih as it's a computed column
 
       const newItemData = {
         uraian: item.uraian,
@@ -219,8 +219,7 @@ const useBudgetData = (filters: FilterSelection) => {
         satuan_menjadi: item.satuanMenjadi,
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
         jumlah_menjadi: jumlahMenjadi,
-        selisih: selisih,
-        komponen_output: item.komponenOutput,
+        // Remove selisih field since it's computed in the database
         status: 'new',
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
         kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
@@ -255,14 +254,14 @@ const useBudgetData = (filters: FilterSelection) => {
     }
   };
 
-  const importBudgetItems = async (items: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>[]) => {
+  const importBudgetItems = async (items: Partial<BudgetItem>[]) => {
     try {
       setLoading(true);
       
       const itemsToInsert = items.map(item => {
-        const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
-        const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-        const selisih = roundToThousands(jumlahMenjadi - jumlahSemula);
+        const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula || 0, item.hargaSatuanSemula || 0));
+        const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi || 0, item.hargaSatuanMenjadi || 0));
+        // Remove selisih calculation as it's computed in the database
 
         return {
           uraian: item.uraian,
@@ -274,8 +273,7 @@ const useBudgetData = (filters: FilterSelection) => {
           satuan_menjadi: item.satuanMenjadi,
           harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: jumlahMenjadi,
-          selisih: selisih,
-          komponen_output: item.komponenOutput,
+          // Remove selisih as it's computed by the database
           status: 'new',
           program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
           kegiatan: item.kegiatan || (filters.kegiatan !== 'all' ? filters.kegiatan : null),
@@ -340,9 +338,10 @@ const useBudgetData = (filters: FilterSelection) => {
         supabaseUpdates.jumlah_menjadi = jumlahMenjadi;
         updatedItem.jumlahMenjadi = jumlahMenjadi;
         
-        const selisih = jumlahMenjadi - updatedItem.jumlahSemula;
-        supabaseUpdates.selisih = selisih;
-        updatedItem.selisih = selisih;
+        // No need to calculate selisih as it's computed in the database
+        // Remove this line: supabaseUpdates.selisih = selisih;
+        // Just update the UI value for display
+        updatedItem.selisih = jumlahMenjadi - updatedItem.jumlahSemula;
       }
       
       if ('volumeSemula' in updates || 'hargaSatuanSemula' in updates) {
@@ -353,9 +352,10 @@ const useBudgetData = (filters: FilterSelection) => {
         supabaseUpdates.jumlah_semula = jumlahSemula;
         updatedItem.jumlahSemula = jumlahSemula;
         
-        const selisih = updatedItem.jumlahMenjadi - jumlahSemula;
-        supabaseUpdates.selisih = selisih;
-        updatedItem.selisih = selisih;
+        // No need to calculate selisih as it's computed in the database
+        // Remove this line: supabaseUpdates.selisih = selisih;
+        // Just update the UI value for display
+        updatedItem.selisih = updatedItem.jumlahMenjadi - jumlahSemula;
       }
       
       if (Object.keys(updates).length > 0 && currentItem.isApproved) {
@@ -434,7 +434,7 @@ const useBudgetData = (filters: FilterSelection) => {
           satuan_semula: item.satuanMenjadi,
           harga_satuan_semula: item.hargaSatuanMenjadi,
           jumlah_semula: item.jumlahMenjadi,
-          selisih: 0,
+          // No need to set selisih as it's computed in the database
           status: 'unchanged'
         })
         .eq('id', id);
@@ -483,9 +483,9 @@ const useBudgetData = (filters: FilterSelection) => {
         .update({
           volume_menjadi: item.volumeSemula,
           satuan_menjadi: item.satuanSemula,
-          harga_satuan_menjadi: item.hargaSatuanMenjadi,
+          harga_satuan_menjadi: item.hargaSatuanSemula,
           jumlah_menjadi: item.jumlahSemula,
-          selisih: 0,
+          // No need to set selisih as it's computed in the database
           status: 'unchanged'
         })
         .eq('id', id);
@@ -501,11 +501,11 @@ const useBudgetData = (filters: FilterSelection) => {
               ...item,
               volumeMenjadi: item.volumeSemula,
               satuanMenjadi: item.satuanSemula,
-              hargaSatuanMenjadi: item.hargaSatuanMenjadi,
+              hargaSatuanMenjadi: item.hargaSatuanSemula,
               jumlahMenjadi: item.jumlahSemula,
               selisih: 0,
               status: 'unchanged',
-              isApproved: false
+              isApproved: true
             };
           }
           return item;

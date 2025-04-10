@@ -1,3 +1,4 @@
+
 import { BudgetItemRecord, KomponenOutputRecord, SubKomponenRecord, AkunRecord, BudgetSummaryRecord } from './supabase';
 
 export interface BudgetItem {
@@ -92,7 +93,7 @@ export const convertToBudgetItemRecord = (item: Partial<BudgetItem>): Partial<Bu
   if ('satuanMenjadi' in item) record.satuan_menjadi = item.satuanMenjadi!;
   if ('hargaSatuanMenjadi' in item) record.harga_satuan_menjadi = item.hargaSatuanMenjadi!;
   if ('jumlahMenjadi' in item) record.jumlah_menjadi = item.jumlahMenjadi!;
-  if ('selisih' in item) record.selisih = item.selisih!;
+  // Don't include selisih in record as it's a computed column in the database
   if ('status' in item) record.status = item.status!;
   if ('isApproved' in item && item.isApproved !== undefined) {
     if (item.isApproved && !('status' in item)) {
