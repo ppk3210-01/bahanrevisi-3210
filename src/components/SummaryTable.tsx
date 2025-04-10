@@ -90,9 +90,8 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       data.forEach(item => {
         if (item.type === 'account_group' && 'account_group' in item && item.account_group) {
           // Extract the first two digits for grouping
-          const accountGroupStr = item.account_group.toString();
-          if (accountGroupStr.length >= 2) {
-            const prefix = accountGroupStr.substring(0, 2);
+          const accountGroupStr = item.account_group.toString().padStart(2, '0');
+          const prefix = accountGroupStr.substring(0, 2);
             
             if (groupedData.has(prefix)) {
               // Add to existing group
@@ -111,10 +110,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
                 type: 'account_group'
               });
             }
-          } else {
-            // Handle items with short account group codes
-            groupedData.set(accountGroupStr, item);
-          }
+          } 
         }
       });
       
