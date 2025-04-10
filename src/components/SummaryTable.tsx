@@ -84,7 +84,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     let data = [...summaryData];
     
     if (view === 'account_group') {
-      // Fix: Convert account_group values to prefixes for proper grouping by 2 digits
+      // Group by first two digits for account_group
       const groupedData: Map<string, BudgetSummaryRecord> = new Map();
       
       data.forEach(item => {
@@ -95,15 +95,13 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
           // Skip empty entries
           if (!accountGroupStr || accountGroupStr === '-') return;
           
-          // Extract first two digits (handling possible non-numeric prefixes)
-          const match = accountGroupStr.match(/(\d{2})/);
-          if (!match) return;
-          
-          const prefix = match[0];
+          // Extract first two digits
+          const firstTwoDigits = accountGroupStr.substring(0, 2);
+          const groupKey = `${firstTwoDigits}xxxx`;
             
-          if (groupedData.has(prefix)) {
+          if (groupedData.has(groupKey)) {
             // Add to existing group
-            const existingItem = groupedData.get(prefix)!;
+            const existingItem = groupedData.get(groupKey)!;
             existingItem.total_semula = (existingItem.total_semula || 0) + (item.total_semula || 0);
             existingItem.total_menjadi = (existingItem.total_menjadi || 0) + (item.total_menjadi || 0);
             existingItem.total_selisih = (existingItem.total_selisih || 0) + (item.total_selisih || 0);
@@ -112,9 +110,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
             existingItem.total_items = (existingItem.total_items || 0) + (item.total_items || 0);
           } else {
             // Create new group
-            groupedData.set(prefix, {
+            groupedData.set(groupKey, {
               ...item,
-              account_group: prefix,
+              account_group: groupKey,
               type: 'account_group'
             });
           }
@@ -143,7 +141,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
             valB = b.total_menjadi || 0;
             break;
           case 'totalSelisih':
-            valA = a.total_selisih ||.0;
+            valA = a.total_selisih || 0;
             valB = b.total_selisih || 0;
             break;
           case 'newItems':
