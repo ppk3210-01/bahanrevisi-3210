@@ -41,8 +41,46 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
   const totalDeletedMenjadi = deletedItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalDeletedSelisih = totalDeletedMenjadi - totalDeletedSemula;
 
+  // Create conclusion text
+  const getConclusionText = () => {
+    const totalItemsChanged = changedItems.length + newItems.length + deletedItems.length;
+    const changeDirection = totalSelisih > 0 ? "bertambah" : totalSelisih < 0 ? "berkurang" : "tetap";
+    
+    return (
+      <div className="space-y-2 text-sm">
+        <p>
+          Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(totalSemula)} 
+          mengalami perubahan menjadi {formatCurrency(totalMenjadi)}, dengan selisih {formatCurrency(Math.abs(totalSelisih))} 
+          atau {changeDirection}.
+        </p>
+        <p>
+          Perubahan ini terdiri dari {changedItems.length} komponen anggaran yang mengalami penyesuaian nilai, 
+          {newItems.length} komponen anggaran baru yang ditambahkan, dan {deletedItems.length} komponen anggaran yang dihapus.
+        </p>
+        <p>
+          Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan 
+          prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {totalItemsChanged} perubahan ini, 
+          diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
+        </p>
+        <p>
+          Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
+      {/* Conclusion Card - Added as requested */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader className="pb-2">
+          <CardDescription className="text-blue-800 font-medium text-base">Kesimpulan</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {getConclusionText()}
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2">

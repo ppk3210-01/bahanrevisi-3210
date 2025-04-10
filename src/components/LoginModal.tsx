@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -31,13 +32,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       if (isRegistering) {
         await signUp(emailOrUsername, password, username);
       } else {
-        // Try login without checking if it's an email
-        await signIn(emailOrUsername, password);
-        onClose();
+        // Try login with email/username and password
+        const success = await signIn(emailOrUsername, password);
+        if (success) {
+          onClose();
+        } else {
+          setError('Invalid login credentials. Please check your username and password.');
+        }
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
-      setError('Invalid login credentials. Please check your input and password.');
+      setError('Authentication failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -54,11 +59,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
   const useDemoAccount = (type: 'admin' | 'user') => {
     if (type === 'admin') {
-      setEmailOrUsername('admin@bps3210.id');
-      setPassword('bps3210admin');
+      setEmailOrUsername('ppk3210');
+      setPassword('bellamy');
     } else {
-      setEmailOrUsername('sosial@bps3210.id');
-      setPassword('bps3210@');
+      setEmailOrUsername('produksi3210');
+      setPassword('bps3210');
     }
   };
 

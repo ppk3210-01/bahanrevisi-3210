@@ -84,7 +84,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     let data = [...summaryData];
     
     if (view === 'account_group') {
-      // Convert account_group values to prefixes for proper grouping
+      // Fix: Convert account_group values to prefixes for proper grouping by 2 digits
       const groupedData: Map<string, BudgetSummaryRecord> = new Map();
       
       data.forEach(item => {
@@ -95,13 +95,11 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
           // Skip empty entries
           if (!accountGroupStr || accountGroupStr === '-') return;
           
-          // Ensure we have at least 2 digits, pad with leading zeros if needed
-          if (accountGroupStr.length === 1) {
-            accountGroupStr = '0' + accountGroupStr;
-          }
+          // Extract first two digits (handling possible non-numeric prefixes)
+          const match = accountGroupStr.match(/(\d{2})/);
+          if (!match) return;
           
-          // Get first two chars for grouping
-          const prefix = accountGroupStr.substring(0, 2);
+          const prefix = match[0];
             
           if (groupedData.has(prefix)) {
             // Add to existing group

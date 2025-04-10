@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -13,6 +14,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+// Add type declaration for jsPDF with autoTable
 declare module 'jspdf' {
   interface jsPDF {
     autoTable: (options: any) => jsPDF;
@@ -110,14 +112,31 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         description: "Menyiapkan gambar..."
       });
 
-      const tempTable = document.createElement('table');
-      tempTable.style.borderCollapse = 'collapse';
-      tempTable.style.width = '100%';
-      tempTable.style.fontFamily = 'Arial, sans-serif';
-      tempTable.style.fontSize = '12px';
+      // Create a temporary container for the table in the DOM, but positioned off-screen
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.top = '0';
+      container.style.left = '-9999px';
+      container.style.width = '1200px';
+      container.style.fontFamily = 'Arial, sans-serif';
+      container.style.padding = '20px';
+      container.style.backgroundColor = '#ffffff';
       
+      // Add a title
+      const title = document.createElement('h2');
+      title.textContent = `Anggaran ${komponenOutput || ''}`;
+      title.style.marginBottom = '10px';
+      container.appendChild(title);
+      
+      // Create the table
+      const table = document.createElement('table');
+      table.style.width = '100%';
+      table.style.borderCollapse = 'collapse';
+      table.style.border = '1px solid #ddd';
+      
+      // Create header row
+      const thead = document.createElement('thead');
       const headerRow = document.createElement('tr');
-      headerRow.style.backgroundColor = '#f0f0f0';
       
       const headers = [
         'No', 'Uraian', 'Volume Semula', 'Satuan Semula', 'Harga Satuan Semula', 
@@ -130,12 +149,17 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         th.textContent = header;
         th.style.padding = '8px';
         th.style.border = '1px solid #ddd';
-        th.style.textAlign = 'left';
+        th.style.backgroundColor = '#f2f2f2';
         headerRow.appendChild(th);
       });
       
-      tempTable.appendChild(headerRow);
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
       
+      // Create tbody
+      const tbody = document.createElement('tbody');
+      
+      // Add data rows
       items.forEach((item, index) => {
         const row = document.createElement('tr');
         row.style.backgroundColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9';
@@ -157,17 +181,21 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         
         cells.forEach(cellText => {
           const td = document.createElement('td');
-          td.textContent = String(cellText);
+          td.textContent = cellText !== null ? String(cellText) : '';
           td.style.padding = '8px';
           td.style.border = '1px solid #ddd';
           row.appendChild(td);
         });
         
-        tempTable.appendChild(row);
+        tbody.appendChild(row);
       });
       
+      table.appendChild(tbody);
+      
+      // Add footer row
+      const tfoot = document.createElement('tfoot');
       const footerRow = document.createElement('tr');
-      footerRow.style.backgroundColor = '#f0f0f0';
+      footerRow.style.backgroundColor = '#f2f2f2';
       footerRow.style.fontWeight = 'bold';
       
       const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
@@ -182,51 +210,38 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       
       footerCells.forEach((cellText, index) => {
         const td = document.createElement('td');
-        td.textContent = String(cellText);
+        td.textContent = cellText;
         td.style.padding = '8px';
         td.style.border = '1px solid #ddd';
-        if (index === 1) {
-          td.style.textAlign = 'left';
-        } else if (index === 5 || index === 9 || index === 10) {
-          td.style.textAlign = 'right';
-        }
         footerRow.appendChild(td);
       });
       
-      tempTable.appendChild(footerRow);
+      tfoot.appendChild(footerRow);
+      table.appendChild(tfoot);
       
-      const titleDiv = document.createElement('div');
-      titleDiv.style.fontWeight = 'bold';
-      titleDiv.style.fontSize = '16px';
-      titleDiv.style.marginBottom = '10px';
-      titleDiv.textContent = `Anggaran ${komponenOutput || ''}`;
+      // Add the table to the container
+      container.appendChild(table);
       
-      const container = document.createElement('div');
-      container.style.padding = '20px';
-      container.style.maxWidth = '1200px';
-      container.appendChild(titleDiv);
-      container.appendChild(tempTable);
-      
-      container.style.position = 'fixed';
-      container.style.left = '-9999px';
+      // Add container to the body
       document.body.appendChild(container);
       
+      // Use html2canvas to convert the table into a canvas
       const canvas = await html2canvas(container, {
-        scale: 2,
-        logging: false,
+        scale: 2, // Increased scale for better quality
         useCORS: true,
-        allowTaint: true,
         backgroundColor: '#ffffff'
       });
       
+      // Convert canvas to data URL and create an image download
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // Create link and trigger download
       const link = document.createElement('a');
-      link.href = dataUrl;
       link.download = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.jpg`;
-      document.body.appendChild(link);
+      link.href = dataUrl;
       link.click();
       
-      document.body.removeChild(link);
+      // Clean up
       document.body.removeChild(container);
       
       toast({
@@ -263,11 +278,14 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         description: "Menyiapkan PDF..."
       });
 
-      const pdf = new jsPDF('landscape', 'pt', 'a4');
+      // Create new jsPDF document (landscape orientation)
+      const pdf = new jsPDF('landscape');
       
+      // Add title
       pdf.setFontSize(16);
-      pdf.text(`Anggaran ${komponenOutput || ''}`, 40, 40);
+      pdf.text(`Anggaran ${komponenOutput || ''}`, 14, 20);
       
+      // Prepare table data
       const tableData = items.map((item, index) => [
         index + 1,
         item.uraian,
@@ -283,44 +301,53 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         item.status
       ]);
       
+      // Define headers
       const headers = [
         'No', 'Uraian', 'Vol Semula', 'Sat Semula', 'HS Semula', 
         'Jml Semula', 'Vol Menjadi', 'Sat Menjadi', 'HS Menjadi', 
         'Jml Menjadi', 'Selisih', 'Status'
       ];
       
+      // Calculate totals
       const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
       const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
       const totalSelisih = totalMenjadi - totalSemula;
       
+      // Add total row
       tableData.push([
         '', 'TOTAL', '', '', '', 
         formatCurrency(totalSemula), '', '', '',
         formatCurrency(totalMenjadi), formatCurrency(totalSelisih), ''
       ]);
       
+      // Generate the table using autoTable plugin
       pdf.autoTable({
         head: [headers],
         body: tableData,
-        startY: 60,
+        startY: 30,
+        theme: 'grid',
         styles: { fontSize: 8, cellPadding: 2 },
-        columnStyles: {
-          0: { cellWidth: 30 },
-          1: { cellWidth: 120 }
+        headerStyles: {
+          fillColor: [220, 220, 220],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold'
         },
-        headStyles: {
+        footerStyles: {
           fillColor: [240, 240, 240],
           textColor: [0, 0, 0],
           fontStyle: 'bold'
         },
         alternateRowStyles: {
-          fillColor: [249, 249, 249]
+          fillColor: [245, 245, 245]
         },
-        rowStyles: {
-          0: { fontStyle: 'bold' }
-        }
+        columnStyles: {
+          0: { cellWidth: 15 },
+          1: { cellWidth: 70 },
+        },
+        margin: { top: 30 }
       });
       
+      // Save the PDF
       pdf.save(`Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast({

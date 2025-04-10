@@ -19,10 +19,10 @@ interface AuthContextProps {
   login: (email: string, password?: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
-  profile: UserProfile | null; // Added profile property
-  signIn: (emailOrUsername: string, password: string) => Promise<boolean>; // Added signIn method
-  signUp: (email: string, password: string, username: string) => Promise<boolean>; // Added signUp method
-  signOut: () => void; // Added signOut method
+  profile: UserProfile | null;
+  signIn: (emailOrUsername: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, username: string) => Promise<boolean>;
+  signOut: () => void;
 }
 
 // Create the context
@@ -32,10 +32,10 @@ const AuthContext = createContext<AuthContextProps>({
   login: async () => false,
   logout: () => {},
   loading: false,
-  profile: null, // Added profile property
-  signIn: async () => false, // Added signIn method
-  signUp: async () => false, // Added signUp method
-  signOut: () => {}, // Added signOut method
+  profile: null,
+  signIn: async () => false,
+  signUp: async () => false,
+  signOut: () => {},
 });
 
 // Create a custom hook to use the context
@@ -54,12 +54,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password?: string) => {
+  const login = async (emailOrUsername: string, password?: string) => {
     setLoading(true);
     try {
       // Simulate fetching user data from an API or database
       // Here, we'll use hardcoded credentials for simplicity
-      const profile = checkHardcodedCredentials(email, password || '');
+      const profile = checkHardcodedCredentials(emailOrUsername, password || '');
 
       if (profile) {
         setUser(profile);
@@ -181,12 +181,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ]
   };
 
-  const checkHardcodedCredentials = (email: string, password: string) => {
-    if (hardcodedCredentials.admin.email === email && hardcodedCredentials.admin.password === password) {
+  const checkHardcodedCredentials = (emailOrUsername: string, password: string) => {
+    // Check admin credentials - allow login with either email or username
+    if (
+      (hardcodedCredentials.admin.email === emailOrUsername || 
+       hardcodedCredentials.admin.username === emailOrUsername) && 
+      hardcodedCredentials.admin.password === password
+    ) {
       return { ...hardcodedCredentials.admin.profile };
     }
 
-    const matchedUser = hardcodedCredentials.users.find(u => u.email === email && u.password === password);
+    // Check user credentials - allow login with either email or username
+    const matchedUser = hardcodedCredentials.users.find(u => 
+      (u.email === emailOrUsername || u.username === emailOrUsername) && 
+      u.password === password
+    );
+    
     if (matchedUser) {
       return { ...matchedUser.profile };
     }

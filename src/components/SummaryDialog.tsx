@@ -2,7 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FileSpreadsheet, Download } from 'lucide-react';
+import { FileSpreadsheet } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { BudgetItem } from '@/types/budget';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
@@ -33,6 +33,20 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     if (selisih > 0) return 'Bertambah';
     if (selisih < 0) return 'Berkurang';
     return 'Tetap';
+  };
+
+  const getCombinedPembebananCode = (item: BudgetItem): string => {
+    // Create combined code format: ProgramPembebanan.KomponenOutput.SubKomponen.A.Akun
+    const program = item.programPembebanan || '';
+    const komponen = item.komponenOutput || '';
+    const subKomponen = item.subKomponen || '';
+    const akun = item.akun || '';
+    
+    if (program && komponen && subKomponen && akun) {
+      return `${program}.${komponen}.${subKomponen}.A.${akun}`;
+    }
+    
+    return program || '-';
   };
 
   const handleExportAll = () => {
@@ -128,6 +142,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       [`Total Pagu anggaran semula sebesar ${formatCurrency(roundToThousands(totalSemula))} berubah menjadi ${formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih sebesar ${formatCurrency(roundToThousands(totalSelisih))}.`, "", ""],
       [`Terdapat ${changedItems} detil anggaran yang diubah, ${newItems} detil anggaran baru, dan ${deletedItems} detil anggaran yang dihapus.`, "", ""],
       ["Perubahan ini menyebabkan perubahan pada total Pagu anggaran.", "", ""],
+      ["", "", ""],
+      ["Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.", "", ""],
     ];
     
     const worksheet = XLSX.utils.aoa_to_sheet(data);
@@ -175,7 +191,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       
       return [
         index + 1,
-        item.programPembebanan || '-',
+        getCombinedPembebananCode(item), // Use combined format here
         item.uraian,
         detailPerubahan,
         item.jumlahSemula,
@@ -189,7 +205,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Set column widths
     worksheet['!cols'] = [
       { wch: 5 },   // No
-      { wch: 20 },  // Pembebanan
+      { wch: 40 },  // Pembebanan (wider for the combined code)
       { wch: 40 },  // Uraian
       { wch: 40 },  // Detail Perubahan
       { wch: 20 },  // Jumlah Semula
@@ -216,7 +232,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     
     const data = newItems.map((item, index) => [
       index + 1,
-      item.programPembebanan || '-',
+      getCombinedPembebananCode(item), // Use combined format here
       item.uraian,
       item.volumeMenjadi,
       item.satuanMenjadi,
@@ -229,7 +245,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Set column widths
     worksheet['!cols'] = [
       { wch: 5 },   // No
-      { wch: 20 },  // Pembebanan
+      { wch: 40 },  // Pembebanan (wider for the combined code)
       { wch: 40 },  // Uraian
       { wch: 10 },  // Volume
       { wch: 15 },  // Satuan
@@ -461,6 +477,23 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
         
         {/* Display summary data according to the image */}
         <div className="space-y-4 p-4">
+          {/* Kesimpulan section - moved to the top as requested */}
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+            <h3 className="font-semibold text-blue-800 mb-2">Kesimpulan</h3>
+            <p className="text-sm mb-2">
+              Total Pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} berubah menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih sebesar {formatCurrency(roundToThousands(totalSelisih))}.
+            </p>
+            <p className="text-sm mb-2">
+              Terdapat {changedItems} detil anggaran yang diubah, {newItems} detil anggaran baru, dan {deletedItems} detil anggaran yang dihapus.
+            </p>
+            <p className="text-sm mb-2">
+              Perubahan ini diperlukan untuk mengoptimalkan alokasi anggaran sesuai dengan prioritas program dan kegiatan.
+            </p>
+            <p className="text-sm">
+              Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
+            </p>
+          </div>
+          
           <div className="flex flex-wrap gap-4">
             <div className="bg-white border rounded-md p-4 w-full md:w-[30%] flex-grow">
               <div className="text-sm font-medium mb-2">Total Pagu Semula</div>
@@ -478,20 +511,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
                 {formatCurrency(roundToThousands(totalSelisih))}
               </div>
             </div>
-          </div>
-          
-          {/* Kesimpulan section */}
-          <div className="bg-gray-50 border rounded-md p-4 mt-4">
-            <h3 className="font-semibold mb-2">Kesimpulan</h3>
-            <p className="text-sm mb-2">
-              Total Pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} berubah menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih sebesar {formatCurrency(roundToThousands(totalSelisih))}.
-            </p>
-            <p className="text-sm mb-2">
-              Terdapat {changedItems} detil anggaran yang diubah, {newItems} detil anggaran baru, dan {deletedItems} detil anggaran yang dihapus.
-            </p>
-            <p className="text-sm">
-              Perubahan ini menyebabkan perubahan pada total Pagu anggaran.
-            </p>
           </div>
           
           <div className="flex justify-end mt-4">
