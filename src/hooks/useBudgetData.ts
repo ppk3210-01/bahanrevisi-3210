@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -223,7 +222,6 @@ const useBudgetData = (filters: FilterSelection) => {
         selisih: selisih,
         komponen_output: item.komponenOutput,
         status: 'new',
-        is_approved: false,
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
         kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
         rincian_output: filters.rincianOutput !== 'all' ? filters.rincianOutput : null,
@@ -279,7 +277,6 @@ const useBudgetData = (filters: FilterSelection) => {
           selisih: selisih,
           komponen_output: item.komponenOutput,
           status: 'new',
-          is_approved: false,
           program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
           kegiatan: item.kegiatan || (filters.kegiatan !== 'all' ? filters.kegiatan : null),
           rincian_output: item.rincianOutput || (filters.rincianOutput !== 'all' ? filters.rincianOutput : null),
@@ -362,7 +359,6 @@ const useBudgetData = (filters: FilterSelection) => {
       }
       
       if (Object.keys(updates).length > 0 && currentItem.isApproved) {
-        supabaseUpdates.is_approved = false;
         supabaseUpdates.status = 'changed';
         updatedItem.isApproved = false;
         updatedItem.status = 'changed';
@@ -439,8 +435,7 @@ const useBudgetData = (filters: FilterSelection) => {
           harga_satuan_semula: item.hargaSatuanMenjadi,
           jumlah_semula: item.jumlahMenjadi,
           selisih: 0,
-          status: 'unchanged',
-          is_approved: true
+          status: 'unchanged'
         })
         .eq('id', id);
       
@@ -488,11 +483,10 @@ const useBudgetData = (filters: FilterSelection) => {
         .update({
           volume_menjadi: item.volumeSemula,
           satuan_menjadi: item.satuanSemula,
-          harga_satuan_menjadi: item.hargaSatuanSemula,
+          harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: item.jumlahSemula,
           selisih: 0,
-          status: 'unchanged',
-          is_approved: false
+          status: 'unchanged'
         })
         .eq('id', id);
       
@@ -507,7 +501,7 @@ const useBudgetData = (filters: FilterSelection) => {
               ...item,
               volumeMenjadi: item.volumeSemula,
               satuanMenjadi: item.satuanSemula,
-              hargaSatuanMenjadi: item.hargaSatuanSemula,
+              hargaSatuanMenjadi: item.hargaSatuanMenjadi,
               jumlahMenjadi: item.jumlahSemula,
               selisih: 0,
               status: 'unchanged',

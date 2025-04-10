@@ -1,4 +1,3 @@
-
 import { BudgetItemRecord, KomponenOutputRecord, SubKomponenRecord, AkunRecord, BudgetSummaryRecord } from './supabase';
 
 export interface BudgetItem {
@@ -70,7 +69,7 @@ export const convertToBudgetItem = (record: BudgetItemRecord): BudgetItem => {
     jumlahMenjadi: Number(record.jumlah_menjadi || 0),
     selisih: Number(record.selisih || 0),
     status: record.status as "unchanged" | "changed" | "new" | "deleted",
-    isApproved: record.is_approved,
+    isApproved: record.status === 'unchanged',
     komponenOutput: record.komponen_output,
     programPembebanan: record.program_pembebanan || '',
     kegiatan: record.kegiatan || '',
@@ -95,7 +94,11 @@ export const convertToBudgetItemRecord = (item: Partial<BudgetItem>): Partial<Bu
   if ('jumlahMenjadi' in item) record.jumlah_menjadi = item.jumlahMenjadi!;
   if ('selisih' in item) record.selisih = item.selisih!;
   if ('status' in item) record.status = item.status!;
-  if ('isApproved' in item) record.is_approved = item.isApproved!;
+  if ('isApproved' in item && item.isApproved !== undefined) {
+    if (item.isApproved && !('status' in item)) {
+      record.status = 'unchanged';
+    }
+  }
   if ('komponenOutput' in item) record.komponen_output = item.komponenOutput!;
   if ('programPembebanan' in item) record.program_pembebanan = item.programPembebanan;
   if ('kegiatan' in item) record.kegiatan = item.kegiatan;
