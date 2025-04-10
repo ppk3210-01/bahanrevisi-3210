@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 import { writeFileSync } from 'fs';
 
 // Project ID from environment or hardcoded value
-const PROJECT_ID = 'ohdmjhjcvoigsddwuaaw';
+const PROJECT_ID = 'hfhmiaskzqcydeyjzayb';
 
 console.log(`Generating Supabase types for project ID: ${PROJECT_ID}...`);
 
@@ -210,19 +210,146 @@ exec(`npx supabase gen types typescript --project-id ${PROJECT_ID}`, (error, std
               total_items: number | null;
             };
           };
+          budget_summary_by_program_pembebanan: {
+            Row: {
+              program_pembebanan: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            };
+          };
+          budget_summary_by_kegiatan: {
+            Row: {
+              kegiatan: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            };
+          };
+          budget_summary_by_rincian_output: {
+            Row: {
+              rincian_output: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            };
+          };
+          budget_summary_by_sub_komponen: {
+            Row: {
+              sub_komponen: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            };
+          };
         };
-        Functions: {};
-        Enums: {};
-        CompositeTypes: {};
+        Functions: {
+          get_budget_summary_by_account_group: {
+            Args: Record<string, never>;
+            Returns: {
+              account_group: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            }[];
+          };
+          get_budget_summary_by_komponen: {
+            Args: Record<string, never>;
+            Returns: {
+              komponen_output: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            }[];
+          };
+          get_budget_summary_by_akun: {
+            Args: Record<string, never>;
+            Returns: {
+              akun: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            }[];
+          };
+          get_budget_summary_by_program_pembebanan: {
+            Args: Record<string, never>;
+            Returns: {
+              program_pembebanan: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            }[];
+          };
+          get_budget_summary_by_kegiatan: {
+            Args: Record<string, never>;
+            Returns: {
+              kegiatan: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            }[];
+          };
+          get_budget_summary_by_rincian_output: {
+            Args: Record<string, never>;
+            Returns: {
+              rincian_output: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            }[];
+          };
+          get_budget_summary_by_sub_komponen: {
+            Args: Record<string, never>;
+            Returns: {
+              sub_komponen: string | null;
+              total_semula: number | null;
+              total_menjadi: number | null;
+              total_selisih: number | null;
+              new_items: number | null;
+              changed_items: number | null;
+              total_items: number | null;
+            }[];
+          };
+        };
       };
     };`;
   }
   
   // Write the generated types to a file
   try {
-    writeFileSync('src/integrations/supabase/tempTypes.ts', stdout);
+    writeFileSync('src/integrations/supabase/types.ts', stdout);
     console.log('Types generated successfully!');
-    console.log('Written to: src/integrations/supabase/tempTypes.ts');
+    console.log('Written to: src/integrations/supabase/types.ts');
     
   } catch (err) {
     console.error(`Failed to write file: ${err}`);
