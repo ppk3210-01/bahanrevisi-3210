@@ -9,16 +9,292 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      akun: {
+        Row: {
+          created_at: string | null
+          id: string
+          kode: string
+          nama: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          kode: string
+          nama: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          kode?: string
+          nama?: string
+        }
+        Relationships: []
+      }
+      budget_items: {
+        Row: {
+          akun: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          harga_satuan_menjadi: number | null
+          harga_satuan_semula: number | null
+          id: string
+          jumlah_menjadi: number | null
+          jumlah_semula: number | null
+          kegiatan: string | null
+          komponen_output: string | null
+          program_pembebanan: string | null
+          rincian_output: string | null
+          satuan_menjadi: string | null
+          satuan_semula: string | null
+          selisih: number | null
+          status: string | null
+          sub_komponen: string | null
+          updated_at: string | null
+          uraian: string
+          volume_menjadi: number | null
+          volume_semula: number | null
+        }
+        Insert: {
+          akun?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          harga_satuan_menjadi?: number | null
+          harga_satuan_semula?: number | null
+          id?: string
+          jumlah_menjadi?: number | null
+          jumlah_semula?: number | null
+          kegiatan?: string | null
+          komponen_output?: string | null
+          program_pembebanan?: string | null
+          rincian_output?: string | null
+          satuan_menjadi?: string | null
+          satuan_semula?: string | null
+          selisih?: number | null
+          status?: string | null
+          sub_komponen?: string | null
+          updated_at?: string | null
+          uraian: string
+          volume_menjadi?: number | null
+          volume_semula?: number | null
+        }
+        Update: {
+          akun?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          harga_satuan_menjadi?: number | null
+          harga_satuan_semula?: number | null
+          id?: string
+          jumlah_menjadi?: number | null
+          jumlah_semula?: number | null
+          kegiatan?: string | null
+          komponen_output?: string | null
+          program_pembebanan?: string | null
+          rincian_output?: string | null
+          satuan_menjadi?: string | null
+          satuan_semula?: string | null
+          selisih?: number | null
+          status?: string | null
+          sub_komponen?: string | null
+          updated_at?: string | null
+          uraian?: string
+          volume_menjadi?: number | null
+          volume_semula?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      komponen_output: {
+        Row: {
+          created_at: string | null
+          id: string
+          kode: string
+          nama: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          kode: string
+          nama: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          kode?: string
+          nama?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      sub_komponen: {
+        Row: {
+          created_at: string | null
+          id: string
+          kode: string
+          komponen_output_id: string | null
+          nama: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          kode: string
+          komponen_output_id?: string | null
+          nama: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          kode?: string
+          komponen_output_id?: string | null
+          nama?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_komponen_komponen_output_id_fkey"
+            columns: ["komponen_output_id"]
+            isOneToOne: false
+            referencedRelation: "komponen_output"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      budget_summary_by_account_group: {
+        Row: {
+          account_group: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_akun: {
+        Row: {
+          akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_kegiatan: {
+        Row: {
+          changed_items: number | null
+          kegiatan: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_komponen: {
+        Row: {
+          changed_items: number | null
+          komponen_output: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_program_pembebanan: {
+        Row: {
+          changed_items: number | null
+          new_items: number | null
+          program_pembebanan: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_rincian_output: {
+        Row: {
+          changed_items: number | null
+          new_items: number | null
+          rincian_output: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_sub_komponen: {
+        Row: {
+          changed_items: number | null
+          new_items: number | null
+          sub_komponen: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +409,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "user"],
+    },
   },
 } as const

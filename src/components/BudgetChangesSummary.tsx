@@ -3,6 +3,9 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BudgetItem } from '@/types/budget';
 import { formatCurrency } from '@/utils/budgetCalculations';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
+import html2canvas from 'html2canvas';
 
 interface BudgetChangesSummaryProps {
   items: BudgetItem[];
@@ -22,12 +25,53 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
   
   const totalMenjadiNew = newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
 
+  // Calculate the total values
+  const totalPaguSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
+  const totalPaguMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+  const totalPaguSelisih = totalPaguMenjadi - totalPaguSemula;
+
+  // Export to JPG function
+  const exportToJPG = async () => {
+    const summaryElement = document.getElementById('budget-change-summary');
+    
+    if (summaryElement) {
+      try {
+        const canvas = await html2canvas(summaryElement, {
+          backgroundColor: '#ffffff',
+          scale: 2, // Higher scale for better quality
+          logging: false
+        });
+        
+        const image = canvas.toDataURL('image/jpeg', 0.9);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `Ringkasan-Perubahan-Anggaran-${new Date().toISOString().split('T')[0]}.jpg`;
+        link.href = image;
+        link.click();
+      } catch (error) {
+        console.error('Error exporting to JPG:', error);
+      }
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" id="budget-change-summary">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-semibold">Ringkasan Perubahan Anggaran</h3>
+        <Button variant="outline" onClick={exportToJPG} className="flex items-center gap-1">
+          <Download size={16} />
+          <span>Export to JPG</span>
+        </Button>
+      </div>
+      
       {/* Kesimpulan section - moved to the top */}
       <div className="bg-blue-50 p-4 border rounded-md">
         <h3 className="font-semibold mb-2 text-blue-800">Kesimpulan</h3>
         <div className="space-y-2 text-sm">
+          <p>
+            Nilai Pagu Anggaran Awal keseluruhan adalah sebesar Rp {formatCurrency(totalPaguSemula)}. Nilai Pagu Anggaran Total keseluruhan setelah perubahan menjadi Rp {formatCurrency(totalPaguMenjadi)}.
+          </p>
           <p>
             {changedItems.length > 0 ? 
               `Terdapat ${changedItems.length} detail anggaran yang mengalami perubahan dengan total nilai semula Rp ${formatCurrency(totalSemulaChanged)} menjadi Rp ${formatCurrency(totalMenjadiChanged)}.` : 
@@ -39,7 +83,10 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
               'Tidak ada detail anggaran baru yang ditambahkan.'}
           </p>
           <p>
-            Total perubahan ini menyebabkan {totalSelisihChanged + totalMenjadiNew > 0 ? 'kenaikan' : 'penurunan'} pada total Pagu anggaran sebesar Rp {formatCurrency(Math.abs(totalSelisihChanged + totalMenjadiNew))}.
+            Total perubahan ini menyebabkan {totalPaguSelisih > 0 ? 'kenaikan' : 'penurunan'} pada total Pagu anggaran sebesar Rp {formatCurrency(Math.abs(totalPaguSelisih))}.
+          </p>
+          <p>
+            Dampak dari perubahan anggaran ini adalah penyesuaian alokasi anggaran untuk mendukung pencapaian target dan sasaran yang telah ditetapkan dalam Rencana Kerja.
           </p>
           <p>
             Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.

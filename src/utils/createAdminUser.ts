@@ -5,12 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 export const createAdminUser = async () => {
   // First, sign up the user
   const { data: signupData, error: signupError } = await supabase.auth.signUp({
-    email: 'admin@bahan-revisi-3210.com',
-    password: 'admin3210!',
+    email: 'ppk3210@bahan-revisi-3210.com',
+    password: 'bellamy',
     options: {
       data: {
-        username: 'admin',
-        full_name: 'Administrator',
+        username: 'ppk3210',
+        full_name: 'Administrator PPK',
         role: 'admin'
       }
     }
@@ -25,31 +25,44 @@ export const createAdminUser = async () => {
   return signupData;
 };
 
-// This function can be run from the browser console to create a standard user
-export const createStandardUser = async () => {
-  // Create the user with the specified username and password
-  const { data: signupData, error: signupError } = await supabase.auth.signUp({
-    email: 'sosial3210@bahan-revisi-3210.com',
-    password: 'bps3210@',
-    options: {
-      data: {
-        username: 'sosial 3210',
-        full_name: 'User Sosial',
-        role: 'user'
-      }
-    }
-  });
+// Create standard users with specified usernames
+export const createStandardUsers = async () => {
+  const users = [
+    { username: 'produksi3210', fullName: 'User Produksi' },
+    { username: 'distribusi3210', fullName: 'User Distribusi' },
+    { username: 'neraca3210', fullName: 'User Neraca' },
+    { username: 'ipds3210', fullName: 'User IPDS' },
+    { username: 'tu3210', fullName: 'User TU' }
+  ];
 
-  if (signupError) {
-    console.error('Error creating standard user:', signupError);
-    return;
+  const results = [];
+
+  for (const user of users) {
+    // Create the user with the specified username and password
+    const { data: signupData, error: signupError } = await supabase.auth.signUp({
+      email: `${user.username}@bahan-revisi-3210.com`,
+      password: 'bps3210',
+      options: {
+        data: {
+          username: user.username,
+          full_name: user.fullName,
+          role: 'user'
+        }
+      }
+    });
+
+    if (signupError) {
+      console.error(`Error creating user ${user.username}:`, signupError);
+    } else {
+      console.log(`User ${user.username} created successfully:`, signupData);
+      results.push(signupData);
+    }
   }
 
-  console.log('Standard user created successfully:', signupData);
-  return signupData;
+  return results;
 };
 
 // Run these functions from the console:
-// import { createAdminUser, createStandardUser } from './src/utils/createAdminUser.ts';
+// import { createAdminUser, createStandardUsers } from './src/utils/createAdminUser.ts';
 // createAdminUser();
-// createStandardUser();
+// createStandardUsers();

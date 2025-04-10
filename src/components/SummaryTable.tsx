@@ -89,28 +89,27 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       
       data.forEach(item => {
         if (item.type === 'account_group' && 'account_group' in item && item.account_group) {
-          // Extract the first two digits for grouping
+          // Extract the first two digits for grouping (fixing the issue with account grouping)
           const accountGroupStr = item.account_group.toString().padStart(2, '0');
           const prefix = accountGroupStr.substring(0, 2);
             
-            if (groupedData.has(prefix)) {
-              // Add to existing group
-              const existingItem = groupedData.get(prefix)!;
-              existingItem.total_semula = (existingItem.total_semula || 0) + (item.total_semula || 0);
-              existingItem.total_menjadi = (existingItem.total_menjadi || 0) + (item.total_menjadi || 0);
-              existingItem.total_selisih = (existingItem.total_selisih || 0) + (item.total_selisih || 0);
-              existingItem.new_items = (existingItem.new_items || 0) + (item.new_items || 0);
-              existingItem.changed_items = (existingItem.changed_items || 0) + (item.changed_items || 0);
-              existingItem.total_items = (existingItem.total_items || 0) + (item.total_items || 0);
-            } else {
-              // Create new group
-              groupedData.set(prefix, {
-                ...item,
-                account_group: prefix,
-                type: 'account_group'
-              });
-            }
-          } 
+          if (groupedData.has(prefix)) {
+            // Add to existing group
+            const existingItem = groupedData.get(prefix)!;
+            existingItem.total_semula = (existingItem.total_semula || 0) + (item.total_semula || 0);
+            existingItem.total_menjadi = (existingItem.total_menjadi || 0) + (item.total_menjadi || 0);
+            existingItem.total_selisih = (existingItem.total_selisih || 0) + (item.total_selisih || 0);
+            existingItem.new_items = (existingItem.new_items || 0) + (item.new_items || 0);
+            existingItem.changed_items = (existingItem.changed_items || 0) + (item.changed_items || 0);
+            existingItem.total_items = (existingItem.total_items || 0) + (item.total_items || 0);
+          } else {
+            // Create new group
+            groupedData.set(prefix, {
+              ...item,
+              account_group: prefix,
+              type: 'account_group'
+            });
+          }
         }
       });
       
