@@ -71,7 +71,7 @@ export const convertToBudgetItem = (record: BudgetItemRecord): BudgetItem => {
     selisih: Number(record.selisih || 0),
     status: record.status as "unchanged" | "changed" | "new" | "deleted",
     isApproved: record.status === 'unchanged',
-    komponenOutput: record.komponen_output,
+    komponenOutput: record.komponen_output || '',
     programPembebanan: record.program_pembebanan || '',
     kegiatan: record.kegiatan || '',
     rincianOutput: record.rincian_output || '',
@@ -93,7 +93,7 @@ export const convertToBudgetItemRecord = (item: Partial<BudgetItem>): Partial<Bu
   if ('satuanMenjadi' in item) record.satuan_menjadi = item.satuanMenjadi!;
   if ('hargaSatuanMenjadi' in item) record.harga_satuan_menjadi = item.hargaSatuanMenjadi!;
   if ('jumlahMenjadi' in item) record.jumlah_menjadi = item.jumlahMenjadi!;
-  // Don't include selisih in record as it's a computed column in the database
+  // selisih is a computed column, do not include it
   if ('status' in item) record.status = item.status!;
   if ('isApproved' in item && item.isApproved !== undefined) {
     if (item.isApproved && !('status' in item)) {

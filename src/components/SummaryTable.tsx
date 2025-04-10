@@ -89,8 +89,18 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       
       data.forEach(item => {
         if (item.type === 'account_group' && 'account_group' in item && item.account_group) {
-          // Extract the first two digits for grouping (fixing the issue with account grouping)
-          const accountGroupStr = item.account_group.toString().padStart(2, '0');
+          // Extract the first two digits for grouping
+          let accountGroupStr = item.account_group.toString().trim();
+          
+          // Skip empty entries
+          if (!accountGroupStr || accountGroupStr === '-') return;
+          
+          // Ensure we have at least 2 digits, pad with leading zeros if needed
+          if (accountGroupStr.length === 1) {
+            accountGroupStr = '0' + accountGroupStr;
+          }
+          
+          // Get first two chars for grouping
           const prefix = accountGroupStr.substring(0, 2);
             
           if (groupedData.has(prefix)) {
@@ -135,7 +145,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
             valB = b.total_menjadi || 0;
             break;
           case 'totalSelisih':
-            valA = a.total_selisih || 0;
+            valA = a.total_selisih ||.0;
             valB = b.total_selisih || 0;
             break;
           case 'newItems':

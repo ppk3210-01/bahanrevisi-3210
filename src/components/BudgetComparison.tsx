@@ -91,7 +91,7 @@ const BudgetComparison: React.FC = () => {
 
   const getSummarySectionName = (): string => {
     switch (summarySectionView) {
-      case 'changes': return 'Ringkasan Perubahan Pagu Anggaran';
+      case 'changes': return 'Perubahan Pagu Anggaran';
       case 'account_group': return 'Kelompok Akun';
       case 'komponen_output': return 'Komponen Output';
       case 'akun': return 'Akun';
