@@ -13,6 +13,12 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
+
 interface ExportOptionsProps {
   items: BudgetItem[];
   komponenOutput: string;

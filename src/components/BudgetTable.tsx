@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   akun,
   areFiltersComplete
 }) => {
-  const { isAdmin, profile, user } = useAuth();
+  const { isAdmin, user, profile } = useAuth();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState<Partial<BudgetItem>>({
     uraian: '',
@@ -77,7 +76,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const [detailItem, setDetailItem] = useState<BudgetItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
 
-  // Determine if user is a viewer (not authenticated)
   const isViewer = !user;
 
   useEffect(() => {
@@ -266,7 +264,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     setIsDetailOpen(true);
   };
 
-  // Check if user can delete an item based on role and item status
   const canDeleteItem = (item: BudgetItem): boolean => {
     if (isAdmin) return true;
     if (isViewer) return false;
@@ -279,12 +276,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     const isValueChange = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field as string);
     const cellClass = getCellClass(item, isValueChange);
     
-    // Don't render edit fields if user is a viewer
     if (isViewer && isEditing) {
       return;
     }
     
-    // For non-admin users, only allow editing of specific fields when all filters are selected
     if (isEditing && !isAdmin && !areFiltersComplete && 
         ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'].includes(field as string)) {
       return;

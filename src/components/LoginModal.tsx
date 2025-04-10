@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -53,7 +52,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setUsername('');
   };
 
-  // Add demo account options for easy login
   const useDemoAccount = (type: 'admin' | 'user') => {
     if (type === 'admin') {
       setEmailOrUsername('admin@bps3210.id');

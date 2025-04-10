@@ -7,7 +7,7 @@ import UserManagement from './UserManagement';
 
 const Header: React.FC = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { user, profile, signOut, isAdmin } = useAuth();
+  const { user, isAdmin, signOut, profile } = useAuth();
 
   return (
     <header className="bg-white border-b shadow-sm py-2 px-4 fixed top-0 left-0 right-0 z-10">

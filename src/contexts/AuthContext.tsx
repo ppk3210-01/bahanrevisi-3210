@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 // Define the types
@@ -18,6 +19,10 @@ interface AuthContextProps {
   login: (email: string, password?: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
+  profile: UserProfile | null; // Added profile property
+  signIn: (emailOrUsername: string, password: string) => Promise<boolean>; // Added signIn method
+  signUp: (email: string, password: string, username: string) => Promise<boolean>; // Added signUp method
+  signOut: () => void; // Added signOut method
 }
 
 // Create the context
@@ -27,6 +32,10 @@ const AuthContext = createContext<AuthContextProps>({
   login: async () => false,
   logout: () => {},
   loading: false,
+  profile: null, // Added profile property
+  signIn: async () => false, // Added signIn method
+  signUp: async () => false, // Added signUp method
+  signOut: () => {}, // Added signOut method
 });
 
 // Create a custom hook to use the context
@@ -72,6 +81,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+  };
+
+  // Add these new methods to align with the interface
+  const signIn = async (emailOrUsername: string, password: string) => {
+    return login(emailOrUsername, password);
+  };
+
+  const signUp = async (email: string, password: string, username: string) => {
+    console.log('Sign up not implemented yet', { email, password, username });
+    // In a real implementation, we would add the user to the database
+    return false;
+  };
+
+  const signOut = () => {
+    logout();
   };
 
   const hardcodedCredentials = {
@@ -171,9 +195,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = user?.role === 'admin';
+  const profile = user; // Add profile for compatibility
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, login, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isAdmin, 
+      login, 
+      logout, 
+      loading, 
+      profile, 
+      signIn, 
+      signUp, 
+      signOut 
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );
