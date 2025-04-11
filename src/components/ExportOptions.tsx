@@ -114,14 +114,14 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
 
       // Create a temporary container for the table in the DOM
       const container = document.createElement('div');
-      document.body.appendChild(container);
-      container.style.position = 'fixed';
-      container.style.top = '0';
+      container.style.position = 'absolute';
       container.style.left = '-9999px';
+      container.style.top = '0';
       container.style.width = '1200px';
       container.style.fontFamily = 'Arial, sans-serif';
       container.style.padding = '20px';
       container.style.backgroundColor = '#ffffff';
+      document.body.appendChild(container);
       
       // Add a title
       const title = document.createElement('h2');
@@ -228,19 +228,18 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         scale: 2, // Increased scale for better quality
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: true
+        logging: false
       });
       
-      // Convert canvas to data URL and create an image download
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-      
-      // Create link and trigger download
+      // Create a link element to trigger download
       const link = document.createElement('a');
       link.download = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.jpg`;
-      link.href = dataUrl;
+      link.href = canvas.toDataURL('image/jpeg', 1.0);
+      document.body.appendChild(link);
       link.click();
       
       // Clean up
+      document.body.removeChild(link);
       document.body.removeChild(container);
       
       toast({
@@ -346,8 +345,16 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         margin: { top: 30 }
       });
       
-      // Save the PDF
-      pdf.save(`Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.pdf`);
+      // Generate and save the PDF file directly
+      const pdfOutput = pdf.output('blob');
+      const url = URL.createObjectURL(pdfOutput);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
       toast({
         title: "Berhasil!",

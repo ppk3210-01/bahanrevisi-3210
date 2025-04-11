@@ -101,14 +101,14 @@ const BudgetComparison: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col-reverse md:flex-row justify-between gap-4">
-        <div className="w-full md:w-3/4">
+      <div className="filter-and-summary-container">
+        <div className="budget-filter-container">
           <BudgetFilter 
             onFilterChange={handleFilterChange} 
             filters={filters}
           />
         </div>
-        <div className="w-full md:w-1/4 flex flex-col gap-2">
+        <div>
           <BudgetSummaryBox 
             totalSemula={totalSemula}
             totalMenjadi={totalMenjadi}

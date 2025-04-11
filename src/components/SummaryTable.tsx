@@ -193,7 +193,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
               const totalItems = record.total_items || 0;
               
               return (
-                <TableRow key={`${categoryValue}-${index}`}>
+                <TableRow key={`${categoryValue}-${index}`} className="py-3">
                   <TableCell className="font-medium">{categoryValue}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalSemula)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalMenjadi)}</TableCell>

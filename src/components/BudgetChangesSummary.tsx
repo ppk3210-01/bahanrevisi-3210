@@ -74,8 +74,8 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
     return (
       <div className="space-y-2 text-sm">
         <p>
-          Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(totalSemula)} 
-          mengalami perubahan menjadi {formatCurrency(totalMenjadi)}, dengan selisih {formatCurrency(Math.abs(totalSelisih))} 
+          Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} 
+          mengalami perubahan menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih {formatCurrency(roundToThousands(Math.abs(totalSelisih)))} 
           atau {changeDirection}.
         </p>
         <p>
@@ -132,7 +132,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
         scale: 2, // Higher quality
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: true,
+        logging: false,
         onclone: (clonedDoc) => {
           // Make sure the cloned element is visible and has proper dimensions
           const clonedSummary = clonedDoc.getElementById('budget-changes-summary');
@@ -149,12 +149,9 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
       });
 
       // Convert to data URL and trigger download
-      const image = canvas.toDataURL('image/jpeg', 0.95);
-      
-      // Create link and trigger download
       const link = document.createElement('a');
-      link.href = image;
       link.download = `Ringkasan_Perubahan_Anggaran_${new Date().toISOString().split('T')[0]}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 1.0);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -216,7 +213,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
           let detailPerubahan = "";
           if (volumeChanged) detailPerubahan += `Volume: ${item.volumeSemula} → ${item.volumeMenjadi}\n`;
           if (satuanChanged) detailPerubahan += `Satuan: ${item.satuanSemula} → ${item.satuanMenjadi}\n`;
-          if (hargaChanged) detailPerubahan += `Harga: ${formatCurrency(item.hargaSatuanSemula)} → ${formatCurrency(item.hargaSatuanMenjadi)}`;
+          if (hargaChanged) detailPerubahan += `Harga: ${formatCurrency(roundToThousands(item.hargaSatuanSemula))} → ${formatCurrency(roundToThousands(item.hargaSatuanMenjadi))}`;
           
           return [
             index + 1,
@@ -311,8 +308,16 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
         pdf.text(line, 14, startY + (index * 5));
       });
       
-      // Save PDF
-      pdf.save(`Ringkasan_Perubahan_Anggaran_${new Date().toISOString().split('T')[0]}.pdf`);
+      // Generate and save the PDF file directly
+      const pdfOutput = pdf.output('blob');
+      const url = URL.createObjectURL(pdfOutput);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Ringkasan_Perubahan_Anggaran_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
       toast({
         title: "Berhasil!",
@@ -361,8 +366,8 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">No</TableHead>
-                  <TableHead className="w-36">Pembebanan</TableHead>
-                  <TableHead className="w-64">Uraian</TableHead>
+                  <TableHead className="w-24">Pembebanan</TableHead>
+                  <TableHead className="min-w-[250px]">Uraian</TableHead>
                   <TableHead className="w-48">Detail Perubahan</TableHead>
                   <TableHead className="text-right">Jumlah Semula</TableHead>
                   <TableHead className="text-right">Jumlah Menjadi</TableHead>
@@ -378,14 +383,14 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                   let detailPerubahan = "";
                   if (volumeChanged) detailPerubahan += `Volume: ${item.volumeSemula} → ${item.volumeMenjadi}\n`;
                   if (satuanChanged) detailPerubahan += `Satuan: ${item.satuanSemula} → ${item.satuanMenjadi}\n`;
-                  if (hargaChanged) detailPerubahan += `Harga: ${formatCurrency(item.hargaSatuanSemula)} → ${formatCurrency(item.hargaSatuanMenjadi)}`;
+                  if (hargaChanged) detailPerubahan += `Harga: ${formatCurrency(roundToThousands(item.hargaSatuanSemula))} → ${formatCurrency(roundToThousands(item.hargaSatuanMenjadi))}`;
                   
                   const selisih = item.jumlahMenjadi - item.jumlahSemula;
                   
                   return (
                     <TableRow key={item.id}>
                       <TableCell>{index + 1}</TableCell>
-                      <TableCell>{getCombinedPembebananCode(item)}</TableCell>
+                      <TableCell className="break-words text-xs">{getCombinedPembebananCode(item)}</TableCell>
                       <TableCell>{item.uraian}</TableCell>
                       <TableCell className="whitespace-pre-line">{detailPerubahan}</TableCell>
                       <TableCell className="text-right">{formatCurrency(roundToThousands(item.jumlahSemula))}</TableCell>
@@ -411,8 +416,8 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">No</TableHead>
-                  <TableHead className="w-36">Pembebanan</TableHead>
-                  <TableHead className="w-64">Uraian</TableHead>
+                  <TableHead className="w-24">Pembebanan</TableHead>
+                  <TableHead className="min-w-[250px]">Uraian</TableHead>
                   <TableHead className="text-center">Volume</TableHead>
                   <TableHead className="text-center">Satuan</TableHead>
                   <TableHead className="text-right">Harga Satuan</TableHead>
@@ -423,7 +428,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                 {newItems.map((item, index) => (
                   <TableRow key={item.id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{getCombinedPembebananCode(item)}</TableCell>
+                    <TableCell className="break-words text-xs">{getCombinedPembebananCode(item)}</TableCell>
                     <TableCell>{item.uraian}</TableCell>
                     <TableCell className="text-center">{item.volumeMenjadi}</TableCell>
                     <TableCell className="text-center">{item.satuanMenjadi}</TableCell>

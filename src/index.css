@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -235,4 +234,42 @@
 /* Add size xs for buttons */
 .btn-xs {
   @apply h-7 px-2 text-xs;
+}
+
+/* Add increased spacing for table rows */
+.data-table tr td,
+.data-table tr th {
+  @apply py-3;
+}
+
+.budget-table-container table tbody tr td {
+  @apply py-3;
+}
+
+/* Modify table cells to use rounding for monetary values */
+.number-cell, 
+.selisih-value {
+  white-space: nowrap;
+}
+
+/* Make the budget filter container match the height of the summary box */
+.budget-filter-container {
+  @apply h-full flex flex-col;
+}
+
+.budget-filter-container .flex-col-reverse {
+  @apply h-full;
+}
+
+/* Make "Pilih Program dan Anggaran" box same height as summary box */
+.filter-and-summary-container {
+  @apply flex flex-col md:flex-row gap-4;
+}
+
+.filter-and-summary-container > div:first-child {
+  @apply w-full md:w-3/4 h-full;
+}
+
+.filter-and-summary-container > div:last-child {
+  @apply w-full md:w-1/4 h-full;
 }
