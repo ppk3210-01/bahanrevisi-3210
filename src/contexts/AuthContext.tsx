@@ -178,6 +178,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           updated_at: new Date().toISOString(),
         }
       }
+      {
+        email: 'sosial3210@bahan-revisi-3210.com',
+        username: 'sosial3210',
+        password: 'bps3210',
+        profile: {
+          id: '00000000-0000-0000-0000-000000000007',
+          username: 'Elitya Tri Permana',
+          full_name: 'User SOSIAL',
+          role: 'user' as UserRole,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      }
     ]
   };
 
