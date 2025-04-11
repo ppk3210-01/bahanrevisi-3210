@@ -26,7 +26,8 @@ type SummarySectionView =
   'program_pembebanan' | 
   'kegiatan' | 
   'rincian_output' | 
-  'sub_komponen';
+  'sub_komponen' |
+  'account_group';
 
 const BudgetComparison: React.FC = () => {
   const { isAdmin, user } = useAuth();
@@ -82,6 +83,8 @@ const BudgetComparison: React.FC = () => {
       return summaryData.filter(item => item.type === 'rincian_output');
     } else if (summarySectionView === 'sub_komponen') {
       return summaryData.filter(item => item.type === 'sub_komponen');
+    } else if (summarySectionView === 'account_group') {
+      return summaryData.filter(item => item.type === 'account_group');
     }
     return [];
   };
@@ -95,6 +98,7 @@ const BudgetComparison: React.FC = () => {
       case 'kegiatan': return 'Kegiatan';
       case 'rincian_output': return 'Rincian Output';
       case 'sub_komponen': return 'Sub Komponen';
+      case 'account_group': return 'Kelompok Akun';
       default: return 'Ringkasan';
     }
   };
@@ -230,6 +234,14 @@ const BudgetComparison: React.FC = () => {
                     className="text-xs"
                   >
                     Akun
+                  </Button>
+                  <Button 
+                    variant={summarySectionView === 'account_group' ? 'default' : 'outline'} 
+                    onClick={() => setSummarySectionView('account_group')}
+                    size="xs"
+                    className="text-xs"
+                  >
+                    Kelompok Akun
                   </Button>
                 </div>
                 

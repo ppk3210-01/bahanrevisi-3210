@@ -6,7 +6,7 @@ import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group';
 
 interface SummaryTableProps {
   summaryData: BudgetSummaryRecord[];
@@ -25,6 +25,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       case 'kegiatan': return 'Kegiatan';
       case 'rincian_output': return 'Rincian Output';
       case 'sub_komponen': return 'Sub Komponen';
+      case 'account_group': return 'Kelompok Akun';
       default: return 'Kategori';
     }
   };
@@ -59,6 +60,11 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       case 'sub_komponen': 
         if (view === 'sub_komponen' && 'sub_komponen' in record) {
           return record.sub_komponen || '-';
+        }
+        break;
+      case 'account_group': 
+        if (view === 'account_group' && 'account_group' in record) {
+          return record.account_group || '-';
         }
         break;
     }

@@ -15,11 +15,9 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,18 +25,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     
     try {
-      console.log(`Attempting to ${isRegistering ? 'register' : 'login'} with email/username:`, emailOrUsername);
+      console.log(`Attempting to login with email/username:`, emailOrUsername);
       
-      if (isRegistering) {
-        await signUp(emailOrUsername, password, username);
+      // Try login with email/username and password
+      const success = await signIn(emailOrUsername, password);
+      if (success) {
+        onClose();
       } else {
-        // Try login with email/username and password
-        const success = await signIn(emailOrUsername, password);
-        if (success) {
-          onClose();
-        } else {
-          setError('Kredensial login tidak valid. Silakan periksa kembali username dan password Anda.');
-        }
+        setError('Kredensial login tidak valid. Silakan periksa kembali username dan password Anda.');
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -48,24 +42,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const toggleMode = () => {
-    setIsRegistering(!isRegistering);
-    setError(null);
-    // Reset fields when switching modes
-    setEmailOrUsername('');
-    setPassword('');
-    setUsername('');
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isRegistering ? 'Buat Akun Baru' : 'Login ke Akun Anda'}</DialogTitle>
+          <DialogTitle>Login ke Akun Anda</DialogTitle>
           <DialogDescription>
-            {isRegistering 
-              ? 'Masukkan detail Anda untuk membuat akun baru.' 
-              : 'Masukkan kredensial Anda untuk mengakses akun Anda.'}
+            Masukkan kredensial Anda untuk mengakses akun Anda.
           </DialogDescription>
         </DialogHeader>
         
@@ -77,28 +60,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         )}
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          {isRegistering && (
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Masukkan username Anda"
-                required
-              />
-            </div>
-          )}
-          
           <div className="space-y-2">
-            <Label htmlFor="emailOrUsername">{isRegistering ? 'Email' : 'Email atau Username'}</Label>
+            <Label htmlFor="emailOrUsername">Email atau Username</Label>
             <Input
               id="emailOrUsername"
               type="text"
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
-              placeholder={isRegistering ? "Masukkan email Anda" : "Masukkan email atau username Anda"}
+              placeholder="Masukkan email atau username Anda"
               required
             />
           </div>
@@ -115,18 +84,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             />
           </div>
           
-          <div className="flex justify-between pt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={toggleMode}
-              disabled={isLoading}
-            >
-              {isRegistering ? 'Sudah punya akun?' : 'Butuh akun baru?'}
-            </Button>
-            
+          <div className="flex justify-end pt-2">
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Memproses...' : isRegistering ? 'Daftar' : 'Login'}
+              {isLoading ? 'Memproses...' : 'Login'}
             </Button>
           </div>
         </form>
