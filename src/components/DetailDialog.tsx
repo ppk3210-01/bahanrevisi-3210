@@ -119,7 +119,8 @@ const DetailDialog: React.FC<DetailDialogProps> = ({ open, onOpenChange, item })
               item.status === 'new' ? 'bg-blue-100 text-blue-800' : 
               item.status === 'changed' ? 'bg-yellow-100 text-yellow-800'
             }`}>
-              {item.status === 'new' ? 'Baru' : 'Diubah'}
+              {item.status === 'new' ? 'Baru' :
+              item.status === 'changed' ? 'Diubah' : ''}
             </div>
           </div>
         </div>
