@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import LoginModal from './LoginModal';
@@ -39,7 +38,7 @@ const Header: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={signOut} 
-                className="border-white text-white hover:bg-[#152154]"
+                className="border-white text-white bg-[#152154] hover:bg-[#152154]"
               >
                 Logout
               </Button>
@@ -49,7 +48,7 @@ const Header: React.FC = () => {
               variant="outline" 
               size="sm" 
               onClick={() => setIsLoginModalOpen(true)}
-              className="border-white text-white hover:[#152154]"
+              className="border-white text-white bg-[#152154] hover:bg-[#152154]"
             >
               Login
             </Button>
