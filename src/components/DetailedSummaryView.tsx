@@ -9,7 +9,7 @@ import { BudgetSummaryRecord } from '@/types/database';
 import SummaryTable from './SummaryTable';
 import SummaryChart from './SummaryChart';
 
-type SummaryViewType = 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 
 interface DetailedSummaryViewProps {
   summaryData: BudgetSummaryRecord[];
@@ -32,9 +32,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   
   // Filter data to remove empty entries
   const filteredSummaryData = summaryData.filter(item => {
-    if (view === 'account_group') {
-      return item.type === 'account_group' && 'account_group' in item && item.account_group !== null && item.account_group !== '-';
-    } else if (view === 'komponen_output') {
+    if (view === 'komponen_output') {
       return item.type === 'komponen_output' && 'komponen_output' in item && item.komponen_output !== null && item.komponen_output !== '-';
     } else if (view === 'akun') {
       return item.type === 'akun' && 'akun' in item && item.akun !== null && item.akun !== '-';

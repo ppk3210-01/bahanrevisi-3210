@@ -21,7 +21,6 @@ import BudgetChangesSummary from './BudgetChangesSummary';
 // Define the type for summary section view
 type SummarySectionView = 
   'changes' |
-  'account_group' | 
   'komponen_output' | 
   'akun' | 
   'program_pembebanan' | 
@@ -71,9 +70,7 @@ const BudgetComparison: React.FC = () => {
   };
   
   const getFilteredSummaryData = (): BudgetSummaryRecord[] => {
-    if (summarySectionView === 'account_group') {
-      return summaryData.filter(item => item.type === 'account_group');
-    } else if (summarySectionView === 'komponen_output') {
+    if (summarySectionView === 'komponen_output') {
       return summaryData.filter(item => item.type === 'komponen_output');
     } else if (summarySectionView === 'akun') {
       return summaryData.filter(item => item.type === 'akun');
@@ -92,7 +89,6 @@ const BudgetComparison: React.FC = () => {
   const getSummarySectionName = (): string => {
     switch (summarySectionView) {
       case 'changes': return 'Perubahan Pagu Anggaran';
-      case 'account_group': return 'Kelompok Akun';
       case 'komponen_output': return 'Komponen Output';
       case 'akun': return 'Akun';
       case 'program_pembebanan': return 'Program Pembebanan';
@@ -186,14 +182,6 @@ const BudgetComparison: React.FC = () => {
                     className="text-xs"
                   >
                     Ringkasan Perubahan
-                  </Button>
-                  <Button 
-                    variant={summarySectionView === 'account_group' ? 'default' : 'outline'} 
-                    onClick={() => setSummarySectionView('account_group')}
-                    size="xs"
-                    className="text-xs"
-                  >
-                    Kelompok Akun
                   </Button>
                   <Button 
                     variant={summarySectionView === 'program_pembebanan' ? 'default' : 'outline'} 
