@@ -117,11 +117,9 @@ const DetailDialog: React.FC<DetailDialogProps> = ({ open, onOpenChange, item })
             
             <div className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ml-2 ${
               item.status === 'new' ? 'bg-blue-100 text-blue-800' : 
-              item.status === 'changed' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800'
+              item.status === 'changed' ? 'bg-yellow-100 text-yellow-800'
             }`}>
-              {item.status === 'new' ? 'Baru' : 
-               item.status === 'changed' ? 'Diubah' : ''}
+              {item.status === 'new' ? 'Baru' : 'Diubah'}
             </div>
           </div>
         </div>
