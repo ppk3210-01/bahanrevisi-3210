@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { BudgetSummaryRecord } from '@/types/database';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-type SummaryViewType = 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 
 interface SummaryTableProps {
   summaryData: BudgetSummaryRecord[];
@@ -19,7 +19,6 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   
   const getColumnName = (): string => {
     switch (view) {
-      case 'account_group': return 'Kelompok Akun';
       case 'komponen_output': return 'Komponen Output';
       case 'akun': return 'Akun';
       case 'program_pembebanan': return 'Program Pembebanan';
@@ -32,11 +31,6 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
 
   const getValueFromRecord = (record: BudgetSummaryRecord): string | null => {
     switch (record.type) {
-      case 'account_group': 
-        if (view === 'account_group' && 'account_group' in record) {
-          return record.account_group || '-';
-        }
-        break;
       case 'komponen_output': 
         if (view === 'komponen_output' && 'komponen_output' in record) {
           return record.komponen_output || '-';
@@ -82,45 +76,6 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   
   const getGroupedData = () => {
     let data = [...summaryData];
-    
-    if (view === 'account_group') {
-      // Group by first two digits for account_group
-      const groupedData: Map<string, BudgetSummaryRecord> = new Map();
-      
-      data.forEach(item => {
-        if (item.type === 'account_group' && 'account_group' in item && item.account_group) {
-          // Extract the first two digits for grouping
-          let accountGroupStr = item.account_group.toString().trim();
-          
-          // Skip empty entries
-          if (!accountGroupStr || accountGroupStr === '-') return;
-          
-          // Extract first two digits
-          const firstTwoDigits = accountGroupStr.substring(0, 2);
-          const groupKey = `${firstTwoDigits}xxxx`;
-            
-          if (groupedData.has(groupKey)) {
-            // Add to existing group
-            const existingItem = groupedData.get(groupKey)!;
-            existingItem.total_semula = (existingItem.total_semula || 0) + (item.total_semula || 0);
-            existingItem.total_menjadi = (existingItem.total_menjadi || 0) + (item.total_menjadi || 0);
-            existingItem.total_selisih = (existingItem.total_selisih || 0) + (item.total_selisih || 0);
-            existingItem.new_items = (existingItem.new_items || 0) + (item.new_items || 0);
-            existingItem.changed_items = (existingItem.changed_items || 0) + (item.changed_items || 0);
-            existingItem.total_items = (existingItem.total_items || 0) + (item.total_items || 0);
-          } else {
-            // Create new group
-            groupedData.set(groupKey, {
-              ...item,
-              account_group: groupKey,
-              type: 'account_group'
-            });
-          }
-        }
-      });
-      
-      data = Array.from(groupedData.values());
-    }
     
     if (sortField) {
       data.sort((a, b) => {
@@ -230,9 +185,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
           ) : (
             displayData.map((record, index) => {
               const categoryValue = getValueFromRecord(record);
-              const totalSemula = record.total_semula || 0;
-              const totalMenjadi = record.total_menjadi || 0;
-              const totalSelisih = record.total_selisih || 0;
+              const totalSemula = roundToThousands(record.total_semula || 0);
+              const totalMenjadi = roundToThousands(record.total_menjadi || 0);
+              const totalSelisih = roundToThousands(record.total_selisih || 0);
               const newItems = record.new_items || 0;
               const changedItems = record.changed_items || 0;
               const totalItems = record.total_items || 0;
@@ -256,10 +211,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
         <TableFooter>
           <TableRow>
             <TableCell className="font-bold">TOTAL</TableCell>
-            <TableCell className="text-right font-bold">{formatCurrency(totalSemula)}</TableCell>
-            <TableCell className="text-right font-bold">{formatCurrency(totalMenjadi)}</TableCell>
+            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
+            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
             <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'text-red-600' : ''}`}>
-              {formatCurrency(totalSelisih)}
+              {formatCurrency(roundToThousands(totalSelisih))}
             </TableCell>
             <TableCell className="text-center font-bold">{totalNewItems}</TableCell>
             <TableCell className="text-center font-bold">{totalChangedItems}</TableCell>

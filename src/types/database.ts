@@ -13,7 +13,6 @@ export type SubKomponenRecord = Tables['sub_komponen']['Row'];
 export type AkunRecord = Tables['akun']['Row'];
 
 // Create union types for different summary records
-export type BudgetSummaryByAccountGroupRecord = Views['budget_summary_by_account_group']['Row'];
 export type BudgetSummaryByKomponenRecord = Views['budget_summary_by_komponen']['Row'];
 export type BudgetSummaryByAkunRecord = Views['budget_summary_by_akun']['Row'];
 export type BudgetSummaryByProgramPembebananRecord = Views['budget_summary_by_program_pembebanan']['Row'];
@@ -32,11 +31,6 @@ export type BudgetSummaryBase = {
 };
 
 // Summary types by different groupings
-export interface BudgetSummaryByAccountGroup extends BudgetSummaryBase {
-  account_group: string | null;
-  type: 'account_group';
-}
-
 export interface BudgetSummaryByKomponen extends BudgetSummaryBase {
   komponen_output: string | null;
   type: 'komponen_output';
@@ -69,7 +63,6 @@ export interface BudgetSummaryBySubKomponen extends BudgetSummaryBase {
 
 // Union type for all budget summary types
 export type BudgetSummaryRecord = 
-  | BudgetSummaryByAccountGroup 
   | BudgetSummaryByKomponen 
   | BudgetSummaryByAkun
   | BudgetSummaryByProgramPembebanan

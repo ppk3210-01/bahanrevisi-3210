@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -22,9 +21,9 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
   summaryData = []
 }) => {
   // Calculate summary data
-  const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
-  const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-  const totalSelisih = totalMenjadi - totalSemula;
+  const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
+  const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
+  const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
   const newItems = items.filter(item => item.status === 'new').length;
   const changedItems = items.filter(item => item.status === 'changed').length;
   const deletedItems = items.filter(item => item.status === 'deleted').length;
@@ -67,13 +66,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Create detailed items sheet
     const itemsSheet = createItemsSheet(items);
     XLSX.utils.book_append_sheet(workbook, itemsSheet, "Detail Anggaran");
-    
-    // Create account group summary sheet if available
-    const accountGroupItems = summaryData.filter(item => 'account_group' in item);
-    if (accountGroupItems.length > 0) {
-      const accountGroupSheet = createGroupSummarySheet(accountGroupItems, 'Kelompok Akun');
-      XLSX.utils.book_append_sheet(workbook, accountGroupSheet, "Ringkasan Kelompok Akun");
-    }
     
     // Create program_pembebanan summary sheet if available
     const programItems = summaryData.filter(item => 'program_pembebanan' in item);
@@ -345,17 +337,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     groupData.forEach(record => {
       let rowData: any[] = [];
       
-      if ('account_group' in record) {
-        rowData = [
-          record.account_group,
-          record.total_semula,
-          record.total_menjadi,
-          record.total_selisih,
-          record.new_items,
-          record.changed_items,
-          record.total_items
-        ];
-      } else if ('komponen_output' in record) {
+      if ('komponen_output' in record) {
         rowData = [
           record.komponen_output,
           record.total_semula,
@@ -481,7 +463,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
             <h3 className="font-semibold text-blue-800 mb-2">Kesimpulan</h3>
             <p className="text-sm mb-2">
-              Total Pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} berubah menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih sebesar {formatCurrency(roundToThousands(totalSelisih))}.
+              Total Pagu anggaran semula sebesar {formatCurrency(totalSemula)} berubah menjadi {formatCurrency(totalMenjadi)}, dengan selisih sebesar {formatCurrency(totalSelisih)}.
             </p>
             <p className="text-sm mb-2">
               Terdapat {changedItems} detil anggaran yang diubah, {newItems} detil anggaran baru, dan {deletedItems} detil anggaran yang dihapus.
@@ -497,18 +479,18 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
           <div className="flex flex-wrap gap-4">
             <div className="bg-white border rounded-md p-4 w-full md:w-[30%] flex-grow">
               <div className="text-sm font-medium mb-2">Total Pagu Semula</div>
-              <div className="text-lg font-bold">{formatCurrency(roundToThousands(totalSemula))}</div>
+              <div className="text-lg font-bold">{formatCurrency(totalSemula)}</div>
             </div>
             
             <div className="bg-white border rounded-md p-4 w-full md:w-[30%] flex-grow">
               <div className="text-sm font-medium mb-2">Total Pagu Menjadi</div>
-              <div className="text-lg font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</div>
+              <div className="text-lg font-bold">{formatCurrency(totalMenjadi)}</div>
             </div>
             
             <div className={`border rounded-md p-4 w-full md:w-[30%] flex-grow ${totalSelisih > 0 ? 'bg-red-50' : totalSelisih < 0 ? 'bg-blue-50' : 'bg-white'}`}>
               <div className="text-sm font-medium mb-2">Selisih</div>
               <div className={`text-lg font-bold ${totalSelisih > 0 ? 'text-red-600' : totalSelisih < 0 ? 'text-blue-600' : ''}`}>
-                {formatCurrency(roundToThousands(totalSelisih))}
+                {formatCurrency(totalSelisih)}
               </div>
             </div>
           </div>

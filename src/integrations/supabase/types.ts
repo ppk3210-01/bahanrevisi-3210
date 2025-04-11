@@ -190,18 +190,6 @@ export type Database = {
       }
     }
     Views: {
-      budget_summary_by_account_group: {
-        Row: {
-          account_group: string | null
-          changed_items: number | null
-          new_items: number | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-        }
-        Relationships: []
-      }
       budget_summary_by_akun: {
         Row: {
           akun: string | null
@@ -276,18 +264,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_budget_summary_by_account_group: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          account_group: string | null
-          changed_items: number | null
-          new_items: number | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-        }[]
-      }
       get_budget_summary_by_akun: {
         Args: Record<PropertyKey, never>
         Returns: {

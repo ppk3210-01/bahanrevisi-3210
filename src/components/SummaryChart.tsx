@@ -2,20 +2,18 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BudgetSummaryRecord } from '@/types/database';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 
 interface SummaryChartProps {
   summaryData: BudgetSummaryRecord[];
   chartType: 'bar';
-  view: 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+  view: 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 }
 
 const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, view }) => {
   // Get the appropriate value from the record based on view type
   const getValueFromRecord = (record: BudgetSummaryRecord): string | null => {
-    if ('account_group' in record && view === 'account_group') {
-      return record.account_group || 'Tidak ada data';
-    } else if ('komponen_output' in record && view === 'komponen_output') {
+    if ('komponen_output' in record && view === 'komponen_output') {
       return record.komponen_output || 'Tidak ada data';
     } else if ('akun' in record && view === 'akun') {
       return record.akun || 'Tidak ada data';
@@ -35,11 +33,7 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
   const transformChartData = () => {
     // Sort the data based on view type
     const sortedData = [...summaryData].sort((a, b) => {
-      if (view === 'account_group') {
-        const aGroup = 'account_group' in a ? a.account_group || '' : '';
-        const bGroup = 'account_group' in b ? b.account_group || '' : '';
-        return aGroup.localeCompare(bGroup);
-      } else if (view === 'komponen_output') {
+      if (view === 'komponen_output') {
         const aKomponen = 'komponen_output' in a ? a.komponen_output || '' : '';
         const bKomponen = 'komponen_output' in b ? b.komponen_output || '' : '';
         return aKomponen.localeCompare(bKomponen);
@@ -69,9 +63,9 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
 
     return sortedData.map(record => {
       const name = getValueFromRecord(record);
-      const totalSemula = record.total_semula || 0;
-      const totalMenjadi = record.total_menjadi || 0;
-      const selisih = record.total_selisih || 0;
+      const totalSemula = roundToThousands(record.total_semula || 0);
+      const totalMenjadi = roundToThousands(record.total_menjadi || 0);
+      const selisih = roundToThousands(record.total_selisih || 0);
       
       return {
         name: name && name.length > 20 ? `${name.substring(0, 18)}...` : name,

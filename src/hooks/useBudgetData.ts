@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -8,7 +7,6 @@ import {
   BudgetItemRecord, 
   BudgetSummaryBase,
   BudgetSummaryRecord,
-  BudgetSummaryByAccountGroup,
   BudgetSummaryByKomponen,
   BudgetSummaryByAkun,
   BudgetSummaryByProgramPembebanan,
@@ -17,7 +15,7 @@ import {
   BudgetSummaryBySubKomponen
 } from '@/types/database';
 
-type SummaryType = 'account_group' | 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+type SummaryType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -78,7 +76,6 @@ const useBudgetData = (filters: FilterSelection) => {
     const fetchSummaryData = async () => {
       try {
         const [
-          accountGroupResult, 
           komponenResult, 
           akunResult,
           programPembebananResult,
@@ -86,7 +83,6 @@ const useBudgetData = (filters: FilterSelection) => {
           rincianOutputResult,
           subKomponenResult
         ] = await Promise.all([
-          supabase.rpc('get_budget_summary_by_account_group'),
           supabase.rpc('get_budget_summary_by_komponen'),
           supabase.rpc('get_budget_summary_by_akun'),
           supabase.rpc('get_budget_summary_by_program_pembebanan'),
@@ -97,26 +93,12 @@ const useBudgetData = (filters: FilterSelection) => {
         
         let allSummaryData: BudgetSummaryRecord[] = [];
         
-        if (accountGroupResult.data) {
-          const accountGroupData: BudgetSummaryByAccountGroup[] = accountGroupResult.data.map(item => ({
-            account_group: item.account_group || '',
-            total_semula: item.total_semula,
-            total_menjadi: item.total_menjadi,
-            total_selisih: item.total_selisih,
-            new_items: item.new_items,
-            changed_items: item.changed_items,
-            total_items: item.total_items,
-            type: 'account_group'
-          }));
-          allSummaryData = [...allSummaryData, ...accountGroupData];
-        }
-        
         if (komponenResult.data) {
           const komponenData: BudgetSummaryByKomponen[] = komponenResult.data.map(item => ({
             komponen_output: item.komponen_output || '',
-            total_semula: item.total_semula,
-            total_menjadi: item.total_menjadi,
-            total_selisih: item.total_selisih,
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -128,9 +110,9 @@ const useBudgetData = (filters: FilterSelection) => {
         if (akunResult.data) {
           const akunData: BudgetSummaryByAkun[] = akunResult.data.map(item => ({
             akun: item.akun || '',
-            total_semula: item.total_semula,
-            total_menjadi: item.total_menjadi,
-            total_selisih: item.total_selisih,
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -142,9 +124,9 @@ const useBudgetData = (filters: FilterSelection) => {
         if (programPembebananResult.data) {
           const programPembebananData: BudgetSummaryByProgramPembebanan[] = programPembebananResult.data.map(item => ({
             program_pembebanan: item.program_pembebanan || '',
-            total_semula: item.total_semula,
-            total_menjadi: item.total_menjadi,
-            total_selisih: item.total_selisih,
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -156,9 +138,9 @@ const useBudgetData = (filters: FilterSelection) => {
         if (kegiatanResult.data) {
           const kegiatanData: BudgetSummaryByKegiatan[] = kegiatanResult.data.map(item => ({
             kegiatan: item.kegiatan || '',
-            total_semula: item.total_semula,
-            total_menjadi: item.total_menjadi,
-            total_selisih: item.total_selisih,
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -170,9 +152,9 @@ const useBudgetData = (filters: FilterSelection) => {
         if (rincianOutputResult.data) {
           const rincianOutputData: BudgetSummaryByRincianOutput[] = rincianOutputResult.data.map(item => ({
             rincian_output: item.rincian_output || '',
-            total_semula: item.total_semula,
-            total_menjadi: item.total_menjadi,
-            total_selisih: item.total_selisih,
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -184,9 +166,9 @@ const useBudgetData = (filters: FilterSelection) => {
         if (subKomponenResult.data) {
           const subKomponenData: BudgetSummaryBySubKomponen[] = subKomponenResult.data.map(item => ({
             sub_komponen: item.sub_komponen || '',
-            total_semula: item.total_semula,
-            total_menjadi: item.total_menjadi,
-            total_selisih: item.total_selisih,
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,

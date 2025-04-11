@@ -10,7 +10,7 @@ const Header: React.FC = () => {
   const { user, isAdmin, signOut, profile } = useAuth();
 
   return (
-    <header className="bg-gradient-to-r from-slate-800 to-blue-900 py-2 px-4 fixed top-0 left-0 right-0 z-10 text-white">
+    <header className="bg-gradient-to-r from-slate-900 to-blue-950 py-2 px-4 fixed top-0 left-0 right-0 z-10 text-white">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex items-center">
           <img 
