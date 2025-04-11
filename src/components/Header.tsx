@@ -39,7 +39,7 @@ const Header: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={signOut} 
-                className="border-white text-white hover:bg-white/10"
+                className="border-white text-white hover:bg-[#152154]"
               >
                 Logout
               </Button>
@@ -49,7 +49,7 @@ const Header: React.FC = () => {
               variant="outline" 
               size="sm" 
               onClick={() => setIsLoginModalOpen(true)}
-              className="border-white text-white hover:bg-white/10"
+              className="border-white text-white hover:[#152154]"
             >
               Login
             </Button>
