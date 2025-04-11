@@ -8,7 +8,7 @@ import {
   CardHeader
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { 
   Table,
   TableBody,
@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { toast } from '@/hooks/use-toast';
 
 // Add type declaration for jsPDF with autoTable
 declare module 'jspdf' {
@@ -111,44 +112,99 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
   // Export to JPEG functionality
   const exportToJPEG = async () => {
     const summaryDiv = document.getElementById('budget-changes-summary');
-    if (!summaryDiv) return;
+    if (!summaryDiv) {
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: "Tidak dapat menemukan konten untuk diekspor"
+      });
+      return;
+    }
 
     try {
+      toast({
+        title: "Memproses",
+        description: "Menyiapkan gambar..."
+      });
+
       // Use html2canvas to convert the summary to an image
       const canvas = await html2canvas(summaryDiv, {
         scale: 2, // Higher quality
         useCORS: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        logging: true,
+        onclone: (clonedDoc) => {
+          // Make sure the cloned element is visible and has proper dimensions
+          const clonedSummary = clonedDoc.getElementById('budget-changes-summary');
+          if (clonedSummary) {
+            clonedSummary.style.width = '1200px';
+            clonedSummary.style.padding = '20px';
+            clonedSummary.style.background = '#ffffff';
+            clonedSummary.style.position = 'absolute';
+            clonedSummary.style.top = '0';
+            clonedSummary.style.left = '0';
+            clonedSummary.style.zIndex = '9999';
+          }
+        }
       });
 
       // Convert to data URL and trigger download
       const image = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // Create link and trigger download
       const link = document.createElement('a');
       link.href = image;
       link.download = `Ringkasan_Perubahan_Anggaran_${new Date().toISOString().split('T')[0]}.jpg`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Berhasil!",
+        description: "Berhasil mengunduh file JPEG"
+      });
     } catch (error) {
       console.error('Error exporting to JPEG:', error);
+      toast({
+        variant: "destructive",
+        title: "Gagal!",
+        description: "Gagal mengunduh file. Silakan coba lagi."
+      });
     }
   };
 
   // Export to PDF functionality
   const exportToPDF = () => {
     const summaryDiv = document.getElementById('budget-changes-summary');
-    if (!summaryDiv) return;
+    if (!summaryDiv) {
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: "Tidak dapat menemukan konten untuk diekspor"
+      });
+      return;
+    }
 
     try {
-      // Create PDF document
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      toast({
+        title: "Memproses",
+        description: "Menyiapkan PDF..."
+      });
+
+      // Create new jsPDF document (landscape orientation)
+      const pdf = new jsPDF('landscape');
       
       // Add title
       pdf.setFontSize(16);
-      pdf.text('Ringkasan Perubahan Pagu Anggaran', 14, 20);
+      pdf.text(`Ringkasan Perubahan Anggaran`, 14, 20);
       
-      // Tables for changed items
+      // Prepare data for the first table - Changed Items
+      let tableData = [];
+      let startY = 30;
+      
       if (changedItems.length > 0) {
         pdf.setFontSize(12);
-        pdf.text('Pagu Anggaran Berubah', 14, 30);
+        pdf.text('Pagu Anggaran Berubah', 14, startY);
         
         // Changed items table data
         const changedHeaders = [['No', 'Pembebanan', 'Uraian', 'Detail Perubahan', 'Jumlah Semula', 'Jumlah Menjadi', 'Selisih']];
@@ -167,9 +223,9 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
             getCombinedPembebananCode(item),
             item.uraian,
             detailPerubahan,
-            formatCurrency(item.jumlahSemula),
-            formatCurrency(item.jumlahMenjadi),
-            formatCurrency(item.jumlahMenjadi - item.jumlahSemula)
+            formatCurrency(roundToThousands(item.jumlahSemula)),
+            formatCurrency(roundToThousands(item.jumlahMenjadi)),
+            formatCurrency(roundToThousands(item.jumlahMenjadi - item.jumlahSemula))
           ];
         });
         
@@ -177,7 +233,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
         pdf.autoTable({
           head: changedHeaders,
           body: changedData,
-          startY: 35,
+          startY: startY + 5,
           theme: 'grid',
           styles: { fontSize: 8, cellPadding: 2 },
           columnStyles: {
@@ -190,19 +246,14 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
             6: { cellWidth: 20 },
           },
         });
+        
+        // Get the final Y position after the table
+        // We'll use a fixed position for the next table instead of relying on previous table position
+        startY = 120;
       }
       
       // New items table
       if (newItems.length > 0) {
-        // Fix: Don't use pdf.autoTable.previous which doesn't exist
-        // Instead, track the Y position manually or use a constant offset
-        let startY = 35; // Default starting position
-        
-        // If we already added the changed items table, add some spacing
-        if (changedItems.length > 0) {
-          startY = 180; // Estimate a reasonable position after the previous table
-        }
-        
         pdf.setFontSize(12);
         pdf.text('Pagu Anggaran Baru', 14, startY);
         
@@ -214,13 +265,13 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
           item.uraian,
           item.volumeMenjadi,
           item.satuanMenjadi,
-          formatCurrency(item.hargaSatuanMenjadi),
-          formatCurrency(item.jumlahMenjadi)
+          formatCurrency(roundToThousands(item.hargaSatuanMenjadi)),
+          formatCurrency(roundToThousands(item.jumlahMenjadi))
         ]);
         
         // Add total row
         const totalAmount = newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-        newData.push(['Total', '', '', '', '', '', formatCurrency(totalAmount)]);
+        newData.push(['Total', '', '', '', '', '', formatCurrency(roundToThousands(totalAmount))]);
         
         // Generate table
         pdf.autoTable({
@@ -241,10 +292,39 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
         });
       }
       
+      // Add conclusion text
+      startY = 180;
+      pdf.setFontSize(12);
+      pdf.text('Kesimpulan', 14, startY);
+      
+      const conclusion = [
+        `Total pagu anggaran semula sebesar ${formatCurrency(roundToThousands(totalSemula))}`,
+        `mengalami perubahan menjadi ${formatCurrency(roundToThousands(totalMenjadi))}`,
+        `dengan selisih ${formatCurrency(roundToThousands(totalSelisih))}.`,
+        `Perubahan ini terdiri dari ${changedItems.length} komponen anggaran yang mengalami penyesuaian nilai,`,
+        `${newItems.length} komponen anggaran baru yang ditambahkan, dan ${deletedItems.length} komponen anggaran yang dihapus.`,
+        `Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.`
+      ];
+      
+      startY += 5;
+      conclusion.forEach((line, index) => {
+        pdf.text(line, 14, startY + (index * 5));
+      });
+      
       // Save PDF
       pdf.save(`Ringkasan_Perubahan_Anggaran_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast({
+        title: "Berhasil!",
+        description: "Berhasil mengunduh file PDF"
+      });
     } catch (error) {
       console.error('Error exporting to PDF:', error);
+      toast({
+        variant: "destructive",
+        title: "Gagal!",
+        description: "Gagal mengunduh file. Silakan coba lagi."
+      });
     }
   };
 
@@ -308,10 +388,10 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                       <TableCell>{getCombinedPembebananCode(item)}</TableCell>
                       <TableCell>{item.uraian}</TableCell>
                       <TableCell className="whitespace-pre-line">{detailPerubahan}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(roundToThousands(item.jumlahSemula))}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(roundToThousands(item.jumlahMenjadi))}</TableCell>
                       <TableCell className={`text-right ${selisih < 0 ? 'text-red-600' : selisih > 0 ? 'text-green-600' : ''}`}>
-                        {selisih < 0 ? `-${formatCurrency(Math.abs(selisih))}` : formatCurrency(selisih)}
+                        {selisih < 0 ? `-${formatCurrency(roundToThousands(Math.abs(selisih)))}` : formatCurrency(roundToThousands(selisih))}
                       </TableCell>
                     </TableRow>
                   );
@@ -347,8 +427,8 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                     <TableCell>{item.uraian}</TableCell>
                     <TableCell className="text-center">{item.volumeMenjadi}</TableCell>
                     <TableCell className="text-center">{item.satuanMenjadi}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(item.hargaSatuanMenjadi)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(roundToThousands(item.hargaSatuanMenjadi))}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(roundToThousands(item.jumlahMenjadi))}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -356,7 +436,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                 <TableRow>
                   <TableCell colSpan={6} className="text-right font-bold">Total</TableCell>
                   <TableCell className="text-right font-bold">
-                    {formatCurrency(newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0))}
+                    {formatCurrency(roundToThousands(newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0)))}
                   </TableCell>
                 </TableRow>
               </TableFooter>
@@ -375,17 +455,17 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Semula:</span>
-                <span className="font-medium">{formatCurrency(totalSemula)}</span>
+                <span className="font-medium">{formatCurrency(roundToThousands(totalSemula))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Menjadi:</span>
-                <span className="font-medium">{formatCurrency(totalMenjadi)}</span>
+                <span className="font-medium">{formatCurrency(roundToThousands(totalMenjadi))}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Selisih:</span>
                 <span className={`font-medium ${totalSelisih !== 0 ? 'text-red-600' : ''}`}>
-                  {formatCurrency(totalSelisih)}
+                  {formatCurrency(roundToThousands(totalSelisih))}
                 </span>
               </div>
             </div>

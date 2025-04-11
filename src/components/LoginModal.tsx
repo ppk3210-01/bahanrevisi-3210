@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -37,12 +36,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         if (success) {
           onClose();
         } else {
-          setError('Invalid login credentials. Please check your username and password.');
+          setError('Kredensial login tidak valid. Silakan periksa kembali username dan password Anda.');
         }
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
-      setError('Authentication failed. Please try again.');
+      setError('Autentikasi gagal. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
@@ -71,11 +70,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isRegistering ? 'Create an Account' : 'Login to Your Account'}</DialogTitle>
+          <DialogTitle>{isRegistering ? 'Buat Akun Baru' : 'Login ke Akun Anda'}</DialogTitle>
           <DialogDescription>
             {isRegistering 
-              ? 'Enter your details to create a new account.' 
-              : 'Enter your credentials to access your account.'}
+              ? 'Masukkan detail Anda untuk membuat akun baru.' 
+              : 'Masukkan kredensial Anda untuk mengakses akun Anda.'}
           </DialogDescription>
         </DialogHeader>
         
@@ -95,20 +94,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Masukkan username Anda"
                 required
               />
             </div>
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="emailOrUsername">{isRegistering ? 'Email' : 'Email or Username'}</Label>
+            <Label htmlFor="emailOrUsername">{isRegistering ? 'Email' : 'Email atau Username'}</Label>
             <Input
               id="emailOrUsername"
               type="text"
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
-              placeholder={isRegistering ? "Enter your email" : "Enter your email or username"}
+              placeholder={isRegistering ? "Masukkan email Anda" : "Masukkan email atau username Anda"}
               required
             />
           </div>
@@ -120,36 +119,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="Masukkan password Anda"
               required
             />
           </div>
-          
-          {!isRegistering && (
-            <div className="flex flex-col space-y-2">
-              <p className="text-xs text-gray-500">Demo accounts:</p>
-              <div className="flex gap-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  className="text-xs py-1 h-7"
-                  onClick={() => useDemoAccount('admin')}
-                >
-                  Use Admin Account
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  className="text-xs py-1 h-7"
-                  onClick={() => useDemoAccount('user')}
-                >
-                  Use User Account
-                </Button>
-              </div>
-            </div>
-          )}
           
           <div className="flex justify-between pt-2">
             <Button 
@@ -158,11 +131,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               onClick={toggleMode}
               disabled={isLoading}
             >
-              {isRegistering ? 'Already have an account?' : 'Need an account?'}
+              {isRegistering ? 'Sudah punya akun?' : 'Butuh akun baru?'}
             </Button>
             
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Processing...' : isRegistering ? 'Register' : 'Login'}
+              {isLoading ? 'Memproses...' : isRegistering ? 'Daftar' : 'Login'}
             </Button>
           </div>
         </form>

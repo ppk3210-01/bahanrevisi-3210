@@ -10,7 +10,7 @@ const Header: React.FC = () => {
   const { user, isAdmin, signOut, profile } = useAuth();
 
   return (
-    <header className="bg-white border-b shadow-sm py-2 px-4 fixed top-0 left-0 right-0 z-10">
+    <header className="bg-gradient-to-r from-slate-800 to-blue-900 py-2 px-4 fixed top-0 left-0 right-0 z-10 text-white">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex items-center">
           <img 
@@ -19,8 +19,8 @@ const Header: React.FC = () => {
             className="h-9 w-9 mr-3" 
           />
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Bahan Revisi-3210</h1>
-            <p className="text-gray-600 text-sm">Aplikasi Bahan Revisi Pagu Anggaran "Semula vs Menjadi"</p>
+            <h1 className="text-xl font-bold text-white">Bahan Revisi-3210</h1>
+            <p className="text-gray-200 text-sm">Aplikasi Bahan Revisi Pagu Anggaran "Semula vs Menjadi"</p>
           </div>
         </div>
         
@@ -31,7 +31,7 @@ const Header: React.FC = () => {
           
           {user ? (
             <>
-              <div className="text-right">
+              <div className="text-right text-white">
                 <p className="font-medium">{profile?.username || 'User'}</p>
                 <p className="text-xs opacity-80">{isAdmin ? 'Admin' : 'User'}</p>
               </div>
@@ -39,7 +39,7 @@ const Header: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={signOut} 
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
+                className="border-white text-white hover:bg-white/10"
               >
                 Logout
               </Button>
@@ -49,7 +49,7 @@ const Header: React.FC = () => {
               variant="outline" 
               size="sm" 
               onClick={() => setIsLoginModalOpen(true)}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-white hover:from-blue-600 hover:to-indigo-700 hover:text-white"
+              className="border-white text-white hover:bg-white/10"
             >
               Login
             </Button>

@@ -40,11 +40,11 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       'Uraian': item.uraian,
       'Volume Semula': item.volumeSemula,
       'Satuan Semula': item.satuanSemula,
-      'Harga Satuan Semula': item.hargaSatuanSemula, 
+      'Harga Satuan Semula': roundToThousands(item.hargaSatuanSemula), 
       'Jumlah Semula': roundToThousands(item.jumlahSemula),
       'Volume Menjadi': item.volumeMenjadi,
       'Satuan Menjadi': item.satuanMenjadi,
-      'Harga Satuan Menjadi': item.hargaSatuanMenjadi, 
+      'Harga Satuan Menjadi': roundToThousands(item.hargaSatuanMenjadi), 
       'Jumlah Menjadi': roundToThousands(item.jumlahMenjadi),
       'Selisih': roundToThousands(item.jumlahMenjadi - item.jumlahSemula),
       'Status': item.status
@@ -112,8 +112,9 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         description: "Menyiapkan gambar..."
       });
 
-      // Create a temporary container for the table in the DOM, but positioned off-screen
+      // Create a temporary container for the table in the DOM
       const container = document.createElement('div');
+      document.body.appendChild(container);
       container.style.position = 'fixed';
       container.style.top = '0';
       container.style.left = '-9999px';
@@ -169,13 +170,13 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
           item.uraian,
           item.volumeSemula,
           item.satuanSemula,
-          formatCurrency(item.hargaSatuanSemula),
-          formatCurrency(item.jumlahSemula),
+          formatCurrency(roundToThousands(item.hargaSatuanSemula)),
+          formatCurrency(roundToThousands(item.jumlahSemula)),
           item.volumeMenjadi,
           item.satuanMenjadi,
-          formatCurrency(item.hargaSatuanMenjadi),
-          formatCurrency(item.jumlahMenjadi),
-          formatCurrency(item.jumlahMenjadi - item.jumlahSemula),
+          formatCurrency(roundToThousands(item.hargaSatuanMenjadi)),
+          formatCurrency(roundToThousands(item.jumlahMenjadi)),
+          formatCurrency(roundToThousands(item.jumlahMenjadi - item.jumlahSemula)),
           item.status
         ];
         
@@ -198,8 +199,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       footerRow.style.backgroundColor = '#f2f2f2';
       footerRow.style.fontWeight = 'bold';
       
-      const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
-      const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+      const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
+      const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
       const totalSelisih = totalMenjadi - totalSemula;
       
       const footerCells = [
@@ -222,14 +223,12 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       // Add the table to the container
       container.appendChild(table);
       
-      // Add container to the body
-      document.body.appendChild(container);
-      
       // Use html2canvas to convert the table into a canvas
       const canvas = await html2canvas(container, {
         scale: 2, // Increased scale for better quality
         useCORS: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        logging: true
       });
       
       // Convert canvas to data URL and create an image download
@@ -291,13 +290,13 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         item.uraian,
         item.volumeSemula,
         item.satuanSemula,
-        formatCurrency(item.hargaSatuanSemula),
-        formatCurrency(item.jumlahSemula),
+        formatCurrency(roundToThousands(item.hargaSatuanSemula)),
+        formatCurrency(roundToThousands(item.jumlahSemula)),
         item.volumeMenjadi,
         item.satuanMenjadi,
-        formatCurrency(item.hargaSatuanMenjadi),
-        formatCurrency(item.jumlahMenjadi),
-        formatCurrency(item.jumlahMenjadi - item.jumlahSemula),
+        formatCurrency(roundToThousands(item.hargaSatuanMenjadi)),
+        formatCurrency(roundToThousands(item.jumlahMenjadi)),
+        formatCurrency(roundToThousands(item.jumlahMenjadi - item.jumlahSemula)),
         item.status
       ]);
       
@@ -309,8 +308,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
       ];
       
       // Calculate totals
-      const totalSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
-      const totalMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+      const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
+      const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
       const totalSelisih = totalMenjadi - totalSemula;
       
       // Add total row
