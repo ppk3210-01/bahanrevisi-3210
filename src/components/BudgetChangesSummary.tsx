@@ -74,13 +74,10 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
     return (
       <div className="space-y-2 text-sm">
         <p>
-          Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} 
-           mengalami perubahan menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih {formatCurrency(roundToThousands(Math.abs(totalSelisih)))} 
-           atau {changeDirection}.
+          Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} mengalami perubahan menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih {formatCurrency(roundToThousands(Math.abs(totalSelisih)))} atau {changeDirection}.
         </p>
         <p>
-          Perubahan ini terdiri dari {changedItems.length} komponen anggaran yang mengalami penyesuaian nilai, 
-           {newItems.length} komponen anggaran baru yang ditambahkan, dan {deletedItems.length} komponen anggaran yang dihapus.
+          Perubahan ini terdiri dari {changedItems.length} komponen anggaran yang mengalami penyesuaian nilai, {newItems.length} komponen anggaran baru yang ditambahkan, dan {deletedItems.length} komponen anggaran yang dihapus.
         </p>
         <p>
           Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan 
