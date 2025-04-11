@@ -37,7 +37,7 @@ const Header: React.FC = () => {
               <Button 
                 size="sm"
                 onClick={signOut}
-                className="bg-[#152154] text-white hover:bg-[#152154] border border-white"
+                className="bg-transparent border border-white text-white hover:bg-white/10"
               >
                 Logout
               </Button>
@@ -46,7 +46,7 @@ const Header: React.FC = () => {
             <Button 
               size="sm"
               onClick={() => setIsLoginModalOpen(true)}
-              className="bg-[#152154] text-white hover:bg-[#152154] border border-white"
+              className="bg-transparent border border-white text-white hover:bg-white/10"
             >
               Login
             </Button>
