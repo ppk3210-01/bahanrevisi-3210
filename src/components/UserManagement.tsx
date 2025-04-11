@@ -311,7 +311,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ buttonClassName }) => {
               <Button 
                 size="sm" 
                 onClick={() => setIsAddUserDialogOpen(true)}
-                className="flex items-center gap-1 bg-transparent border border-white text-white hover:bg-white/10"
+                className="flex items-center gap-1"
               >
                 <UserPlus className="h-4 w-4" />
                 <span>Add User</span>
