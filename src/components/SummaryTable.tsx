@@ -141,12 +141,24 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   const totalChangedItems = displayData.reduce((sum, record) => sum + (record.changed_items || 0), 0);
   const totalItems = displayData.reduce((sum, record) => sum + (record.total_items || 0), 0);
 
+  // Adjust column widths based on view type
+  const getCategoryColumnClass = () => {
+    switch (view) {
+      case 'program_pembebanan':
+        return 'w-[200px]'; // Narrower for program_pembebanan
+      case 'account_group':
+        return 'w-[200px]'; // Narrow for account_group
+      default:
+        return 'w-[300px]'; // Default width
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[300px]">
+            <TableHead className={getCategoryColumnClass()}>
               <Button variant="ghost" onClick={() => handleSort('category')} className="flex items-center p-0">
                 {getColumnName()} <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
@@ -200,7 +212,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
               
               return (
                 <TableRow key={`${categoryValue}-${index}`} className="py-3">
-                  <TableCell className="font-medium">{categoryValue}</TableCell>
+                  <TableCell className="font-medium whitespace-normal">{categoryValue}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalSemula)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalMenjadi)}</TableCell>
                   <TableCell className={`text-right ${totalSelisih !== 0 ? 'text-red-600' : ''}`}>

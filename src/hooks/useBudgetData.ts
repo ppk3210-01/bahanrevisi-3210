@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -12,10 +13,11 @@ import {
   BudgetSummaryByProgramPembebanan,
   BudgetSummaryByKegiatan,
   BudgetSummaryByRincianOutput,
-  BudgetSummaryBySubKomponen
+  BudgetSummaryBySubKomponen,
+  BudgetSummaryByAccountGroup
 } from '@/types/database';
 
-type SummaryType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+type SummaryType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -81,14 +83,16 @@ const useBudgetData = (filters: FilterSelection) => {
           programPembebananResult,
           kegiatanResult,
           rincianOutputResult,
-          subKomponenResult
+          subKomponenResult,
+          accountGroupResult
         ] = await Promise.all([
           supabase.rpc('get_budget_summary_by_komponen'),
           supabase.rpc('get_budget_summary_by_akun'),
           supabase.rpc('get_budget_summary_by_program_pembebanan'),
           supabase.rpc('get_budget_summary_by_kegiatan'),
           supabase.rpc('get_budget_summary_by_rincian_output'),
-          supabase.rpc('get_budget_summary_by_sub_komponen')
+          supabase.rpc('get_budget_summary_by_sub_komponen'),
+          supabase.rpc('get_budget_summary_by_account_group')
         ]);
         
         let allSummaryData: BudgetSummaryRecord[] = [];
@@ -175,6 +179,20 @@ const useBudgetData = (filters: FilterSelection) => {
             type: 'sub_komponen'
           }));
           allSummaryData = [...allSummaryData, ...subKomponenData];
+        }
+        
+        if (accountGroupResult.data) {
+          const accountGroupData: BudgetSummaryByAccountGroup[] = accountGroupResult.data.map(item => ({
+            account_group: item.account_group || '',
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'account_group'
+          }));
+          allSummaryData = [...allSummaryData, ...accountGroupData];
         }
         
         setSummaryData(allSummaryData);
