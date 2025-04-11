@@ -35,20 +35,18 @@ const Header: React.FC = () => {
                 <p className="text-xs opacity-80">{isAdmin ? 'Admin' : 'User'}</p>
               </div>
               <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={signOut} 
-                className="border-white text-white bg-[#152154] hover:bg-[#152154]"
+                size="sm"
+                onClick={signOut}
+                className="bg-[#152154] text-white hover:bg-[#152154] border border-white"
               >
                 Logout
               </Button>
             </>
           ) : (
             <Button 
-              variant="outline" 
-              size="sm" 
+              size="sm"
               onClick={() => setIsLoginModalOpen(true)}
-              className="border-white text-white bg-[#152154] hover:bg-[#152154]"
+              className="bg-[#152154] text-white hover:bg-[#152154] border border-white"
             >
               Login
             </Button>
