@@ -194,7 +194,15 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
       
       // New items table
       if (newItems.length > 0) {
-        const startY = pdf.autoTable.previous.finalY + 10 || 35;
+        // Fix: Don't use pdf.autoTable.previous which doesn't exist
+        // Instead, track the Y position manually or use a constant offset
+        let startY = 35; // Default starting position
+        
+        // If we already added the changed items table, add some spacing
+        if (changedItems.length > 0) {
+          startY = 180; // Estimate a reasonable position after the previous table
+        }
+        
         pdf.setFontSize(12);
         pdf.text('Pagu Anggaran Baru', 14, startY);
         
