@@ -32,7 +32,6 @@ export const createStandardUsers = async () => {
     { username: 'distribusi3210', fullName: 'User Distribusi' },
     { username: 'neraca3210', fullName: 'User Neraca' },
     { username: 'ipds3210', fullName: 'User IPDS' },
-    { username: 'sosial3210', fullName: 'User Sosial' },
     { username: 'tu3210', fullName: 'User TU' }
   ];
 
@@ -133,24 +132,11 @@ export const setupLocalUsers = () => {
       }
     },
     {
-      email: 'sosial3210@bps3210.id',
-      username: 'sosial3210',
-      password: 'bps3210',
-      profile: {
-        id: '00000000-0000-0000-0000-000000000006',
-        username: 'sosial3210',
-        full_name: 'User Sosial',
-        role: 'user',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-    },
-    {
       email: 'tu3210@bps3210.id',
       username: 'tu3210',
       password: 'bps3210',
       profile: {
-        id: '00000000-0000-0000-0000-000000000007',
+        id: '00000000-0000-0000-0000-000000000006',
         username: 'tu3210',
         full_name: 'User TU',
         role: 'user',
