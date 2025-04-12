@@ -1,17 +1,17 @@
-
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BudgetSummaryRecord } from '@/types/database';
-import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
+import { formatCurrency } from '@/utils/budgetCalculations';
+
+type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group';
 
 interface SummaryChartProps {
   summaryData: BudgetSummaryRecord[];
   chartType: 'bar';
-  view: 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen';
+  view: SummaryViewType;
 }
 
 const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, view }) => {
-  // Get the appropriate value from the record based on view type
   const getValueFromRecord = (record: BudgetSummaryRecord): string | null => {
     if ('komponen_output' in record && view === 'komponen_output') {
       return record.komponen_output || 'Tidak ada data';
@@ -29,9 +29,7 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
     return 'Tidak ada data';
   };
 
-  // Transform data for charts
   const transformChartData = () => {
-    // Sort the data based on view type
     const sortedData = [...summaryData].sort((a, b) => {
       if (view === 'komponen_output') {
         const aKomponen = 'komponen_output' in a ? a.komponen_output || '' : '';
@@ -69,7 +67,7 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
       
       return {
         name: name && name.length > 20 ? `${name.substring(0, 18)}...` : name,
-        fullName: name, // Keep the full name for tooltips
+        fullName: name,
         totalSemula,
         totalMenjadi,
         selisih
@@ -79,7 +77,19 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
 
   const chartData = transformChartData();
   
-  // Custom tooltip formatter for better display
+  const getCategoryName = (): string => {
+    switch (view) {
+      case 'komponen_output': return 'Komponen Output';
+      case 'akun': return 'Akun';
+      case 'program_pembebanan': return 'Program Pembebanan';
+      case 'kegiatan': return 'Kegiatan';
+      case 'rincian_output': return 'Rincian Output';
+      case 'sub_komponen': return 'Sub Komponen';
+      case 'account_group': return 'Kelompok Akun';
+      default: return 'Kategori';
+    }
+  };
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;

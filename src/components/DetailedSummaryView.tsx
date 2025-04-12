@@ -62,7 +62,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
             onValueChange={(value) => {
               if (value) setChartType(value as 'bar' | 'table');
             }}
-            size="sm" // Smaller size
+            size="sm"
             className="border p-0.5 rounded-md"
           >
             <ToggleGroupItem value="bar" className="text-xs h-7 px-2">
