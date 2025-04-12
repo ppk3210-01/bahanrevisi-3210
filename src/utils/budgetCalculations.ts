@@ -29,6 +29,16 @@ export const formatCurrency = (value: number, shouldRound: boolean = true): stri
   }).format(valueToFormat);
 };
 
+// Format without rounding - specifically for unit prices
+export const formatWithoutRounding = (value: number): string => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value);
+};
+
 // Check if an item has been changed
 export const hasItemChanged = (item: BudgetItem): boolean => {
   return (

@@ -3,27 +3,35 @@
 
 /* Adjust spacing in tables */
 .data-table tr {
-  height: 2.5rem;
+  height: 2rem; /* Reduced from 2.5rem */
 }
 
 .data-table tr.h-7 {
-  height: 1.75rem !important;
+  height: 1.5rem !important; /* Reduced from 1.75rem */
 }
 
 .data-table thead th {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  font-size: 0.85rem; /* Slightly reduced font size */
 }
 
 .data-table tbody td {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.2rem;
+  font-size: 0.85rem; /* Slightly reduced font size */
 }
 
 /* Wrap text in Pembebanan column */
 .data-table td.whitespace-normal {
   white-space: normal;
   word-break: break-word;
+  max-width: 200px; /* Limit width for Pembebanan column */
+}
+
+/* Adjust uraian column to be wider */
+.data-table td.uraian-column {
+  min-width: 250px;
 }
 
 /* Status colors */

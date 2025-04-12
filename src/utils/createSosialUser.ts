@@ -4,18 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 export const createSosialUser = async () => {
   try {
     // Check if the user already exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('auth.users')
-      .select('id')
-      .eq('email', 'sosial3210@example.com')
-      .single();
+    const { data: existingUser } = await supabase.auth.signInWithPassword({
+      email: 'sosial3210@example.com',
+      password: 'bps3210'
+    });
       
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking for existing user:', checkError);
-      return;
-    }
-    
-    if (existingUser) {
+    if (existingUser?.user) {
       console.log('User sosial3210 already exists');
       return;
     }
