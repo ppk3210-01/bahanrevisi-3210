@@ -593,7 +593,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             <SelectTrigger className="w-20 h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white z-50">
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="25">25</SelectItem>
               <SelectItem value="50">50</SelectItem>
@@ -632,7 +632,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[5%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeSemula')}
                   >
                     Vol.Semula
@@ -642,7 +642,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 <th className="unit-cell py-2 px-1 w-[7%]">Sat.Semula</th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanSemula')}
                   >
                     Hrg.Semula
@@ -651,7 +651,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahSemula')}
                   >
                     Jml.Semula
@@ -660,7 +660,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[5%] border-l-2">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeMenjadi')}
                   >
                     Vol.Menjadi
@@ -670,7 +670,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 <th className="unit-cell py-2 px-1 w-[7%]">Sat.Menjadi</th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanMenjadi')}
                   >
                     Hrg.Menjadi
@@ -679,7 +679,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahMenjadi')}
                   >
                     Jml.Menjadi
@@ -688,7 +688,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('selisih')}
                   >
                     Selisih
