@@ -1,7 +1,7 @@
+
 #root {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -39,4 +39,26 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Fix for table styling */
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+}
+
+.data-table th {
+  background-color: #f3f4f6;
+  font-weight: 500;
+}
+
+/* Fix for button styling */
+button {
+  cursor: pointer;
 }

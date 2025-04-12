@@ -8,7 +8,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-blue-50">
       <Header />
       
-      <main className="container mx-auto py-3 px-4 sm:px-6 pt-[76px]">
+      <main className="container mx-auto py-3 px-4 sm:px-6 lg:px-8 pt-[76px]">
         <BudgetComparison />
       </main>
       
