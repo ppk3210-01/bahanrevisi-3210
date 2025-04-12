@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BudgetSummaryRecord } from '@/types/database';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 
 type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group';
 
@@ -25,6 +26,8 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
       return record.rincian_output || 'Tidak ada data';
     } else if ('sub_komponen' in record && view === 'sub_komponen') {
       return record.sub_komponen || 'Tidak ada data';
+    } else if ('account_group' in record && view === 'account_group') {
+      return record.account_group || 'Tidak ada data';
     }
     return 'Tidak ada data';
   };
@@ -55,6 +58,10 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
         const aSubKomponen = 'sub_komponen' in a ? a.sub_komponen || '' : '';
         const bSubKomponen = 'sub_komponen' in b ? b.sub_komponen || '' : '';
         return aSubKomponen.localeCompare(bSubKomponen);
+      } else if (view === 'account_group') {
+        const aAccountGroup = 'account_group' in a ? a.account_group || '' : '';
+        const bAccountGroup = 'account_group' in b ? b.account_group || '' : '';
+        return aAccountGroup.localeCompare(bAccountGroup);
       }
       return 0;
     });
