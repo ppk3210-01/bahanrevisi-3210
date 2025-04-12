@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,233 +6,270 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
-
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
+  }
 
-    --sidebar-background: 222.2 84% 4.9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 40% 98%;
-    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
-    --sidebar-ring: 212.7 26.8% 83.9%;
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
-/* Existing styles */
-
-/* Adjust spacing in tables */
-.data-table tr {
-  height: 2rem; /* Reduced from 2.5rem */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-.data-table tr.h-7 {
-  height: 1.5rem !important; /* Reduced from 1.75rem */
+.data-table th {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700 text-xs;
 }
 
-.data-table thead th {
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-  font-size: 0.85rem; /* Slightly reduced font size */
+.data-table .uraian-cell {
+  @apply text-left;
 }
 
-.data-table tbody td {
-  padding-top: 0.2rem;
-  padding-bottom: 0.2rem;
-  font-size: 0.85rem; /* Slightly reduced font size */
-}
-
-/* Wrap text in Pembebanan column */
-.data-table td.whitespace-normal {
-  white-space: normal;
-  word-break: break-word;
-  max-width: 200px; /* Limit width for Pembebanan column */
-}
-
-/* Adjust uraian column to be wider */
-.data-table td.uraian-column, 
-.data-table th.uraian-cell,
-.data-table td.uraian-cell {
-  min-width: 250px;
-  text-align: left;
-}
-
-/* Number cells alignment */
 .data-table .number-cell {
-  text-align: right;
+  @apply text-right;
 }
 
-/* Unit cells alignment */
 .data-table .unit-cell {
-  text-align: center;
+  @apply text-center;
 }
 
-/* Improve header styling */
-.data-table thead {
-  background: linear-gradient(to right, #e0e7ff, #dbeafe);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+.changed-row {
+  @apply bg-yellow-50;
 }
 
-/* Status colors */
-.row-changed {
-  background-color: rgba(160, 58, 255, 0.3);
+.new-row {
+  @apply bg-green-50;
 }
 
-.row-new {
-  background-color: rgba(160, 58, 255, 0.3);
+.deleted-row {
+  @apply bg-red-50;
 }
 
-.row-deleted {
-  background-color: rgba(254, 202, 202, 0.3);
+.border-changed-row {
+  border-color: #fef3c7;
+}
+
+.border-new-row {
+  border-color: #d1fae5;
+}
+
+.border-deleted-row {
+  border-color: #fee2e2;
 }
 
 .unapproved-change {
-  font-weight: 500;
-  position: relative;
+  @apply font-semibold text-blue-700;
 }
 
-.unapproved-change::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #f59e0b;
+/* Row styling for data tables */
+.row-changed {
+  @apply bg-gradient-to-r from-amber-50 to-yellow-50;
 }
 
-/* Improve filter container styling */
-.filter-container {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  color: #111;
+.row-new {
+  @apply bg-gradient-to-r from-emerald-50 to-green-50;
 }
 
-/* Improve summary boxes */
-.summary-box {
-  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.row-deleted {
+  @apply bg-gradient-to-r from-red-50 to-rose-50;
 }
 
-/* Button styling consistency */
-button.primary-button {
-  background-color: #3b82f6;
-  color: white;
-  border-radius: 0.375rem;
-  padding: 0.5rem 1rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
+/* Add gradient text classes */
+.text-gradient-blue {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text;
 }
 
-button.primary-button:hover {
-  background-color: #2563eb;
+.text-gradient-green {
+  @apply bg-gradient-to-r from-green-600 to-teal-600 text-transparent bg-clip-text;
 }
 
-/* Improve tab styling */
-.tab-button {
-  padding: 0.5rem 1rem;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
+.text-gradient-purple {
+  @apply bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text;
 }
 
-.tab-button.active {
-  border-bottom: 2px solid #3b82f6;
-  color: #2563eb;
-  font-weight: 500;
+/* Add button gradient classes */
+.btn-gradient-blue {
+  @apply bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white;
 }
 
-/* Fix dropdown styling */
-.select-container {
-  position: relative;
+.btn-gradient-green {
+  @apply bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white;
 }
 
-.select-dropdown {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  z-index: 50;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+.btn-gradient-purple {
+  @apply bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white;
 }
 
-/* App container */
-.app-container {
-  width: 100%;
-  min-height: 100vh;
+/* Add card gradient classes */
+.card-gradient-blue {
+  @apply bg-gradient-to-br from-blue-50 to-indigo-50 border-t-4 border-t-blue-400;
 }
 
-/* Make sure tailwind form elements have proper styling */
-select, input, button {
-  @apply border rounded px-2 py-1;
+.card-gradient-green {
+  @apply bg-gradient-to-br from-green-50 to-teal-50 border-t-4 border-t-green-400;
 }
 
-select {
-  @apply appearance-none bg-white;
+.card-gradient-purple {
+  @apply bg-gradient-to-br from-purple-50 to-pink-50 border-t-4 border-t-purple-400;
 }
 
-button {
-  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+.card-gradient-orange {
+  @apply bg-gradient-to-br from-orange-50 to-amber-50 border-t-4 border-t-orange-400;
 }
 
-.filter-and-summary-container {
-  @apply grid grid-cols-1 md:grid-cols-3 gap-4 mb-4;
+/* Add table styling improvements */
+.data-table tr:nth-child(even) {
+  @apply bg-gradient-to-r from-blue-50/30 to-indigo-50/30;
 }
 
+.data-table tr:hover {
+  @apply bg-gradient-to-r from-blue-100/50 to-indigo-100/50;
+}
+
+.data-table thead tr {
+  @apply bg-gradient-to-r from-blue-100 to-indigo-100;
+}
+
+.data-table tfoot tr {
+  @apply bg-gradient-to-r from-blue-100 to-indigo-100 font-semibold;
+}
+
+/* Add colorful alert dialog */
+.alert-dialog-gradient {
+  @apply bg-gradient-to-br from-blue-50 to-indigo-50;
+}
+
+/* Add enhanced button styles */
+.btn-3d {
+  @apply shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
+}
+
+/* Animated background for important elements */
+.animated-bg {
+  background: linear-gradient(-45deg, #4f46e5, #3b82f6, #8b5cf6, #6366f1);
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Add sticky header for budget table */
+.budget-table-container {
+  @apply overflow-auto max-h-[calc(100vh-300px)];
+}
+
+.budget-table-container table thead {
+  @apply sticky top-0 z-10 bg-white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.budget-table-container table thead th {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700;
+}
+
+/* Make all selisih values red if not 0 */
+.selisih-value {
+  @apply font-semibold;
+}
+
+.selisih-value:not(.selisih-zero) {
+  @apply text-red-600;
+}
+
+.selisih-zero {
+  @apply text-gray-600;
+}
+
+/* Add size xs for buttons */
+.btn-xs {
+  @apply h-7 px-2 text-xs;
+}
+
+/* Add increased spacing for table rows */
+.data-table tr td,
+.data-table tr th {
+  @apply py-3;
+}
+
+.budget-table-container table tbody tr td {
+  @apply py-3;
+}
+
+/* Modify table cells to use rounding for monetary values */
+.number-cell, 
+.selisih-value {
+  white-space: nowrap;
+}
+
+/* Make the budget filter container match the height of the summary box */
 .budget-filter-container {
-  @apply md:col-span-2;
+  @apply h-full flex flex-col;
 }
 
-/* Ensure tables are properly styled */
-table {
-  @apply w-full border-collapse;
+.budget-filter-container .flex-col-reverse {
+  @apply h-full;
 }
 
-table th, table td {
-  @apply border p-2;
+/* Make "Pilih Program dan Anggaran" box same height as summary box */
+.filter-and-summary-container {
+  @apply flex flex-col md:flex-row gap-4;
 }
 
-table thead {
-  @apply bg-gray-100;
+.filter-and-summary-container > div:first-child {
+  @apply w-full md:w-3/4 h-full;
 }
 
-table tbody tr:hover {
-  @apply bg-gray-50;
-}
-
-/* Make sure header is properly styled */
-header {
-  @apply fixed top-0 left-0 right-0 z-10;
+.filter-and-summary-container > div:last-child {
+  @apply w-full md:w-1/4 h-full;
 }
