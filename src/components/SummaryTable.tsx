@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { BudgetSummaryRecord } from '@/types/database';
@@ -133,7 +132,6 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   
   const displayData = getGroupedData();
 
-  // Calculate totals for footer row
   const totalSemula = displayData.reduce((sum, record) => sum + (record.total_semula || 0), 0);
   const totalMenjadi = displayData.reduce((sum, record) => sum + (record.total_menjadi || 0), 0);
   const totalSelisih = totalMenjadi - totalSemula;
@@ -141,15 +139,14 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   const totalChangedItems = displayData.reduce((sum, record) => sum + (record.changed_items || 0), 0);
   const totalItems = displayData.reduce((sum, record) => sum + (record.total_items || 0), 0);
 
-  // Adjust column widths based on view type
   const getCategoryColumnClass = () => {
     switch (view) {
       case 'program_pembebanan':
-        return 'w-[200px]'; // Narrower for program_pembebanan
+        return 'w-[200px]';
       case 'account_group':
-        return 'w-[200px]'; // Narrow for account_group
+        return 'w-[200px]';
       default:
-        return 'w-[300px]'; // Default width
+        return 'w-[300px]';
     }
   };
 
