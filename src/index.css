@@ -1,275 +1,55 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
+/* Existing styles */
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-  }
+/* Adjust spacing in tables */
+.data-table tr {
+  height: 2.5rem;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+.data-table tr.h-7 {
+  height: 1.75rem !important;
 }
 
-.data-table th {
-  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700 text-xs;
+.data-table thead th {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
-.data-table .uraian-cell {
-  @apply text-left;
+.data-table tbody td {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
 }
 
-.data-table .number-cell {
-  @apply text-right;
+/* Wrap text in Pembebanan column */
+.data-table td.whitespace-normal {
+  white-space: normal;
+  word-break: break-word;
 }
 
-.data-table .unit-cell {
-  @apply text-center;
-}
-
-.changed-row {
-  @apply bg-yellow-50;
-}
-
-.new-row {
-  @apply bg-green-50;
-}
-
-.deleted-row {
-  @apply bg-red-50;
-}
-
-.border-changed-row {
-  border-color: #fef3c7;
-}
-
-.border-new-row {
-  border-color: #d1fae5;
-}
-
-.border-deleted-row {
-  border-color: #fee2e2;
-}
-
-.unapproved-change {
-  @apply font-semibold text-blue-700;
-}
-
-/* Row styling for data tables */
+/* Status colors */
 .row-changed {
-  @apply bg-gradient-to-r from-amber-50 to-yellow-50;
+  background-color: rgba(255, 241, 184, 0.3);
 }
 
 .row-new {
-  @apply bg-gradient-to-r from-emerald-50 to-green-50;
+  background-color: rgba(209, 250, 229, 0.3);
 }
 
 .row-deleted {
-  @apply bg-gradient-to-r from-red-50 to-rose-50;
+  background-color: rgba(254, 202, 202, 0.3);
 }
 
-/* Add gradient text classes */
-.text-gradient-blue {
-  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text;
+.unapproved-change {
+  font-weight: 500;
+  position: relative;
 }
 
-.text-gradient-green {
-  @apply bg-gradient-to-r from-green-600 to-teal-600 text-transparent bg-clip-text;
-}
-
-.text-gradient-purple {
-  @apply bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text;
-}
-
-/* Add button gradient classes */
-.btn-gradient-blue {
-  @apply bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white;
-}
-
-.btn-gradient-green {
-  @apply bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white;
-}
-
-.btn-gradient-purple {
-  @apply bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white;
-}
-
-/* Add card gradient classes */
-.card-gradient-blue {
-  @apply bg-gradient-to-br from-blue-50 to-indigo-50 border-t-4 border-t-blue-400;
-}
-
-.card-gradient-green {
-  @apply bg-gradient-to-br from-green-50 to-teal-50 border-t-4 border-t-green-400;
-}
-
-.card-gradient-purple {
-  @apply bg-gradient-to-br from-purple-50 to-pink-50 border-t-4 border-t-purple-400;
-}
-
-.card-gradient-orange {
-  @apply bg-gradient-to-br from-orange-50 to-amber-50 border-t-4 border-t-orange-400;
-}
-
-/* Add table styling improvements */
-.data-table tr:nth-child(even) {
-  @apply bg-gradient-to-r from-blue-50/30 to-indigo-50/30;
-}
-
-.data-table tr:hover {
-  @apply bg-gradient-to-r from-blue-100/50 to-indigo-100/50;
-}
-
-.data-table thead tr {
-  @apply bg-gradient-to-r from-blue-100 to-indigo-100;
-}
-
-.data-table tfoot tr {
-  @apply bg-gradient-to-r from-blue-100 to-indigo-100 font-semibold;
-}
-
-/* Add colorful alert dialog */
-.alert-dialog-gradient {
-  @apply bg-gradient-to-br from-blue-50 to-indigo-50;
-}
-
-/* Add enhanced button styles */
-.btn-3d {
-  @apply shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
-}
-
-/* Animated background for important elements */
-.animated-bg {
-  background: linear-gradient(-45deg, #4f46e5, #3b82f6, #8b5cf6, #6366f1);
-  background-size: 400% 400%;
-  animation: gradientAnimation 15s ease infinite;
-}
-
-@keyframes gradientAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Add sticky header for budget table */
-.budget-table-container {
-  @apply overflow-auto max-h-[calc(100vh-300px)];
-}
-
-.budget-table-container table thead {
-  @apply sticky top-0 z-10 bg-white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.budget-table-container table thead th {
-  @apply bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700;
-}
-
-/* Make all selisih values red if not 0 */
-.selisih-value {
-  @apply font-semibold;
-}
-
-.selisih-value:not(.selisih-zero) {
-  @apply text-red-600;
-}
-
-.selisih-zero {
-  @apply text-gray-600;
-}
-
-/* Add size xs for buttons */
-.btn-xs {
-  @apply h-7 px-2 text-xs;
-}
-
-/* Add increased spacing for table rows */
-.data-table tr td,
-.data-table tr th {
-  @apply py-3;
-}
-
-.budget-table-container table tbody tr td {
-  @apply py-3;
-}
-
-/* Modify table cells to use rounding for monetary values */
-.number-cell, 
-.selisih-value {
-  white-space: nowrap;
-}
-
-/* Make the budget filter container match the height of the summary box */
-.budget-filter-container {
-  @apply h-full flex flex-col;
-}
-
-.budget-filter-container .flex-col-reverse {
-  @apply h-full;
-}
-
-/* Make "Pilih Program dan Anggaran" box same height as summary box */
-.filter-and-summary-container {
-  @apply flex flex-col md:flex-row gap-4;
-}
-
-.filter-and-summary-container > div:first-child {
-  @apply w-full md:w-3/4 h-full;
-}
-
-.filter-and-summary-container > div:last-child {
-  @apply w-full md:w-1/4 h-full;
+.unapproved-change::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #f59e0b;
 }

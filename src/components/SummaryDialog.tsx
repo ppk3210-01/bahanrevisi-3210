@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -198,13 +199,28 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       ];
     });
     
+    // Add total row
+    const totalSemula = changedItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
+    const totalMenjadi = changedItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+    const totalSelisih = totalMenjadi - totalSemula;
+    
+    data.push([
+      "",
+      "TOTAL",
+      "",
+      "",
+      totalSemula,
+      totalMenjadi,
+      totalSelisih
+    ]);
+    
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
     
     // Set column widths
     worksheet['!cols'] = [
       { wch: 5 },   // No
-      { wch: 40 },  // Pembebanan (wider for the combined code)
-      { wch: 40 },  // Uraian
+      { wch: 25 },  // Pembebanan (narrowed width per req #5)
+      { wch: 50 },  // Uraian (increased width per req #5)
       { wch: 40 },  // Detail Perubahan
       { wch: 20 },  // Jumlah Semula
       { wch: 20 },  // Jumlah Menjadi
@@ -238,13 +254,26 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       item.jumlahMenjadi
     ]);
     
+    // Add total row
+    const totalMenjadi = newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+    
+    data.push([
+      "",
+      "TOTAL",
+      "",
+      "",
+      "",
+      "",
+      totalMenjadi
+    ]);
+    
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
     
     // Set column widths
     worksheet['!cols'] = [
       { wch: 5 },   // No
-      { wch: 40 },  // Pembebanan (wider for the combined code)
-      { wch: 40 },  // Uraian
+      { wch: 25 },  // Pembebanan (narrowed width per req #5)
+      { wch: 50 },  // Uraian (increased width per req #5)
       { wch: 10 },  // Volume
       { wch: 15 },  // Satuan
       { wch: 20 },  // Harga Satuan
@@ -396,6 +425,16 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       } else if ('sub_komponen' in record) {
         rowData = [
           record.sub_komponen,
+          record.total_semula,
+          record.total_menjadi,
+          record.total_selisih,
+          record.new_items,
+          record.changed_items,
+          record.total_items
+        ];
+      } else if ('account_group' in record) {
+        rowData = [
+          record.account_group,
           record.total_semula,
           record.total_menjadi,
           record.total_selisih,

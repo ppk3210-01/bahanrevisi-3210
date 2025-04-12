@@ -1,3 +1,4 @@
+
 import { BudgetItem, BudgetSummary } from "@/types/budget";
 
 // Calculate the amount based on volume and unit price
@@ -17,13 +18,15 @@ export const roundToThousands = (value: number): number => {
 };
 
 // Format number as currency (e.g., Rp 1.000.000)
-export const formatCurrency = (value: number): string => {
+export const formatCurrency = (value: number, shouldRound: boolean = true): string => {
+  const valueToFormat = shouldRound ? roundToThousands(value) : value;
+  
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
-  }).format(roundToThousands(value));
+  }).format(valueToFormat);
 };
 
 // Check if an item has been changed

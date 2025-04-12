@@ -345,7 +345,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             disabled={!isAdmin && !areFiltersComplete}
           />
         ) : (
-          <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi)}</span>
+          <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi, false)}</span>
         );
       
       case 'jumlahMenjadi':
@@ -355,7 +355,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         return <span>{formatCurrency(item.jumlahSemula)}</span>;
       
       case 'hargaSatuanSemula':
-        return <span>{formatCurrency(item.hargaSatuanSemula)}</span>;
+        return <span>{formatCurrency(item.hargaSatuanSemula, false)}</span>;
       
       case 'selisih':
         return <span className={item.selisih > 0 ? 'text-green-600' : item.selisih < 0 ? 'text-red-600' : ''}>
@@ -700,9 +700,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               </tr>
             </thead>
             
-            <tbody>
+            <tbody className="text-xs">
               {paginatedItems.map((item, index) => (
-                <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? getRowColor(index) : ''}`}>
+                <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? getRowColor(index) : ''} h-7`}>
                   <td>{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
                   <td className="uraian-cell">{renderItemField(item, 'uraian')}</td>
                   <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
@@ -815,7 +815,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               ))}
 
               {!isViewer && (
-                <tr className="bg-gray-50">
+                <tr className="bg-gray-50 h-7">
                   <td className="py-1 px-1">{filteredItems.length + 1}</td>
                   <td className="uraian-cell py-1 px-1">
                     <Input 
