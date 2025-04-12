@@ -109,6 +109,13 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       XLSX.utils.book_append_sheet(workbook, akunSheet, "Ringkasan Akun");
     }
     
+    // Create account group summary sheet if available
+    const accountGroupItems = summaryData.filter(item => 'account_group' in item);
+    if (accountGroupItems.length > 0) {
+      const accountGroupSheet = createGroupSummarySheet(accountGroupItems, 'Kelompok Akun');
+      XLSX.utils.book_append_sheet(workbook, accountGroupSheet, "Ringkasan Kelompok Akun");
+    }
+    
     // Write to file and download
     XLSX.writeFile(workbook, "Ringkasan_Anggaran.xlsx");
   };
@@ -157,7 +164,6 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     return worksheet;
   };
 
-  // Create a sheet with changed items
   const createChangedItemsSheet = (items: BudgetItem[]) => {
     const headers = [
       "No",
