@@ -143,9 +143,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   const getCategoryColumnClass = () => {
     switch (view) {
       case 'program_pembebanan':
-        return 'w-[180px] whitespace-normal';
+        return 'w-[220px] whitespace-normal';
       case 'account_group':
-        return 'w-[180px]';
+        return 'w-[200px]';
       default:
         return 'w-[250px]';
     }
@@ -155,23 +155,23 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
     <div className="rounded-md border overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/20">
+          <TableRow className="bg-slate-100">
             <TableHead className={getCategoryColumnClass()}>
               <Button variant="ghost" onClick={() => handleSort('category')} className="flex items-center p-0 text-slate-700">
                 {getColumnName()} <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead className="text-center">
               <Button variant="ghost" onClick={() => handleSort('totalSemula')} className="flex items-center justify-end p-0 w-full text-slate-700">
                 Total Semula <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead className="text-center">
               <Button variant="ghost" onClick={() => handleSort('totalMenjadi')} className="flex items-center justify-end p-0 w-full text-slate-700">
                 Total Menjadi <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
-            <TableHead className="text-right">
+            <TableHead className="text-center">
               <Button variant="ghost" onClick={() => handleSort('totalSelisih')} className="flex items-center justify-end p-0 w-full text-slate-700">
                 Selisih <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>

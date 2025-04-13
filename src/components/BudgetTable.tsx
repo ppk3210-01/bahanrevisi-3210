@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Select, 
   SelectContent, 
@@ -72,6 +73,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const [pageSize, setPageSize] = useState<number>(10);
   const [sortField, setSortField] = useState<keyof BudgetItem | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
   
   const [detailItem, setDetailItem] = useState<BudgetItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
@@ -369,7 +371,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 
   const filteredItems = items.filter(item => {
     const searchLower = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       item.uraian?.toLowerCase().includes(searchLower) ||
       item.satuanSemula?.toLowerCase().includes(searchLower) ||
       item.satuanMenjadi?.toLowerCase().includes(searchLower) ||
@@ -382,6 +384,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       item.hargaSatuanSemula.toString().includes(searchTerm) ||
       item.hargaSatuanMenjadi.toString().includes(searchTerm)
     );
+    
+    if (hideZeroBudget) {
+      return matchesSearch && item.jumlahSemula > 0;
+    }
+    
+    return matchesSearch;
   });
 
   const sortedItems = [...filteredItems].sort((a, b) => {
@@ -568,17 +576,34 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   return (
     <div className="space-y-2">
       <div className="flex flex-col sm:flex-row justify-between gap-2 mb-2">
-        <div className="relative">
-          <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
-          <Input
-            placeholder="Cari anggaran..."
-            className="pl-8 w-full sm:w-80 h-8 text-sm"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <div className="relative">
+            <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Cari anggaran..."
+              className="pl-8 w-full sm:w-80 h-8 text-sm"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+          
+          <div className="filter-checkbox-container">
+            <Checkbox 
+              id="hideZeroBudget"
+              checked={hideZeroBudget}
+              onCheckedChange={(checked) => {
+                setHideZeroBudget(checked === true);
+                setCurrentPage(1);
+              }}
+              className="filter-checkbox"
+            />
+            <label htmlFor="hideZeroBudget" className="filter-checkbox-label">
+              Sembunyikan jumlah pagu 0
+            </label>
+          </div>
         </div>
         
         <div className="flex items-center gap-2">
@@ -607,21 +632,22 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       <div className="text-xs text-gray-500">
         Menampilkan {paginatedItems.length} dari {filteredItems.length} item
         {searchTerm && ` (filter: "${searchTerm}")`}
+        {hideZeroBudget && ` (menyembunyikan jumlah pagu 0)`}
       </div>
       
       <div className="rounded-md border border-gray-200 w-full">
         {komponenOutput && (
-          <div className="bg-gradient-to-r from-purple-100 to-indigo-100 p-2 border-b border-gray-200">
-            <h3 className="font-medium text-sm">Komponen Output: {komponenOutput}</h3>
+          <div className="bg-gradient-to-r from-blue-50 to-slate-100 p-2 border-b border-gray-200">
+            <h3 className="font-medium text-sm text-slate-700">Komponen Output: {komponenOutput}</h3>
           </div>
         )}
         
         <div className="overflow-x-auto w-full">
           <table className="w-full min-w-full data-table text-xs">
-            <thead className="sticky top-[64px] bg-gradient-to-r from-blue-700 to-indigo-100 z-10 shadow-sm">
+            <thead className="sticky top-[64px] bg-slate-200 z-10 shadow-sm">
               <tr className="text-xs">
-                <th className="py-2 px-1 w-8">No</th>
-                <th className="uraian-cell py-2 px-1 w-[20%]">
+                <th className="py-2 px-1 w-8 text-center">#</th>
+                <th className="uraian-cell py-2 px-1 w-[250px] text-center">
                   <button 
                     className="flex items-center" 
                     onClick={() => handleSort('uraian')}
@@ -630,7 +656,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[5%]">
+                <th className="number-cell py-2 px-1 w-[70px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeSemula')}
@@ -639,8 +665,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="unit-cell py-2 px-1 w-[7%]">Sat.Semula</th>
-                <th className="number-cell py-2 px-1 w-[10%]">
+                <th className="unit-cell py-2 px-1 w-[80px] text-center">Sat.Semula</th>
+                <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanSemula')}
@@ -649,7 +675,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[10%]">
+                <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahSemula')}
@@ -658,7 +684,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[5%] border-l-2">
+                <th className="number-cell py-2 px-1 w-[70px] text-center border-l-2">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeMenjadi')}
@@ -667,8 +693,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="unit-cell py-2 px-1 w-[7%]">Sat.Menjadi</th>
-                <th className="number-cell py-2 px-1 w-[10%]">
+                <th className="unit-cell py-2 px-1 w-[80px] text-center">Sat.Menjadi</th>
+                <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanMenjadi')}
@@ -677,7 +703,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[10%]">
+                <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahMenjadi')}
@@ -686,7 +712,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[10%]">
+                <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('selisih')}
@@ -695,128 +721,136 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                {!isViewer && <th className="py-2 px-1 w-[7%]">Aksi SM/PJK</th>}
-                {!isViewer && <th className="py-2 px-1 w-[7%]">PPK</th>}
+                {!isViewer && <th className="py-2 px-1 w-[80px] text-center">Aksi SM/PJK</th>}
+                {!isViewer && <th className="py-2 px-1 w-[80px] text-center">PPK</th>}
               </tr>
             </thead>
             
             <tbody className="text-xs">
-              {paginatedItems.map((item, index) => (
-                <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? getRowColor(index) : ''} h-7`}>
-                  <td>{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
-                  <td className="uraian-cell">{renderItemField(item, 'uraian')}</td>
-                  <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
-                  <td className="unit-cell">{renderItemField(item, 'satuanSemula')}</td>
-                  <td className="number-cell">{renderItemField(item, 'hargaSatuanSemula')}</td>
-                  <td className="number-cell">{renderItemField(item, 'jumlahSemula')}</td>
-                  <td className="number-cell border-l-2">{renderItemField(item, 'volumeMenjadi')}</td>
-                  <td className="unit-cell">{renderItemField(item, 'satuanMenjadi')}</td>
-                  <td className="number-cell">{renderItemField(item, 'hargaSatuanMenjadi')}</td>
-                  <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
-                  <td className="number-cell">{renderItemField(item, 'selisih')}</td>
-                  
-                  {!isViewer && (
-                    <td>
-                      <div className="flex space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => showDetailDialog(item)}
-                          title="Lihat Detail"
-                          className="h-6 w-6"
-                        >
-                          <Eye className="h-3 w-3" />
-                        </Button>
-
-                        {editingId === item.id ? (
-                          <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
-                            <Check className="h-3 w-3" />
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => startEditing(item)} 
-                            className="h-6 w-6"
-                            disabled={!isAdmin && !areFiltersComplete}
-                          >
-                            <FileEdit className="h-3 w-3" />
-                          </Button>
-                        )}
-                        
-                        {canDeleteItem(item) && (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => {
-                              onDelete(item.id);
-                              toast({
-                                title: "Berhasil",
-                                description: 'Item berhasil dihapus'
-                              });
-                            }}
-                            className="h-6 w-6"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  )}
-                  
-                  {!isViewer && (
-                    <td className="text-center">
-                      {needsApproval(item) && (
+              {paginatedItems.length === 0 ? (
+                <tr>
+                  <td colSpan={!isViewer ? 13 : 11} className="py-4 text-center text-slate-500">
+                    {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data'}
+                  </td>
+                </tr>
+              ) : (
+                paginatedItems.map((item, index) => (
+                  <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
+                    <td className="text-center">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
+                    <td className="uraian-cell">{renderItemField(item, 'uraian')}</td>
+                    <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
+                    <td className="unit-cell">{renderItemField(item, 'satuanSemula')}</td>
+                    <td className="number-cell">{renderItemField(item, 'hargaSatuanSemula')}</td>
+                    <td className="number-cell">{renderItemField(item, 'jumlahSemula')}</td>
+                    <td className="number-cell border-l-2">{renderItemField(item, 'volumeMenjadi')}</td>
+                    <td className="unit-cell">{renderItemField(item, 'satuanMenjadi')}</td>
+                    <td className="number-cell">{renderItemField(item, 'hargaSatuanMenjadi')}</td>
+                    <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
+                    <td className="number-cell">{renderItemField(item, 'selisih')}</td>
+                    
+                    {!isViewer && (
+                      <td>
                         <div className="flex space-x-1 justify-center">
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="text-green-600 h-6 w-6" 
-                            onClick={() => {
-                              if (isAdmin) {
-                                onApprove(item.id);
+                            onClick={() => showDetailDialog(item)}
+                            title="Lihat Detail"
+                            className="h-6 w-6"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+
+                          {editingId === item.id ? (
+                            <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => startEditing(item)} 
+                              className="h-6 w-6"
+                              disabled={!isAdmin && !areFiltersComplete}
+                            >
+                              <FileEdit className="h-3 w-3" />
+                            </Button>
+                          )}
+                          
+                          {canDeleteItem(item) && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => {
+                                onDelete(item.id);
                                 toast({
                                   title: "Berhasil",
-                                  description: 'Item disetujui oleh PPK'
+                                  description: 'Item berhasil dihapus'
                                 });
-                              }
-                            }}
-                            title="Setujui"
-                            disabled={!isAdmin}
-                          >
-                            <Check className="h-3 w-3 font-bold" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-red-600 h-6 w-6" 
-                            onClick={() => {
-                              if (isAdmin) {
-                                onReject(item.id);
-                                toast({
-                                  title: "Info",
-                                  description: 'Item ditolak oleh PPK'
-                                });
-                              }
-                            }}
-                            title="Tolak"
-                            disabled={!isAdmin}
-                          >
-                            <X className="h-3 w-3 font-bold" />
-                          </Button>
+                              }}
+                              className="h-6 w-6"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
                         </div>
-                      )}
-                      {item.isApproved && (
-                        <span className="text-green-600 font-medium">OK</span>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))}
+                      </td>
+                    )}
+                    
+                    {!isViewer && (
+                      <td className="text-center">
+                        {needsApproval(item) && (
+                          <div className="flex space-x-1 justify-center">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-green-600 h-6 w-6" 
+                              onClick={() => {
+                                if (isAdmin) {
+                                  onApprove(item.id);
+                                  toast({
+                                    title: "Berhasil",
+                                    description: 'Item disetujui oleh PPK'
+                                  });
+                                }
+                              }}
+                              title="Setujui"
+                              disabled={!isAdmin}
+                            >
+                              <Check className="h-3 w-3 font-bold" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-red-600 h-6 w-6" 
+                              onClick={() => {
+                                if (isAdmin) {
+                                  onReject(item.id);
+                                  toast({
+                                    title: "Info",
+                                    description: 'Item ditolak oleh PPK'
+                                  });
+                                }
+                              }}
+                              title="Tolak"
+                              disabled={!isAdmin}
+                            >
+                              <X className="h-3 w-3 font-bold" />
+                            </Button>
+                          </div>
+                        )}
+                        {item.isApproved && (
+                          <span className="text-green-600 font-medium">OK</span>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
 
               {!isViewer && (
-                <tr className="bg-gray-50 h-7">
-                  <td className="py-1 px-1">{filteredItems.length + 1}</td>
+                <tr className="bg-gray-50 h-9">
+                  <td className="py-1 px-1 text-center">{filteredItems.length + 1}</td>
                   <td className="uraian-cell py-1 px-1">
                     <Input 
                       placeholder="Tambah Uraian Baru" 

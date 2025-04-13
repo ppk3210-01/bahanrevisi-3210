@@ -50,37 +50,37 @@
 
 /* Adjust spacing in tables */
 .data-table tr {
-  height: 2rem; /* Reduced from 2.5rem */
+  height: 2.25rem; /* Increased from 2rem for better spacing */
 }
 
 .data-table tr.h-7 {
-  height: 1.5rem !important; /* Reduced from 1.75rem */
+  height: 1.75rem !important; /* Increased from 1.5rem */
 }
 
 .data-table thead th {
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-  font-size: 0.85rem; /* Slightly reduced font size */
-  color: #334155;
-  background-color: #f1f5f9;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.85rem;
+  color: #1E293B; /* Darker color for better contrast */
+  background-color: #E2E8F0; /* Slightly darker background */
   text-align: center; /* Center align all headers */
 }
 
 .data-table tbody td {
-  padding-top: 0.2rem;
-  padding-bottom: 0.2rem;
-  font-size: 0.85rem; /* Slightly reduced font size */
-  color: #334155;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+  font-size: 0.85rem;
+  color: #334155; /* Dark enough for good contrast */
 }
 
 /* Wrap text in Pembebanan column */
 .data-table td.whitespace-normal {
   white-space: normal;
   word-break: break-word;
-  max-width: 200px; /* Limit width for Pembebanan column */
+  max-width: 200px;
 }
 
-/* Adjust uraian column to be wider */
+/* Adjust uraian column to be wider based on the attached image */
 .data-table td.uraian-column, 
 .data-table th.uraian-cell,
 .data-table td.uraian-cell {
@@ -100,7 +100,7 @@
 
 /* Improve header styling */
 .data-table thead {
-  background: linear-gradient(to right, #f1f5f9, #e2e8f0);
+  background: linear-gradient(to right, #E2E8F0, #F1F5F9);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -243,37 +243,6 @@ header {
   @apply fixed top-0 left-0 right-0 z-10;
 }
 
-/* Dark theme overrides - we're not using them but ensuring colors are properly set */
-.dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 0 0% 98%;
-  
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 217.2 91.2% 59.8%;
-}
-
 /* Pagination controls */
 .pagination-controls {
   @apply flex justify-between items-center mt-4;
@@ -294,4 +263,50 @@ header {
 
 .current-page-info {
   @apply text-sm text-slate-600;
+}
+
+/* Filter checkbox styles */
+.filter-checkbox-container {
+  @apply flex items-center space-x-2 mb-2;
+}
+
+.filter-checkbox {
+  @apply h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500;
+}
+
+.filter-checkbox-label {
+  @apply text-sm text-gray-700;
+}
+
+/* RPD table specific styles */
+.rpd-table th {
+  @apply text-center bg-slate-100 py-2 px-1 text-xs;
+}
+
+.rpd-table td {
+  @apply py-1 px-1 text-xs;
+}
+
+.rpd-status-cell {
+  @apply w-[100px] text-center;
+}
+
+.rpd-uraian-cell {
+  @apply w-[300px] text-left whitespace-normal;
+}
+
+.rpd-month-cell {
+  @apply w-[80px] text-right;
+}
+
+.rpd-text-left {
+  @apply text-left;
+}
+
+.rpd-text-center {
+  @apply text-center;
+}
+
+.rpd-text-right {
+  @apply text-right;
 }

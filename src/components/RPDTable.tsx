@@ -4,14 +4,17 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AlertCircle, Check, Clock, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRPDData, RPDItem } from '@/hooks/useRPDData';
-import { Select } from '@/components/ui/select';
+import { useAuth } from '@/contexts/AuthContext';
 
 const RPDTable: React.FC = () => {
   const { rpdItems, loading, updateRPDItem } = useRPDData();
+  const { isAdmin, profile } = useAuth();
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, Record<string, number>>>({});
+  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,13 +72,13 @@ const RPDTable: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'ok':
-        return <Check className="h-5 w-5 text-green-500" />;
+        return <Check className="h-4 w-4 text-green-500" />;
       case 'belum_isi':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
       case 'belum_lengkap':
-        return <Clock className="h-5 w-5 text-orange-500" />;
+        return <Clock className="h-4 w-4 text-orange-500" />;
       case 'sisa':
-        return <Info className="h-5 w-5 text-blue-500" />;
+        return <Info className="h-4 w-4 text-blue-500" />;
       default:
         return null;
     }
@@ -115,11 +118,19 @@ const RPDTable: React.FC = () => {
     return value.toLocaleString('id-ID');
   };
   
+  // Apply the filter for zero budget if enabled
+  const filteredItems = rpdItems.filter(item => {
+    if (hideZeroBudget) {
+      return item.jumlah_menjadi > 0;
+    }
+    return true;
+  });
+  
   // Calculate pagination
-  const totalPages = Math.ceil(rpdItems.length / pageSize);
+  const totalPages = Math.ceil(filteredItems.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, rpdItems.length);
-  const paginatedItems = rpdItems.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + pageSize, filteredItems.length);
+  const paginatedItems = filteredItems.slice(startIndex, endIndex);
   
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -132,32 +143,65 @@ const RPDTable: React.FC = () => {
     setPageSize(newSize);
     setCurrentPage(1); // Reset to first page when changing page size
   };
+  
+  const canEditMonths = isAdmin || (profile?.role === 'user');
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-4 mb-2">
+        <div className="filter-checkbox-container">
+          <Checkbox 
+            id="hideZeroBudgetRPD"
+            checked={hideZeroBudget}
+            onCheckedChange={(checked) => {
+              setHideZeroBudget(checked === true);
+              setCurrentPage(1);
+            }}
+            className="filter-checkbox"
+          />
+          <label htmlFor="hideZeroBudgetRPD" className="filter-checkbox-label">
+            Sembunyikan jumlah pagu 0
+          </label>
+        </div>
+        
+        <div className="flex items-center ml-auto">
+          <span className="text-xs text-gray-600 mr-2">Tampilkan:</span>
+          <select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            className="border border-slate-300 rounded text-slate-700 px-2 py-1 text-sm"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
+      </div>
+      
       <div className="overflow-x-auto pb-4">
-        <Table className="min-w-full border rounded-md">
+        <Table className="min-w-full border rounded-md rpd-table">
           <TableHeader className="bg-slate-100">
             <TableRow>
-              <TableHead className="w-20 text-center">Status</TableHead>
-              <TableHead className="w-1/4 text-left">Uraian</TableHead>
-              <TableHead className="text-right">Volume</TableHead>
-              <TableHead className="text-center">Satuan</TableHead>
-              <TableHead className="text-right">Harga Satuan</TableHead>
-              <TableHead className="text-right">Jumlah Pagu</TableHead>
-              <TableHead className="text-right bg-blue-50">Jumlah RPD</TableHead>
-              <TableHead className="text-right">Januari</TableHead>
-              <TableHead className="text-right">Februari</TableHead>
-              <TableHead className="text-right">Maret</TableHead>
-              <TableHead className="text-right">April</TableHead>
-              <TableHead className="text-right">Mei</TableHead>
-              <TableHead className="text-right">Juni</TableHead>
-              <TableHead className="text-right">Juli</TableHead>
-              <TableHead className="text-right">Agustus</TableHead>
-              <TableHead className="text-right">September</TableHead>
-              <TableHead className="text-right">Oktober</TableHead>
-              <TableHead className="text-right">November</TableHead>
-              <TableHead className="text-right">Desember</TableHead>
+              <TableHead className="w-16 text-center">Status</TableHead>
+              <TableHead className="w-[300px] text-left">Uraian</TableHead>
+              <TableHead className="text-right w-[70px]">Volume</TableHead>
+              <TableHead className="text-center w-[70px]">Satuan</TableHead>
+              <TableHead className="text-right w-[100px]">Harga Satuan</TableHead>
+              <TableHead className="text-right w-[100px]">Jumlah Pagu</TableHead>
+              <TableHead className="text-right bg-blue-50 w-[100px]">Jumlah RPD</TableHead>
+              <TableHead className="text-right w-[80px]">Januari</TableHead>
+              <TableHead className="text-right w-[80px]">Februari</TableHead>
+              <TableHead className="text-right w-[80px]">Maret</TableHead>
+              <TableHead className="text-right w-[80px]">April</TableHead>
+              <TableHead className="text-right w-[80px]">Mei</TableHead>
+              <TableHead className="text-right w-[80px]">Juni</TableHead>
+              <TableHead className="text-right w-[80px]">Juli</TableHead>
+              <TableHead className="text-right w-[80px]">Agustus</TableHead>
+              <TableHead className="text-right w-[80px]">September</TableHead>
+              <TableHead className="text-right w-[80px]">Oktober</TableHead>
+              <TableHead className="text-right w-[80px]">November</TableHead>
+              <TableHead className="text-right w-[80px]">Desember</TableHead>
               <TableHead className="w-20 text-center">Aksi</TableHead>
             </TableRow>
           </TableHeader>
@@ -175,26 +219,26 @@ const RPDTable: React.FC = () => {
             ) : paginatedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={20} className="text-center py-4 text-slate-600">
-                  Tidak ada data Rencana Penarikan Dana
+                  {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data Rencana Penarikan Dana'}
                 </TableCell>
               </TableRow>
             ) : (
               paginatedItems.map(item => (
                 <TableRow key={item.id} className={item.jumlah_rpd === 0 ? 'bg-green-50' : ''}>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center p-1">
                     <div className="flex items-center justify-center">
-                      <div className={`px-2 py-1 rounded-full flex items-center ${getStatusColor(item.status)}`}>
+                      <div className={`px-1.5 py-0.5 rounded-full flex items-center ${getStatusColor(item.status)}`}>
                         {getStatusIcon(item.status)}
-                        <span className="ml-1 text-xs font-medium">{getStatusText(item.status)}</span>
+                        <span className="ml-1 text-xs">{getStatusText(item.status)}</span>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium text-left">{item.uraian}</TableCell>
-                  <TableCell className="text-right">{item.volume_menjadi}</TableCell>
-                  <TableCell className="text-center">{item.satuan_menjadi}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
-                  <TableCell className="text-right font-medium">{formatCurrency(item.jumlah_menjadi)}</TableCell>
-                  <TableCell className={`text-right font-medium ${item.jumlah_rpd === item.jumlah_menjadi ? 'bg-green-100' : 'bg-blue-50'}`}>
+                  <TableCell className="p-1 rpd-uraian-cell">{item.uraian}</TableCell>
+                  <TableCell className="text-right p-1">{item.volume_menjadi}</TableCell>
+                  <TableCell className="text-center p-1">{item.satuan_menjadi}</TableCell>
+                  <TableCell className="text-right p-1">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
+                  <TableCell className="text-right p-1">{formatCurrency(item.jumlah_menjadi)}</TableCell>
+                  <TableCell className={`text-right p-1 ${item.jumlah_rpd === item.jumlah_menjadi ? 'bg-green-100' : 'bg-blue-50'}`}>
                     {formatCurrency(item.jumlah_rpd)}
                   </TableCell>
                   
@@ -207,16 +251,16 @@ const RPDTable: React.FC = () => {
                             min="0"
                             value={editValues[item.id]?.[month] || 0}
                             onChange={(e) => handleInputChange(item.id, month, e.target.value)}
-                            className="h-8 text-right text-slate-800"
+                            className="h-8 text-right text-xs"
                           />
                         </TableCell>
                       ))}
-                      <TableCell>
+                      <TableCell className="p-1">
                         <div className="flex space-x-1">
-                          <Button size="sm" variant="default" onClick={() => saveChanges(item.id)}>
+                          <Button size="sm" variant="default" onClick={() => saveChanges(item.id)} className="text-xs py-0 h-7">
                             Simpan
                           </Button>
-                          <Button size="sm" variant="outline" onClick={cancelEditing}>
+                          <Button size="sm" variant="outline" onClick={cancelEditing} className="text-xs py-0 h-7">
                             Batal
                           </Button>
                         </div>
@@ -224,24 +268,25 @@ const RPDTable: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <TableCell className="text-right">{formatCurrency(item.januari)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.februari)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.maret)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.april)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.mei)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.juni)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.juli)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.agustus)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.september)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.oktober)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.november)}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(item.desember)}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.januari)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.februari)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.maret)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.april)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.mei)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.juni)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.juli)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.agustus)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.september)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.oktober)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.november)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.desember)}</TableCell>
+                      <TableCell className="p-1 text-center">
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          className="bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
+                          className="bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700 text-xs h-7"
                           onClick={() => startEditing(item.id)}
+                          disabled={!canEditMonths}
                         >
                           Edit
                         </Button>
@@ -255,25 +300,10 @@ const RPDTable: React.FC = () => {
         </Table>
       </div>
       
-      {!loading && rpdItems.length > 0 && (
+      {!loading && filteredItems.length > 0 && (
         <div className="pagination-controls">
           <div className="page-size-selector">
-            <span className="text-sm text-slate-600">Tampilkan</span>
-            <select
-              value={pageSize}
-              onChange={handlePageSizeChange}
-              className="ml-2 border border-slate-300 rounded text-slate-700 px-2 py-1"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span className="ml-2 text-sm text-slate-600">entri</span>
-          </div>
-          
-          <div className="current-page-info">
-            Menampilkan {startIndex + 1} - {endIndex} dari {rpdItems.length} item
+            <span className="text-sm text-slate-600">Menampilkan {startIndex + 1} - {endIndex} dari {filteredItems.length} item</span>
           </div>
           
           <div className="page-navigation">
