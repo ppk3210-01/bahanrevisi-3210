@@ -1,4 +1,3 @@
-
 #root {
   width: 100%;
   margin: 0 auto;
@@ -243,69 +242,142 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
 /* RPD table specific styles */
 .rpd-table th {
   font-weight: 500;
-  padding: 8px 6px;
+  padding: 6px;
   text-align: center;
   vertical-align: middle;
   color: #334155;
+  white-space: nowrap;
+  height: 40px;
 }
 
 .rpd-table td {
-  padding: 6px;
+  padding: 4px 6px;
   vertical-align: middle;
-  height: 36px;
+  height: 32px;
   color: #334155;
+  font-weight: normal;
 }
 
 .rpd-table .rpd-uraian-cell {
+  min-width: 350px;
+  max-width: 350px;
+  white-space: normal;
+  word-break: break-word;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fix for budget changes tables - tighter row spacing */
+.budget-changes-table tr {
+  height: 32px;
+}
+
+.budget-changes-table td {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+/* Fix for budget table column sizing */
+.budget-table .volume-column {
+  max-width: 80px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Budget table styles */
+.budget-table th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: white;
+  color: #334155;
+  font-weight: 500;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+  padding: 6px;
+  height: 40px;
+}
+
+.budget-table td {
+  padding: 4px 6px;
+  vertical-align: middle;
+  height: 32px;
+  color: #334155;
+  font-weight: normal;
+}
+
+.budget-table .uraian-cell {
   min-width: 300px;
-  max-width: 400px;
+  max-width: 300px;
   white-space: normal;
   word-break: break-word;
   text-align: left;
 }
 
-/* Fix pagination buttons */
-.pagination-button {
-  background-color: white;
-  color: #334155 !important;
+.budget-table .pembebanan-cell {
+  min-width: 250px;
+  max-width: 250px;
+  white-space: normal;
+  word-break: break-word;
+  text-align: left;
 }
 
-/* Hover states */
-.hover\:bg-slate-50:hover {
-  color: #334155 !important;
+/* RPD table month columns */
+.rpd-table th:nth-child(n+8):nth-child(-n+19),
+.rpd-table td:nth-child(n+8):nth-child(-n+19) {
+  min-width: 120px;
+  width: 120px;
 }
 
-/* Fix button styling */
-button, a {
-  color: #334155;
-  font-weight: normal;
-}
-
-button.bg-blue-500, button.bg-blue-600, 
-button.bg-indigo-500, button.bg-indigo-600,
-button.bg-purple-500, button.bg-purple-600,
-button.bg-green-500, button.bg-green-600 {
-  color: white;
-}
-
-/* Table Row Spacing */
-.data-table tr, .budget-table tr, .rpd-table tr {
-  height: 40px;
-}
-
-/* Fix TabsTrigger text */
-.TabsTrigger[data-state="active"] {
-  color: #334155;
-  background-color: transparent;
-  border-bottom: 2px solid #64748b;
-}
-
+/* Don't apply bold to tab text */
 .TabsTrigger {
-  color: #64748b;
-  background-color: transparent;
+  font-weight: normal;
+  color: #334155 !important;
 }
 
-/* Fix TabsList */
+/* Fix header styling - no blue background */
 .TabsList {
-  background-color: transparent;
+  background-color: transparent !important;
+}
+
+.TabsTrigger[data-state="active"] {
+  color: #334155 !important;
+  background-color: transparent !important;
+  font-weight: 500 !important;
+  border-bottom: 2px solid #334155 !important;
+}
+
+/* Make table backgrounds white, not blue */
+thead, .table-header {
+  background-color: white !important;
+}
+
+/* Freeze columns for budget table */
+.budget-table th.sticky-left,
+.budget-table td.sticky-left {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background-color: inherit;
+  border-right: 1px solid #e2e8f0;
+}
+
+.budget-table th.sticky-pembebanan,
+.budget-table td.sticky-pembebanan {
+  position: sticky;
+  left: 80px;
+  z-index: 20;
+  background-color: inherit;
+  border-right: 1px solid #e2e8f0;
+}
+
+.budget-table th.sticky-uraian,
+.budget-table td.sticky-uraian {
+  position: sticky;
+  left: 320px;
+  z-index: 20;
+  background-color: inherit;
+  border-right: 1px solid #e2e8f0;
 }

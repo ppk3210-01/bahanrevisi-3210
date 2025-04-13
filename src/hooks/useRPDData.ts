@@ -51,48 +51,35 @@ export const useRPDData = (filters?: FilterSelection) => {
     try {
       setLoading(true);
       
-      let query = supabase.rpc('get_rpd_data');
+      let { data, error } = { data: null, error: null };
       
-      // Add filters if provided
-      if (filters) {
-        if (filters.programPembebanan && filters.programPembebanan !== 'all') {
-          query = supabase.rpc('get_rpd_data_filtered', { 
-            program_filter: filters.programPembebanan 
-          });
-        }
+      // Determine if we need to use filters
+      if (filters && (
+        (filters.programPembebanan && filters.programPembebanan !== 'all') ||
+        (filters.kegiatan && filters.kegiatan !== 'all') ||
+        (filters.rincianOutput && filters.rincianOutput !== 'all') ||
+        (filters.komponenOutput && filters.komponenOutput !== 'all') ||
+        (filters.subKomponen && filters.subKomponen !== 'all') ||
+        (filters.akun && filters.akun !== 'all')
+      )) {
+        // Use filtered query with appropriate parameters
+        const result = await supabase.rpc('get_rpd_data_filtered', {
+          program_filter: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
+          kegiatan_filter: filters.kegiatan !== 'all' ? filters.kegiatan : null,
+          rincian_filter: filters.rincianOutput !== 'all' ? filters.rincianOutput : null,
+          komponen_filter: filters.komponenOutput !== 'all' ? filters.komponenOutput : null,
+          sub_komponen_filter: filters.subKomponen !== 'all' ? filters.subKomponen : null,
+          akun_filter: filters.akun !== 'all' ? filters.akun : null
+        });
         
-        if (filters.kegiatan && filters.kegiatan !== 'all') {
-          query = supabase.rpc('get_rpd_data_filtered', { 
-            kegiatan_filter: filters.kegiatan 
-          });
-        }
-        
-        if (filters.rincianOutput && filters.rincianOutput !== 'all') {
-          query = supabase.rpc('get_rpd_data_filtered', { 
-            rincian_filter: filters.rincianOutput 
-          });
-        }
-        
-        if (filters.komponenOutput && filters.komponenOutput !== 'all') {
-          query = supabase.rpc('get_rpd_data_filtered', { 
-            komponen_filter: filters.komponenOutput 
-          });
-        }
-        
-        if (filters.subKomponen && filters.subKomponen !== 'all') {
-          query = supabase.rpc('get_rpd_data_filtered', { 
-            sub_komponen_filter: filters.subKomponen 
-          });
-        }
-        
-        if (filters.akun && filters.akun !== 'all') {
-          query = supabase.rpc('get_rpd_data_filtered', { 
-            akun_filter: filters.akun 
-          });
-        }
+        data = result.data;
+        error = result.error;
+      } else {
+        // Use unfiltered query
+        const result = await supabase.rpc('get_rpd_data');
+        data = result.data;
+        error = result.error;
       }
-      
-      const { data, error } = await query;
       
       if (error) {
         throw error;

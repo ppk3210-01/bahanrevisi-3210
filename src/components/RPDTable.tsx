@@ -140,7 +140,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
       item.uraian.toLowerCase().includes(searchLower) ||
-      item.satuan_menjadi.toLowerCase().includes(searchLower) ||
+      item.satuan_menjadi?.toLowerCase().includes(searchLower) ||
       item.jumlah_menjadi.toString().includes(searchTerm) ||
       item.volume_menjadi.toString().includes(searchTerm) ||
       item.harga_satuan_menjadi.toString().includes(searchTerm) ||
@@ -171,7 +171,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const endIndex = Math.min(startIndex + pageSize, filteredItems.length);
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
   
-  // Calculate totals for the visible items
+  // Calculate totals for all filtered items
   const totals = {
     jumlah_menjadi: filteredItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0),
     jumlah_rpd: filteredItems.reduce((sum, item) => sum + item.jumlah_rpd, 0),
@@ -260,38 +260,38 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       <div className="overflow-x-auto pb-4 border border-slate-200 rounded-md">
         <div className="min-w-[1400px]">
           <Table className="rpd-table w-full">
-            <TableHeader className="sticky top-0 z-10 bg-white">
-              <TableRow>
-                <TableHead className="sticky left-0 z-20 w-16 text-center bg-white text-slate-700">Status</TableHead>
-                <TableHead className="sticky left-[64px] z-20 w-[300px] text-left bg-white text-slate-700">Uraian</TableHead>
-                <TableHead className="text-right w-[70px] text-slate-700">Volume</TableHead>
-                <TableHead className="text-center w-[70px] text-slate-700">Satuan</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700">Harga Satuan</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Jumlah Pagu</TableHead>
-                <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700">Jumlah RPD</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Januari</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Februari</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Maret</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">April</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Mei</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Juni</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Juli</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Agustus</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">September</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Oktober</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">November</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700">Desember</TableHead>
-                <TableHead className="w-20 text-center text-slate-700">Aksi</TableHead>
+            <TableHeader className="bg-white">
+              <TableRow className="h-10">
+                <TableHead className="sticky left-0 z-20 w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
+                <TableHead className="sticky left-[80px] z-20 w-[350px] text-left bg-white text-slate-700 font-medium border-r border-slate-200">Uraian</TableHead>
+                <TableHead className="text-right w-[70px] text-slate-700 font-medium">Volume</TableHead>
+                <TableHead className="text-center w-[70px] text-slate-700 font-medium">Satuan</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Jumlah Pagu</TableHead>
+                <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700 font-medium">Jumlah RPD</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Januari</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Februari</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Maret</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">April</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Mei</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Juni</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Juli</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Agustus</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">September</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Oktober</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">November</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Desember</TableHead>
+                <TableHead className="w-20 text-center text-slate-700 font-medium">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             
-            <TableBody>
+            <TableBody className="bg-white">
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={index} className="h-8">
                     {Array.from({ length: 20 }).map((_, cellIndex) => (
                       <TableCell key={cellIndex} className="p-1">
-                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-5 w-full" />
                       </TableCell>
                     ))}
                   </TableRow>
@@ -305,21 +305,21 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               ) : (
                 <>
                   {paginatedItems.map(item => (
-                    <TableRow key={item.id} className={getRowBackground(item)}>
-                      <TableCell className="sticky left-0 z-10 text-center p-1 bg-inherit">
+                    <TableRow key={item.id} className={`h-8 ${getRowBackground(item)}`}>
+                      <TableCell className="sticky left-0 z-10 text-center p-1 bg-inherit border-r border-slate-200">
                         <div className="flex items-center justify-center">
                           <div className={`px-1.5 py-0.5 rounded-full flex items-center ${getStatusColor(item.status)}`}>
                             {getStatusIcon(item.status)}
-                            <span className="ml-1 text-xs">{getStatusText(item.status)}</span>
+                            <span className="ml-1 text-xs font-normal">{getStatusText(item.status)}</span>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="sticky left-[64px] z-10 p-1 bg-inherit rpd-uraian-cell">{item.uraian}</TableCell>
-                      <TableCell className="text-right p-1">{item.volume_menjadi}</TableCell>
-                      <TableCell className="text-center p-1">{item.satuan_menjadi}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.jumlah_menjadi)}</TableCell>
-                      <TableCell className={`text-right p-1 ${item.jumlah_rpd === item.jumlah_menjadi ? 'bg-green-50' : 'bg-slate-50'}`}>
+                      <TableCell className="sticky left-[80px] z-10 p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
+                      <TableCell className="text-right p-1 font-normal">{item.volume_menjadi}</TableCell>
+                      <TableCell className="text-center p-1 font-normal">{item.satuan_menjadi}</TableCell>
+                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
+                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.jumlah_menjadi)}</TableCell>
+                      <TableCell className={`text-right p-1 font-normal ${item.jumlah_rpd === item.jumlah_menjadi ? 'bg-green-50' : 'bg-slate-50'}`}>
                         {formatCurrency(item.jumlah_rpd)}
                       </TableCell>
                       
@@ -332,16 +332,16 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                                 min="0"
                                 value={editValues[item.id]?.[month] || 0}
                                 onChange={(e) => handleInputChange(item.id, month, e.target.value)}
-                                className="h-8 text-right text-xs"
+                                className="h-7 text-right text-xs"
                               />
                             </TableCell>
                           ))}
                           <TableCell className="p-1">
                             <div className="flex space-x-1">
-                              <Button size="sm" variant="default" onClick={() => saveChanges(item.id)} className="text-xs py-0 h-7">
+                              <Button size="sm" variant="default" onClick={() => saveChanges(item.id)} className="text-xs py-0 h-6">
                                 Simpan
                               </Button>
-                              <Button size="sm" variant="outline" onClick={cancelEditing} className="text-xs py-0 h-7">
+                              <Button size="sm" variant="outline" onClick={cancelEditing} className="text-xs py-0 h-6">
                                 Batal
                               </Button>
                             </div>
@@ -349,23 +349,23 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                         </>
                       ) : (
                         <>
-                          <TableCell className="text-right p-1">{formatCurrency(item.januari)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.februari)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.maret)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.april)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.mei)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.juni)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.juli)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.agustus)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.september)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.oktober)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.november)}</TableCell>
-                          <TableCell className="text-right p-1">{formatCurrency(item.desember)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.januari)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.februari)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.maret)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.april)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.mei)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.juni)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.juli)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.agustus)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.september)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.oktober)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.november)}</TableCell>
+                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.desember)}</TableCell>
                           <TableCell className="p-1 text-center">
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 text-xs h-7"
+                              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 text-xs h-6"
                               onClick={() => startEditing(item.id)}
                               disabled={!canEditMonths}
                             >
@@ -379,7 +379,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   
                   {/* Total row */}
                   <TableRow className="bg-slate-100 font-medium">
-                    <TableCell className="sticky left-0 z-10 bg-slate-100 p-1" colSpan={2}>
+                    <TableCell className="sticky left-0 z-10 bg-slate-100 p-1 border-r border-slate-200" colSpan={2}>
                       <span className="font-medium text-slate-700">TOTAL</span>
                     </TableCell>
                     <TableCell className="p-1" colSpan={3}></TableCell>
