@@ -1,3 +1,4 @@
+
 #root {
   width: 100%;
   margin: 0 auto;
@@ -140,6 +141,7 @@ table.data-table {
   border: 1px solid #e2e8f0;
   vertical-align: middle;
   color: #334155;
+  height: 32px; /* Reduce row height */
 }
 
 .budget-table .uraian-column {
@@ -248,6 +250,7 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   color: #334155;
   white-space: nowrap;
   height: 40px;
+  background-color: white;
 }
 
 .rpd-table td {
@@ -377,6 +380,25 @@ thead, .table-header {
 .budget-table td.sticky-uraian {
   position: sticky;
   left: 320px;
+  z-index: 20;
+  background-color: inherit;
+  border-right: 1px solid #e2e8f0;
+}
+
+/* RPD table frozen columns */
+.rpd-table th.sticky-status,
+.rpd-table td.sticky-status {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background-color: inherit;
+  border-right: 1px solid #e2e8f0;
+}
+
+.rpd-table th.sticky-uraian,
+.rpd-table td.sticky-uraian {
+  position: sticky;
+  left: 80px;
   z-index: 20;
   background-color: inherit;
   border-right: 1px solid #e2e8f0;
