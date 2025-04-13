@@ -345,7 +345,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             disabled={!isAdmin && !areFiltersComplete}
           />
         ) : (
-          <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi)}</span>
+          <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi, false)}</span>
         );
       
       case 'jumlahMenjadi':
@@ -355,7 +355,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         return <span>{formatCurrency(item.jumlahSemula)}</span>;
       
       case 'hargaSatuanSemula':
-        return <span>{formatCurrency(item.hargaSatuanSemula)}</span>;
+        return <span>{formatCurrency(item.hargaSatuanSemula, false)}</span>;
       
       case 'selisih':
         return <span className={item.selisih > 0 ? 'text-green-600' : item.selisih < 0 ? 'text-red-600' : ''}>
@@ -593,7 +593,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             <SelectTrigger className="w-20 h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white z-50">
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="25">25</SelectItem>
               <SelectItem value="50">50</SelectItem>
@@ -618,7 +618,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         
         <div className="overflow-x-auto w-full">
           <table className="w-full min-w-full data-table text-xs">
-            <thead className="sticky top-0 bg-gradient-to-r from-blue-100 to-indigo-100 z-10 shadow-sm">
+            <thead className="sticky top-[64px] bg-gradient-to-r from-blue-700 to-indigo-100 z-10 shadow-sm">
               <tr className="text-xs">
                 <th className="py-2 px-1 w-8">No</th>
                 <th className="uraian-cell py-2 px-1 w-[20%]">
@@ -632,7 +632,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[5%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeSemula')}
                   >
                     Vol.Semula
@@ -642,7 +642,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 <th className="unit-cell py-2 px-1 w-[7%]">Sat.Semula</th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanSemula')}
                   >
                     Hrg.Semula
@@ -651,7 +651,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahSemula')}
                   >
                     Jml.Semula
@@ -660,7 +660,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[5%] border-l-2">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeMenjadi')}
                   >
                     Vol.Menjadi
@@ -670,7 +670,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 <th className="unit-cell py-2 px-1 w-[7%]">Sat.Menjadi</th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanMenjadi')}
                   >
                     Hrg.Menjadi
@@ -679,7 +679,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahMenjadi')}
                   >
                     Jml.Menjadi
@@ -688,7 +688,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 </th>
                 <th className="number-cell py-2 px-1 w-[10%]">
                   <button 
-                    className="flex items-center" 
+                    className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('selisih')}
                   >
                     Selisih
@@ -700,9 +700,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               </tr>
             </thead>
             
-            <tbody>
+            <tbody className="text-xs">
               {paginatedItems.map((item, index) => (
-                <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? getRowColor(index) : ''}`}>
+                <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? getRowColor(index) : ''} h-7`}>
                   <td>{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
                   <td className="uraian-cell">{renderItemField(item, 'uraian')}</td>
                   <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
@@ -815,7 +815,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               ))}
 
               {!isViewer && (
-                <tr className="bg-gray-50">
+                <tr className="bg-gray-50 h-7">
                   <td className="py-1 px-1">{filteredItems.length + 1}</td>
                   <td className="uraian-cell py-1 px-1">
                     <Input 

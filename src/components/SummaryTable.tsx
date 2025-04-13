@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { BudgetSummaryRecord } from '@/types/database';
@@ -142,19 +143,19 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
   const getCategoryColumnClass = () => {
     switch (view) {
       case 'program_pembebanan':
-        return 'w-[200px]';
+        return 'w-[180px] whitespace-normal';
       case 'account_group':
-        return 'w-[200px]';
+        return 'w-[180px]';
       default:
-        return 'w-[300px]';
+        return 'w-[250px]';
     }
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-muted/20">
             <TableHead className={getCategoryColumnClass()}>
               <Button variant="ghost" onClick={() => handleSort('category')} className="flex items-center p-0">
                 {getColumnName()} <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -208,7 +209,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
               const totalItems = record.total_items || 0;
               
               return (
-                <TableRow key={`${categoryValue}-${index}`} className="py-3">
+                <TableRow key={`${categoryValue}-${index}`} className="py-1">
                   <TableCell className="font-medium whitespace-normal">{categoryValue}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalSemula)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalMenjadi)}</TableCell>
