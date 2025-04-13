@@ -156,6 +156,78 @@ export type Database = {
         }
         Relationships: []
       }
+      rencana_penarikan_dana: {
+        Row: {
+          agustus: number | null
+          april: number | null
+          budget_item_id: string
+          created_at: string | null
+          desember: number | null
+          februari: number | null
+          id: string
+          januari: number | null
+          juli: number | null
+          juni: number | null
+          maret: number | null
+          mei: number | null
+          november: number | null
+          oktober: number | null
+          september: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agustus?: number | null
+          april?: number | null
+          budget_item_id: string
+          created_at?: string | null
+          desember?: number | null
+          februari?: number | null
+          id?: string
+          januari?: number | null
+          juli?: number | null
+          juni?: number | null
+          maret?: number | null
+          mei?: number | null
+          november?: number | null
+          oktober?: number | null
+          september?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agustus?: number | null
+          april?: number | null
+          budget_item_id?: string
+          created_at?: string | null
+          desember?: number | null
+          februari?: number | null
+          id?: string
+          januari?: number | null
+          juli?: number | null
+          juni?: number | null
+          maret?: number | null
+          mei?: number | null
+          november?: number | null
+          oktober?: number | null
+          september?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rencana_penarikan_dana_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "budget_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rencana_penarikan_dana_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "budget_items_with_rpd"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sub_komponen: {
         Row: {
           created_at: string | null
@@ -190,6 +262,30 @@ export type Database = {
       }
     }
     Views: {
+      budget_items_with_rpd: {
+        Row: {
+          agustus: number | null
+          april: number | null
+          desember: number | null
+          februari: number | null
+          harga_satuan_menjadi: number | null
+          id: string | null
+          januari: number | null
+          juli: number | null
+          jumlah_menjadi: number | null
+          jumlah_rpd: number | null
+          juni: number | null
+          maret: number | null
+          mei: number | null
+          november: number | null
+          oktober: number | null
+          satuan_menjadi: string | null
+          september: number | null
+          uraian: string | null
+          volume_menjadi: number | null
+        }
+        Relationships: []
+      }
       budget_summary_by_account_group: {
         Row: {
           account_group: string | null
@@ -358,6 +454,31 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+        }[]
+      }
+      get_rpd_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          uraian: string
+          volume_menjadi: number
+          satuan_menjadi: string
+          harga_satuan_menjadi: number
+          jumlah_menjadi: number
+          januari: number
+          februari: number
+          maret: number
+          april: number
+          mei: number
+          juni: number
+          juli: number
+          agustus: number
+          september: number
+          oktober: number
+          november: number
+          desember: number
+          jumlah_rpd: number
+          status: string
         }[]
       }
     }

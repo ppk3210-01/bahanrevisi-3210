@@ -51,14 +51,171 @@ table.data-table {
 .data-table td {
   border: 1px solid #e5e7eb;
   padding: 8px 12px;
+  color: #334155;
 }
 
 .data-table th {
-  background-color: #f3f4f6;
+  background-color: #f1f5f9;
   font-weight: 500;
+  color: #475569;
 }
 
 /* Fix for button styling */
 button {
   cursor: pointer;
+  color: #475569;
+}
+
+/* Row status colors */
+.row-changed {
+  background-color: rgba(160, 58, 255, 0.15);
+}
+
+.row-new {
+  background-color: rgba(16, 185, 129, 0.15);
+}
+
+.row-deleted {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Status indicator */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.status-indicator-ok {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: rgb(6, 95, 70);
+}
+
+.status-indicator-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: rgb(154, 52, 18);
+}
+
+.status-indicator-error {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: rgb(153, 27, 27);
+}
+
+.status-indicator-info {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: rgb(29, 78, 216);
+}
+
+/* Budget table */
+.budget-table th {
+  white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #334155;
+}
+
+.budget-table td {
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  vertical-align: middle;
+  color: #334155;
+}
+
+.budget-table .uraian-column {
+  min-width: 250px;
+  text-align: left;
+}
+
+.budget-table .number-column {
+  text-align: right;
+}
+
+.budget-table .center-column {
+  text-align: center;
+}
+
+/* Improved tabs */
+.react-tabs__tab--selected {
+  background: #fff;
+  border-color: #e2e8f0;
+  color: #2563eb;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.react-tabs__tab {
+  padding: 0.5rem 1rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.react-tabs__tab:hover {
+  color: #1e40af;
+}
+
+/* Filter container */
+.filter-container {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Summary box */
+.summary-box {
+  background: linear-gradient(to bottom right, #f9fafb, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Month input grid */
+.month-input-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .month-input-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .month-input-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Month input */
+.month-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.month-input label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #64748b;
+}
+
+.month-input input {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  width: 100%;
 }

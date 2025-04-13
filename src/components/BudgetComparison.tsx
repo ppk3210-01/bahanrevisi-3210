@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
 import useBudgetData from '@/hooks/useBudgetData';
@@ -14,9 +14,12 @@ import {
   BudgetSummaryBase
 } from '@/types/database';
 import { Button } from '@/components/ui/button';
-import { FileBarChart2 } from 'lucide-react';
+import { FileBarChart2, Download } from 'lucide-react';
 import SummaryDialog from './SummaryDialog';
 import BudgetChangesSummary from './BudgetChangesSummary';
+import RPDTable from './RPDTable';
+import { toast } from '@/hooks/use-toast';
+import { exportToJpeg } from '@/utils/exportUtils';
 
 // Define the type for summary section view
 type SummarySectionView = 
@@ -43,6 +46,7 @@ const BudgetComparison: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("table");
   const [summarySectionView, setSummarySectionView] = useState<SummarySectionView>('changes');
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
+  const summaryContentRef = useRef<HTMLDivElement>(null);
   
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
   
@@ -103,6 +107,28 @@ const BudgetComparison: React.FC = () => {
     }
   };
 
+  const handleExportToJpeg = async () => {
+    try {
+      if (!summaryContentRef.current) {
+        throw new Error('Summary content not found');
+      }
+
+      await exportToJpeg('summary-content', `ringkasan-${summarySectionView}`);
+      
+      toast({
+        title: 'Berhasil',
+        description: 'Ringkasan berhasil diekspor ke JPEG.'
+      });
+    } catch (error) {
+      console.error('Error exporting to JPEG:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Gagal mengekspor ringkasan. Silakan coba lagi.'
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="filter-and-summary-container">
@@ -122,7 +148,7 @@ const BudgetComparison: React.FC = () => {
         </div>
       </div>
       
-      <div className="border rounded-md p-4 bg-white">
+      <div className="border rounded-md p-4 bg-white shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <Tabs 
             defaultValue="table" 
@@ -131,17 +157,26 @@ const BudgetComparison: React.FC = () => {
             className="w-full"
           >
             <div className="flex justify-between items-center">
-              <TabsList>
-                <TabsTrigger value="table">Tabel Anggaran</TabsTrigger>
-                <TabsTrigger value="summary">Ringkasan</TabsTrigger>
+              <TabsList className="bg-slate-100">
+                <TabsTrigger value="table" className="text-slate-700">Tabel Anggaran</TabsTrigger>
+                <TabsTrigger value="rpd" className="text-slate-700">Rencana Penarikan Dana</TabsTrigger>
+                <TabsTrigger value="summary" className="text-slate-700">Ringkasan</TabsTrigger>
               </TabsList>
               
               <div className="flex gap-2">
                 {activeTab === "summary" && (
-                  <Button variant="outline" onClick={() => setShowSummaryDialog(true)}>
-                    <FileBarChart2 className="h-4 w-4 mr-2" /> 
-                    Ekspor Semua Ringkasan
-                  </Button>
+                  <>
+                    <Button variant="outline" onClick={() => setShowSummaryDialog(true)} className="border-slate-200 text-slate-700 hover:text-slate-900">
+                      <FileBarChart2 className="h-4 w-4 mr-2" /> 
+                      Ekspor Semua Ringkasan
+                    </Button>
+                    {summarySectionView !== 'changes' && (
+                      <Button variant="outline" onClick={handleExportToJpeg} className="border-slate-200 text-slate-700 hover:text-slate-900">
+                        <Download className="h-4 w-4 mr-2" /> 
+                        Ekspor ke JPEG
+                      </Button>
+                    )}
+                  </>
                 )}
                 
                 {isAdmin && activeTab === "table" && (
@@ -176,6 +211,10 @@ const BudgetComparison: React.FC = () => {
               />
             </TabsContent>
             
+            <TabsContent value="rpd" className="pt-4">
+              <RPDTable />
+            </TabsContent>
+            
             <TabsContent value="summary" className="pt-4">
               <div className="space-y-6">
                 <div className="flex flex-wrap gap-1">
@@ -183,7 +222,7 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'changes' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('changes')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Ringkasan Perubahan
                   </Button>
@@ -191,7 +230,7 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'program_pembebanan' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('program_pembebanan')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Program Pembebanan
                   </Button>
@@ -199,7 +238,7 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'kegiatan' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('kegiatan')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Kegiatan
                   </Button>
@@ -207,7 +246,7 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'rincian_output' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('rincian_output')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Rincian Output
                   </Button>
@@ -215,7 +254,7 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'komponen_output' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('komponen_output')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Komponen Output
                   </Button>
@@ -223,7 +262,7 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'sub_komponen' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('sub_komponen')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Sub Komponen
                   </Button>
@@ -231,7 +270,7 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'akun' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('akun')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Akun
                   </Button>
@@ -239,14 +278,14 @@ const BudgetComparison: React.FC = () => {
                     variant={summarySectionView === 'account_group' ? 'default' : 'outline'} 
                     onClick={() => setSummarySectionView('account_group')}
                     size="xs"
-                    className="text-xs"
+                    className="text-xs border-slate-200 hover:bg-slate-50"
                   >
                     Kelompok Akun
                   </Button>
                 </div>
                 
-                <div className="mt-4">
-                  <h3 className="text-xl font-semibold mb-4">{getSummarySectionName()}</h3>
+                <div className="mt-4" id="summary-content" ref={summaryContentRef}>
+                  <h3 className="text-xl font-semibold mb-4 text-slate-800">{getSummarySectionName()}</h3>
                   
                   {summarySectionView === 'changes' ? (
                     <BudgetChangesSummary items={budgetItems} />
