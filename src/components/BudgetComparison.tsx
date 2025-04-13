@@ -48,6 +48,7 @@ const BudgetComparison: React.FC = () => {
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   const summaryContentRef = useRef<HTMLDivElement>(null);
   const changesContentRef = useRef<HTMLDivElement>(null);
+  const budgetChangeSummaryRef = useRef<HTMLDivElement>(null);
   
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
   
@@ -111,7 +112,7 @@ const BudgetComparison: React.FC = () => {
   const handleExportToJpeg = async () => {
     try {
       if (summarySectionView === 'changes') {
-        if (!changesContentRef.current) {
+        if (!budgetChangeSummaryRef.current) {
           throw new Error('Summary content not found');
         }
         await exportToJpeg('changes-content', `ringkasan-perubahan`);
@@ -135,6 +136,15 @@ const BudgetComparison: React.FC = () => {
       });
     }
   };
+
+  // Get stats for budget changes summary
+  const changedItems = budgetItems.filter(item => item.status === 'changed');
+  const newItems = budgetItems.filter(item => item.status === 'new');
+  const deletedItems = budgetItems.filter(item => item.status === 'deleted');
+  
+  const totalChangedSemula = changedItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
+  const totalChangedMenjadi = changedItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+  const totalNewMenjadi = newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
 
   return (
     <div className="space-y-4">
@@ -164,7 +174,7 @@ const BudgetComparison: React.FC = () => {
             className="w-full"
           >
             <div className="flex justify-between items-center">
-              <TabsList className="bg-slate-100">
+              <TabsList className="bg-slate-50">
                 <TabsTrigger value="table" className="text-slate-700">Tabel Anggaran</TabsTrigger>
                 <TabsTrigger value="rpd" className="text-slate-700">Rencana Penarikan Dana</TabsTrigger>
                 <TabsTrigger value="summary" className="text-slate-700">Ringkasan</TabsTrigger>
@@ -217,7 +227,7 @@ const BudgetComparison: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="rpd" className="pt-4">
-              <RPDTable />
+              <RPDTable filters={filters} />
             </TabsContent>
             
             <TabsContent value="summary" className="pt-4">
@@ -293,7 +303,22 @@ const BudgetComparison: React.FC = () => {
                   <h3 className="text-xl font-semibold mb-4 text-slate-800">{getSummarySectionName()}</h3>
                   
                   {summarySectionView === 'changes' ? (
-                    <div id="changes-content" ref={changesContentRef}>
+                    <div id="changes-content" ref={budgetChangeSummaryRef}>
+                      <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-md" ref={changesContentRef}>
+                        <h4 className="text-lg font-medium mb-2 text-slate-800">Kesimpulan</h4>
+                        <p className="text-slate-700 mb-2">
+                          Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar Rp {totalSemula.toLocaleString('id-ID')} mengalami perubahan menjadi Rp {totalMenjadi.toLocaleString('id-ID')}, dengan selisih Rp {totalSelisih.toLocaleString('id-ID')} atau {totalSelisih === 0 ? 'tetap' : totalSelisih > 0 ? 'meningkat' : 'menurun'}.
+                        </p>
+                        <p className="text-slate-700 mb-2">
+                          Perubahan ini terdiri dari {changedItems.length} komponen anggaran yang mengalami penyesuaian nilai, {newItems.length} komponen anggaran baru yang ditambahkan, dan {deletedItems.length} komponen anggaran yang dihapus.
+                        </p>
+                        <p className="text-slate-700 mb-2">
+                          Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {changedItems.length + newItems.length + deletedItems.length} perubahan ini, diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
+                        </p>
+                        <p className="text-slate-700">
+                          Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
+                        </p>
+                      </div>
                       <BudgetChangesSummary items={budgetItems} />
                     </div>
                   ) : (

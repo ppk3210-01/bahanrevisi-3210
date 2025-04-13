@@ -1,25 +1,39 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { AlertCircle, Check, Clock, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle, Check, Clock, Info, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useRPDData, RPDItem } from '@/hooks/useRPDData';
 import { useAuth } from '@/contexts/AuthContext';
+import { FilterSelection } from '@/types/budget';
+import useBudgetData from '@/hooks/useBudgetData';
 
-const RPDTable: React.FC = () => {
-  const { rpdItems, loading, updateRPDItem } = useRPDData();
+interface RPDTableProps {
+  filters?: FilterSelection;
+}
+
+const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
+  const { rpdItems, loading, updateRPDItem, refreshData } = useRPDData(filters);
   const { isAdmin, profile } = useAuth();
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, Record<string, number>>>({});
   const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   
+  // Effect to refresh data when filters change
+  useEffect(() => {
+    if (filters) {
+      refreshData();
+    }
+  }, [filters, refreshData]);
+
   const startEditing = (itemId: string) => {
     const item = rpdItems.find(item => item.id === itemId);
     if (!item) return;
@@ -75,10 +89,8 @@ const RPDTable: React.FC = () => {
         return <Check className="h-4 w-4 text-green-500" />;
       case 'belum_isi':
         return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case 'belum_lengkap':
-        return <Clock className="h-4 w-4 text-orange-500" />;
       case 'sisa':
-        return <Info className="h-4 w-4 text-blue-500" />;
+        return <Info className="h-4 w-4 text-orange-500" />;
       default:
         return null;
     }
@@ -105,25 +117,52 @@ const RPDTable: React.FC = () => {
         return 'bg-green-100 text-green-800';
       case 'belum_isi':
         return 'bg-red-100 text-red-800';
-      case 'belum_lengkap':
-        return 'bg-orange-100 text-orange-800';
       case 'sisa':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getRowBackground = (item: RPDItem) => {
+    if (item.status === 'belum_isi') return 'bg-red-50';
+    if (item.status === 'sisa') return 'bg-orange-50';
+    return '';
   };
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString('id-ID');
   };
   
-  // Apply the filter for zero budget if enabled
+  // Apply filters
   const filteredItems = rpdItems.filter(item => {
+    // Search filter
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = 
+      item.uraian.toLowerCase().includes(searchLower) ||
+      item.satuan_menjadi.toLowerCase().includes(searchLower) ||
+      item.jumlah_menjadi.toString().includes(searchTerm) ||
+      item.volume_menjadi.toString().includes(searchTerm) ||
+      item.harga_satuan_menjadi.toString().includes(searchTerm) ||
+      item.januari.toString().includes(searchTerm) ||
+      item.februari.toString().includes(searchTerm) ||
+      item.maret.toString().includes(searchTerm) ||
+      item.april.toString().includes(searchTerm) ||
+      item.mei.toString().includes(searchTerm) ||
+      item.juni.toString().includes(searchTerm) ||
+      item.juli.toString().includes(searchTerm) ||
+      item.agustus.toString().includes(searchTerm) ||
+      item.september.toString().includes(searchTerm) ||
+      item.oktober.toString().includes(searchTerm) ||
+      item.november.toString().includes(searchTerm) ||
+      item.desember.toString().includes(searchTerm);
+    
+    // Zero budget filter
     if (hideZeroBudget) {
-      return item.jumlah_menjadi > 0;
+      return matchesSearch && item.jumlah_menjadi > 0;
     }
-    return true;
+    
+    return matchesSearch;
   });
   
   // Calculate pagination
@@ -131,6 +170,24 @@ const RPDTable: React.FC = () => {
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, filteredItems.length);
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
+  
+  // Calculate totals for the visible items
+  const totals = {
+    jumlah_menjadi: filteredItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0),
+    jumlah_rpd: filteredItems.reduce((sum, item) => sum + item.jumlah_rpd, 0),
+    januari: filteredItems.reduce((sum, item) => sum + item.januari, 0),
+    februari: filteredItems.reduce((sum, item) => sum + item.februari, 0),
+    maret: filteredItems.reduce((sum, item) => sum + item.maret, 0),
+    april: filteredItems.reduce((sum, item) => sum + item.april, 0),
+    mei: filteredItems.reduce((sum, item) => sum + item.mei, 0),
+    juni: filteredItems.reduce((sum, item) => sum + item.juni, 0),
+    juli: filteredItems.reduce((sum, item) => sum + item.juli, 0),
+    agustus: filteredItems.reduce((sum, item) => sum + item.agustus, 0),
+    september: filteredItems.reduce((sum, item) => sum + item.september, 0),
+    oktober: filteredItems.reduce((sum, item) => sum + item.oktober, 0),
+    november: filteredItems.reduce((sum, item) => sum + item.november, 0),
+    desember: filteredItems.reduce((sum, item) => sum + item.desember, 0)
+  };
   
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -148,24 +205,39 @@ const RPDTable: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4 mb-2">
-        <div className="filter-checkbox-container">
-          <Checkbox 
-            id="hideZeroBudgetRPD"
-            checked={hideZeroBudget}
-            onCheckedChange={(checked) => {
-              setHideZeroBudget(checked === true);
-              setCurrentPage(1);
-            }}
-            className="filter-checkbox"
-          />
-          <label htmlFor="hideZeroBudgetRPD" className="filter-checkbox-label">
-            Sembunyikan jumlah pagu 0
-          </label>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-2">
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+          <div className="relative">
+            <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Cari rencana penarikan dana..."
+              className="pl-8 w-full sm:w-80 h-8 text-sm"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+          
+          <div className="filter-checkbox-container">
+            <Checkbox 
+              id="hideZeroBudgetRPD"
+              checked={hideZeroBudget}
+              onCheckedChange={(checked) => {
+                setHideZeroBudget(checked === true);
+                setCurrentPage(1);
+              }}
+              className="filter-checkbox"
+            />
+            <label htmlFor="hideZeroBudgetRPD" className="filter-checkbox-label text-slate-700">
+              Sembunyikan jumlah pagu 0
+            </label>
+          </div>
         </div>
         
-        <div className="flex items-center ml-auto">
-          <span className="text-xs text-gray-600 mr-2">Tampilkan:</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-700">Tampilkan:</span>
           <select
             value={pageSize}
             onChange={handlePageSizeChange}
@@ -179,131 +251,165 @@ const RPDTable: React.FC = () => {
         </div>
       </div>
       
-      <div className="overflow-x-auto pb-4">
-        <Table className="min-w-full border rounded-md rpd-table">
-          <TableHeader className="bg-slate-100">
-            <TableRow>
-              <TableHead className="w-16 text-center">Status</TableHead>
-              <TableHead className="w-[300px] text-left">Uraian</TableHead>
-              <TableHead className="text-right w-[70px]">Volume</TableHead>
-              <TableHead className="text-center w-[70px]">Satuan</TableHead>
-              <TableHead className="text-right w-[100px]">Harga Satuan</TableHead>
-              <TableHead className="text-right w-[100px]">Jumlah Pagu</TableHead>
-              <TableHead className="text-right bg-blue-50 w-[100px]">Jumlah RPD</TableHead>
-              <TableHead className="text-right w-[80px]">Januari</TableHead>
-              <TableHead className="text-right w-[80px]">Februari</TableHead>
-              <TableHead className="text-right w-[80px]">Maret</TableHead>
-              <TableHead className="text-right w-[80px]">April</TableHead>
-              <TableHead className="text-right w-[80px]">Mei</TableHead>
-              <TableHead className="text-right w-[80px]">Juni</TableHead>
-              <TableHead className="text-right w-[80px]">Juli</TableHead>
-              <TableHead className="text-right w-[80px]">Agustus</TableHead>
-              <TableHead className="text-right w-[80px]">September</TableHead>
-              <TableHead className="text-right w-[80px]">Oktober</TableHead>
-              <TableHead className="text-right w-[80px]">November</TableHead>
-              <TableHead className="text-right w-[80px]">Desember</TableHead>
-              <TableHead className="w-20 text-center">Aksi</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              Array.from({ length: 5 }).map((_, index) => (
-                <TableRow key={index}>
-                  {Array.from({ length: 20 }).map((_, cellIndex) => (
-                    <TableCell key={cellIndex}>
-                      <Skeleton className="h-6 w-full" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : paginatedItems.length === 0 ? (
+      <div className="text-xs text-slate-700">
+        Menampilkan {paginatedItems.length} dari {filteredItems.length} item
+        {searchTerm && ` (filter: "${searchTerm}")`}
+        {hideZeroBudget && ` (menyembunyikan jumlah pagu 0)`}
+      </div>
+      
+      <div className="overflow-x-auto pb-4 border border-slate-200 rounded-md">
+        <div className="min-w-[1400px]">
+          <Table className="rpd-table w-full">
+            <TableHeader className="sticky top-0 z-10 bg-white">
               <TableRow>
-                <TableCell colSpan={20} className="text-center py-4 text-slate-600">
-                  {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data Rencana Penarikan Dana'}
-                </TableCell>
+                <TableHead className="sticky left-0 z-20 w-16 text-center bg-white text-slate-700">Status</TableHead>
+                <TableHead className="sticky left-[64px] z-20 w-[300px] text-left bg-white text-slate-700">Uraian</TableHead>
+                <TableHead className="text-right w-[70px] text-slate-700">Volume</TableHead>
+                <TableHead className="text-center w-[70px] text-slate-700">Satuan</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700">Harga Satuan</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Jumlah Pagu</TableHead>
+                <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700">Jumlah RPD</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Januari</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Februari</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Maret</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">April</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Mei</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Juni</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Juli</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Agustus</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">September</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Oktober</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">November</TableHead>
+                <TableHead className="text-right w-[120px] text-slate-700">Desember</TableHead>
+                <TableHead className="w-20 text-center text-slate-700">Aksi</TableHead>
               </TableRow>
-            ) : (
-              paginatedItems.map(item => (
-                <TableRow key={item.id} className={item.jumlah_rpd === 0 ? 'bg-green-50' : ''}>
-                  <TableCell className="text-center p-1">
-                    <div className="flex items-center justify-center">
-                      <div className={`px-1.5 py-0.5 rounded-full flex items-center ${getStatusColor(item.status)}`}>
-                        {getStatusIcon(item.status)}
-                        <span className="ml-1 text-xs">{getStatusText(item.status)}</span>
-                      </div>
-                    </div>
+            </TableHeader>
+            
+            <TableBody>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index}>
+                    {Array.from({ length: 20 }).map((_, cellIndex) => (
+                      <TableCell key={cellIndex} className="p-1">
+                        <Skeleton className="h-6 w-full" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : paginatedItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={20} className="text-center py-4 text-slate-600">
+                    {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data Rencana Penarikan Dana'}
                   </TableCell>
-                  <TableCell className="p-1 rpd-uraian-cell">{item.uraian}</TableCell>
-                  <TableCell className="text-right p-1">{item.volume_menjadi}</TableCell>
-                  <TableCell className="text-center p-1">{item.satuan_menjadi}</TableCell>
-                  <TableCell className="text-right p-1">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
-                  <TableCell className="text-right p-1">{formatCurrency(item.jumlah_menjadi)}</TableCell>
-                  <TableCell className={`text-right p-1 ${item.jumlah_rpd === item.jumlah_menjadi ? 'bg-green-100' : 'bg-blue-50'}`}>
-                    {formatCurrency(item.jumlah_rpd)}
-                  </TableCell>
-                  
-                  {editingItem === item.id ? (
-                    <>
-                      {['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'].map(month => (
-                        <TableCell key={`${item.id}-${month}`} className="p-1">
-                          <Input 
-                            type="number"
-                            min="0"
-                            value={editValues[item.id]?.[month] || 0}
-                            onChange={(e) => handleInputChange(item.id, month, e.target.value)}
-                            className="h-8 text-right text-xs"
-                          />
-                        </TableCell>
-                      ))}
-                      <TableCell className="p-1">
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="default" onClick={() => saveChanges(item.id)} className="text-xs py-0 h-7">
-                            Simpan
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={cancelEditing} className="text-xs py-0 h-7">
-                            Batal
-                          </Button>
+                </TableRow>
+              ) : (
+                <>
+                  {paginatedItems.map(item => (
+                    <TableRow key={item.id} className={getRowBackground(item)}>
+                      <TableCell className="sticky left-0 z-10 text-center p-1 bg-inherit">
+                        <div className="flex items-center justify-center">
+                          <div className={`px-1.5 py-0.5 rounded-full flex items-center ${getStatusColor(item.status)}`}>
+                            {getStatusIcon(item.status)}
+                            <span className="ml-1 text-xs">{getStatusText(item.status)}</span>
+                          </div>
                         </div>
                       </TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell className="text-right p-1">{formatCurrency(item.januari)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.februari)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.maret)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.april)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.mei)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.juni)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.juli)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.agustus)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.september)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.oktober)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.november)}</TableCell>
-                      <TableCell className="text-right p-1">{formatCurrency(item.desember)}</TableCell>
-                      <TableCell className="p-1 text-center">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700 text-xs h-7"
-                          onClick={() => startEditing(item.id)}
-                          disabled={!canEditMonths}
-                        >
-                          Edit
-                        </Button>
+                      <TableCell className="sticky left-[64px] z-10 p-1 bg-inherit rpd-uraian-cell">{item.uraian}</TableCell>
+                      <TableCell className="text-right p-1">{item.volume_menjadi}</TableCell>
+                      <TableCell className="text-center p-1">{item.satuan_menjadi}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
+                      <TableCell className="text-right p-1">{formatCurrency(item.jumlah_menjadi)}</TableCell>
+                      <TableCell className={`text-right p-1 ${item.jumlah_rpd === item.jumlah_menjadi ? 'bg-green-50' : 'bg-slate-50'}`}>
+                        {formatCurrency(item.jumlah_rpd)}
                       </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                      
+                      {editingItem === item.id ? (
+                        <>
+                          {['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'].map(month => (
+                            <TableCell key={`${item.id}-${month}`} className="p-1">
+                              <Input 
+                                type="number"
+                                min="0"
+                                value={editValues[item.id]?.[month] || 0}
+                                onChange={(e) => handleInputChange(item.id, month, e.target.value)}
+                                className="h-8 text-right text-xs"
+                              />
+                            </TableCell>
+                          ))}
+                          <TableCell className="p-1">
+                            <div className="flex space-x-1">
+                              <Button size="sm" variant="default" onClick={() => saveChanges(item.id)} className="text-xs py-0 h-7">
+                                Simpan
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={cancelEditing} className="text-xs py-0 h-7">
+                                Batal
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell className="text-right p-1">{formatCurrency(item.januari)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.februari)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.maret)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.april)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.mei)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.juni)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.juli)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.agustus)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.september)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.oktober)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.november)}</TableCell>
+                          <TableCell className="text-right p-1">{formatCurrency(item.desember)}</TableCell>
+                          <TableCell className="p-1 text-center">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 text-xs h-7"
+                              onClick={() => startEditing(item.id)}
+                              disabled={!canEditMonths}
+                            >
+                              Edit
+                            </Button>
+                          </TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  ))}
+                  
+                  {/* Total row */}
+                  <TableRow className="bg-slate-100 font-medium">
+                    <TableCell className="sticky left-0 z-10 bg-slate-100 p-1" colSpan={2}>
+                      <span className="font-medium text-slate-700">TOTAL</span>
+                    </TableCell>
+                    <TableCell className="p-1" colSpan={3}></TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.jumlah_menjadi)}</TableCell>
+                    <TableCell className="text-right p-1 bg-slate-50">{formatCurrency(totals.jumlah_rpd)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.januari)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.februari)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.maret)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.april)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.mei)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.juni)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.juli)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.agustus)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.september)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.oktober)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.november)}</TableCell>
+                    <TableCell className="text-right p-1">{formatCurrency(totals.desember)}</TableCell>
+                    <TableCell className="p-1"></TableCell>
+                  </TableRow>
+                </>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       
       {!loading && filteredItems.length > 0 && (
         <div className="pagination-controls">
           <div className="page-size-selector">
-            <span className="text-sm text-slate-600">Menampilkan {startIndex + 1} - {endIndex} dari {filteredItems.length} item</span>
+            <span className="text-sm text-slate-700">Menampilkan {startIndex + 1} - {endIndex} dari {filteredItems.length} item</span>
           </div>
           
           <div className="page-navigation">

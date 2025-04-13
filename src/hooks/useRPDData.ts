@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { FilterSelection } from '@/types/budget';
 
 export type RPDItem = {
   id: string;
@@ -41,19 +42,57 @@ type RPDMonthValues = {
   desember: number;
 };
 
-export const useRPDData = () => {
+export const useRPDData = (filters?: FilterSelection) => {
   const [rpdItems, setRpdItems] = useState<RPDItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchRPDData();
-  }, []);
-
   const fetchRPDData = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.rpc('get_rpd_data');
+      
+      let query = supabase.rpc('get_rpd_data');
+      
+      // Add filters if provided
+      if (filters) {
+        if (filters.programPembebanan && filters.programPembebanan !== 'all') {
+          query = supabase.rpc('get_rpd_data_filtered', { 
+            program_filter: filters.programPembebanan 
+          });
+        }
+        
+        if (filters.kegiatan && filters.kegiatan !== 'all') {
+          query = supabase.rpc('get_rpd_data_filtered', { 
+            kegiatan_filter: filters.kegiatan 
+          });
+        }
+        
+        if (filters.rincianOutput && filters.rincianOutput !== 'all') {
+          query = supabase.rpc('get_rpd_data_filtered', { 
+            rincian_filter: filters.rincianOutput 
+          });
+        }
+        
+        if (filters.komponenOutput && filters.komponenOutput !== 'all') {
+          query = supabase.rpc('get_rpd_data_filtered', { 
+            komponen_filter: filters.komponenOutput 
+          });
+        }
+        
+        if (filters.subKomponen && filters.subKomponen !== 'all') {
+          query = supabase.rpc('get_rpd_data_filtered', { 
+            sub_komponen_filter: filters.subKomponen 
+          });
+        }
+        
+        if (filters.akun && filters.akun !== 'all') {
+          query = supabase.rpc('get_rpd_data_filtered', { 
+            akun_filter: filters.akun 
+          });
+        }
+      }
+      
+      const { data, error } = await query;
       
       if (error) {
         throw error;
@@ -72,6 +111,10 @@ export const useRPDData = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchRPDData();
+  }, [filters]);
 
   const updateRPDItem = async (itemId: string, monthValues: Partial<RPDMonthValues>) => {
     try {
@@ -113,7 +156,7 @@ export const useRPDData = () => {
             
             updatedItem.jumlah_rpd = jumlah_rpd;
             
-            // Determine status
+            // Determine status - improved logic
             if (jumlah_rpd === item.jumlah_menjadi) {
               updatedItem.status = 'ok';
             } else if (
@@ -133,22 +176,6 @@ export const useRPDData = () => {
             ) {
               updatedItem.status = 'belum_isi';
             } else if (
-              item.jumlah_menjadi > 0 && 
-              (updatedItem.januari === 0 || 
-               updatedItem.februari === 0 || 
-               updatedItem.maret === 0 || 
-               updatedItem.april === 0 || 
-               updatedItem.mei === 0 || 
-               updatedItem.juni === 0 || 
-               updatedItem.juli === 0 || 
-               updatedItem.agustus === 0 || 
-               updatedItem.september === 0 || 
-               updatedItem.oktober === 0 || 
-               updatedItem.november === 0 || 
-               updatedItem.desember === 0)
-            ) {
-              updatedItem.status = 'belum_lengkap';
-            } else if (
               updatedItem.januari > 0 && 
               updatedItem.februari > 0 && 
               updatedItem.maret > 0 && 
@@ -165,7 +192,7 @@ export const useRPDData = () => {
             ) {
               updatedItem.status = 'sisa';
             } else {
-              updatedItem.status = 'lainnya';
+              updatedItem.status = 'belum_lengkap';
             }
             
             return updatedItem;

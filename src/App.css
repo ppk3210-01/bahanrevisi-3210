@@ -55,9 +55,9 @@ table.data-table {
 }
 
 .data-table th {
-  background-color: #f1f5f9;
+  background-color: #f8fafc;
   font-weight: 500;
-  color: #475569;
+  color: #334155;
   text-align: center;
 }
 
@@ -80,23 +80,17 @@ table.data-table {
   text-align: center;
 }
 
-/* Fix for button styling */
-button {
-  cursor: pointer;
-  color: #475569;
-}
-
 /* Row status colors */
 .row-changed {
-  background-color: rgba(160, 58, 255, 0.15);
+  background-color: rgba(160, 58, 255, 0.05);
 }
 
 .row-new {
-  background-color: rgba(16, 185, 129, 0.15);
+  background-color: rgba(16, 185, 129, 0.05);
 }
 
 .row-deleted {
-  background-color: rgba(239, 68, 68, 0.15);
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 /* Status indicator */
@@ -166,8 +160,8 @@ button {
 .react-tabs__tab--selected {
   background: #fff;
   border-color: #e2e8f0;
-  color: #2563eb;
-  border-bottom: 2px solid #3b82f6;
+  color: #334155;
+  border-bottom: 2px solid #64748b;
 }
 
 .react-tabs__tab {
@@ -241,35 +235,77 @@ button {
   color: #334155;
 }
 
-/* Fix for text contrast issues */
+/* Text colors */
 button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   color: #334155;
+}
+
+/* RPD table specific styles */
+.rpd-table th {
+  font-weight: 500;
+  padding: 8px 6px;
+  text-align: center;
+  vertical-align: middle;
+  color: #334155;
+}
+
+.rpd-table td {
+  padding: 6px;
+  vertical-align: middle;
+  height: 36px;
+  color: #334155;
+}
+
+.rpd-table .rpd-uraian-cell {
+  min-width: 300px;
+  max-width: 400px;
+  white-space: normal;
+  word-break: break-word;
+  text-align: left;
+}
+
+/* Fix pagination buttons */
+.pagination-button {
+  background-color: white;
+  color: #334155 !important;
+}
+
+/* Hover states */
+.hover\:bg-slate-50:hover {
+  color: #334155 !important;
+}
+
+/* Fix button styling */
+button, a {
+  color: #334155;
+  font-weight: normal;
 }
 
 button.bg-blue-500, button.bg-blue-600, 
 button.bg-indigo-500, button.bg-indigo-600,
 button.bg-purple-500, button.bg-purple-600,
-button.bg-pink-500, button.bg-pink-600,
-button.bg-red-500, button.bg-red-600,
 button.bg-green-500, button.bg-green-600 {
   color: white;
 }
 
-/* Improved hover states */
-.hover\:bg-blue-600:hover {
-  color: white !important;
+/* Table Row Spacing */
+.data-table tr, .budget-table tr, .rpd-table tr {
+  height: 40px;
 }
 
-.hover\:bg-slate-100:hover, 
-.hover\:bg-slate-200:hover,
-.hover\:bg-slate-50:hover {
-  color: #334155 !important;
+/* Fix TabsTrigger text */
+.TabsTrigger[data-state="active"] {
+  color: #334155;
+  background-color: transparent;
+  border-bottom: 2px solid #64748b;
 }
 
-/* Override for white text on light backgrounds */
-.bg-white .text-white, 
-.bg-gray-50 .text-white, 
-.bg-slate-50 .text-white, 
-.bg-slate-100 .text-white {
-  color: #334155 !important;
+.TabsTrigger {
+  color: #64748b;
+  background-color: transparent;
+}
+
+/* Fix TabsList */
+.TabsList {
+  background-color: transparent;
 }

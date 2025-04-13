@@ -46,31 +46,33 @@
   }
 }
 
-/* Existing styles */
-
 /* Adjust spacing in tables */
 .data-table tr {
-  height: 2.25rem; /* Increased from 2rem for better spacing */
+  height: 40px; 
 }
 
 .data-table tr.h-7 {
-  height: 1.75rem !important; /* Increased from 1.5rem */
+  height: 36px !important; 
+}
+
+.data-table tr.h-6 {
+  height: 32px !important; 
 }
 
 .data-table thead th {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-top: 8px;
+  padding-bottom: 8px;
   font-size: 0.85rem;
-  color: #1E293B; /* Darker color for better contrast */
-  background-color: #E2E8F0; /* Slightly darker background */
-  text-align: center; /* Center align all headers */
+  color: #334155;
+  background-color: #f1f5f9;
+  text-align: center;
 }
 
 .data-table tbody td {
-  padding-top: 0.3rem;
-  padding-bottom: 0.3rem;
+  padding-top: 6px;
+  padding-bottom: 6px;
   font-size: 0.85rem;
-  color: #334155; /* Dark enough for good contrast */
+  color: #334155;
 }
 
 /* Wrap text in Pembebanan column */
@@ -80,11 +82,11 @@
   max-width: 200px;
 }
 
-/* Adjust uraian column to be wider based on the attached image */
+/* Adjust uraian column to be wider */
 .data-table td.uraian-column, 
 .data-table th.uraian-cell,
 .data-table td.uraian-cell {
-  min-width: 250px;
+  min-width: 300px;
   text-align: left;
 }
 
@@ -100,7 +102,7 @@
 
 /* Improve header styling */
 .data-table thead {
-  background: linear-gradient(to right, #E2E8F0, #F1F5F9);
+  background-color: #f8fafc;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -108,15 +110,15 @@
 
 /* Status colors */
 .row-changed {
-  background-color: rgba(124, 58, 237, 0.1);
+  background-color: rgba(124, 58, 237, 0.05);
 }
 
 .row-new {
-  background-color: rgba(16, 185, 129, 0.1);
+  background-color: rgba(16, 185, 129, 0.05);
 }
 
 .row-deleted {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(239, 68, 68, 0.05);
 }
 
 .unapproved-change {
@@ -146,17 +148,18 @@
 
 /* Improve summary boxes */
 .summary-box {
-  background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+  background-color: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 0.5rem;
   padding: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Button styling consistency */
 button.primary-button {
-  background-color: #3b82f6;
-  color: white;
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
   border-radius: 0.375rem;
   padding: 0.5rem 1rem;
   font-weight: 500;
@@ -164,7 +167,7 @@ button.primary-button {
 }
 
 button.primary-button:hover {
-  background-color: #2563eb;
+  background-color: #f1f5f9;
 }
 
 /* Improve tab styling */
@@ -176,8 +179,8 @@ button.primary-button:hover {
 }
 
 .tab-button.active {
-  border-bottom: 2px solid #3b82f6;
-  color: #2563eb;
+  border-bottom: 2px solid #64748b;
+  color: #334155;
   font-weight: 500;
 }
 
@@ -210,7 +213,7 @@ select {
 }
 
 button {
-  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+  @apply bg-white text-slate-700 px-4 py-2 rounded hover:bg-slate-50;
 }
 
 .filter-and-summary-container {
@@ -231,7 +234,7 @@ table th, table td {
 }
 
 table thead {
-  @apply bg-slate-100;
+  @apply bg-slate-50;
 }
 
 table tbody tr:hover {
@@ -271,24 +274,24 @@ header {
 }
 
 .filter-checkbox {
-  @apply h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500;
+  @apply h-4 w-4 text-slate-600 rounded border-gray-300 focus:ring-slate-500;
 }
 
 .filter-checkbox-label {
-  @apply text-sm text-gray-700;
+  @apply text-sm text-slate-700;
 }
 
 /* RPD table specific styles */
 .rpd-table th {
-  @apply text-center bg-slate-100 py-2 px-1 text-xs;
+  @apply text-center bg-slate-50 py-2 px-1 text-sm text-slate-700 font-normal;
 }
 
 .rpd-table td {
-  @apply py-1 px-1 text-xs;
+  @apply py-1 px-1 text-sm text-slate-700;
 }
 
 .rpd-status-cell {
-  @apply w-[100px] text-center;
+  @apply w-[80px] text-center;
 }
 
 .rpd-uraian-cell {
@@ -296,7 +299,7 @@ header {
 }
 
 .rpd-month-cell {
-  @apply w-[80px] text-right;
+  @apply w-[120px] text-right;
 }
 
 .rpd-text-left {
@@ -309,4 +312,20 @@ header {
 
 .rpd-text-right {
   @apply text-right;
+}
+
+/* Fix hover states for shadcn components */
+.TabsTrigger[data-state="active"] {
+  color: #334155 !important;
+  background-color: transparent !important;
+  border-bottom: 2px solid #64748b !important;
+}
+
+.TabsTrigger {
+  color: #64748b !important;
+  background-color: transparent !important;
+}
+
+.TabsList {
+  background-color: transparent !important;
 }

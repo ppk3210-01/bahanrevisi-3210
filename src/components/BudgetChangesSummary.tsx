@@ -59,27 +59,27 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-3">Pagu Anggaran Berubah</h3>
+        <h3 className="text-lg font-medium mb-3 text-slate-800">Pagu Anggaran Berubah</h3>
         {groupedItems.changed.length > 0 ? (
           <div className="border rounded-md overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/50 text-xs h-8">
-                  <TableHead className="w-12">No</TableHead>
-                  <TableHead className="w-[15%]">Pembebanan</TableHead>
-                  <TableHead className="w-[30%]">Uraian</TableHead>
-                  <TableHead className="w-[20%]">Detail Perubahan</TableHead>
-                  <TableHead className="text-right">Semula</TableHead>
-                  <TableHead className="text-right">Menjadi</TableHead>
-                  <TableHead className="text-right">Selisih</TableHead>
+                <TableRow className="bg-slate-50 text-xs h-7">
+                  <TableHead className="w-12 text-center text-slate-700">No</TableHead>
+                  <TableHead className="w-[15%] text-center text-slate-700">Pembebanan</TableHead>
+                  <TableHead className="w-[30%] text-center text-slate-700">Uraian</TableHead>
+                  <TableHead className="w-[20%] text-center text-slate-700">Detail Perubahan</TableHead>
+                  <TableHead className="text-right text-center text-slate-700">Semula</TableHead>
+                  <TableHead className="text-right text-center text-slate-700">Menjadi</TableHead>
+                  <TableHead className="text-right text-center text-slate-700">Selisih</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="text-xs">
                 {groupedItems.changed.map((item, index) => (
-                  <TableRow key={item.id} className="h-7">
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell className="whitespace-normal break-words max-w-[120px]">{getPembebananText(item)}</TableCell>
-                    <TableCell className="whitespace-normal break-words">{item.uraian}</TableCell>
+                  <TableRow key={item.id} className="h-6">
+                    <TableCell className="text-center">{index + 1}</TableCell>
+                    <TableCell className="text-left whitespace-normal break-words max-w-[120px]">{getPembebananText(item)}</TableCell>
+                    <TableCell className="text-left whitespace-normal break-words">{item.uraian}</TableCell>
                     <TableCell className="whitespace-normal break-words">{getDetailPerubahan(item)}</TableCell>
                     <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
                     <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
@@ -109,26 +109,26 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
       </div>
 
       <div>
-        <h3 className="text-lg font-medium mb-3">Pagu Anggaran Baru</h3>
+        <h3 className="text-lg font-medium mb-3 text-slate-800">Pagu Anggaran Baru</h3>
         {groupedItems.new.length > 0 ? (
           <div className="border rounded-md overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/50 text-xs h-8">
-                  <TableHead className="w-12">No</TableHead>
-                  <TableHead className="w-[15%]">Pembebanan</TableHead>
-                  <TableHead className="w-[30%]">Uraian</TableHead>
-                  <TableHead className="w-[15%]">Volume</TableHead>
-                  <TableHead className="w-[15%]">Harga Satuan</TableHead>
-                  <TableHead className="text-right">Jumlah</TableHead>
+                <TableRow className="bg-slate-50 text-xs h-7">
+                  <TableHead className="w-12 text-center text-slate-700">No</TableHead>
+                  <TableHead className="w-[15%] text-center text-slate-700">Pembebanan</TableHead>
+                  <TableHead className="w-[30%] text-center text-slate-700">Uraian</TableHead>
+                  <TableHead className="w-[15%] text-center text-slate-700">Volume</TableHead>
+                  <TableHead className="w-[15%] text-center text-slate-700">Harga Satuan</TableHead>
+                  <TableHead className="text-center text-slate-700">Jumlah</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="text-xs">
                 {groupedItems.new.map((item, index) => (
-                  <TableRow key={item.id} className="h-7">
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell className="whitespace-normal break-words max-w-[120px]">{getPembebananText(item)}</TableCell>
-                    <TableCell className="whitespace-normal break-words">{item.uraian}</TableCell>
+                  <TableRow key={item.id} className="h-6">
+                    <TableCell className="text-center">{index + 1}</TableCell>
+                    <TableCell className="text-left whitespace-normal break-words max-w-[120px]">{getPembebananText(item)}</TableCell>
+                    <TableCell className="text-left whitespace-normal break-words">{item.uraian}</TableCell>
                     <TableCell>{item.volumeMenjadi} {item.satuanMenjadi}</TableCell>
                     <TableCell>{formatCurrency(item.hargaSatuanMenjadi, false)}</TableCell>
                     <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
