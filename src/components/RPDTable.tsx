@@ -4,14 +4,19 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { AlertCircle, Check, Clock, Info } from 'lucide-react';
+import { AlertCircle, Check, Clock, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRPDData, RPDItem } from '@/hooks/useRPDData';
+import { Select } from '@/components/ui/select';
 
 const RPDTable: React.FC = () => {
   const { rpdItems, loading, updateRPDItem } = useRPDData();
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, Record<string, number>>>({});
-
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
   const startEditing = (itemId: string) => {
     const item = rpdItems.find(item => item.id === itemId);
     if (!item) return;
@@ -109,6 +114,24 @@ const RPDTable: React.FC = () => {
   const formatCurrency = (value: number) => {
     return value.toLocaleString('id-ID');
   };
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(rpdItems.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, rpdItems.length);
+  const paginatedItems = rpdItems.slice(startIndex, endIndex);
+  
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+  
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSize = parseInt(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
 
   return (
     <div className="space-y-4">
@@ -117,7 +140,7 @@ const RPDTable: React.FC = () => {
           <TableHeader className="bg-slate-100">
             <TableRow>
               <TableHead className="w-20 text-center">Status</TableHead>
-              <TableHead className="w-1/4">Uraian</TableHead>
+              <TableHead className="w-1/4 text-left">Uraian</TableHead>
               <TableHead className="text-right">Volume</TableHead>
               <TableHead className="text-center">Satuan</TableHead>
               <TableHead className="text-right">Harga Satuan</TableHead>
@@ -149,14 +172,14 @@ const RPDTable: React.FC = () => {
                   ))}
                 </TableRow>
               ))
-            ) : rpdItems.length === 0 ? (
+            ) : paginatedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={20} className="text-center py-4">
+                <TableCell colSpan={20} className="text-center py-4 text-slate-600">
                   Tidak ada data Rencana Penarikan Dana
                 </TableCell>
               </TableRow>
             ) : (
-              rpdItems.map(item => (
+              paginatedItems.map(item => (
                 <TableRow key={item.id} className={item.jumlah_rpd === 0 ? 'bg-green-50' : ''}>
                   <TableCell className="text-center">
                     <div className="flex items-center justify-center">
@@ -166,7 +189,7 @@ const RPDTable: React.FC = () => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{item.uraian}</TableCell>
+                  <TableCell className="font-medium text-left">{item.uraian}</TableCell>
                   <TableCell className="text-right">{item.volume_menjadi}</TableCell>
                   <TableCell className="text-center">{item.satuan_menjadi}</TableCell>
                   <TableCell className="text-right">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
@@ -184,7 +207,7 @@ const RPDTable: React.FC = () => {
                             min="0"
                             value={editValues[item.id]?.[month] || 0}
                             onChange={(e) => handleInputChange(item.id, month, e.target.value)}
-                            className="h-8 text-right"
+                            className="h-8 text-right text-slate-800"
                           />
                         </TableCell>
                       ))}
@@ -231,6 +254,55 @@ const RPDTable: React.FC = () => {
           </TableBody>
         </Table>
       </div>
+      
+      {!loading && rpdItems.length > 0 && (
+        <div className="pagination-controls">
+          <div className="page-size-selector">
+            <span className="text-sm text-slate-600">Tampilkan</span>
+            <select
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              className="ml-2 border border-slate-300 rounded text-slate-700 px-2 py-1"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="ml-2 text-sm text-slate-600">entri</span>
+          </div>
+          
+          <div className="current-page-info">
+            Menampilkan {startIndex + 1} - {endIndex} dari {rpdItems.length} item
+          </div>
+          
+          <div className="page-navigation">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => goToPage(currentPage - 1)} 
+              disabled={currentPage === 1}
+              className="pagination-button"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <span className="px-3 py-1 text-sm text-slate-700">
+              Halaman {currentPage} dari {totalPages}
+            </span>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => goToPage(currentPage + 1)} 
+              disabled={currentPage === totalPages}
+              className="pagination-button"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

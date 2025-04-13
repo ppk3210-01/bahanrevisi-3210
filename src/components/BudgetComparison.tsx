@@ -47,6 +47,7 @@ const BudgetComparison: React.FC = () => {
   const [summarySectionView, setSummarySectionView] = useState<SummarySectionView>('changes');
   const [showSummaryDialog, setShowSummaryDialog] = useState(false);
   const summaryContentRef = useRef<HTMLDivElement>(null);
+  const changesContentRef = useRef<HTMLDivElement>(null);
   
   const areFiltersComplete = Object.values(filters).every(filter => filter !== 'all');
   
@@ -109,11 +110,17 @@ const BudgetComparison: React.FC = () => {
 
   const handleExportToJpeg = async () => {
     try {
-      if (!summaryContentRef.current) {
-        throw new Error('Summary content not found');
+      if (summarySectionView === 'changes') {
+        if (!changesContentRef.current) {
+          throw new Error('Summary content not found');
+        }
+        await exportToJpeg('changes-content', `ringkasan-perubahan`);
+      } else {
+        if (!summaryContentRef.current) {
+          throw new Error('Summary content not found');
+        }
+        await exportToJpeg('summary-content', `ringkasan-${summarySectionView}`);
       }
-
-      await exportToJpeg('summary-content', `ringkasan-${summarySectionView}`);
       
       toast({
         title: 'Berhasil',
@@ -170,12 +177,10 @@ const BudgetComparison: React.FC = () => {
                       <FileBarChart2 className="h-4 w-4 mr-2" /> 
                       Ekspor Semua Ringkasan
                     </Button>
-                    {summarySectionView !== 'changes' && (
-                      <Button variant="outline" onClick={handleExportToJpeg} className="border-slate-200 text-slate-700 hover:text-slate-900">
-                        <Download className="h-4 w-4 mr-2" /> 
-                        Ekspor ke JPEG
-                      </Button>
-                    )}
+                    <Button variant="outline" onClick={handleExportToJpeg} className="border-slate-200 text-slate-700 hover:text-slate-900">
+                      <Download className="h-4 w-4 mr-2" /> 
+                      Ekspor ke JPEG
+                    </Button>
                   </>
                 )}
                 
@@ -284,19 +289,23 @@ const BudgetComparison: React.FC = () => {
                   </Button>
                 </div>
                 
-                <div className="mt-4" id="summary-content" ref={summaryContentRef}>
+                <div className="mt-4">
                   <h3 className="text-xl font-semibold mb-4 text-slate-800">{getSummarySectionName()}</h3>
                   
                   {summarySectionView === 'changes' ? (
-                    <BudgetChangesSummary items={budgetItems} />
+                    <div id="changes-content" ref={changesContentRef}>
+                      <BudgetChangesSummary items={budgetItems} />
+                    </div>
                   ) : (
-                    <DetailedSummaryView 
-                      summaryData={getFilteredSummaryData()}
-                      loading={loading}
-                      view={summarySectionView}
-                      setView={setSummarySectionView}
-                      defaultView="table"
-                    />
+                    <div id="summary-content" ref={summaryContentRef}>
+                      <DetailedSummaryView 
+                        summaryData={getFilteredSummaryData()}
+                        loading={loading}
+                        view={summarySectionView}
+                        setView={setSummarySectionView}
+                        defaultView="table"
+                      />
+                    </div>
                   )}
                 </div>
               </div>

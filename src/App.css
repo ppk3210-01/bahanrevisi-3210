@@ -58,6 +58,26 @@ table.data-table {
   background-color: #f1f5f9;
   font-weight: 500;
   color: #475569;
+  text-align: center;
+}
+
+.data-table td {
+  color: #334155;
+}
+
+.data-table td.text-right,
+.data-table th.text-right {
+  text-align: right;
+}
+
+.data-table td.text-left,
+.data-table th.text-left {
+  text-align: left;
+}
+
+.data-table td.text-center,
+.data-table th.text-center {
+  text-align: center;
 }
 
 /* Fix for button styling */
@@ -218,4 +238,5 @@ button {
   border-radius: 0.25rem;
   font-size: 0.875rem;
   width: 100%;
+  color: #334155;
 }

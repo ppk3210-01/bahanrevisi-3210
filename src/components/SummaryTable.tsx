@@ -157,37 +157,37 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
         <TableHeader>
           <TableRow className="bg-muted/20">
             <TableHead className={getCategoryColumnClass()}>
-              <Button variant="ghost" onClick={() => handleSort('category')} className="flex items-center p-0">
+              <Button variant="ghost" onClick={() => handleSort('category')} className="flex items-center p-0 text-slate-700">
                 {getColumnName()} <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
             <TableHead className="text-right">
-              <Button variant="ghost" onClick={() => handleSort('totalSemula')} className="flex items-center justify-end p-0 w-full">
+              <Button variant="ghost" onClick={() => handleSort('totalSemula')} className="flex items-center justify-end p-0 w-full text-slate-700">
                 Total Semula <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
             <TableHead className="text-right">
-              <Button variant="ghost" onClick={() => handleSort('totalMenjadi')} className="flex items-center justify-end p-0 w-full">
+              <Button variant="ghost" onClick={() => handleSort('totalMenjadi')} className="flex items-center justify-end p-0 w-full text-slate-700">
                 Total Menjadi <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
             <TableHead className="text-right">
-              <Button variant="ghost" onClick={() => handleSort('totalSelisih')} className="flex items-center justify-end p-0 w-full">
+              <Button variant="ghost" onClick={() => handleSort('totalSelisih')} className="flex items-center justify-end p-0 w-full text-slate-700">
                 Selisih <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
             <TableHead className="text-center">
-              <Button variant="ghost" onClick={() => handleSort('newItems')} className="flex items-center justify-center p-0 w-full">
+              <Button variant="ghost" onClick={() => handleSort('newItems')} className="flex items-center justify-center p-0 w-full text-slate-700">
                 Items Baru <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
             <TableHead className="text-center">
-              <Button variant="ghost" onClick={() => handleSort('changedItems')} className="flex items-center justify-center p-0 w-full">
+              <Button variant="ghost" onClick={() => handleSort('changedItems')} className="flex items-center justify-center p-0 w-full text-slate-700">
                 Items Berubah <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
             <TableHead className="text-center">
-              <Button variant="ghost" onClick={() => handleSort('totalItems')} className="flex items-center justify-center p-0 w-full">
+              <Button variant="ghost" onClick={() => handleSort('totalItems')} className="flex items-center justify-center p-0 w-full text-slate-700">
                 Total Items <ArrowUpDown className="ml-2 h-4 w-4" />
               </Button>
             </TableHead>
@@ -196,7 +196,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
         <TableBody>
           {displayData.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center">Tidak ada data</TableCell>
+              <TableCell colSpan={7} className="text-center text-slate-600">Tidak ada data</TableCell>
             </TableRow>
           ) : (
             displayData.map((record, index) => {
@@ -210,15 +210,15 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
               
               return (
                 <TableRow key={`${categoryValue}-${index}`} className="py-1">
-                  <TableCell className="font-medium whitespace-normal">{categoryValue}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(totalSemula)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(totalMenjadi)}</TableCell>
-                  <TableCell className={`text-right ${totalSelisih !== 0 ? 'text-red-600' : ''}`}>
+                  <TableCell className="font-medium whitespace-normal text-left text-slate-700">{categoryValue}</TableCell>
+                  <TableCell className="text-right text-slate-700">{formatCurrency(totalSemula)}</TableCell>
+                  <TableCell className="text-right text-slate-700">{formatCurrency(totalMenjadi)}</TableCell>
+                  <TableCell className={`text-right ${totalSelisih !== 0 ? 'text-red-600' : 'text-slate-700'}`}>
                     {formatCurrency(totalSelisih)}
                   </TableCell>
-                  <TableCell className="text-center">{newItems}</TableCell>
-                  <TableCell className="text-center">{changedItems}</TableCell>
-                  <TableCell className="text-center">{totalItems}</TableCell>
+                  <TableCell className="text-center text-slate-700">{newItems}</TableCell>
+                  <TableCell className="text-center text-slate-700">{changedItems}</TableCell>
+                  <TableCell className="text-center text-slate-700">{totalItems}</TableCell>
                 </TableRow>
               );
             })
@@ -226,15 +226,15 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
         </TableBody>
         <TableFooter>
           <TableRow>
-            <TableCell className="font-bold">TOTAL</TableCell>
-            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
-            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
-            <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'text-red-600' : ''}`}>
+            <TableCell className="font-bold text-left text-slate-800">TOTAL</TableCell>
+            <TableCell className="text-right font-bold text-slate-800">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
+            <TableCell className="text-right font-bold text-slate-800">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
+            <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'text-red-600' : 'text-slate-800'}`}>
               {formatCurrency(roundToThousands(totalSelisih))}
             </TableCell>
-            <TableCell className="text-center font-bold">{totalNewItems}</TableCell>
-            <TableCell className="text-center font-bold">{totalChangedItems}</TableCell>
-            <TableCell className="text-center font-bold">{totalItems}</TableCell>
+            <TableCell className="text-center font-bold text-slate-800">{totalNewItems}</TableCell>
+            <TableCell className="text-center font-bold text-slate-800">{totalChangedItems}</TableCell>
+            <TableCell className="text-center font-bold text-slate-800">{totalItems}</TableCell>
           </TableRow>
         </TableFooter>
       </Table>
