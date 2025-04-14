@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -104,7 +103,7 @@ const BudgetComparison: React.FC = () => {
       case 'kegiatan': return 'Kegiatan';
       case 'rincian_output': return 'Rincian Output';
       case 'sub_komponen': return 'Sub Komponen';
-      case 'account_group': return 'Kelompok Akun';
+      case 'account_group': return 'Kelompok Belanja';
       default: return 'Ringkasan';
     }
   };
@@ -137,7 +136,6 @@ const BudgetComparison: React.FC = () => {
     }
   };
 
-  // Get stats for budget changes summary
   const changedItems = budgetItems.filter(item => item.status === 'changed');
   const newItems = budgetItems.filter(item => item.status === 'new');
   const deletedItems = budgetItems.filter(item => item.status === 'deleted');
@@ -295,7 +293,7 @@ const BudgetComparison: React.FC = () => {
                     size="xs"
                     className="text-xs border-slate-200 hover:bg-slate-50"
                   >
-                    Kelompok Akun
+                    Kelompok Belanja
                   </Button>
                 </div>
                 

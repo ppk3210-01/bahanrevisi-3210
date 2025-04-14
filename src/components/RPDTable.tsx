@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -23,11 +22,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   
-  // Effect to refresh data when filters change
   useEffect(() => {
     if (filters) {
       refreshData();
@@ -134,9 +131,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return value.toLocaleString('id-ID');
   };
   
-  // Apply filters
   const filteredItems = rpdItems.filter(item => {
-    // Search filter
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
       item.uraian.toLowerCase().includes(searchLower) ||
@@ -157,7 +152,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       item.november.toString().includes(searchTerm) ||
       item.desember.toString().includes(searchTerm);
     
-    // Zero budget filter
     if (hideZeroBudget) {
       return matchesSearch && item.jumlah_menjadi > 0;
     }
@@ -165,13 +159,11 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return matchesSearch;
   });
   
-  // Calculate pagination
   const totalPages = Math.ceil(filteredItems.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, filteredItems.length);
   const paginatedItems = filteredItems.slice(startIndex, endIndex);
   
-  // Calculate totals for all filtered items
   const totals = {
     jumlah_menjadi: filteredItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0),
     jumlah_rpd: filteredItems.reduce((sum, item) => sum + item.jumlah_rpd, 0),
@@ -198,7 +190,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newSize = parseInt(e.target.value);
     setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
   
   const canEditMonths = isAdmin || (profile?.role === 'user');
@@ -258,29 +250,29 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       </div>
       
       <div className="overflow-x-auto pb-4 border border-slate-200 rounded-md">
-        <div className="min-w-[1400px]">
+        <div className="min-width-[1400px]">
           <Table className="rpd-table w-full">
             <TableHeader className="bg-white">
               <TableRow className="h-10">
-                <TableHead className="sticky left-0 z-20 w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
-                <TableHead className="sticky left-[80px] z-20 w-[350px] text-left bg-white text-slate-700 font-medium border-r border-slate-200">Uraian</TableHead>
+                <TableHead className="sticky-status w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
+                <TableHead className="sticky-uraian w-[350px] text-left bg-white text-slate-700 font-medium border-r border-slate-200">Uraian</TableHead>
                 <TableHead className="text-right w-[70px] text-slate-700 font-medium">Volume</TableHead>
                 <TableHead className="text-center w-[70px] text-slate-700 font-medium">Satuan</TableHead>
                 <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
                 <TableHead className="text-right w-[120px] text-slate-700 font-medium">Jumlah Pagu</TableHead>
                 <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700 font-medium">Jumlah RPD</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Januari</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Februari</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Maret</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">April</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Mei</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Juni</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Juli</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Agustus</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">September</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Oktober</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">November</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Desember</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Januari</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Februari</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Maret</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">April</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Mei</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Juni</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Juli</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Agustus</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">September</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Oktober</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">November</TableHead>
+                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Desember</TableHead>
                 <TableHead className="w-20 text-center text-slate-700 font-medium">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -306,7 +298,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                 <>
                   {paginatedItems.map(item => (
                     <TableRow key={item.id} className={`h-8 ${getRowBackground(item)}`}>
-                      <TableCell className="sticky left-0 z-10 text-center p-1 bg-inherit border-r border-slate-200">
+                      <TableCell className="sticky-status text-center p-1 bg-inherit border-r border-slate-200">
                         <div className="flex items-center justify-center">
                           <div className={`px-1.5 py-0.5 rounded-full flex items-center ${getStatusColor(item.status)}`}>
                             {getStatusIcon(item.status)}
@@ -314,14 +306,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="sticky left-[80px] z-10 p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{item.volume_menjadi}</TableCell>
-                      <TableCell className="text-center p-1 font-normal">{item.satuan_menjadi}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.jumlah_menjadi)}</TableCell>
-                      <TableCell className={`text-right p-1 font-normal ${item.jumlah_rpd === item.jumlah_menjadi ? 'bg-green-50' : 'bg-slate-50'}`}>
-                        {formatCurrency(item.jumlah_rpd)}
-                      </TableCell>
+                      <TableCell className="sticky-uraian p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
                       
                       {editingItem === item.id ? (
                         <>
@@ -377,11 +362,11 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                     </TableRow>
                   ))}
                   
-                  {/* Total row */}
                   <TableRow className="bg-slate-100 font-medium">
-                    <TableCell className="sticky left-0 z-10 bg-slate-100 p-1 border-r border-slate-200" colSpan={2}>
+                    <TableCell className="sticky-status bg-slate-100 p-1 border-r border-slate-200" colSpan={1}>
                       <span className="font-medium text-slate-700">TOTAL</span>
                     </TableCell>
+                    <TableCell className="sticky-uraian bg-slate-100 p-1 border-r border-slate-200"></TableCell>
                     <TableCell className="p-1" colSpan={3}></TableCell>
                     <TableCell className="text-right p-1">{formatCurrency(totals.jumlah_menjadi)}</TableCell>
                     <TableCell className="text-right p-1 bg-slate-50">{formatCurrency(totals.jumlah_rpd)}</TableCell>

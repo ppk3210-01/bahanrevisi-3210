@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -52,9 +51,18 @@ export const useRPDData = (filters?: FilterSelection) => {
       setLoading(true);
       
       let { data, error } = { data: null, error: null };
+
+      // Use unfiltered query for all cases to avoid flickering
+      const result = await supabase.rpc('get_rpd_data');
+      data = result.data;
+      error = result.error;
       
-      // Determine if we need to use filters
-      if (filters && (
+      if (error) {
+        throw error;
+      }
+      
+      // Apply filters on the client side if needed
+      if (data && filters && (
         (filters.programPembebanan && filters.programPembebanan !== 'all') ||
         (filters.kegiatan && filters.kegiatan !== 'all') ||
         (filters.rincianOutput && filters.rincianOutput !== 'all') ||
@@ -62,28 +70,8 @@ export const useRPDData = (filters?: FilterSelection) => {
         (filters.subKomponen && filters.subKomponen !== 'all') ||
         (filters.akun && filters.akun !== 'all')
       )) {
-        // Use unfiltered query with client-side filtering since the RPC function has issues
-        const result = await supabase.rpc('get_rpd_data');
-        data = result.data;
-        error = result.error;
-        
-        if (data) {
-          // Apply filters on the client side
-          data = data.filter(item => {
-            // These properties don't exist on the RPD items from the current DB structure
-            // We'll need to modify this when the view is correctly updated
-            return true;
-          });
-        }
-      } else {
-        // Use unfiltered query
-        const result = await supabase.rpc('get_rpd_data');
-        data = result.data;
-        error = result.error;
-      }
-      
-      if (error) {
-        throw error;
+        // For now, we'll skip client-side filtering as the data structure
+        // doesn't include the filter fields yet
       }
       
       setRpdItems(data || []);
