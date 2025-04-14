@@ -64,7 +64,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
           <div className="border rounded-md overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50 text-xs h-7">
+                <TableRow className="bg-slate-50 text-base h-7">
                   <TableHead className="w-12 text-center text-slate-700">No</TableHead>
                   <TableHead className="w-[15%] text-center text-slate-700">Pembebanan</TableHead>
                   <TableHead className="w-[30%] text-center text-slate-700">Uraian</TableHead>
@@ -74,7 +74,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                   <TableHead className="text-right text-center text-slate-700">Selisih</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="text-xs">
+              <TableBody className="text-base">
                 {groupedItems.changed.map((item, index) => (
                   <TableRow key={item.id} className="h-6">
                     <TableCell className="text-center">{index + 1}</TableCell>
@@ -90,7 +90,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                 ))}
               </TableBody>
               <TableFooter>
-                <TableRow className="text-xs font-semibold">
+                <TableRow className="text-base font-semibold">
                   <TableCell colSpan={4} className="text-right">TOTAL</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalChangedSemula)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalChangedMenjadi)}</TableCell>
@@ -102,7 +102,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
             </Table>
           </div>
         ) : (
-          <div className="border rounded-md p-4 text-center text-sm text-gray-500">
+          <div className="border rounded-md p-4 text-center text-base text-gray-500">
             Tidak ada anggaran yang berubah
           </div>
         )}
@@ -114,7 +114,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
           <div className="border rounded-md overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50 text-xs h-7">
+                <TableRow className="bg-slate-50 text-base h-7">
                   <TableHead className="w-12 text-center text-slate-700">No</TableHead>
                   <TableHead className="w-[15%] text-center text-slate-700">Pembebanan</TableHead>
                   <TableHead className="w-[30%] text-center text-slate-700">Uraian</TableHead>
@@ -123,7 +123,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                   <TableHead className="text-center text-slate-700">Jumlah</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="text-xs">
+              <TableBody className="text-base">
                 {groupedItems.new.map((item, index) => (
                   <TableRow key={item.id} className="h-6">
                     <TableCell className="text-center">{index + 1}</TableCell>
@@ -136,7 +136,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                 ))}
               </TableBody>
               <TableFooter>
-                <TableRow className="text-xs font-semibold">
+                <TableRow className="text-base font-semibold">
                   <TableCell colSpan={5} className="text-right">TOTAL</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalNewMenjadi)}</TableCell>
                 </TableRow>
@@ -144,7 +144,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
             </Table>
           </div>
         ) : (
-          <div className="border rounded-md p-4 text-center text-sm text-gray-500">
+          <div className="border rounded-md p-4 text-center text-base text-gray-500">
             Tidak ada anggaran baru
           </div>
         )}
