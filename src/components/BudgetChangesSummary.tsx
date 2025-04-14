@@ -59,12 +59,12 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-3 text-slate-800">Pagu Anggaran Berubah</h3>
+        <h3 className="text-lg font-medium mb-3 text-orange-600 text-left">Pagu Anggaran Berubah</h3>
         {groupedItems.changed.length > 0 ? (
           <div className="border rounded-md overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50 text-xs h-7">
+                <TableRow className="bg-slate-50 text-base h-7">
                   <TableHead className="w-12 text-center text-slate-700">No</TableHead>
                   <TableHead className="w-[15%] text-center text-slate-700">Pembebanan</TableHead>
                   <TableHead className="w-[30%] text-center text-slate-700">Uraian</TableHead>
@@ -74,7 +74,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                   <TableHead className="text-right text-center text-slate-700">Selisih</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="text-xs">
+              <TableBody className="text-base">
                 {groupedItems.changed.map((item, index) => (
                   <TableRow key={item.id} className="h-6">
                     <TableCell className="text-center">{index + 1}</TableCell>
@@ -90,7 +90,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
                 ))}
               </TableBody>
               <TableFooter>
-                <TableRow className="text-xs font-semibold">
+                <TableRow className="text-base font-semibold">
                   <TableCell colSpan={4} className="text-right">TOTAL</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalChangedSemula)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(totalChangedMenjadi)}</TableCell>
