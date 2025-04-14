@@ -251,7 +251,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       
       <div className="overflow-x-auto pb-4 border border-slate-200 rounded-md">
         <div className="min-width-[1400px]">
-          <Table className="rpd-table w-full">
+          <Table className="rpd-table table-fixed w-full">
             <TableHeader className="bg-white">
               <TableRow className="h-10">
                 <TableHead className="sticky-status w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
