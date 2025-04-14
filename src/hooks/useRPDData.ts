@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -50,6 +51,7 @@ export const useRPDData = (filters?: FilterSelection) => {
     try {
       setLoading(true);
       
+      // Use the improved get_rpd_data function which avoids the blinking issue
       const { data, error } = await supabase.rpc('get_rpd_data');
       
       if (error) {
@@ -67,9 +69,60 @@ export const useRPDData = (filters?: FilterSelection) => {
         (filters.subKomponen && filters.subKomponen !== 'all') ||
         (filters.akun && filters.akun !== 'all')
       )) {
-        // Placeholder for client-side filtering. In the real implementation,
-        // this would filter based on the provided filters.
-        // For now we'll keep all data as the structure doesn't include filter fields yet
+        // Fetch the related budget items to get the filter fields
+        const { data: budgetData, error: budgetError } = await supabase
+          .from('budget_items')
+          .select('id, program_pembebanan, kegiatan, rincian_output, komponen_output, sub_komponen, akun');
+        
+        if (budgetError) {
+          throw budgetError;
+        }
+        
+        // Create a lookup map for budget items
+        const budgetMap = new Map();
+        if (budgetData) {
+          budgetData.forEach(item => {
+            budgetMap.set(item.id, item);
+          });
+        }
+        
+        // Apply filters
+        filteredData = filteredData.filter(item => {
+          const budgetItem = budgetMap.get(item.id);
+          if (!budgetItem) return false;
+          
+          if (filters.programPembebanan && filters.programPembebanan !== 'all' && 
+              budgetItem.program_pembebanan !== filters.programPembebanan) {
+            return false;
+          }
+          
+          if (filters.kegiatan && filters.kegiatan !== 'all' && 
+              budgetItem.kegiatan !== filters.kegiatan) {
+            return false;
+          }
+          
+          if (filters.rincianOutput && filters.rincianOutput !== 'all' && 
+              budgetItem.rincian_output !== filters.rincianOutput) {
+            return false;
+          }
+          
+          if (filters.komponenOutput && filters.komponenOutput !== 'all' && 
+              budgetItem.komponen_output !== filters.komponenOutput) {
+            return false;
+          }
+          
+          if (filters.subKomponen && filters.subKomponen !== 'all' && 
+              budgetItem.sub_komponen !== filters.subKomponen) {
+            return false;
+          }
+          
+          if (filters.akun && filters.akun !== 'all' && 
+              budgetItem.akun !== filters.akun) {
+            return false;
+          }
+          
+          return true;
+        });
       }
       
       setRpdItems(filteredData);
@@ -104,7 +157,7 @@ export const useRPDData = (filters?: FilterSelection) => {
         throw error;
       }
       
-      // Update local state
+      // Update local state optimistically
       setRpdItems(prevItems => 
         prevItems.map(item => {
           if (item.id === itemId) {
@@ -130,7 +183,7 @@ export const useRPDData = (filters?: FilterSelection) => {
             
             updatedItem.jumlah_rpd = jumlah_rpd;
             
-            // Determine status - improved logic
+            // Determine status using the same logic as in the database function
             if (jumlah_rpd === item.jumlah_menjadi) {
               updatedItem.status = 'ok';
             } else if (

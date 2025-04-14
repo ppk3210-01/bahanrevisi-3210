@@ -134,8 +134,8 @@ table.data-table {
   background-color: #f8fafc;
   color: #334155;
   font-weight: 500;
-  height: 60px; /* Increased height for wrapped text */
-  min-width: 80px; /* Minimum width for columns */
+  height: 60px;
+  min-width: 80px;
   font-size: 0.8rem;
   line-height: 1.2;
 }
@@ -145,7 +145,7 @@ table.data-table {
   border: 1px solid #e2e8f0;
   vertical-align: middle;
   color: #334155;
-  height: 24px; /* Reduce row height */
+  height: 24px;
   font-size: 0.85rem;
 }
 
@@ -162,7 +162,6 @@ table.data-table {
   text-align: center;
 }
 
-/* Hide sort icons while keeping functionality */
 .budget-table th button svg {
   display: none !important;
 }
@@ -299,12 +298,10 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   font-size: 0.85rem;
 }
 
-/* Improve budget changes tables text alignment */
 .budget-changes-table .text-left {
   text-align: left !important;
 }
 
-/* Fix for budget table column sizing */
 .budget-table .volume-column {
   max-width: 100px;
   min-width: 100px;
@@ -312,7 +309,6 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   word-break: break-word;
 }
 
-/* Budget table styles */
 .budget-table th {
   color: #334155;
   font-weight: 500;
@@ -348,14 +344,12 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   text-align: left;
 }
 
-/* RPD table month columns - standardized width */
 .rpd-table th:nth-child(n+8):nth-child(-n+19),
 .rpd-table td:nth-child(n+8):nth-child(-n+19) {
   min-width: 150px;
   width: 150px;
 }
 
-/* Fix text wrapping for column headers */
 .budget-table th button {
   white-space: normal;
   height: auto;
@@ -366,13 +360,11 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   justify-content: center;
 }
 
-/* Don't apply bold to tab text */
 .TabsTrigger {
   font-weight: normal;
   color: #334155 !important;
 }
 
-/* Fix header styling - no blue background */
 .TabsList {
   background-color: transparent !important;
 }
@@ -384,12 +376,10 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   border-bottom: 2px solid #334155 !important;
 }
 
-/* Make table backgrounds white, not blue */
 thead, .table-header {
   background-color: white !important;
 }
 
-/* Freeze columns for budget table */
 .budget-table th.sticky-left,
 .budget-table td.sticky-left {
   position: sticky;
@@ -417,7 +407,6 @@ thead, .table-header {
   border-right: 1px solid #e2e8f0;
 }
 
-/* RPD table frozen columns */
 .rpd-table th.sticky-status,
 .rpd-table td.sticky-status {
   position: sticky;
@@ -434,4 +423,100 @@ thead, .table-header {
   z-index: 20;
   background-color: inherit;
   border-right: 1px solid #e2e8f0;
+}
+
+/* Account group specific styles */
+.account-group-table th, 
+.account-group-table td {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.account-group-table th {
+  background-color: #f8fafc;
+  font-weight: 500;
+  text-align: center;
+  white-space: normal;
+  color: #334155;
+}
+
+.account-group-table .group-name-cell {
+  text-align: left;
+  font-weight: 500;
+  min-width: 200px;
+}
+
+.account-group-table .number-cell {
+  text-align: right;
+  min-width: 120px;
+}
+
+.account-group-heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+.account-group-description {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.account-group-card {
+  padding: 1rem;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
+}
+
+.account-group-category {
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 0.25rem;
+}
+
+.account-group-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.account-group-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.group-511 {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 4px solid rgba(59, 130, 246, 0.8);
+}
+
+.group-512 {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-left: 4px solid rgba(99, 102, 241, 0.8);
+}
+
+.group-521 {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-left: 4px solid rgba(16, 185, 129, 0.8);
+}
+
+.group-522 {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left: 4px solid rgba(245, 158, 11, 0.8);
+}
+
+.group-523 {
+  background-color: rgba(168, 85, 247, 0.1);
+  border-left: 4px solid rgba(168, 85, 247, 0.8);
+}
+
+.group-524 {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid rgba(239, 68, 68, 0.8);
 }
