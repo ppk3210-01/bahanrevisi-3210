@@ -78,10 +78,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
       <Table className="border">
         <TableHeader className="bg-gray-50">
           <TableRow>
-            <TableHead className="min-w-[200px] text-slate-700 font-semibold">{getCategoryName()}</TableHead>
-            <TableHead className="text-right text-slate-700 font-semibold">Total Semula</TableHead>
-            <TableHead className="text-right text-slate-700 font-semibold">Total Menjadi</TableHead>
-            <TableHead className="text-right text-slate-700 font-semibold">Selisih</TableHead>
+            <TableHead className="min-w-[200px] text-center text-slate-700 font-semibold">{getCategoryName()}</TableHead>
+            <TableHead className="text-center text-slate-700 font-semibold">Total Semula</TableHead>
+            <TableHead className="text-center text-slate-700 font-semibold">Total Menjadi</TableHead>
+            <TableHead className="text-center text-slate-700 font-semibold">Selisih</TableHead>
             <TableHead className="text-center text-slate-700 font-semibold">Item Baru</TableHead>
             <TableHead className="text-center text-slate-700 font-semibold">Item Berubah</TableHead>
             <TableHead className="text-center text-slate-700 font-semibold">Total Item</TableHead>
@@ -90,10 +90,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
         <TableBody>
           {sortedData.map((item, index) => (
             <TableRow key={index} className="hover:bg-slate-50">
-              <TableCell className="font-medium">{getItemCategoryValue(item)}</TableCell>
+              <TableCell className="text-left font-medium">{getItemCategoryValue(item)}</TableCell>
               <TableCell className="text-right">{formatCurrency(item.total_semula || 0)}</TableCell>
               <TableCell className="text-right">{formatCurrency(item.total_menjadi || 0)}</TableCell>
-              <TableCell className={`text-right ${(item.total_selisih || 0) > 0 ? 'text-green-600' : (item.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
+              <TableCell className={`text-right ${(item.total_selisih || 0) > 0 ? 'text-red-600' : (item.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
                 {formatCurrency(item.total_selisih || 0)}
               </TableCell>
               <TableCell className="text-center">{item.new_items || 0}</TableCell>
@@ -105,7 +105,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
             <TableCell className="font-semibold">TOTAL</TableCell>
             <TableCell className="text-right font-semibold">{formatCurrency(totalRow.total_semula)}</TableCell>
             <TableCell className="text-right font-semibold">{formatCurrency(totalRow.total_menjadi)}</TableCell>
-            <TableCell className={`text-right font-semibold ${totalRow.total_selisih > 0 ? 'text-green-600' : totalRow.total_selisih < 0 ? 'text-red-600' : ''}`}>
+            <TableCell className={`text-right font-semibold ${totalRow.total_selisih > 0 ? 'text-red-600' : totalRow.total_selisih < 0 ? 'text-red-600' : ''}`}>
               {formatCurrency(totalRow.total_selisih)}
             </TableCell>
             <TableCell className="text-center font-semibold">{totalRow.new_items}</TableCell>
