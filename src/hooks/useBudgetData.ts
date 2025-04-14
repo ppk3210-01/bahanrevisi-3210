@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -14,10 +13,11 @@ import {
   BudgetSummaryByKegiatan,
   BudgetSummaryByRincianOutput,
   BudgetSummaryBySubKomponen,
-  BudgetSummaryByAccountGroup
+  BudgetSummaryByAccountGroup,
+  BudgetSummaryByAkunGroup
 } from '@/types/database';
 
-type SummaryType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group';
+type SummaryType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group' | 'akun_group';
 
 const useBudgetData = (filters: FilterSelection) => {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
@@ -84,7 +84,8 @@ const useBudgetData = (filters: FilterSelection) => {
           kegiatanResult,
           rincianOutputResult,
           subKomponenResult,
-          accountGroupResult
+          accountGroupResult,
+          akunGroupResult
         ] = await Promise.all([
           supabase.rpc('get_budget_summary_by_komponen'),
           supabase.rpc('get_budget_summary_by_akun'),
@@ -92,7 +93,8 @@ const useBudgetData = (filters: FilterSelection) => {
           supabase.rpc('get_budget_summary_by_kegiatan'),
           supabase.rpc('get_budget_summary_by_rincian_output'),
           supabase.rpc('get_budget_summary_by_sub_komponen'),
-          supabase.rpc('get_budget_summary_by_account_group')
+          supabase.rpc('get_budget_summary_by_account_group'),
+          supabase.rpc('get_budget_summary_by_akun_group')
         ]);
         
         let allSummaryData: BudgetSummaryRecord[] = [];
@@ -193,6 +195,21 @@ const useBudgetData = (filters: FilterSelection) => {
             type: 'account_group'
           }));
           allSummaryData = [...allSummaryData, ...accountGroupData];
+        }
+        
+        if (akunGroupResult.data) {
+          const akunGroupData: BudgetSummaryByAkunGroup[] = akunGroupResult.data.map(item => ({
+            akun_group: item.akun_group || '',
+            akun_group_name: item.akun_group_name || item.akun_group || '',
+            total_semula: roundToThousands(item.total_semula || 0),
+            total_menjadi: roundToThousands(item.total_menjadi || 0),
+            total_selisih: roundToThousands(item.total_selisih || 0),
+            new_items: item.new_items,
+            changed_items: item.changed_items,
+            total_items: item.total_items,
+            type: 'akun_group'
+          }));
+          allSummaryData = [...allSummaryData, ...akunGroupData];
         }
         
         setSummaryData(allSummaryData);
@@ -486,7 +503,7 @@ const useBudgetData = (filters: FilterSelection) => {
         .update({
           volume_menjadi: item.volumeSemula,
           satuan_menjadi: item.satuanSemula,
-          harga_satuan_menjadi: item.hargaSatuanSemula,
+          harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: item.jumlahSemula,
           // No need to set selisih as it's computed in the database
           status: 'unchanged'
@@ -504,7 +521,7 @@ const useBudgetData = (filters: FilterSelection) => {
               ...item,
               volumeMenjadi: item.volumeSemula,
               satuanMenjadi: item.satuanSemula,
-              hargaSatuanMenjadi: item.hargaSatuanSemula,
+              hargaSatuanMenjadi: item.hargaSatuanMenjadi,
               jumlahMenjadi: item.jumlahSemula,
               selisih: 0,
               status: 'unchanged',

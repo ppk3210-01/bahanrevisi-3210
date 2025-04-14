@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
@@ -46,10 +46,20 @@ export const useRPDData = (filters?: FilterSelection) => {
   const [rpdItems, setRpdItems] = useState<RPDItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const dataFetchedRef = useRef<boolean>(false);
+  const isUpdatingRef = useRef<boolean>(false);
 
   const fetchRPDData = useCallback(async () => {
     try {
-      setLoading(true);
+      // Skip if we're already in the process of updating an item
+      if (isUpdatingRef.current) {
+        return;
+      }
+
+      // Only set loading to true for the initial fetch
+      if (!dataFetchedRef.current) {
+        setLoading(true);
+      }
       
       // Use the improved get_rpd_data function which avoids the blinking issue
       const { data, error } = await supabase.rpc('get_rpd_data');
@@ -125,7 +135,9 @@ export const useRPDData = (filters?: FilterSelection) => {
         });
       }
       
+      // Update state and refs
       setRpdItems(filteredData);
+      dataFetchedRef.current = true;
     } catch (err) {
       console.error('Error fetching RPD data:', err);
       setError('Gagal memuat data RPD. Silakan coba lagi.');
@@ -141,10 +153,35 @@ export const useRPDData = (filters?: FilterSelection) => {
 
   useEffect(() => {
     fetchRPDData();
+    
+    // Subscribe to changes in the rencana_penarikan_dana table
+    const channel = supabase
+      .channel('rpd-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'rencana_penarikan_dana',
+        },
+        (payload) => {
+          // Only refresh if we're not the ones who initiated the update
+          if (!isUpdatingRef.current) {
+            fetchRPDData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchRPDData]);
 
   const updateRPDItem = async (itemId: string, monthValues: Partial<RPDMonthValues>) => {
     try {
+      isUpdatingRef.current = true;
+      
       const { error } = await supabase
         .from('rencana_penarikan_dana')
         .update({
@@ -242,6 +279,8 @@ export const useRPDData = (filters?: FilterSelection) => {
         description: 'Gagal menyimpan data. Silakan coba lagi.'
       });
       return false;
+    } finally {
+      isUpdatingRef.current = false;
     }
   };
 

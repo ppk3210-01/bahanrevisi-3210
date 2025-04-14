@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { BudgetSummaryRecord } from '@/types/database';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 
-type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group';
+type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group' | 'akun_group';
 
 interface SummaryChartProps {
   summaryData: BudgetSummaryRecord[];
@@ -27,43 +27,18 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
     } else if ('sub_komponen' in record && view === 'sub_komponen') {
       return record.sub_komponen || 'Tidak ada data';
     } else if ('account_group' in record && view === 'account_group') {
-      return record.account_group || 'Tidak ada data';
+      return record.account_group_name || record.account_group || 'Tidak ada data';
+    } else if ('akun_group' in record && view === 'akun_group') {
+      return record.akun_group_name || record.akun_group || 'Tidak ada data';
     }
     return 'Tidak ada data';
   };
 
   const transformChartData = () => {
     const sortedData = [...summaryData].sort((a, b) => {
-      if (view === 'komponen_output') {
-        const aKomponen = 'komponen_output' in a ? a.komponen_output || '' : '';
-        const bKomponen = 'komponen_output' in b ? b.komponen_output || '' : '';
-        return aKomponen.localeCompare(bKomponen);
-      } else if (view === 'akun') {
-        const aAkun = 'akun' in a ? a.akun || '' : '';
-        const bAkun = 'akun' in b ? b.akun || '' : '';
-        return aAkun.localeCompare(bAkun);
-      } else if (view === 'program_pembebanan') {
-        const aProgram = 'program_pembebanan' in a ? a.program_pembebanan || '' : '';
-        const bProgram = 'program_pembebanan' in b ? b.program_pembebanan || '' : '';
-        return aProgram.localeCompare(bProgram);
-      } else if (view === 'kegiatan') {
-        const aKegiatan = 'kegiatan' in a ? a.kegiatan || '' : '';
-        const bKegiatan = 'kegiatan' in b ? b.kegiatan || '' : '';
-        return aKegiatan.localeCompare(bKegiatan);
-      } else if (view === 'rincian_output') {
-        const aRincian = 'rincian_output' in a ? a.rincian_output || '' : '';
-        const bRincian = 'rincian_output' in b ? b.rincian_output || '' : '';
-        return aRincian.localeCompare(bRincian);
-      } else if (view === 'sub_komponen') {
-        const aSubKomponen = 'sub_komponen' in a ? a.sub_komponen || '' : '';
-        const bSubKomponen = 'sub_komponen' in b ? b.sub_komponen || '' : '';
-        return aSubKomponen.localeCompare(bSubKomponen);
-      } else if (view === 'account_group') {
-        const aAccountGroup = 'account_group' in a ? a.account_group || '' : '';
-        const bAccountGroup = 'account_group' in b ? b.account_group || '' : '';
-        return aAccountGroup.localeCompare(bAccountGroup);
-      }
-      return 0;
+      const aValue = getValueFromRecord(a) || '';
+      const bValue = getValueFromRecord(b) || '';
+      return aValue.localeCompare(bValue);
     });
 
     return sortedData.map(record => {
@@ -92,7 +67,8 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
       case 'kegiatan': return 'Kegiatan';
       case 'rincian_output': return 'Rincian Output';
       case 'sub_komponen': return 'Sub Komponen';
-      case 'account_group': return 'Kelompok Akun';
+      case 'account_group': return 'Kelompok Belanja';
+      case 'akun_group': return 'Kelompok Akun';
       default: return 'Kategori';
     }
   };

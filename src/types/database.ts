@@ -20,6 +20,7 @@ export type BudgetSummaryByKegiatanRecord = Views['budget_summary_by_kegiatan'][
 export type BudgetSummaryByRincianOutputRecord = Views['budget_summary_by_rincian_output']['Row']; 
 export type BudgetSummaryBySubKomponenRecord = Views['budget_summary_by_sub_komponen']['Row'];
 export type BudgetSummaryByAccountGroupRecord = Views['budget_summary_by_account_group']['Row'];
+export type BudgetSummaryByAkunGroupRecord = Views['budget_summary_by_akun_group']['Row'];
 
 // Base type with common fields
 export type BudgetSummaryBase = {
@@ -64,7 +65,14 @@ export interface BudgetSummaryBySubKomponen extends BudgetSummaryBase {
 
 export interface BudgetSummaryByAccountGroup extends BudgetSummaryBase {
   account_group: string | null;
+  account_group_name: string | null;
   type: 'account_group';
+}
+
+export interface BudgetSummaryByAkunGroup extends BudgetSummaryBase {
+  akun_group: string | null;
+  akun_group_name: string | null;
+  type: 'akun_group';
 }
 
 // Union type for all budget summary types
@@ -75,7 +83,8 @@ export type BudgetSummaryRecord =
   | BudgetSummaryByKegiatan
   | BudgetSummaryByRincianOutput
   | BudgetSummaryBySubKomponen
-  | BudgetSummaryByAccountGroup;
+  | BudgetSummaryByAccountGroup
+  | BudgetSummaryByAkunGroup;
 
 export type UserProfile = Tables['profiles']['Row'];
 

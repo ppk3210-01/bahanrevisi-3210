@@ -9,7 +9,7 @@ import { BudgetSummaryRecord } from '@/types/database';
 import SummaryTable from './SummaryTable';
 import SummaryChart from './SummaryChart';
 
-type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group';
+type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group' | 'akun_group';
 
 interface DetailedSummaryViewProps {
   summaryData: BudgetSummaryRecord[];
@@ -46,6 +46,8 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       return item.type === 'sub_komponen' && 'sub_komponen' in item && item.sub_komponen !== null && item.sub_komponen !== '-';
     } else if (view === 'account_group') {
       return item.type === 'account_group' && 'account_group' in item && item.account_group !== null && item.account_group !== '-';
+    } else if (view === 'akun_group') {
+      return item.type === 'akun_group' && 'akun_group' in item && item.akun_group !== null && item.akun_group !== '-';
     }
     return true;
   });

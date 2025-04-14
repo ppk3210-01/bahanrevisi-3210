@@ -289,6 +289,7 @@ export type Database = {
       budget_summary_by_account_group: {
         Row: {
           account_group: string | null
+          account_group_name: string | null
           changed_items: number | null
           new_items: number | null
           total_items: number | null
@@ -301,6 +302,19 @@ export type Database = {
       budget_summary_by_akun: {
         Row: {
           akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_akun_group: {
+        Row: {
+          akun_group: string | null
+          akun_group_name: string | null
           changed_items: number | null
           new_items: number | null
           total_items: number | null
@@ -372,10 +386,19 @@ export type Database = {
       }
     }
     Functions: {
+      get_account_group_name: {
+        Args: { group_code: string }
+        Returns: string
+      }
+      get_akun_group_name: {
+        Args: { group_code: string }
+        Returns: string
+      }
       get_budget_summary_by_account_group: {
         Args: Record<PropertyKey, never>
         Returns: {
           account_group: string | null
+          account_group_name: string | null
           changed_items: number | null
           new_items: number | null
           total_items: number | null
@@ -388,6 +411,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }[]
+      }
+      get_budget_summary_by_akun_group: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          akun_group: string | null
+          akun_group_name: string | null
           changed_items: number | null
           new_items: number | null
           total_items: number | null
