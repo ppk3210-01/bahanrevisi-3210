@@ -59,7 +59,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-3 text-slate-800">Pagu Anggaran Berubah</h3>
+        <h3 className="text-lg font-medium mb-3 text-orange-500 text-left">Pagu Anggaran Berubah</h3>
         {groupedItems.changed.length > 0 ? (
           <div className="border rounded-md overflow-hidden">
             <Table>
@@ -109,7 +109,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({ items }) =>
       </div>
 
       <div>
-        <h3 className="text-lg font-medium mb-3 text-slate-800">Pagu Anggaran Baru</h3>
+        <h3 className="text-lg font-medium mb-3 text-green-600 text-left">Pagu Anggaran Baru</h3>
         {groupedItems.new.length > 0 ? (
           <div className="border rounded-md overflow-hidden">
             <Table>
