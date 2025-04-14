@@ -315,17 +315,17 @@ const BudgetComparison: React.FC = () => {
                   {summarySectionView === 'changes' ? (
                     <div id="changes-content" ref={budgetChangeSummaryRef}>
                       <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-md" ref={changesContentRef}>
-                        <h4 className="text-lg font-medium mb-2 text-slate-800">Kesimpulan</h4>
-                        <p className="text-slate-700 mb-2">
-                          Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar Rp {totalSemula.toLocaleString('id-ID')} mengalami perubahan menjadi Rp {totalMenjadi.toLocaleString('id-ID')}, dengan selisih Rp {totalSelisih.toLocaleString('id-ID')} atau {totalSelisih === 0 ? 'tetap' : totalSelisih > 0 ? 'meningkat' : 'menurun'}.
+                        <h4 className="text-lg font-medium mb-2 text-blue-600 text-left">Kesimpulan</h4>
+                        <p className="text-slate-700 mb-2 text-left">
+                          Berdasarkan hasil analisis terhadap revisi anggaran, total pagu anggaran semula sebesar Rp {totalSemula.toLocaleString('id-ID')} mengalami perubahan menjadi Rp {totalMenjadi.toLocaleString('id-ID')}, dengan selisih Rp {totalSelisih.toLocaleString('id-ID')} atau {totalSelisih === 0 ? 'tetap' : totalSelisih > 0 ? 'meningkat' : 'menurun'}.
                         </p>
-                        <p className="text-slate-700 mb-2">
+                        <p className="text-slate-700 mb-2 text-left">
                           Perubahan ini terdiri dari {changedItems.length} komponen anggaran yang mengalami penyesuaian nilai, {newItems.length} komponen anggaran baru yang ditambahkan, dan {deletedItems.length} komponen anggaran yang dihapus.
                         </p>
-                        <p className="text-slate-700 mb-2">
+                        <p className="text-slate-700 mb-2 text-left">
                           Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {changedItems.length + newItems.length + deletedItems.length} perubahan ini, diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
                         </p>
-                        <p className="text-slate-700">
+                        <p className="text-slate-700 text-left">
                           Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
                         </p>
                       </div>
