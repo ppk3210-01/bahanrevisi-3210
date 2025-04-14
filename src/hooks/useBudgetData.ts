@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -186,6 +187,7 @@ const useBudgetData = (filters: FilterSelection) => {
         if (accountGroupResult.data) {
           const accountGroupData: BudgetSummaryByAccountGroup[] = accountGroupResult.data.map(item => ({
             account_group: item.account_group || '',
+            account_group_name: item.account_group_name || item.account_group || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
