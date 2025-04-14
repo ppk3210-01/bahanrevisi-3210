@@ -656,7 +656,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[70px] text-center">
+                <th className="number-cell py-2 px-1 w-[50px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeSemula')}
@@ -692,7 +692,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="number-cell py-2 px-1 w-[70px] text-center border-l-2">
+                <th className="number-cell py-2 px-1 w-[50px] text-center border-l-2">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeMenjadi')}
