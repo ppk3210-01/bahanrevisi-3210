@@ -661,17 +661,25 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeSemula')}
                   >
-                    Vol.Semula
+                    Volume Semula
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="unit-cell py-2 px-1 w-[80px] text-center">Sat.Semula</th>
+                <th className="unit-cell py-2 px-1 w-[80px] text-center">
+                  <button 
+                    className="flex items-center justify-center w-full" 
+                    onClick={() => handleSort('satuanSemula')}
+                  >
+                    Satuan Semula
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
                 <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanSemula')}
                   >
-                    Hrg.Semula
+                    Harga Satuan Semula
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
@@ -680,7 +688,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahSemula')}
                   >
-                    Jml.Semula
+                    Jumlah Semula
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
@@ -689,17 +697,25 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('volumeMenjadi')}
                   >
-                    Vol.Menjadi
+                    Volume Menjadi
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
-                <th className="unit-cell py-2 px-1 w-[80px] text-center">Sat.Menjadi</th>
+                <th className="unit-cell py-2 px-1 w-[80px] text-center">
+                  <button 
+                    className="flex items-center justify-center w-full" 
+                    onClick={() => handleSort('satuanMenjadi')}
+                  >
+                    Satuan Menjadi
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
                 <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button 
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('hargaSatuanMenjadi')}
                   >
-                    Hrg.Menjadi
+                    Harga Satuan Menjadi
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
@@ -708,7 +724,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     className="flex items-center justify-end w-full" 
                     onClick={() => handleSort('jumlahMenjadi')}
                   >
-                    Jml.Menjadi
+                    Jumlah Menjadi
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
@@ -721,6 +737,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
+                
                 {!isViewer && <th className="py-2 px-1 w-[80px] text-center">Aksi SM/PJK</th>}
                 {!isViewer && <th className="py-2 px-1 w-[80px] text-center">PPK</th>}
               </tr>

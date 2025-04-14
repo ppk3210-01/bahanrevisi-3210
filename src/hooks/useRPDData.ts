@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
@@ -46,23 +46,20 @@ export const useRPDData = (filters?: FilterSelection) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRPDData = async () => {
+  const fetchRPDData = useCallback(async () => {
     try {
       setLoading(true);
       
-      let { data, error } = { data: null, error: null };
-
-      // Use unfiltered query for all cases to avoid flickering
-      const result = await supabase.rpc('get_rpd_data');
-      data = result.data;
-      error = result.error;
+      const { data, error } = await supabase.rpc('get_rpd_data');
       
       if (error) {
         throw error;
       }
       
       // Apply filters on the client side if needed
-      if (data && filters && (
+      let filteredData = data || [];
+      
+      if (filters && (
         (filters.programPembebanan && filters.programPembebanan !== 'all') ||
         (filters.kegiatan && filters.kegiatan !== 'all') ||
         (filters.rincianOutput && filters.rincianOutput !== 'all') ||
@@ -70,11 +67,12 @@ export const useRPDData = (filters?: FilterSelection) => {
         (filters.subKomponen && filters.subKomponen !== 'all') ||
         (filters.akun && filters.akun !== 'all')
       )) {
-        // For now, we'll skip client-side filtering as the data structure
-        // doesn't include the filter fields yet
+        // Placeholder for client-side filtering. In the real implementation,
+        // this would filter based on the provided filters.
+        // For now we'll keep all data as the structure doesn't include filter fields yet
       }
       
-      setRpdItems(data || []);
+      setRpdItems(filteredData);
     } catch (err) {
       console.error('Error fetching RPD data:', err);
       setError('Gagal memuat data RPD. Silakan coba lagi.');
@@ -86,11 +84,11 @@ export const useRPDData = (filters?: FilterSelection) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchRPDData();
-  }, [filters]);
+  }, [fetchRPDData]);
 
   const updateRPDItem = async (itemId: string, monthValues: Partial<RPDMonthValues>) => {
     try {

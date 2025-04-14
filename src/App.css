@@ -1,4 +1,3 @@
-
 #root {
   width: 100%;
   margin: 0 auto;
@@ -135,8 +134,10 @@ table.data-table {
   background-color: #f8fafc;
   color: #334155;
   font-weight: 500;
-  height: 50px; /* Increase height for wrapped text */
+  height: 60px; /* Increased height for wrapped text */
   min-width: 80px; /* Minimum width for columns */
+  font-size: 0.8rem;
+  line-height: 1.2;
 }
 
 .budget-table td {
@@ -161,9 +162,9 @@ table.data-table {
   text-align: center;
 }
 
-/* Hide sort icons */
+/* Hide sort icons while keeping functionality */
 .budget-table th button svg {
-  display: none;
+  display: none !important;
 }
 
 /* Improved tabs */
@@ -347,11 +348,22 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
   text-align: left;
 }
 
-/* RPD table month columns */
+/* RPD table month columns - standardized width */
 .rpd-table th:nth-child(n+8):nth-child(-n+19),
 .rpd-table td:nth-child(n+8):nth-child(-n+19) {
   min-width: 150px;
   width: 150px;
+}
+
+/* Fix text wrapping for column headers */
+.budget-table th button {
+  white-space: normal;
+  height: auto;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Don't apply bold to tab text */
