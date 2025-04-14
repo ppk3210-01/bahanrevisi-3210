@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,6 @@ import { AlertCircle, Check, Clock, Info, ChevronLeft, ChevronRight, Search } fr
 import { useRPDData, RPDItem } from '@/hooks/useRPDData';
 import { useAuth } from '@/contexts/AuthContext';
 import { FilterSelection } from '@/types/budget';
-import useBudgetData from '@/hooks/useBudgetData';
 
 interface RPDTableProps {
   filters?: FilterSelection;
@@ -261,18 +261,18 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                 <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
                 <TableHead className="text-right w-[120px] text-slate-700 font-medium">Jumlah Pagu</TableHead>
                 <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700 font-medium">Jumlah RPD</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Januari</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Februari</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Maret</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">April</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Mei</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Juni</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Juli</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Agustus</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">September</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Oktober</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">November</TableHead>
-                <TableHead className="text-right w-[150px] text-slate-700 font-medium">Desember</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Januari</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Februari</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Maret</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">April</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Mei</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Juni</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Juli</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Agustus</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">September</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Oktober</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">November</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Desember</TableHead>
                 <TableHead className="w-20 text-center text-slate-700 font-medium">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -307,20 +307,26 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                         </div>
                       </TableCell>
                       <TableCell className="sticky-uraian p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
+                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.volume_menjadi)}</TableCell>
+                      <TableCell className="text-center p-1 font-normal">{item.satuan_menjadi}</TableCell>
+                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
+                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.jumlah_menjadi)}</TableCell>
+                      <TableCell className="text-right p-1 font-normal bg-slate-50">{formatCurrency(item.jumlah_rpd)}</TableCell>
                       
                       {editingItem === item.id ? (
                         <>
-                          {['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'].map(month => (
-                            <TableCell key={`${item.id}-${month}`} className="p-1">
-                              <Input 
-                                type="number"
-                                min="0"
-                                value={editValues[item.id]?.[month] || 0}
-                                onChange={(e) => handleInputChange(item.id, month, e.target.value)}
-                                className="h-7 text-right text-xs"
-                              />
-                            </TableCell>
-                          ))}
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.januari || 0} onChange={(e) => handleInputChange(item.id, 'januari', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.februari || 0} onChange={(e) => handleInputChange(item.id, 'februari', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.maret || 0} onChange={(e) => handleInputChange(item.id, 'maret', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.april || 0} onChange={(e) => handleInputChange(item.id, 'april', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.mei || 0} onChange={(e) => handleInputChange(item.id, 'mei', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.juni || 0} onChange={(e) => handleInputChange(item.id, 'juni', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.juli || 0} onChange={(e) => handleInputChange(item.id, 'juli', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.agustus || 0} onChange={(e) => handleInputChange(item.id, 'agustus', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.september || 0} onChange={(e) => handleInputChange(item.id, 'september', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.oktober || 0} onChange={(e) => handleInputChange(item.id, 'oktober', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.november || 0} onChange={(e) => handleInputChange(item.id, 'november', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
+                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.desember || 0} onChange={(e) => handleInputChange(item.id, 'desember', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
                           <TableCell className="p-1">
                             <div className="flex space-x-1">
                               <Button size="sm" variant="default" onClick={() => saveChanges(item.id)} className="text-xs py-0 h-6">

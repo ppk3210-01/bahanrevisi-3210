@@ -61,12 +61,17 @@ export const useRPDData = (filters?: FilterSelection) => {
         setLoading(true);
       }
       
-      // Use the improved get_rpd_data function which avoids the blinking issue
+      console.log('Fetching RPD data...');
+      
+      // Call the get_rpd_data function
       const { data, error } = await supabase.rpc('get_rpd_data');
       
       if (error) {
+        console.error('Error from get_rpd_data RPC:', error);
         throw error;
       }
+      
+      console.log('RPD data received:', data?.length || 0, 'items');
       
       // Apply filters on the client side if needed
       let filteredData = data || [];
@@ -82,7 +87,8 @@ export const useRPDData = (filters?: FilterSelection) => {
         // Fetch the related budget items to get the filter fields
         const { data: budgetData, error: budgetError } = await supabase
           .from('budget_items')
-          .select('id, program_pembebanan, kegiatan, rincian_output, komponen_output, sub_komponen, akun');
+          .select('id, program_pembebanan, kegiatan, rincian_output, komponen_output, sub_komponen, akun')
+          .neq('status', 'deleted');
         
         if (budgetError) {
           throw budgetError;
@@ -135,6 +141,8 @@ export const useRPDData = (filters?: FilterSelection) => {
         });
       }
       
+      console.log('Filtered RPD data:', filteredData.length, 'items');
+      
       // Update state and refs
       setRpdItems(filteredData);
       dataFetchedRef.current = true;
@@ -167,6 +175,7 @@ export const useRPDData = (filters?: FilterSelection) => {
         (payload) => {
           // Only refresh if we're not the ones who initiated the update
           if (!isUpdatingRef.current) {
+            console.log('RPD data changed, refreshing...');
             fetchRPDData();
           }
         }
@@ -182,6 +191,8 @@ export const useRPDData = (filters?: FilterSelection) => {
     try {
       isUpdatingRef.current = true;
       
+      console.log('Updating RPD item:', itemId, monthValues);
+      
       const { error } = await supabase
         .from('rencana_penarikan_dana')
         .update({
@@ -191,6 +202,7 @@ export const useRPDData = (filters?: FilterSelection) => {
         .eq('budget_item_id', itemId);
       
       if (error) {
+        console.error('Error updating RPD data in Supabase:', error);
         throw error;
       }
       
