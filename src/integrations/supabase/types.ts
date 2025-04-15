@@ -9,38 +9,16 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      akun: {
-        Row: {
-          created_at: string | null
-          id: string
-          kode: string
-          nama: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          kode: string
-          nama: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          kode?: string
-          nama?: string
-        }
-        Relationships: []
-      }
       budget_items: {
         Row: {
           akun: string | null
-          approved_by: string | null
           created_at: string | null
-          created_by: string | null
-          harga_satuan_menjadi: number | null
-          harga_satuan_semula: number | null
+          harga_satuan_menjadi: number
+          harga_satuan_semula: number
           id: string
-          jumlah_menjadi: number | null
-          jumlah_semula: number | null
+          is_approved: boolean | null
+          jumlah_menjadi: number
+          jumlah_semula: number
           kegiatan: string | null
           komponen_output: string | null
           program_pembebanan: string | null
@@ -48,23 +26,22 @@ export type Database = {
           satuan_menjadi: string | null
           satuan_semula: string | null
           selisih: number | null
-          status: string | null
+          status: string
           sub_komponen: string | null
           updated_at: string | null
           uraian: string
-          volume_menjadi: number | null
-          volume_semula: number | null
+          volume_menjadi: number
+          volume_semula: number
         }
         Insert: {
           akun?: string | null
-          approved_by?: string | null
           created_at?: string | null
-          created_by?: string | null
-          harga_satuan_menjadi?: number | null
-          harga_satuan_semula?: number | null
+          harga_satuan_menjadi?: number
+          harga_satuan_semula?: number
           id?: string
-          jumlah_menjadi?: number | null
-          jumlah_semula?: number | null
+          is_approved?: boolean | null
+          jumlah_menjadi?: number
+          jumlah_semula?: number
           kegiatan?: string | null
           komponen_output?: string | null
           program_pembebanan?: string | null
@@ -72,23 +49,22 @@ export type Database = {
           satuan_menjadi?: string | null
           satuan_semula?: string | null
           selisih?: number | null
-          status?: string | null
+          status?: string
           sub_komponen?: string | null
           updated_at?: string | null
           uraian: string
-          volume_menjadi?: number | null
-          volume_semula?: number | null
+          volume_menjadi?: number
+          volume_semula?: number
         }
         Update: {
           akun?: string | null
-          approved_by?: string | null
           created_at?: string | null
-          created_by?: string | null
-          harga_satuan_menjadi?: number | null
-          harga_satuan_semula?: number | null
+          harga_satuan_menjadi?: number
+          harga_satuan_semula?: number
           id?: string
-          jumlah_menjadi?: number | null
-          jumlah_semula?: number | null
+          is_approved?: boolean | null
+          jumlah_menjadi?: number
+          jumlah_semula?: number
           kegiatan?: string | null
           komponen_output?: string | null
           program_pembebanan?: string | null
@@ -96,33 +72,12 @@ export type Database = {
           satuan_menjadi?: string | null
           satuan_semula?: string | null
           selisih?: number | null
-          status?: string | null
+          status?: string
           sub_komponen?: string | null
           updated_at?: string | null
           uraian?: string
-          volume_menjadi?: number | null
-          volume_semula?: number | null
-        }
-        Relationships: []
-      }
-      komponen_output: {
-        Row: {
-          created_at: string | null
-          id: string
-          kode: string
-          nama: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          kode: string
-          nama: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          kode?: string
-          nama?: string
+          volume_menjadi?: number
+          volume_semula?: number
         }
         Relationships: []
       }
@@ -132,83 +87,83 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string
-          role: string
+          role: string | null
           updated_at: string | null
-          username: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
           id: string
-          role?: string
+          role?: string | null
           updated_at?: string | null
-          username: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string
-          role?: string
+          role?: string | null
           updated_at?: string | null
-          username?: string
+          username?: string | null
         }
         Relationships: []
       }
       rencana_penarikan_dana: {
         Row: {
-          agustus: number | null
-          april: number | null
-          budget_item_id: string
+          agustus: number
+          april: number
+          budget_item_id: string | null
           created_at: string | null
-          desember: number | null
-          februari: number | null
+          desember: number
+          februari: number
           id: string
-          januari: number | null
-          juli: number | null
-          juni: number | null
-          maret: number | null
-          mei: number | null
-          november: number | null
-          oktober: number | null
-          september: number | null
+          januari: number
+          juli: number
+          juni: number
+          maret: number
+          mei: number
+          november: number
+          oktober: number
+          september: number
           updated_at: string | null
         }
         Insert: {
-          agustus?: number | null
-          april?: number | null
-          budget_item_id: string
+          agustus?: number
+          april?: number
+          budget_item_id?: string | null
           created_at?: string | null
-          desember?: number | null
-          februari?: number | null
+          desember?: number
+          februari?: number
           id?: string
-          januari?: number | null
-          juli?: number | null
-          juni?: number | null
-          maret?: number | null
-          mei?: number | null
-          november?: number | null
-          oktober?: number | null
-          september?: number | null
+          januari?: number
+          juli?: number
+          juni?: number
+          maret?: number
+          mei?: number
+          november?: number
+          oktober?: number
+          september?: number
           updated_at?: string | null
         }
         Update: {
-          agustus?: number | null
-          april?: number | null
-          budget_item_id?: string
+          agustus?: number
+          april?: number
+          budget_item_id?: string | null
           created_at?: string | null
-          desember?: number | null
-          februari?: number | null
+          desember?: number
+          februari?: number
           id?: string
-          januari?: number | null
-          juli?: number | null
-          juni?: number | null
-          maret?: number | null
-          mei?: number | null
-          november?: number | null
-          oktober?: number | null
-          september?: number | null
+          januari?: number
+          juli?: number
+          juni?: number
+          maret?: number
+          mei?: number
+          november?: number
+          oktober?: number
+          september?: number
           updated_at?: string | null
         }
         Relationships: [
@@ -219,73 +174,10 @@ export type Database = {
             referencedRelation: "budget_items"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "rencana_penarikan_dana_budget_item_id_fkey"
-            columns: ["budget_item_id"]
-            isOneToOne: false
-            referencedRelation: "budget_items_with_rpd"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sub_komponen: {
-        Row: {
-          created_at: string | null
-          id: string
-          kode: string
-          komponen_output_id: string | null
-          nama: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          kode: string
-          komponen_output_id?: string | null
-          nama: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          kode?: string
-          komponen_output_id?: string | null
-          nama?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sub_komponen_komponen_output_id_fkey"
-            columns: ["komponen_output_id"]
-            isOneToOne: false
-            referencedRelation: "komponen_output"
-            referencedColumns: ["id"]
-          },
         ]
       }
     }
     Views: {
-      budget_items_with_rpd: {
-        Row: {
-          agustus: number | null
-          april: number | null
-          desember: number | null
-          februari: number | null
-          harga_satuan_menjadi: number | null
-          id: string | null
-          januari: number | null
-          juli: number | null
-          jumlah_menjadi: number | null
-          jumlah_rpd: number | null
-          juni: number | null
-          maret: number | null
-          mei: number | null
-          november: number | null
-          oktober: number | null
-          satuan_menjadi: string | null
-          september: number | null
-          uraian: string | null
-          volume_menjadi: number | null
-        }
-        Relationships: []
-      }
       budget_summary_by_account_group: {
         Row: {
           account_group: string | null
@@ -386,14 +278,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_account_group_name: {
-        Args: { group_code: string }
-        Returns: string
-      }
-      get_akun_group_name: {
-        Args: { group_code: string }
-        Returns: string
-      }
       get_budget_summary_by_account_group: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -519,7 +403,7 @@ export type Database = {
       }
     }
     Enums: {
-      user_role: "admin" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -634,8 +518,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      user_role: ["admin", "user"],
-    },
+    Enums: {},
   },
 } as const
