@@ -6,6 +6,7 @@ import { TableRow, TableCell } from '@/components/ui/table';
 import { Edit, Trash2, Check, X } from 'lucide-react';
 import { formatCurrency } from '@/utils/formatters';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
+import { getCellClass } from '@/utils/budgetCalculations';
 
 interface BudgetItemRowProps {
   item: BudgetItem;
@@ -77,10 +78,18 @@ const BudgetItemRow: React.FC<BudgetItemRowProps> = ({
         <TableCell className="p-2 text-right">{formatCurrency(item.hargaSatuanSemula)}</TableCell>
         <TableCell className="p-2 text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
         
-        <TableCell className="p-2 text-right">{formatCurrency(item.volumeMenjadi)}</TableCell>
-        <TableCell className="p-2">{item.satuanMenjadi}</TableCell>
-        <TableCell className="p-2 text-right">{formatCurrency(item.hargaSatuanMenjadi)}</TableCell>
-        <TableCell className="p-2 text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+        <TableCell className={`p-2 text-right ${getCellClass(item, 'volumeMenjadi')}`}>
+          {formatCurrency(item.volumeMenjadi)}
+        </TableCell>
+        <TableCell className={`p-2 ${getCellClass(item, 'satuanMenjadi')}`}>
+          {item.satuanMenjadi}
+        </TableCell>
+        <TableCell className={`p-2 text-right ${getCellClass(item, 'hargaSatuanMenjadi')}`}>
+          {formatCurrency(item.hargaSatuanMenjadi)}
+        </TableCell>
+        <TableCell className={`p-2 text-right ${getCellClass(item, 'jumlahMenjadi')}`}>
+          {formatCurrency(item.jumlahMenjadi)}
+        </TableCell>
         
         <TableCell className={`p-2 text-right ${item.selisih > 0 ? 'text-green-600' : item.selisih < 0 ? 'text-red-600' : ''}`}>
           {formatCurrency(item.selisih)}
