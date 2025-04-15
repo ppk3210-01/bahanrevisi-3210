@@ -33,6 +33,40 @@ export type AkunRecord = {
   code: string;
 };
 
+// Map for account groups (first digit of akun code)
+export const ACCOUNT_GROUP_MAP: Record<string, string> = {
+  '5': 'Belanja',
+  '51': 'Belanja Pegawai',
+  '52': 'Belanja Barang dan Jasa',
+  '53': 'Belanja Modal',
+  '54': 'Belanja Pembayaran Kewajiban Utang'
+};
+
+// Map for akun groups (first 3 digits of akun code)
+export const AKUN_GROUP_MAP: Record<string, string> = {
+  '511': 'Belanja Pegawai',
+  '521': 'Belanja Barang',
+  '522': 'Belanja Perjalanan Dinas',
+  '523': 'Belanja Barang Operasional Lainnya',
+  '524': 'Belanja Barang Non Operasional Lainnya',
+  '525': 'Belanja Pemeliharaan',
+  '526': 'Belanja Sewa',
+  '531': 'Belanja Modal Tanah',
+  '532': 'Belanja Modal Peralatan dan Mesin',
+  '533': 'Belanja Modal Gedung dan Bangunan',
+  '534': 'Belanja Modal Jalan, Irigasi, dan Jaringan',
+  '535': 'Belanja Modal Aset Tetap Lainnya',
+  '536': 'Belanja Modal Aset Lainnya',
+  '537': 'Belanja Modal Lainnya',
+  '541': 'Belanja Hibah',
+  '542': 'Belanja Bantuan Sosial',
+  '551': 'Belanja Subsidi',
+  '552': 'Belanja Bantuan Keuangan',
+  '553': 'Belanja Bagi Hasil',
+  '561': 'Belanja Tidak Terduga',
+  '571': 'Belanja Transfer ke Daerah dan Dana Desa'
+};
+
 // Create union types for different summary records
 // Define manual types for summary views since they aren't in the generated types
 export type BudgetSummaryByKomponenRecord = {

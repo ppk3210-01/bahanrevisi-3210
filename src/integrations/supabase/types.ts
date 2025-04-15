@@ -178,105 +178,202 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      budget_summary_by_account_group: {
+        Row: {
+          account_group: string | null
+          account_group_name: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_akun: {
+        Row: {
+          akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_akun_group: {
+        Row: {
+          akun_group: string | null
+          akun_group_name: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_kegiatan: {
+        Row: {
+          changed_items: number | null
+          kegiatan: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_komponen: {
+        Row: {
+          changed_items: number | null
+          komponen_output: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_program_pembebanan: {
+        Row: {
+          changed_items: number | null
+          new_items: number | null
+          program_pembebanan: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_rincian_output: {
+        Row: {
+          changed_items: number | null
+          new_items: number | null
+          rincian_output: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
+      budget_summary_by_sub_komponen: {
+        Row: {
+          changed_items: number | null
+          new_items: number | null
+          sub_komponen: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_budget_summary_by_account_group: {
         Args: Record<PropertyKey, never>
         Returns: {
-          account_group: string
-          account_group_name: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          account_group: string | null
+          account_group_name: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_akun: {
         Args: Record<PropertyKey, never>
         Returns: {
-          akun: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          akun: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_akun_group: {
         Args: Record<PropertyKey, never>
         Returns: {
-          akun_group: string
-          akun_group_name: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          akun_group: string | null
+          akun_group_name: string | null
+          changed_items: number | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_kegiatan: {
         Args: Record<PropertyKey, never>
         Returns: {
-          kegiatan: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          changed_items: number | null
+          kegiatan: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_komponen: {
         Args: Record<PropertyKey, never>
         Returns: {
-          komponen_output: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          changed_items: number | null
+          komponen_output: string | null
+          new_items: number | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_program_pembebanan: {
         Args: Record<PropertyKey, never>
         Returns: {
-          program_pembebanan: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          changed_items: number | null
+          new_items: number | null
+          program_pembebanan: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_rincian_output: {
         Args: Record<PropertyKey, never>
         Returns: {
-          rincian_output: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          changed_items: number | null
+          new_items: number | null
+          rincian_output: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_budget_summary_by_sub_komponen: {
         Args: Record<PropertyKey, never>
         Returns: {
-          sub_komponen: string
-          total_semula: number
-          total_menjadi: number
-          total_selisih: number
-          new_items: number
-          changed_items: number
-          total_items: number
+          changed_items: number | null
+          new_items: number | null
+          sub_komponen: string | null
+          total_items: number | null
+          total_menjadi: number | null
+          total_selisih: number | null
+          total_semula: number | null
         }[]
       }
       get_rpd_data: {

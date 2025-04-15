@@ -10,6 +10,7 @@ import { useRPDData, RPDItem } from '@/hooks/useRPDData';
 import { useAuth } from '@/contexts/AuthContext';
 import { FilterSelection } from '@/types/budget';
 import { roundToThousands } from '@/utils/budgetCalculations';
+import { formatCurrency } from '@/utils/formatters';
 
 interface RPDTableProps {
   filters?: FilterSelection;
@@ -127,21 +128,12 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     if (item.status === 'sisa') return 'bg-orange-50';
     return '';
   };
-
-  const formatCurrency = (value: number) => {
-    // Rounding to thousands and formatting as currency
-    const roundedValue = roundToThousands(value);
-    return roundedValue.toLocaleString('id-ID');
-  };
   
   const filteredItems = rpdItems.filter(item => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = 
       item.uraian.toLowerCase().includes(searchLower) ||
-      item.satuan_menjadi?.toLowerCase().includes(searchLower) ||
       item.jumlah_menjadi.toString().includes(searchTerm) ||
-      item.volume_menjadi.toString().includes(searchTerm) ||
-      item.harga_satuan_menjadi.toString().includes(searchTerm) ||
       item.januari.toString().includes(searchTerm) ||
       item.februari.toString().includes(searchTerm) ||
       item.maret.toString().includes(searchTerm) ||
@@ -155,7 +147,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       item.november.toString().includes(searchTerm) ||
       item.desember.toString().includes(searchTerm);
     
-    // Improved logic: Hide items where BOTH jumlah_semula AND jumlah_menjadi are 0
+    // Improved logic: Hide items where jumlah_menjadi is 0
     if (hideZeroBudget) {
       return matchesSearch && item.jumlah_menjadi > 0;
     }
@@ -260,23 +252,25 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               <TableRow className="h-10">
                 <TableHead className="w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
                 <TableHead className="w-[350px] text-left bg-white text-slate-700 font-medium border-r border-slate-200">Uraian</TableHead>
-                <TableHead className="text-right w-[70px] text-slate-700 font-medium">Volume</TableHead>
+                {/* Hidden columns as per requirement */}
+                {/* <TableHead className="text-right w-[70px] text-slate-700 font-medium">Volume</TableHead>
                 <TableHead className="text-center w-[70px] text-slate-700 font-medium">Satuan</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
+                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead> */}
                 <TableHead className="text-right w-[120px] text-slate-700 font-medium">Jumlah Pagu</TableHead>
                 <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700 font-medium">Jumlah RPD</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Januari</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Februari</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Maret</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">April</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Mei</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Juni</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Juli</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Agustus</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">September</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Oktober</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">November</TableHead>
-                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Desember</TableHead>
+                {/* Reduced width for month columns by 20% */}
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Januari</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Februari</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Maret</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">April</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Mei</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Juni</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Juli</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Agustus</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">September</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Oktober</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">November</TableHead>
+                <TableHead className="text-right w-[64px] text-slate-700 font-medium">Desember</TableHead>
                 <TableHead className="w-20 text-center text-slate-700 font-medium">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -285,7 +279,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index} className="h-8">
-                    {Array.from({ length: 20 }).map((_, cellIndex) => (
+                    {Array.from({ length: 17 }).map((_, cellIndex) => (
                       <TableCell key={cellIndex} className="p-1">
                         <Skeleton className="h-5 w-full" />
                       </TableCell>
@@ -294,7 +288,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                 ))
               ) : paginatedItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={20} className="text-center py-4 text-slate-600">
+                  <TableCell colSpan={17} className="text-center py-4 text-slate-600">
                     {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data Rencana Penarikan Dana'}
                   </TableCell>
                 </TableRow>
@@ -311,9 +305,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                         </div>
                       </TableCell>
                       <TableCell className="p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.volume_menjadi)}</TableCell>
-                      <TableCell className="text-center p-1 font-normal">{item.satuan_menjadi}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
                       <TableCell className="text-right p-1 font-normal">{formatCurrency(item.jumlah_menjadi)}</TableCell>
                       <TableCell className="text-right p-1 font-normal bg-slate-50">{formatCurrency(item.jumlah_rpd)}</TableCell>
                       
@@ -377,7 +368,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                       <span className="font-medium text-slate-700">TOTAL</span>
                     </TableCell>
                     <TableCell className="bg-slate-100 p-1 border-r border-slate-200"></TableCell>
-                    <TableCell className="p-1" colSpan={3}></TableCell>
                     <TableCell className="text-right p-1">{formatCurrency(totals.jumlah_menjadi)}</TableCell>
                     <TableCell className="text-right p-1 bg-slate-50">{formatCurrency(totals.jumlah_rpd)}</TableCell>
                     <TableCell className="text-right p-1">{formatCurrency(totals.januari)}</TableCell>
