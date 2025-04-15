@@ -2,7 +2,7 @@
 import React from 'react';
 import { BudgetItem } from '@/types/budget';
 import { BudgetSummaryRecord } from '@/types/database';
-import { utils, WorkBook, WorkSheet } from 'xlsx';
+import { utils, WorkBook, WorkSheet, write } from 'xlsx';
 
 interface SummaryExportProps {
   items: BudgetItem[];
@@ -180,9 +180,28 @@ export const useSummaryExport = ({ items, summaryData, onComplete }: SummaryExpo
       const accountGroupWs = createSummaryWorksheet(accountGroupData, 'RINGKASAN BERDASARKAN KELOMPOK BELANJA');
       utils.book_append_sheet(wb, accountGroupWs, 'Kelompok Belanja');
       
-      // Create download link
+      // Create download link - use write function instead of writeFile
       const date = new Date().toISOString().split('T')[0];
-      utils.writeFile(wb, `Ringkasan_Anggaran_${date}.xlsx`);
+      const filename = `Ringkasan_Anggaran_${date}.xlsx`;
+      
+      // Create a buffer
+      const wbout = write(wb, { bookType: 'xlsx', type: 'binary' });
+      
+      // Convert binary string to ArrayBuffer
+      const buf = new ArrayBuffer(wbout.length);
+      const view = new Uint8Array(buf);
+      for (let i = 0; i < wbout.length; i++) {
+        view[i] = wbout.charCodeAt(i) & 0xFF;
+      }
+      
+      // Create blob and download
+      const blob = new Blob([buf], { type: 'application/octet-stream' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
       onComplete();
     } catch (error) {

@@ -1,10 +1,27 @@
 
 import { Database } from '@/integrations/supabase/types';
 
+// Define record types directly instead of trying to access them from the Database type
 export type BudgetItemRecord = Database['public']['Tables']['budget_items']['Row'];
-export type KomponenOutputRecord = Database['public']['Tables']['komponen_output']['Row'];
-export type SubKomponenRecord = Database['public']['Tables']['sub_komponen']['Row'];
-export type AkunRecord = Database['public']['Tables']['akun']['Row'];
+
+// Define missing record types
+export type KomponenOutputRecord = {
+  id: string;
+  name: string;
+  created_at?: string | null;
+};
+
+export type SubKomponenRecord = {
+  id: string;
+  name: string;
+  komponen_output_id?: string | null;
+};
+
+export type AkunRecord = {
+  id: string;
+  code: string;
+  name: string;
+};
 
 export type BudgetSummaryRecord = {
   account_group?: string;
@@ -139,6 +156,7 @@ export type TemporaryDatabase = {
       budget_summary_by_account_group: {
         Row: {
           account_group: string | null;
+          account_group_name: string | null;
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
@@ -213,12 +231,25 @@ export type TemporaryDatabase = {
           total_items: number | null;
         };
       };
+      budget_summary_by_akun_group: {
+        Row: {
+          akun_group: string | null;
+          akun_group_name: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
+      };
     };
     Functions: {
       get_budget_summary_by_account_group: {
         Args: Record<string, never>;
         Returns: {
           account_group: string | null;
+          account_group_name: string | null;
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
