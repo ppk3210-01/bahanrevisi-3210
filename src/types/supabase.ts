@@ -81,6 +81,59 @@ export type TemporaryDatabase = {
           updated_at?: string;
         }>;
       };
+      rencana_penarikan_dana: {
+        Row: {
+          id: string;
+          budget_item_id: string;
+          januari: number;
+          februari: number;
+          maret: number;
+          april: number;
+          mei: number;
+          juni: number;
+          juli: number;
+          agustus: number;
+          september: number;
+          oktober: number;
+          november: number;
+          desember: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Insert: {
+          id?: string;
+          budget_item_id: string;
+          januari?: number;
+          februari?: number;
+          maret?: number;
+          april?: number;
+          mei?: number;
+          juni?: number;
+          juli?: number;
+          agustus?: number;
+          september?: number;
+          oktober?: number;
+          november?: number;
+          desember?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          januari?: number;
+          februari?: number;
+          maret?: number;
+          april?: number;
+          mei?: number;
+          juni?: number;
+          juli?: number;
+          agustus?: number;
+          september?: number;
+          oktober?: number;
+          november?: number;
+          desember?: number;
+          updated_at?: string;
+        }>;
+      };
     };
     Views: {
       budget_summary_by_account_group: {
@@ -244,6 +297,31 @@ export type TemporaryDatabase = {
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
+        }[];
+      };
+      get_rpd_data: {
+        Args: Record<string, never>;
+        Returns: {
+          id: string;
+          uraian: string;
+          volume_menjadi: number;
+          satuan_menjadi: string;
+          harga_satuan_menjadi: number;
+          jumlah_menjadi: number;
+          januari: number;
+          februari: number;
+          maret: number;
+          april: number;
+          mei: number;
+          juni: number;
+          juli: number;
+          agustus: number;
+          september: number;
+          oktober: number;
+          november: number;
+          desember: number;
+          jumlah_rpd: number;
+          status: string;
         }[];
       };
     };

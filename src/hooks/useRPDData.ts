@@ -193,6 +193,7 @@ export const useRPDData = (filters?: FilterSelection) => {
       
       console.log('Updating RPD item:', itemId, monthValues);
       
+      // Fix: Update the correct table with the budget_item_id field
       const { error } = await supabase
         .from('rencana_penarikan_dana')
         .update({

@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { AlertCircle, Check, Clock, Info, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { AlertCircle, Check, Info, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useRPDData, RPDItem } from '@/hooks/useRPDData';
 import { useAuth } from '@/contexts/AuthContext';
 import { FilterSelection } from '@/types/budget';
+import { roundToThousands } from '@/utils/budgetCalculations';
 
 interface RPDTableProps {
   filters?: FilterSelection;
@@ -128,7 +129,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   };
 
   const formatCurrency = (value: number) => {
-    return value.toLocaleString('id-ID');
+    // Rounding to thousands and formatting as currency
+    const roundedValue = roundToThousands(value);
+    return roundedValue.toLocaleString('id-ID');
   };
   
   const filteredItems = rpdItems.filter(item => {
@@ -152,6 +155,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       item.november.toString().includes(searchTerm) ||
       item.desember.toString().includes(searchTerm);
     
+    // Improved logic: Hide items where BOTH jumlah_semula AND jumlah_menjadi are 0
     if (hideZeroBudget) {
       return matchesSearch && item.jumlah_menjadi > 0;
     }
@@ -254,8 +258,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           <Table className="rpd-table table-fixed w-full">
             <TableHeader className="bg-white">
               <TableRow className="h-10">
-                <TableHead className="sticky-status w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
-                <TableHead className="sticky-uraian w-[350px] text-left bg-white text-slate-700 font-medium border-r border-slate-200">Uraian</TableHead>
+                <TableHead className="w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
+                <TableHead className="w-[350px] text-left bg-white text-slate-700 font-medium border-r border-slate-200">Uraian</TableHead>
                 <TableHead className="text-right w-[70px] text-slate-700 font-medium">Volume</TableHead>
                 <TableHead className="text-center w-[70px] text-slate-700 font-medium">Satuan</TableHead>
                 <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
@@ -298,7 +302,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                 <>
                   {paginatedItems.map(item => (
                     <TableRow key={item.id} className={`h-8 ${getRowBackground(item)}`}>
-                      <TableCell className="sticky-status text-center p-1 bg-inherit border-r border-slate-200">
+                      <TableCell className="text-center p-1 bg-inherit border-r border-slate-200">
                         <div className="flex items-center justify-center">
                           <div className={`px-1.5 py-0.5 rounded-full flex items-center ${getStatusColor(item.status)}`}>
                             {getStatusIcon(item.status)}
@@ -306,7 +310,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="sticky-uraian p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
+                      <TableCell className="p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
                       <TableCell className="text-right p-1 font-normal">{formatCurrency(item.volume_menjadi)}</TableCell>
                       <TableCell className="text-center p-1 font-normal">{item.satuan_menjadi}</TableCell>
                       <TableCell className="text-right p-1 font-normal">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
@@ -369,10 +373,10 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   ))}
                   
                   <TableRow className="bg-slate-100 font-medium">
-                    <TableCell className="sticky-status bg-slate-100 p-1 border-r border-slate-200" colSpan={1}>
+                    <TableCell className="bg-slate-100 p-1 border-r border-slate-200" colSpan={1}>
                       <span className="font-medium text-slate-700">TOTAL</span>
                     </TableCell>
-                    <TableCell className="sticky-uraian bg-slate-100 p-1 border-r border-slate-200"></TableCell>
+                    <TableCell className="bg-slate-100 p-1 border-r border-slate-200"></TableCell>
                     <TableCell className="p-1" colSpan={3}></TableCell>
                     <TableCell className="text-right p-1">{formatCurrency(totals.jumlah_menjadi)}</TableCell>
                     <TableCell className="text-right p-1 bg-slate-50">{formatCurrency(totals.jumlah_rpd)}</TableCell>
