@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -20,7 +19,6 @@ import BudgetChangesSummary from './BudgetChangesSummary';
 import RPDTable from './RPDTable';
 import { toast } from '@/hooks/use-toast';
 import { exportToJpeg } from '@/utils/exportUtils';
-import { roundToThousands } from '@/utils/budgetCalculations';
 
 // Define the type for summary section view
 type SummarySectionView = 
@@ -150,12 +148,6 @@ const BudgetComparison: React.FC = () => {
   const totalChangedMenjadi = changedItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalNewMenjadi = newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
 
-  // Format currency with thousands rounding
-  const formatRoundedCurrency = (value: number) => {
-    const roundedValue = roundToThousands(value);
-    return roundedValue.toLocaleString('id-ID');
-  };
-
   return (
     <div className="space-y-4">
       <div className="filter-and-summary-container">
@@ -191,7 +183,7 @@ const BudgetComparison: React.FC = () => {
               </TabsList>
               
               <div className="flex gap-2">
-                {activeTab === "summary" && isAdmin && (
+                {activeTab === "summary" && (
                   <>
                     <Button variant="outline" onClick={() => setShowSummaryDialog(true)} className="border-slate-200 text-slate-700 hover:text-slate-900">
                       <FileBarChart2 className="h-4 w-4 mr-2" /> 
@@ -325,7 +317,7 @@ const BudgetComparison: React.FC = () => {
                       <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-md" ref={changesContentRef}>
                         <h4 className="text-lg font-medium mb-2 text-blue-600 text-left">Kesimpulan</h4>
                         <p className="text-slate-700 mb-2 text-left">
-                          Berdasarkan hasil analisis usulan revisi anggaran, total pagu anggaran semula sebesar Rp {formatRoundedCurrency(totalSemula)} menjadi Rp {formatRoundedCurrency(totalMenjadi)}, dengan selisih Rp {formatRoundedCurrency(totalSelisih)} atau {totalSelisih === 0 ? 'pagu tetap' : totalSelisih > 0 ? 'pagu bertambah' : 'pagu berkurang'}.
+                          Berdasarkan hasil analisis usulan revisi anggaran, total pagu anggaran semula sebesar Rp {totalSemula.toLocaleString('id-ID')} menjadi Rp {totalMenjadi.toLocaleString('id-ID')}, dengan selisih Rp {totalSelisih.toLocaleString('id-ID')} atau {totalSelisih === 0 ? 'pagu tetap' : totalSelisih > 0 ? 'pagu bertambah' : 'pagu berkurang'}.
                         </p>
                         <p className="text-slate-700 mb-2 text-left">
                           Perubahan ini terdiri dari:

@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 import { writeFileSync } from 'fs';
 
 // Project ID from environment or hardcoded value
-const PROJECT_ID = 'bpvxlqlbtmnxjvfxvifg';
+const PROJECT_ID = 'hfhmiaskzqcydeyjzayb';
 
 console.log(`Generating Supabase types for project ID: ${PROJECT_ID}...`);
 

@@ -193,24 +193,6 @@ export const useRPDData = (filters?: FilterSelection) => {
       
       console.log('Updating RPD item:', itemId, monthValues);
       
-      // FIX: We need to check if the record exists first
-      const { data: existingRPD } = await supabase
-        .from('rencana_penarikan_dana')
-        .select('id')
-        .eq('budget_item_id', itemId)
-        .single();
-      
-      if (!existingRPD) {
-        console.error('RPD record not found for budget item', itemId);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: 'Catatan RPD tidak ditemukan'
-        });
-        return false;
-      }
-      
-      // Update the rencana_penarikan_dana table with the new values
       const { error } = await supabase
         .from('rencana_penarikan_dana')
         .update({

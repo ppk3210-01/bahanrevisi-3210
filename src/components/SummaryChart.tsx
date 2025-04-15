@@ -8,20 +8,11 @@ type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegi
 
 interface SummaryChartProps {
   summaryData: BudgetSummaryRecord[];
-  loading: boolean;
   chartType: 'bar';
   view: SummaryViewType;
 }
 
-const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, loading, chartType, view }) => {
-  if (loading) {
-    return <div className="text-center p-4">Loading chart data...</div>;
-  }
-
-  if (!summaryData || summaryData.length === 0) {
-    return <div className="text-center p-4">No data available for chart</div>;
-  }
-  
+const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, view }) => {
   const getValueFromRecord = (record: BudgetSummaryRecord): string | null => {
     if ('komponen_output' in record && view === 'komponen_output') {
       return record.komponen_output || 'Tidak ada data';

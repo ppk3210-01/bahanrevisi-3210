@@ -27,27 +27,65 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   defaultView = 'table' 
 }) => {
   const [chartType, setChartType] = useState<'bar' | 'table'>(defaultView);
+
+  const isLoading = loading || !summaryData;
   
+  // Filter data to remove empty entries
+  const filteredSummaryData = summaryData.filter(item => {
+    if (view === 'komponen_output') {
+      return item.type === 'komponen_output' && 'komponen_output' in item && item.komponen_output !== null && item.komponen_output !== '-';
+    } else if (view === 'akun') {
+      return item.type === 'akun' && 'akun' in item && item.akun !== null && item.akun !== '-';
+    } else if (view === 'program_pembebanan') {
+      return item.type === 'program_pembebanan' && 'program_pembebanan' in item && item.program_pembebanan !== null && item.program_pembebanan !== '-';
+    } else if (view === 'kegiatan') {
+      return item.type === 'kegiatan' && 'kegiatan' in item && item.kegiatan !== null && item.kegiatan !== '-';
+    } else if (view === 'rincian_output') {
+      return item.type === 'rincian_output' && 'rincian_output' in item && item.rincian_output !== null && item.rincian_output !== '-';
+    } else if (view === 'sub_komponen') {
+      return item.type === 'sub_komponen' && 'sub_komponen' in item && item.sub_komponen !== null && item.sub_komponen !== '-';
+    } else if (view === 'account_group') {
+      return item.type === 'account_group' && 'account_group' in item && item.account_group !== null && item.account_group !== '-';
+    } else if (view === 'akun_group') {
+      return item.type === 'akun_group' && 'akun_group' in item && item.akun_group !== null && item.akun_group !== '-';
+    }
+    return true;
+  });
+
   return (
     <div className="space-y-4">
-      {/* Always show chart first */}
-      <div className="mb-6">
-        <SummaryChart 
-          summaryData={summaryData}
-          loading={loading}
-          view={view}
-          chartType="bar"
-        />
+      <div className="flex justify-between items-center">
+        <div></div>
+        
+        <div>
+          <ToggleGroup 
+            type="single" 
+            value={chartType} 
+            onValueChange={(value) => {
+              if (value) setChartType(value as 'bar' | 'table');
+            }}
+            size="sm"
+            className="border p-0.5 rounded-md"
+          >
+            <ToggleGroupItem value="bar" className="text-xs h-7 px-2">
+              <BarChart3 className="h-3 w-3" />
+              <span className="ml-1">Bar</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="table" className="text-xs h-7 px-2">
+              <Table2 className="h-3 w-3" />
+              <span className="ml-1">Table</span>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
       
-      {/* Then show table */}
-      <div className="mt-6">
-        <SummaryTable
-          data={summaryData}
-          loading={loading}
-          view={view}
-        />
-      </div>
+      {isLoading ? (
+        <p>Loading summary data...</p>
+      ) : chartType === 'table' ? (
+        <SummaryTable summaryData={filteredSummaryData} view={view} />
+      ) : (
+        <SummaryChart summaryData={filteredSummaryData} chartType="bar" view={view} />
+      )}
     </div>
   );
 };
