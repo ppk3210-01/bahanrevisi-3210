@@ -5,7 +5,7 @@
 import { exec } from 'child_process';
 
 console.log('Generating Supabase types...');
-exec('npx supabase gen types typescript --project-id daegbpegzubzmjvyprtl', (error, stdout, stderr) => {
+exec('npx supabase gen types typescript --project-id bpvxlqlbtmnxjvfxvifg', (error, stdout, stderr) => {
   if (error) {
     console.error(`Error generating types: ${error}`);
     return;

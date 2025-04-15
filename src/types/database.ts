@@ -4,9 +4,14 @@ import { Database } from '@/integrations/supabase/types';
 // Define user roles as a strict union type
 export type UserRole = 'admin' | 'user';
 
-// Export database tables directly using the Database type
-export type Tables = Database['public']['Tables'];
-export type BudgetItemRecord = Tables['budget_items']['Row'];
+// Export database tables directly
+export type Tables = {
+  budget_items: Database['public']['Tables']['budget_items']['Row'];
+  profiles: Database['public']['Tables']['profiles']['Row'];
+  rencana_penarikan_dana: Database['public']['Tables']['rencana_penarikan_dana']['Row'];
+};
+
+export type BudgetItemRecord = Tables['budget_items'];
 
 // We need to define these manually since they aren't correctly typed in the generated types
 // This is a workaround for the missing tables in the types
