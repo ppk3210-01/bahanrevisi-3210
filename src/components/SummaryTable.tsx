@@ -53,19 +53,31 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data, loading, view }) => {
 
   const getIdValueForRow = (row: BudgetSummaryRecord) => {
     const field = getItemField();
-    if (field && field in row) {
-      // @ts-ignore
-      const value = row[field];
-      if (view === 'account_group' || view === 'akun_group') {
-        return getAccountGroupName(value);
-      }
-      return value;
+    
+    // Handle different record types
+    if (view === 'account_group' && 'account_group' in row) {
+      return getAccountGroupName(row.account_group);
+    } else if (view === 'akun_group' && 'akun_group' in row) {
+      return row.akun_group_name || row.akun_group;
+    } else if (view === 'komponen_output' && 'komponen_output' in row) {
+      return row.komponen_output;
+    } else if (view === 'akun' && 'akun' in row) {
+      return row.akun;
+    } else if (view === 'program_pembebanan' && 'program_pembebanan' in row) {
+      return row.program_pembebanan;
+    } else if (view === 'kegiatan' && 'kegiatan' in row) {
+      return row.kegiatan;
+    } else if (view === 'rincian_output' && 'rincian_output' in row) {
+      return row.rincian_output;
+    } else if (view === 'sub_komponen' && 'sub_komponen' in row) {
+      return row.sub_komponen;
     }
+    
     return '';
   };
 
   const getGroupClassName = (code: string) => {
-    if (view !== 'account_group' || !code) return '';
+    if (view !== 'account_group') return '';
     return `group-${code}`;
   };
 
@@ -92,7 +104,12 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data, loading, view }) => {
               : '0';
             
             const idValue = getIdValueForRow(item);
-            const groupClass = getGroupClassName(item.account_group || '');
+            
+            // Get the group class conditionally based on view and record type
+            let groupClass = '';
+            if (view === 'account_group' && 'account_group' in item) {
+              groupClass = getGroupClassName(item.account_group);
+            }
             
             return (
               <TableRow key={index} className={groupClass}>

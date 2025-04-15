@@ -33,9 +33,10 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       {/* Always show chart first */}
       <div className="mb-6">
         <SummaryChart 
-          data={summaryData}
+          summaryData={summaryData}
           loading={loading}
           view={view}
+          chartType="bar"
         />
       </div>
       

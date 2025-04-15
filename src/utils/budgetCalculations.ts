@@ -44,3 +44,24 @@ export const getCellClass = (item: any, field: string): string => {
   }
   return '';
 };
+
+// Add the missing updateItemStatus function
+export const updateItemStatus = (item: any): any => {
+  const updatedItem = { ...item };
+  
+  // If jumlah_menjadi is different from jumlah_semula, mark as changed
+  if (updatedItem.jumlahMenjadi !== updatedItem.jumlahSemula) {
+    updatedItem.status = 'changed';
+  } else {
+    // If they are the same, check if any other relevant fields changed
+    if (updatedItem.volumeMenjadi !== updatedItem.volumeSemula ||
+        updatedItem.satuanMenjadi !== updatedItem.satuanSemula ||
+        updatedItem.hargaSatuanMenjadi !== updatedItem.hargaSatuanSemula) {
+      updatedItem.status = 'changed';
+    } else {
+      updatedItem.status = 'unchanged';
+    }
+  }
+  
+  return updatedItem;
+};

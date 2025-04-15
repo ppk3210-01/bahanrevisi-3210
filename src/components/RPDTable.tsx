@@ -1,13 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/utils/budgetCalculations';
-import { FilterSelection } from '@/types/budget';
+import { FilterSelection, BudgetItemRPD } from '@/types/budget';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { BudgetItemRPD } from '@/types/budget';
 import { HIERARCHY_DATA } from '@/lib/constants';
 import { AlertCircle, Check } from 'lucide-react';
 
@@ -122,7 +120,14 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         );
       }
       
-      setRpdData(filteredData);
+      // Convert the status string to the correct type
+      const typedData: BudgetItemRPD[] = filteredData.map(item => ({
+        ...item,
+        // Make sure status is one of the allowed values
+        status: (item.status as 'ok' | 'belum_isi' | 'belum_lengkap' | 'sisa')
+      }));
+      
+      setRpdData(typedData);
     } catch (error) {
       console.error('Error fetching RPD data:', error);
       toast({
@@ -216,10 +221,53 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       
       if (error) throw error;
       
-      // Update the local state to reflect changes immediately
+      // Update the local state optimistically
       setRpdData(prevData => 
         prevData.map(item => {
           if (item.id === editingId) {
+            const updatedTotal = 
+              (editValues.januari || 0) +
+              (editValues.februari || 0) +
+              (editValues.maret || 0) +
+              (editValues.april || 0) +
+              (editValues.mei || 0) +
+              (editValues.juni || 0) +
+              (editValues.juli || 0) +
+              (editValues.agustus || 0) +
+              (editValues.september || 0) +
+              (editValues.oktober || 0) +
+              (editValues.november || 0) +
+              (editValues.desember || 0);
+            
+            // Determine the new status
+            let newStatus: 'ok' | 'belum_isi' | 'belum_lengkap' | 'sisa';
+            
+            if (item.jumlah_menjadi === 0) {
+              newStatus = 'belum_isi';
+            } else if (updatedTotal === 0) {
+              newStatus = 'belum_isi';
+            } else if (updatedTotal === item.jumlah_menjadi) {
+              newStatus = 'ok';
+            } else if (
+              (editValues.januari || 0) > 0 && 
+              (editValues.februari || 0) > 0 && 
+              (editValues.maret || 0) > 0 && 
+              (editValues.april || 0) > 0 && 
+              (editValues.mei || 0) > 0 && 
+              (editValues.juni || 0) > 0 && 
+              (editValues.juli || 0) > 0 && 
+              (editValues.agustus || 0) > 0 && 
+              (editValues.september || 0) > 0 && 
+              (editValues.oktober || 0) > 0 && 
+              (editValues.november || 0) > 0 && 
+              (editValues.desember || 0) > 0 && 
+              updatedTotal !== item.jumlah_menjadi
+            ) {
+              newStatus = 'sisa';
+            } else {
+              newStatus = 'belum_lengkap';
+            }
+            
             return {
               ...item,
               januari: editValues.januari || 0,
@@ -234,7 +282,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               oktober: editValues.oktober || 0,
               november: editValues.november || 0,
               desember: editValues.desember || 0,
-              jumlah_rpd: Object.values(editValues).reduce((sum, val) => sum + (val || 0), 0)
+              jumlah_rpd: updatedTotal,
+              status: newStatus
             };
           }
           return item;
