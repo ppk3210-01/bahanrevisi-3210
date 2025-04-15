@@ -92,8 +92,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
             <TableRow key={index} className="hover:bg-slate-50">
               <TableCell className="text-left font-medium">{getItemCategoryValue(item)}</TableCell>
               <TableCell className="text-right">{formatCurrency(item.total_semula || 0)}</TableCell>
-              {/* Fix for issue #3: Apply blue bold styling to "menjadi" values */}
-              <TableCell className="text-right font-bold text-blue-600">{formatCurrency(item.total_menjadi || 0)}</TableCell>
+              <TableCell className="text-right">{formatCurrency(item.total_menjadi || 0)}</TableCell>
               <TableCell className={`text-right ${(item.total_selisih || 0) > 0 ? 'text-red-600' : (item.total_selisih || 0) < 0 ? 'text-red-600' : ''}`}>
                 {formatCurrency(item.total_selisih || 0)}
               </TableCell>
@@ -105,8 +104,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ summaryData, view }) => {
           <TableRow className="bg-slate-100 font-medium">
             <TableCell className="font-semibold">TOTAL</TableCell>
             <TableCell className="text-right font-semibold">{formatCurrency(totalRow.total_semula)}</TableCell>
-            {/* Fix for issue #3: Apply blue bold styling to total "menjadi" value */}
-            <TableCell className="text-right font-bold text-blue-600">{formatCurrency(totalRow.total_menjadi)}</TableCell>
+            <TableCell className="text-right font-semibold">{formatCurrency(totalRow.total_menjadi)}</TableCell>
             <TableCell className={`text-right font-semibold ${totalRow.total_selisih > 0 ? 'text-red-600' : totalRow.total_selisih < 0 ? 'text-red-600' : ''}`}>
               {formatCurrency(totalRow.total_selisih)}
             </TableCell>

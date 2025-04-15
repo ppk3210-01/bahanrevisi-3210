@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { AlertCircle, Check, Info, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { AlertCircle, Check, Clock, Info, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useRPDData, RPDItem } from '@/hooks/useRPDData';
 import { useAuth } from '@/contexts/AuthContext';
 import { FilterSelection } from '@/types/budget';
@@ -261,19 +261,18 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                 <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
                 <TableHead className="text-right w-[120px] text-slate-700 font-medium">Jumlah Pagu</TableHead>
                 <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700 font-medium">Jumlah RPD</TableHead>
-                {/* Fix for issue #2: Standardize month column widths for 6-digit numbers */}
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Januari</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Februari</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Maret</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">April</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Mei</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Juni</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Juli</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Agustus</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">September</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Oktober</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">November</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Desember</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Januari</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Februari</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Maret</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">April</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Mei</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Juni</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Juli</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Agustus</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">September</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Oktober</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">November</TableHead>
+                <TableHead className="text-right w-[80px] text-slate-700 font-medium">Desember</TableHead>
                 <TableHead className="w-20 text-center text-slate-700 font-medium">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -431,28 +430,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           </div>
         </div>
       )}
-
-      <style jsx global>{`
-        .rpd-table th, .rpd-table td {
-          white-space: nowrap;
-        }
-        .rpd-uraian-cell {
-          white-space: normal;
-          word-break: break-word;
-          min-width: 300px;
-          max-width: 350px;
-        }
-        .sticky-status {
-          position: sticky;
-          left: 0;
-          z-index: 20;
-        }
-        .sticky-uraian {
-          position: sticky;
-          left: 80px;
-          z-index: 19;
-        }
-      `}</style>
     </div>
   );
 };

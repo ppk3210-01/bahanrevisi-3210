@@ -206,7 +206,7 @@ export const useRPDData = (filters?: FilterSelection) => {
         throw error;
       }
       
-      // Update local state optimistically - Key fix for Issue #1
+      // Update local state optimistically
       setRpdItems(prevItems => 
         prevItems.map(item => {
           if (item.id === itemId) {
@@ -233,10 +233,10 @@ export const useRPDData = (filters?: FilterSelection) => {
             updatedItem.jumlah_rpd = jumlah_rpd;
             
             // Determine status using the same logic as in the database function
-            if (jumlah_rpd === updatedItem.jumlah_menjadi) {
+            if (jumlah_rpd === item.jumlah_menjadi) {
               updatedItem.status = 'ok';
             } else if (
-              updatedItem.jumlah_menjadi === 0 || 
+              item.jumlah_menjadi === 0 || 
               (updatedItem.januari === 0 && 
                updatedItem.februari === 0 && 
                updatedItem.maret === 0 && 
@@ -264,7 +264,7 @@ export const useRPDData = (filters?: FilterSelection) => {
               updatedItem.oktober > 0 && 
               updatedItem.november > 0 && 
               updatedItem.desember > 0 && 
-              jumlah_rpd !== updatedItem.jumlah_menjadi
+              jumlah_rpd !== item.jumlah_menjadi
             ) {
               updatedItem.status = 'sisa';
             } else {
