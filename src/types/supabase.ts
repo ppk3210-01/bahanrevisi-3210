@@ -1,10 +1,27 @@
-
 import { Database } from '@/integrations/supabase/types';
 
 export type BudgetItemRecord = Database['public']['Tables']['budget_items']['Row'];
-export type KomponenOutputRecord = Database['public']['Tables']['komponen_output']['Row'];
-export type SubKomponenRecord = Database['public']['Tables']['sub_komponen']['Row'];
-export type AkunRecord = Database['public']['Tables']['akun']['Row'];
+
+export type KomponenOutputRecord = { 
+  id: string; 
+  name: string; 
+  code: string;
+  // Add any other properties needed
+};
+
+export type SubKomponenRecord = { 
+  id: string;
+  name: string;
+  code: string;
+  // Add any other properties needed
+};
+
+export type AkunRecord = { 
+  id: string;
+  name: string;
+  code: string;
+  // Add any other properties needed
+};
 
 export type BudgetSummaryRecord = {
   account_group?: string;

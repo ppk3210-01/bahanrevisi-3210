@@ -8,9 +8,11 @@ export type UserRole = 'admin' | 'user';
 export type Tables = Database['public']['Tables'];
 export type Views = Database['public']['Views'];
 export type BudgetItemRecord = Tables['budget_items']['Row'];
-export type KomponenOutputRecord = Tables['komponen_output']['Row'];
-export type SubKomponenRecord = Tables['sub_komponen']['Row'];
-export type AkunRecord = Tables['akun']['Row'];
+
+// These type definitions needed to be fixed - using proper type assertions
+export type KomponenOutputRecord = { id: string, name: string, code: string };
+export type SubKomponenRecord = { id: string, name: string, code: string };
+export type AkunRecord = { id: string, name: string, code: string };
 
 // Create union types for different summary records
 export type BudgetSummaryByKomponenRecord = Views['budget_summary_by_komponen']['Row'];

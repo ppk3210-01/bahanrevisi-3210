@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -261,19 +260,18 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                 <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
                 <TableHead className="text-right w-[120px] text-slate-700 font-medium">Jumlah Pagu</TableHead>
                 <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700 font-medium">Jumlah RPD</TableHead>
-                {/* Fix for issue #2: Standardize month column widths for 6-digit numbers */}
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Januari</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Februari</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Maret</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">April</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Mei</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Juni</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Juli</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Agustus</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">September</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Oktober</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">November</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Desember</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Januari</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Februari</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Maret</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">April</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Mei</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Juni</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Juli</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Agustus</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">September</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Oktober</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">November</TableHead>
+                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Desember</TableHead>
                 <TableHead className="w-20 text-center text-slate-700 font-medium">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -451,6 +449,11 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           position: sticky;
           left: 80px;
           z-index: 19;
+        }
+        .month-column {
+          width: 90px !important;
+          min-width: 90px !important;
+          max-width: 90px !important;
         }
       `}</style>
     </div>
