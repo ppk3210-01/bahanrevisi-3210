@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +43,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [sortField, setSortField] = useState<keyof RPDItem | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  // Calculate the pagu value from the rpdItems
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
@@ -65,7 +63,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       }
     }
     
-    // Convert field names to match the API
     let apiField = field;
     if (field === 'jan') apiField = 'januari';
     if (field === 'feb') apiField = 'februari';
@@ -80,10 +77,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     if (field === 'nov') apiField = 'november';
     if (field === 'dec') apiField = 'desember';
     
-    // Prepare updates object with the correct field name
     const updates = { [apiField]: value };
     
-    // Update the item
     updateRPDItem(id, updates);
   };
 
@@ -113,7 +108,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     
     let fieldA: any, fieldB: any;
     
-    // Map the sortField to the actual property names in the rpdItems
     if (sortField === 'jan') {
       fieldA = a.januari;
       fieldB = b.januari;
@@ -221,7 +215,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       return <span>{formatCurrency(item.jumlah_rpd || 0)}</span>;
     }
     
-    // Map field names to the actual properties in the data
     let value = 0;
     if (field === 'jan') value = item.januari || 0;
     else if (field === 'feb') value = item.februari || 0;
@@ -236,7 +229,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     else if (field === 'nov') value = item.november || 0;
     else if (field === 'dec') value = item.desember || 0;
     
-    // For month fields
     return isEditing ? (
       <Input 
         type="number"
@@ -256,7 +248,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
 
   return (
     <div className="space-y-2">
-      <style jsx>{`
+      <style>
+        {`
         .rpd-table th, .rpd-table td {
           padding: 4px 6px;
           font-size: 0.75rem;
@@ -318,7 +311,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         .rpd-table .sisa {
           background-color: #e0f2fe;
         }
-      `}</style>
+      `}
+      </style>
       
       <div className="rounded-md border border-gray-200 w-full overflow-x-auto">
         <table className="w-full min-w-full rpd-table">
