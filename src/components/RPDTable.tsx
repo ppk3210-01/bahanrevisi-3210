@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,7 +41,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const { rpdItems, loading, updateRPDItem } = useRPDData(filters);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<keyof RPDItem | null>(null);
+  const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -100,7 +99,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     });
   };
 
-  const handleSort = (field: keyof RPDItem) => {
+  const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -109,15 +108,13 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     }
   };
 
-  // Apply filtering for both search term and hideZeroBudget
   const filteredItems = [...rpdItems].filter(item => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = !searchTerm || 
       item.uraian.toLowerCase().includes(searchLower);
     
-    // Only hide items where both jumlah_semula and jumlah_menjadi are 0
     if (hideZeroBudget) {
-      return matchesSearch && !(item.jumlah_semula === 0 && item.jumlah_menjadi === 0);
+      return matchesSearch && item.jumlah_menjadi !== 0;
     }
     
     return matchesSearch;
@@ -192,7 +189,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return 0;
   });
 
-  // Calculate total by month
   const totalByMonth = {
     jan: rpdItems.reduce((sum, item) => sum + (item.januari || 0), 0),
     feb: rpdItems.reduce((sum, item) => sum + (item.februari || 0), 0),
@@ -217,7 +213,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return '';
   };
   
-  // Pagination logic
   const paginatedItems = pageSize === -1 
     ? sortedItems 
     : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -629,7 +624,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         </table>
       </div>
       
-      {/* Pagination controls */}
       {pageSize !== -1 && totalPages > 1 && (
         <div className="flex justify-center mt-4">
           <div className="flex items-center gap-2">

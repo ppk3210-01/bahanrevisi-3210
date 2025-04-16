@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -52,19 +51,16 @@ export const useRPDData = (filters?: FilterSelection) => {
 
   const fetchRPDData = useCallback(async () => {
     try {
-      // Skip if we're already in the process of updating an item
       if (isUpdatingRef.current) {
         return;
       }
 
-      // Only set loading to true for the initial fetch
       if (!dataFetchedRef.current) {
         setLoading(true);
       }
       
       console.log('Fetching RPD data...');
       
-      // Call the get_rpd_data function
       const { data, error } = await supabase.rpc('get_rpd_data');
       
       if (error) {
@@ -74,7 +70,6 @@ export const useRPDData = (filters?: FilterSelection) => {
       
       console.log('RPD data received:', data?.length || 0, 'items');
       
-      // Apply filters on the client side if needed
       let filteredData = data || [];
       
       if (filters && (
@@ -85,7 +80,6 @@ export const useRPDData = (filters?: FilterSelection) => {
         (filters.subKomponen && filters.subKomponen !== 'all') ||
         (filters.akun && filters.akun !== 'all')
       )) {
-        // Fetch the related budget items to get the filter fields
         const { data: budgetData, error: budgetError } = await supabase
           .from('budget_items')
           .select('id, program_pembebanan, kegiatan, rincian_output, komponen_output, sub_komponen, akun')
@@ -95,7 +89,6 @@ export const useRPDData = (filters?: FilterSelection) => {
           throw budgetError;
         }
         
-        // Create a lookup map for budget items
         const budgetMap = new Map();
         if (budgetData) {
           budgetData.forEach(item => {
@@ -103,7 +96,6 @@ export const useRPDData = (filters?: FilterSelection) => {
           });
         }
         
-        // Apply filters
         filteredData = filteredData.filter(item => {
           const budgetItem = budgetMap.get(item.id);
           if (!budgetItem) return false;
@@ -144,7 +136,6 @@ export const useRPDData = (filters?: FilterSelection) => {
       
       console.log('Filtered RPD data:', filteredData.length, 'items');
       
-      // Apply rounding to all currency values
       const roundedData = filteredData.map(item => ({
         ...item,
         jumlah_menjadi: roundToThousands(item.jumlah_menjadi),
@@ -163,7 +154,6 @@ export const useRPDData = (filters?: FilterSelection) => {
         jumlah_rpd: roundToThousands(item.jumlah_rpd || 0),
       }));
       
-      // Update state and refs
       setRpdItems(roundedData);
       dataFetchedRef.current = true;
     } catch (err) {
@@ -182,7 +172,6 @@ export const useRPDData = (filters?: FilterSelection) => {
   useEffect(() => {
     fetchRPDData();
     
-    // Subscribe to changes in the rencana_penarikan_dana table
     const channel = supabase
       .channel('rpd-changes')
       .on(
@@ -193,7 +182,6 @@ export const useRPDData = (filters?: FilterSelection) => {
           table: 'rencana_penarikan_dana',
         },
         (payload) => {
-          // Only refresh if we're not the ones who initiated the update
           if (!isUpdatingRef.current) {
             console.log('RPD data changed, refreshing...');
             fetchRPDData();
@@ -211,7 +199,6 @@ export const useRPDData = (filters?: FilterSelection) => {
     try {
       isUpdatingRef.current = true;
       
-      // Round all values to thousands before sending to the database
       const roundedValues: Partial<RPDMonthValues> = {};
       Object.entries(monthValues).forEach(([key, value]) => {
         roundedValues[key as keyof RPDMonthValues] = roundToThousands(value as number);
@@ -232,7 +219,6 @@ export const useRPDData = (filters?: FilterSelection) => {
         throw error;
       }
       
-      // Update local state optimistically - Key fix for Issue #1
       setRpdItems(prevItems => 
         prevItems.map(item => {
           if (item.id === itemId) {
@@ -241,7 +227,6 @@ export const useRPDData = (filters?: FilterSelection) => {
               ...roundedValues
             };
             
-            // Calculate jumlah_rpd with rounded values
             const jumlah_rpd = roundToThousands(
               (updatedItem.januari || 0) +
               (updatedItem.februari || 0) +
@@ -259,7 +244,6 @@ export const useRPDData = (filters?: FilterSelection) => {
             
             updatedItem.jumlah_rpd = jumlah_rpd;
             
-            // Determine status using the same logic as in the database function
             if (jumlah_rpd === updatedItem.jumlah_menjadi) {
               updatedItem.status = 'ok';
             } else if (
