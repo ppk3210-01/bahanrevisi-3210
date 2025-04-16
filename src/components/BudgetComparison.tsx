@@ -15,7 +15,7 @@ import SummaryDialog from './SummaryDialog';
 import ExportOptions from './ExportOptions';
 import SummaryChart from './SummaryChart';
 import DetailedSummaryView from './DetailedSummaryView';
-import { useBudgetData } from '@/hooks/useBudgetData'; 
+import useBudgetData from '@/hooks/useBudgetData';
 import RPDTable from './RPDTable';
 import { toast } from '@/hooks/use-toast';
 import { exportToJpeg } from '@/utils/exportUtils';
@@ -31,6 +31,13 @@ type SummarySectionView =
   'akun' |
   'akun_group' |
   'account_group';
+
+const exportElementToJpeg = (elementRef: React.RefObject<HTMLDivElement>, fileName: string) => {
+  if (elementRef.current) {
+    const element = elementRef.current;
+    exportToJpeg(element, fileName);
+  }
+};
 
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
@@ -52,28 +59,57 @@ const BudgetComparison: React.FC = () => {
   
   const { 
     budgetItems,
-    loadingItems,
+    loading: loadingItems,
     addBudgetItem,
     updateBudgetItem,
     deleteBudgetItem,
     approveBudgetItem,
     rejectBudgetItem,
-    loadingOptions,
-    programPembebananOptions,
-    kegiatanOptions,
-    rincianOutputOptions,
-    komponenOutputOptions,
-    subKomponenOptions,
-    akunOptions,
-    summaryByProgramPembebanan,
-    summaryByKegiatan,
-    summaryByRincianOutput,
-    summaryByKomponenOutput,
-    summaryBySubKomponen,
-    summaryByAkun,
-    summaryByAkunGroup,
-    summaryByAccountGroup
+    summaryData
   } = useBudgetData(filters);
+
+  const loadingOptions = false;
+  const programPembebananOptions = [];
+  const kegiatanOptions = [];
+  const rincianOutputOptions = [];
+  const komponenOutputOptions = [];
+  const subKomponenOptions = [];
+  const akunOptions = [];
+
+  const getBudgetSummary = (type: string) => {
+    const items = (summaryData || []).filter(item => item.type === type);
+    return items.map(item => {
+      const name = 
+        type === 'komponen_output' ? item.komponen_output :
+        type === 'akun' ? item.akun : 
+        type === 'program_pembebanan' ? item.program_pembebanan :
+        type === 'kegiatan' ? item.kegiatan :
+        type === 'rincian_output' ? item.rincian_output :
+        type === 'sub_komponen' ? item.sub_komponen :
+        type === 'account_group' ? item.account_group_name || item.account_group :
+        type === 'akun_group' ? item.akun_group_name || item.akun_group : '';
+      
+      return {
+        id: name,
+        name,
+        totalSemula: item.total_semula || 0,
+        totalMenjadi: item.total_menjadi || 0,
+        totalSelisih: item.total_selisih || 0,
+        newItems: item.new_items || 0,
+        changedItems: item.changed_items || 0,
+        totalItems: item.total_items || 0
+      };
+    });
+  };
+
+  const summaryByProgramPembebanan = getBudgetSummary('program_pembebanan');
+  const summaryByKegiatan = getBudgetSummary('kegiatan');
+  const summaryByRincianOutput = getBudgetSummary('rincian_output');
+  const summaryByKomponenOutput = getBudgetSummary('komponen_output');
+  const summaryBySubKomponen = getBudgetSummary('sub_komponen');
+  const summaryByAkun = getBudgetSummary('akun');
+  const summaryByAkunGroup = getBudgetSummary('akun_group');
+  const summaryByAccountGroup = getBudgetSummary('account_group');
 
   const filteredItems = budgetItems;
   const areFiltersComplete = filters.akun !== 'all' && filters.komponenOutput !== 'all';
@@ -94,24 +130,18 @@ const BudgetComparison: React.FC = () => {
   const totalDeletedValue = 0;
 
   const handleExportChanges = () => {
-    if (changesContentRef.current) {
-      exportToJpeg(changesContentRef.current, 'changes_summary');
-      setOpenExport(false);
-    }
+    exportElementToJpeg(changesContentRef, 'changes_summary');
+    setOpenExport(false);
   };
 
   const handleExportTable = () => {
-    if (tableContentRef.current) {
-      exportToJpeg(tableContentRef.current, 'budget_table');
-      setOpenExport(false);
-    }
+    exportElementToJpeg(tableContentRef, 'budget_table');
+    setOpenExport(false);
   };
 
   const handleExportChart = () => {
-    if (chartContentRef.current) {
-      exportToJpeg(chartContentRef.current, 'budget_chart');
-      setOpenExport(false);
-    }
+    exportElementToJpeg(chartContentRef, 'budget_chart');
+    setOpenExport(false);
   };
 
   const renderSummarySectionContent = () => {
@@ -166,24 +196,28 @@ const BudgetComparison: React.FC = () => {
                   <Card className="p-4">
                     <h4 className="text-lg font-medium mb-2 text-blue-600">Diagram Perubahan</h4>
                     <SummaryChart 
-                      type="changes" 
-                      data={{
+                      summaryData={[]}
+                      chartType="bar"
+                      view="komponen_output"
+                      customData={{
                         semula: roundToThousands(totalSemula),
                         menjadi: roundToThousands(totalMenjadi),
                         selisih: roundToThousands(totalSelisih)
-                      }} 
+                      }}
                     />
                   </Card>
                   
                   <Card className="p-4">
                     <h4 className="text-lg font-medium mb-2 text-blue-600">Diagram Komposisi</h4>
                     <SummaryChart 
-                      type="composition" 
-                      data={{
+                      summaryData={[]}
+                      chartType="composition"
+                      view="komponen_output"
+                      customData={{
                         new: roundToThousands(totalNewValue),
                         changed: roundToThousands(totalChangedValue),
                         unchanged: roundToThousands(totalMenjadi - totalNewValue - totalChangedValue)
-                      }} 
+                      }}
                     />
                   </Card>
                 </div>
@@ -192,10 +226,7 @@ const BudgetComparison: React.FC = () => {
               <div className="space-y-4" ref={tableContentRef}>
                 <Card className="p-4">
                   <h4 className="text-lg font-medium mb-4 text-blue-600">Detail Perubahan Per Item</h4>
-                  <BudgetChangesSummary
-                    newItems={newItems}
-                    changedItems={changedItems}
-                  />
+                  <BudgetChangesSummary items={[...newItems, ...changedItems]} />
                 </Card>
               </div>
             </div>
@@ -255,7 +286,7 @@ const BudgetComparison: React.FC = () => {
           <Badge variant="outline" className="text-xs font-normal">
             Total Menjadi: {formatCurrency(roundToThousands(totalMenjadi))}
           </Badge>
-          <Badge variant={totalSelisih > 0 ? "success" : totalSelisih < 0 ? "destructive" : "outline"} className="text-xs font-normal">
+          <Badge variant={totalSelisih > 0 ? "default" : totalSelisih < 0 ? "destructive" : "outline"} className="text-xs font-normal">
             Selisih: {formatCurrency(roundToThousands(totalSelisih))}
           </Badge>
         </div>
@@ -276,11 +307,11 @@ const BudgetComparison: React.FC = () => {
                 </DialogDescription>
               </DialogHeader>
               
-              <ExportOptions 
-                onExportChanges={handleExportChanges}
-                onExportTable={handleExportTable}
-                onExportChart={handleExportChart}
-              />
+              <div className="space-y-4 py-4">
+                <Button onClick={handleExportChanges} className="w-full">Export Ringkasan Perubahan</Button>
+                <Button onClick={handleExportTable} className="w-full">Export Tabel Anggaran</Button>  
+                <Button onClick={handleExportChart} className="w-full">Export Diagram</Button>
+              </div>
               
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpenExport(false)}>
@@ -296,18 +327,22 @@ const BudgetComparison: React.FC = () => {
                 Lihat Ringkasan
               </Button>
             </DialogTrigger>
-            <SummaryDialog
-              onClose={() => setOpenSummary(false)}
-              totalSemula={totalSemula}
-              totalMenjadi={totalMenjadi}
-              totalSelisih={totalSelisih}
-              newItems={newItems}
-              changedItems={changedItems}
-              totalNewItems={totalNewItems}
-              totalChangedItems={totalChangedItems}
-              totalNewValue={totalNewValue}
-              totalChangedValue={totalChangedValue}
-            />
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ringkasan Anggaran</DialogTitle>
+                <DialogDescription>
+                  Informasi ringkasan anggaran
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <div>Semula: {formatCurrency(roundToThousands(totalSemula))}</div>
+                <div>Menjadi: {formatCurrency(roundToThousands(totalMenjadi))}</div>
+                <div>Selisih: {formatCurrency(roundToThousands(totalSelisih))}</div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setOpenSummary(false)}>Tutup</Button>
+              </DialogFooter>
+            </DialogContent>
           </Dialog>
         </div>
       </div>
@@ -419,21 +454,9 @@ const BudgetComparison: React.FC = () => {
             </Card>
             
             <DetailedSummaryView 
-              totalSemula={roundToThousands(totalSemula)}
-              totalMenjadi={roundToThousands(totalMenjadi)} 
-              totalSelisih={roundToThousands(totalSelisih)}
-              totalNewValue={roundToThousands(totalNewValue)}
-              totalChangedValue={roundToThousands(totalChangedValue)}
-              totalNewItems={totalNewItems}
-              totalChangedItems={totalChangedItems}
-              summaryByProgramPembebanan={summaryByProgramPembebanan}
-              summaryByKegiatan={summaryByKegiatan}
-              summaryByRincianOutput={summaryByRincianOutput}
-              summaryByKomponenOutput={summaryByKomponenOutput}
-              summaryBySubKomponen={summaryBySubKomponen}
-              summaryByAkun={summaryByAkun}
-              summaryByAkunGroup={summaryByAkunGroup}
-              summaryByAccountGroup={summaryByAccountGroup}
+              summaryData={summaryData}
+              view={summaryView}
+              setView={setSummaryView}
             />
           </div>
         </TabsContent>

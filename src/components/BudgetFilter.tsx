@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Select, 
@@ -12,62 +11,126 @@ import { FilterSelection } from '@/types/budget';
 import { HIERARCHY_DATA } from '@/lib/constants';
 
 interface BudgetFilterProps {
-  onFilterChange: (filters: Partial<FilterSelection>) => void;
+  onFilterChange?: (filters: Partial<FilterSelection>) => void;
   filters: FilterSelection;
+  setFilters?: React.Dispatch<React.SetStateAction<FilterSelection>>;
+  programPembebananOptions?: any[];
+  kegiatanOptions?: any[];
+  rincianOutputOptions?: any[];
+  komponenOutputOptions?: any[];
+  subKomponenOptions?: any[];
+  akunOptions?: any[];
+  loading?: boolean;
 }
 
-const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) => {
-  // Handle changes to program pembebanan
+const BudgetFilter: React.FC<BudgetFilterProps> = ({ 
+  onFilterChange, 
+  filters, 
+  setFilters,
+  programPembebananOptions,
+  kegiatanOptions,
+  rincianOutputOptions,
+  komponenOutputOptions,
+  subKomponenOptions,
+  akunOptions,
+  loading
+}) => {
   const handleProgramChange = (value: string) => {
-    onFilterChange({
-      programPembebanan: value,
-      kegiatan: 'all',
-      rincianOutput: 'all',
-      komponenOutput: 'all',
-      subKomponen: 'all'
-      // Keep akun filter as it's independent
-    });
+    if (onFilterChange) {
+      onFilterChange({
+        programPembebanan: value,
+        kegiatan: 'all',
+        rincianOutput: 'all',
+        komponenOutput: 'all',
+        subKomponen: 'all'
+      });
+    } else if (setFilters) {
+      setFilters(prev => ({
+        ...prev,
+        programPembebanan: value,
+        kegiatan: 'all',
+        rincianOutput: 'all',
+        komponenOutput: 'all',
+        subKomponen: 'all'
+      }));
+    }
   };
 
-  // Handle changes to kegiatan
   const handleKegiatanChange = (value: string) => {
-    onFilterChange({
-      kegiatan: value,
-      rincianOutput: 'all',
-      komponenOutput: 'all',
-      subKomponen: 'all'
-    });
+    if (onFilterChange) {
+      onFilterChange({
+        kegiatan: value,
+        rincianOutput: 'all',
+        komponenOutput: 'all',
+        subKomponen: 'all'
+      });
+    } else if (setFilters) {
+      setFilters(prev => ({
+        ...prev,
+        kegiatan: value,
+        rincianOutput: 'all',
+        komponenOutput: 'all',
+        subKomponen: 'all'
+      }));
+    }
   };
 
-  // Handle changes to rincian output
   const handleRincianOutputChange = (value: string) => {
-    onFilterChange({
-      rincianOutput: value,
-      komponenOutput: 'all',
-      subKomponen: 'all'
-    });
+    if (onFilterChange) {
+      onFilterChange({
+        rincianOutput: value,
+        komponenOutput: 'all',
+        subKomponen: 'all'
+      });
+    } else if (setFilters) {
+      setFilters(prev => ({
+        ...prev,
+        rincianOutput: value,
+        komponenOutput: 'all',
+        subKomponen: 'all'
+      }));
+    }
   };
 
-  // Handle changes to komponen output
   const handleKomponenOutputChange = (value: string) => {
-    onFilterChange({
-      komponenOutput: value,
-      subKomponen: 'all'
-    });
+    if (onFilterChange) {
+      onFilterChange({
+        komponenOutput: value,
+        subKomponen: 'all'
+      });
+    } else if (setFilters) {
+      setFilters(prev => ({
+        ...prev,
+        komponenOutput: value,
+        subKomponen: 'all'
+      }));
+    }
   };
 
-  // Handle changes to sub komponen
   const handleSubKomponenChange = (value: string) => {
-    onFilterChange({
-      subKomponen: value
-    });
+    if (onFilterChange) {
+      onFilterChange({
+        subKomponen: value
+      });
+    } else if (setFilters) {
+      setFilters(prev => ({
+        ...prev,
+        subKomponen: value
+      }));
+    }
   };
 
-  // Handle changes to akun
   const handleAkunChange = (value: string) => {
-    onFilterChange({
-      akun: value
-    });
+    if (onFilterChange) {
+      onFilterChange({
+        akun: value
+      });
+    } else if (setFilters) {
+      setFilters(prev => ({
+        ...prev,
+        akun: value
+      }));
+    }
   };
 
   return (
@@ -76,7 +139,6 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
         <CardTitle className="text-base">Pilih Program dan Anggaran</CardTitle>
       </CardHeader>
       <CardContent className="p-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {/* Program Pembebanan Dropdown */}
         <div className="space-y-1">
           <label className="text-xs font-medium">Program Pembebanan</label>
           <Select
@@ -97,7 +159,6 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
           </Select>
         </div>
 
-        {/* Kegiatan Dropdown */}
         <div className="space-y-1">
           <label className="text-xs font-medium">Kegiatan</label>
           <Select
@@ -120,7 +181,6 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
           </Select>
         </div>
 
-        {/* Rincian Output Dropdown */}
         <div className="space-y-1">
           <label className="text-xs font-medium">Rincian Output</label>
           <Select
@@ -143,7 +203,6 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
           </Select>
         </div>
 
-        {/* Komponen Output Dropdown */}
         <div className="space-y-1">
           <label className="text-xs font-medium">Komponen Output</label>
           <Select
@@ -166,7 +225,6 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
           </Select>
         </div>
 
-        {/* Sub Komponen Dropdown */}
         <div className="space-y-1">
           <label className="text-xs font-medium">Sub Komponen</label>
           <Select
@@ -189,7 +247,6 @@ const BudgetFilter: React.FC<BudgetFilterProps> = ({ onFilterChange, filters }) 
           </Select>
         </div>
 
-        {/* Akun Dropdown */}
         <div className="space-y-1">
           <label className="text-xs font-medium">Akun</label>
           <Select

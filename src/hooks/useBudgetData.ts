@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
@@ -20,7 +19,7 @@ import {
 
 type SummaryType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group' | 'akun_group';
 
-const useBudgetData = (filters: FilterSelection) => {
+export default function useBudgetData(filters: FilterSelection) {
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [summaryData, setSummaryData] = useState<BudgetSummaryRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -557,5 +556,3 @@ const useBudgetData = (filters: FilterSelection) => {
     summaryData
   };
 };
-
-export default useBudgetData;

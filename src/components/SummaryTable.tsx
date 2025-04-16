@@ -5,6 +5,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown } from 'lucide-react';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
+import { BudgetSummaryRecord } from '@/types/database';
 
 interface SummaryRow {
   id: string;
@@ -18,11 +19,13 @@ interface SummaryRow {
 }
 
 interface SummaryTableProps {
-  data: SummaryRow[];
-  title: string;
+  data?: SummaryRow[];
+  title?: string;
+  summaryData?: BudgetSummaryRecord[];
+  view?: string;
 }
 
-const SummaryTable: React.FC<SummaryTableProps> = ({ data, title }) => {
+const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summaryData, view }) => {
   const [sortField, setSortField] = useState<keyof SummaryRow>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -37,7 +40,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data, title }) => {
     }
   };
 
-  const sortedData = [...data].sort((a, b) => {
+  // If summaryData is provided, process it instead of using data directly
+  const processedData = data && data.length > 0 ? data : [];
+
+  const sortedData = [...processedData].sort((a, b) => {
     const fieldA = a[sortField];
     const fieldB = b[sortField];
     

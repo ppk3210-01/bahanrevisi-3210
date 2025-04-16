@@ -12,17 +12,33 @@ import SummaryChart from './SummaryChart';
 type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group' | 'akun_group';
 
 interface DetailedSummaryViewProps {
-  summaryData: BudgetSummaryRecord[];
-  loading: boolean;
-  view: SummaryViewType;
-  setView: (view: SummaryViewType) => void;
+  summaryData?: BudgetSummaryRecord[];
+  loading?: boolean;
+  view?: SummaryViewType;
+  setView?: (view: SummaryViewType) => void;
   defaultView?: 'table' | 'bar';
+  // Add props used in BudgetComparison.tsx
+  totalSemula?: number;
+  totalMenjadi?: number;
+  totalSelisih?: number;
+  totalNewValue?: number;
+  totalChangedValue?: number;
+  totalNewItems?: number;
+  totalChangedItems?: number;
+  summaryByProgramPembebanan?: any[];
+  summaryByKegiatan?: any[];
+  summaryByRincianOutput?: any[];
+  summaryByKomponenOutput?: any[];
+  summaryBySubKomponen?: any[];
+  summaryByAkun?: any[];
+  summaryByAkunGroup?: any[];
+  summaryByAccountGroup?: any[];
 }
 
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ 
-  summaryData, 
-  loading, 
-  view, 
+  summaryData = [], 
+  loading = false, 
+  view = 'komponen_output', 
   setView,
   defaultView = 'table' 
 }) => {
