@@ -9,8 +9,9 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
-import { PlusCircle, Trash2, FileEdit, Check, ArrowUpDown } from 'lucide-react';
+import { PlusCircle, Trash2, FileEdit, Check, ArrowUpDown, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
 import { useRPDData } from '@/hooks/useRPDData';
@@ -45,6 +46,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
@@ -106,7 +109,21 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     }
   };
 
-  const sortedItems = [...rpdItems].sort((a, b) => {
+  // Apply filtering for both search term and hideZeroBudget
+  const filteredItems = [...rpdItems].filter(item => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm || 
+      item.uraian.toLowerCase().includes(searchLower);
+    
+    // Only hide items where both jumlah_semula and jumlah_menjadi are 0
+    if (hideZeroBudget) {
+      return matchesSearch && !(item.jumlah_semula === 0 && item.jumlah_menjadi === 0);
+    }
+    
+    return matchesSearch;
+  });
+
+  const sortedItems = [...filteredItems].sort((a, b) => {
     if (!sortField) return 0;
     
     let fieldA: any, fieldB: any;
@@ -230,6 +247,10 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     if (field === 'total') {
       return <span>{formatCurrency(item.jumlah_rpd || 0)}</span>;
     }
+
+    if (field === 'pagu') {
+      return <span>{formatCurrency(item.jumlah_menjadi || 0)}</span>;
+    }
     
     let value = 0;
     if (field === 'jan') value = item.januari || 0;
@@ -271,7 +292,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           font-size: 0.75rem;
           text-align: center;
           white-space: nowrap;
-          min-width: 80px;
         }
         
         .rpd-table th {
@@ -296,9 +316,13 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         .rpd-table .total-cell {
           font-weight: 600;
         }
+
+        .rpd-table .pagu-cell {
+          font-weight: 600;
+        }
         
         .rpd-table .action-cell {
-          width: 60px;
+          width: 40px;
         }
         
         .rpd-table .input-cell input {
@@ -330,10 +354,37 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       `}
       </style>
       
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-sm">
-          Menampilkan {paginatedItems.length} dari {sortedItems.length} item
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center w-full sm:w-auto">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Cari rencana penarikan dana..."
+              className="pl-8 w-full h-8 text-sm"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+          
+          <div className="filter-checkbox-container flex items-center gap-2">
+            <Checkbox 
+              id="hideZeroBudget"
+              checked={hideZeroBudget}
+              onCheckedChange={(checked) => {
+                setHideZeroBudget(checked === true);
+                setCurrentPage(1);
+              }}
+              className="filter-checkbox"
+            />
+            <label htmlFor="hideZeroBudget" className="filter-checkbox-label text-sm">
+              Sembunyikan jumlah pagu 0
+            </label>
+          </div>
         </div>
+        
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">Tampilkan:</span>
           <Select
@@ -354,6 +405,12 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
             </SelectContent>
           </Select>
         </div>
+      </div>
+      
+      <div className="text-xs text-gray-500">
+        Menampilkan {paginatedItems.length} dari {filteredItems.length} item
+        {searchTerm && ` (filter: "${searchTerm}")`}
+        {hideZeroBudget && ` (menyembunyikan jumlah pagu 0)`}
       </div>
       
       <div className="rounded-md border border-gray-200 w-full overflow-x-auto">
@@ -487,6 +544,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   <ArrowUpDown className="h-3 w-3 ml-1" />
                 </button>
               </th>
+              <th className="pagu-cell py-2 px-1">
+                Pagu Anggaran
+              </th>
               <th className="action-cell py-2 px-1">Aksi</th>
             </tr>
           </thead>
@@ -494,7 +554,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           <tbody>
             {paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={16} className="py-4 text-center text-slate-500">
+                <td colSpan={17} className="py-4 text-center text-slate-500">
                   Tidak ada data
                 </td>
               </tr>
@@ -516,6 +576,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   <td className={`month-cell ${getMonthClass('nov')}`}>{renderItemField(item, 'nov')}</td>
                   <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
                   <td className="total-cell">{renderItemField(item, 'total')}</td>
+                  <td className="pagu-cell">{renderItemField(item, 'pagu')}</td>
                   <td className="action-cell">
                     <div className="flex space-x-1 justify-center">
                       {editingId === item.id ? (
@@ -553,20 +614,13 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               <td className={`month-cell ${getMonthClass('nov')}`}>{formatCurrency(totalByMonth.nov, false)}</td>
               <td className={`month-cell ${getMonthClass('dec')}`}>{formatCurrency(totalByMonth.dec, false)}</td>
               <td className="total-cell">{formatCurrency(grandTotal)}</td>
+              <td className="pagu-cell">{formatCurrency(pagu)}</td>
               <td></td>
             </tr>
             
             <tr className="footer-row">
-              <td colSpan={2} className="text-right">Pagu Anggaran</td>
-              <td colSpan={12}></td>
-              <td className="total-cell">{formatCurrency(pagu)}</td>
-              <td></td>
-            </tr>
-            
-            <tr className="footer-row">
-              <td colSpan={2} className="text-right">Sisa Pagu</td>
-              <td colSpan={12}></td>
-              <td className={`total-cell sisa ${sisaPagu < 0 ? 'text-red-600' : ''}`}>
+              <td colSpan={14} className="text-right">Sisa Pagu</td>
+              <td className={`total-cell sisa ${sisaPagu < 0 ? 'text-red-600' : ''}`} colSpan={2}>
                 {formatCurrency(sisaPagu)}
               </td>
               <td></td>

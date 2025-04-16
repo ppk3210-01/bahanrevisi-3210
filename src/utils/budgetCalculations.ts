@@ -35,7 +35,7 @@ export const formatCurrency = (amount: number, showPrefix: boolean = true): stri
 
 // Add calculateAmount function - apply rounding
 export const calculateAmount = (volume: number, unitPrice: number): number => {
-  return volume * unitPrice;
+  return roundToThousands(volume * unitPrice);
 };
 
 // Add calculateDifference function

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
+import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,6 +11,16 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { BudgetItem } from '@/types/budget';
 import { UNIT_OPTIONS } from '@/lib/constants';
 import { getRowStyle, formatCurrency, calculateAmount, calculateDifference, roundToThousands } from '@/utils/budgetCalculations';
@@ -80,6 +91,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   
   const [detailItem, setDetailItem] = useState<BudgetItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+  
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
 
   const isViewer = !user;
 
@@ -263,6 +277,23 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const showDetailDialog = (item: BudgetItem) => {
     setDetailItem(item);
     setIsDetailOpen(true);
+  };
+
+  const confirmDelete = (id: string) => {
+    setItemToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (itemToDelete) {
+      onDelete(itemToDelete);
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+      toast({
+        title: "Berhasil",
+        description: 'Item berhasil dihapus'
+      });
+    }
   };
 
   const canDeleteItem = (item: BudgetItem): boolean => {
@@ -561,19 +592,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     );
   };
 
-  const getRowStyle = (status: string): string => {
-    switch (status) {
-      case 'changed':
-        return 'row-changed';
-      case 'new':
-        return 'row-new';
-      case 'deleted':
-        return 'row-deleted';
-      default:
-        return '';
-    }
-  };
-
   if (isLoading) {
     return <div className="flex justify-center p-4">Loading budget data...</div>;
   }
@@ -803,13 +821,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              onClick={() => {
-                                onDelete(item.id);
-                                toast({
-                                  title: "Berhasil",
-                                  description: 'Item berhasil dihapus'
-                                });
-                              }}
+                              onClick={() => confirmDelete(item.id)}
                               className="h-6 w-6"
                             >
                               <Trash2 className="h-3 w-3" />
@@ -1023,6 +1035,32 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
           item={detailItem}
         />
       )}
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Konfirmasi Hapus
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus uraian ini? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
