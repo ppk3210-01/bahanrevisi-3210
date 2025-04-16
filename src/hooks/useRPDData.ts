@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
+import { roundToThousands } from '@/utils/budgetCalculations';
 
 export type RPDItem = {
   id: string;
@@ -143,8 +144,27 @@ export const useRPDData = (filters?: FilterSelection) => {
       
       console.log('Filtered RPD data:', filteredData.length, 'items');
       
+      // Apply rounding to all currency values
+      const roundedData = filteredData.map(item => ({
+        ...item,
+        jumlah_menjadi: roundToThousands(item.jumlah_menjadi),
+        januari: roundToThousands(item.januari || 0),
+        februari: roundToThousands(item.februari || 0),
+        maret: roundToThousands(item.maret || 0),
+        april: roundToThousands(item.april || 0),
+        mei: roundToThousands(item.mei || 0),
+        juni: roundToThousands(item.juni || 0),
+        juli: roundToThousands(item.juli || 0),
+        agustus: roundToThousands(item.agustus || 0),
+        september: roundToThousands(item.september || 0),
+        oktober: roundToThousands(item.oktober || 0),
+        november: roundToThousands(item.november || 0),
+        desember: roundToThousands(item.desember || 0),
+        jumlah_rpd: roundToThousands(item.jumlah_rpd || 0),
+      }));
+      
       // Update state and refs
-      setRpdItems(filteredData);
+      setRpdItems(roundedData);
       dataFetchedRef.current = true;
     } catch (err) {
       console.error('Error fetching RPD data:', err);
@@ -191,12 +211,18 @@ export const useRPDData = (filters?: FilterSelection) => {
     try {
       isUpdatingRef.current = true;
       
-      console.log('Updating RPD item:', itemId, monthValues);
+      // Round all values to thousands before sending to the database
+      const roundedValues: Partial<RPDMonthValues> = {};
+      Object.entries(monthValues).forEach(([key, value]) => {
+        roundedValues[key as keyof RPDMonthValues] = roundToThousands(value as number);
+      });
+      
+      console.log('Updating RPD item:', itemId, roundedValues);
       
       const { error } = await supabase
         .from('rencana_penarikan_dana')
         .update({
-          ...monthValues,
+          ...roundedValues,
           updated_at: new Date().toISOString()
         })
         .eq('budget_item_id', itemId);
@@ -212,11 +238,11 @@ export const useRPDData = (filters?: FilterSelection) => {
           if (item.id === itemId) {
             const updatedItem = {
               ...item,
-              ...monthValues
+              ...roundedValues
             };
             
-            // Calculate jumlah_rpd
-            const jumlah_rpd = 
+            // Calculate jumlah_rpd with rounded values
+            const jumlah_rpd = roundToThousands(
               (updatedItem.januari || 0) +
               (updatedItem.februari || 0) +
               (updatedItem.maret || 0) +
@@ -228,7 +254,8 @@ export const useRPDData = (filters?: FilterSelection) => {
               (updatedItem.september || 0) +
               (updatedItem.oktober || 0) +
               (updatedItem.november || 0) +
-              (updatedItem.desember || 0);
+              (updatedItem.desember || 0)
+            );
             
             updatedItem.jumlah_rpd = jumlah_rpd;
             

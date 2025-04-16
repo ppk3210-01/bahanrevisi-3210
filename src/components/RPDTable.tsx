@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { formatCurrency } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { PlusCircle, Trash2, FileEdit, Check, ArrowUpDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
@@ -42,6 +43,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<keyof RPDItem | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
@@ -77,7 +80,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     if (field === 'nov') apiField = 'november';
     if (field === 'dec') apiField = 'desember';
     
-    const updates = { [apiField]: value };
+    const updates = { [apiField]: roundToThousands(value as number) };
     
     updateRPDItem(id, updates);
   };
@@ -172,6 +175,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return 0;
   });
 
+  // Calculate total by month
   const totalByMonth = {
     jan: rpdItems.reduce((sum, item) => sum + (item.januari || 0), 0),
     feb: rpdItems.reduce((sum, item) => sum + (item.februari || 0), 0),
@@ -194,6 +198,18 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     const total = totalByMonth[month];
     if (total === 0) return 'belum-isi';
     return '';
+  };
+  
+  // Pagination logic
+  const paginatedItems = pageSize === -1 
+    ? sortedItems 
+    : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  
+  const totalPages = pageSize === -1 ? 1 : Math.ceil(sortedItems.length / pageSize);
+  
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
   };
 
   const renderItemField = (item: any, field: string) => {
@@ -313,6 +329,32 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         }
       `}
       </style>
+      
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm">
+          Menampilkan {paginatedItems.length} dari {sortedItems.length} item
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">Tampilkan:</span>
+          <Select
+            value={pageSize.toString()} 
+            onValueChange={(value) => {
+              setPageSize(parseInt(value));
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-20 h-8 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white z-50">
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="-1">Semua</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       
       <div className="rounded-md border border-gray-200 w-full overflow-x-auto">
         <table className="w-full min-w-full rpd-table">
@@ -450,16 +492,16 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           </thead>
           
           <tbody>
-            {sortedItems.length === 0 ? (
+            {paginatedItems.length === 0 ? (
               <tr>
                 <td colSpan={16} className="py-4 text-center text-slate-500">
                   Tidak ada data
                 </td>
               </tr>
             ) : (
-              sortedItems.map((item, index) => (
+              paginatedItems.map((item, index) => (
                 <tr key={item.id} className={`${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
-                  <td className="text-center">{index + 1}</td>
+                  <td className="text-center">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
                   <td className="description-cell">{renderItemField(item, 'uraian')}</td>
                   <td className={`month-cell ${getMonthClass('jan')}`}>{renderItemField(item, 'jan')}</td>
                   <td className={`month-cell ${getMonthClass('feb')}`}>{renderItemField(item, 'feb')}</td>
@@ -532,6 +574,70 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           </tbody>
         </table>
       </div>
+      
+      {/* Pagination controls */}
+      {pageSize !== -1 && totalPages > 1 && (
+        <div className="flex justify-center mt-4">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePageChange(1)} 
+              disabled={currentPage === 1}
+            >
+              First
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePageChange(currentPage - 1)} 
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+                return (
+                  <Button 
+                    key={pageNumber}
+                    variant={currentPage === pageNumber ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => handlePageChange(pageNumber)}
+                  >
+                    {pageNumber}
+                  </Button>
+                );
+              })}
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePageChange(currentPage + 1)} 
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => handlePageChange(totalPages)} 
+              disabled={currentPage === totalPages}
+            >
+              Last
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

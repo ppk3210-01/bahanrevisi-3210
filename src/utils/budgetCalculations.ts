@@ -33,7 +33,7 @@ export const formatCurrency = (amount: number, showPrefix: boolean = true): stri
   return showPrefix ? `Rp ${formattedAmount}` : formattedAmount;
 };
 
-// Add calculateAmount function
+// Add calculateAmount function - apply rounding
 export const calculateAmount = (volume: number, unitPrice: number): number => {
   return volume * unitPrice;
 };
@@ -43,7 +43,7 @@ export const calculateDifference = (original: number, updated: number): number =
   return updated - original;
 };
 
-// Add roundToThousands function
+// Update roundToThousands function to properly round to thousands
 export const roundToThousands = (value: number): number => {
   return Math.round(value / 1000) * 1000;
 };

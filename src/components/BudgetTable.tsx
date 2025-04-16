@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { BudgetItem } from '@/types/budget';
 import { UNIT_OPTIONS } from '@/lib/constants';
-import { getRowStyle, formatCurrency, calculateAmount, calculateDifference } from '@/utils/budgetCalculations';
+import { getRowStyle, formatCurrency, calculateAmount, calculateDifference, roundToThousands } from '@/utils/budgetCalculations';
 import { toast } from '@/hooks/use-toast';
 import DetailDialog from './DetailDialog';
 import {
@@ -93,8 +92,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }));
   }, [komponenOutput, subKomponen, akun]);
 
-  const newItemJumlahSemula = calculateAmount(newItem.volumeSemula || 0, newItem.hargaSatuanSemula || 0);
-  const newItemJumlahMenjadi = calculateAmount(newItem.volumeMenjadi || 0, newItem.hargaSatuanMenjadi || 0);
+  const newItemJumlahSemula = roundToThousands(calculateAmount(newItem.volumeSemula || 0, newItem.hargaSatuanSemula || 0));
+  const newItemJumlahMenjadi = roundToThousands(calculateAmount(newItem.volumeMenjadi || 0, newItem.hargaSatuanMenjadi || 0));
   const newItemSelisih = calculateDifference(newItemJumlahSemula, newItemJumlahMenjadi);
 
   const validateItem = (item: Partial<BudgetItem>): boolean => {
@@ -141,20 +140,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
     
     return true;
-  };
-
-  const getRowColor = (index: number) => {
-    const colors = [
-      'bg-blue-50', 'bg-purple-50', 'bg-indigo-50', 'bg-teal-50', 'bg-sky-50'
-    ];
-    return colors[index % colors.length];
-  };
-
-  const getCellClass = (item: BudgetItem, isValueChange: boolean): string => {
-    if (!item.isApproved && isValueChange && item.status !== 'unchanged') {
-      return 'unapproved-change';
-    }
-    return '';
   };
 
   const handleAddItem = async () => {
@@ -266,6 +251,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         });
         return;
       }
+      
+      if (field === 'hargaSatuanSemula' || field === 'hargaSatuanMenjadi') {
+        value = roundToThousands(value as number);
+      }
     }
     
     onUpdate(id, { [field]: value });
@@ -285,8 +274,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const renderItemField = (item: BudgetItem, field: keyof BudgetItem) => {
     const isEditing = editingId === item.id;
     
-    const isValueChange = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field as string);
-    const cellClass = getCellClass(item, isValueChange);
+    const isMenjadiField = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field);
+    const isDifferentValue = 
+      (field === 'volumeMenjadi' && item.volumeMenjadi !== item.volumeSemula) ||
+      (field === 'satuanMenjadi' && item.satuanMenjadi !== item.satuanSemula) ||
+      (field === 'hargaSatuanMenjadi' && item.hargaSatuanMenjadi !== item.hargaSatuanSemula) ||
+      (field === 'jumlahMenjadi' && item.jumlahMenjadi !== item.jumlahSemula);
+    
+    const menjadiClassName = isMenjadiField && isDifferentValue ? 'text-blue-600 font-bold' : '';
     
     if (isViewer && isEditing) {
       return;
@@ -321,7 +316,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             disabled={!isAdmin && !areFiltersComplete}
           />
         ) : (
-          <span className={cellClass}>{item.volumeMenjadi}</span>
+          <span className={menjadiClassName}>{item.volumeMenjadi}</span>
         );
       
       case 'satuanMenjadi':
@@ -343,7 +338,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             </SelectContent>
           </Select>
         ) : (
-          <span className={cellClass}>{item.satuanMenjadi}</span>
+          <span className={menjadiClassName}>{item.satuanMenjadi}</span>
         );
       
       case 'hargaSatuanMenjadi':
@@ -357,11 +352,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             disabled={!isAdmin && !areFiltersComplete}
           />
         ) : (
-          <span className={cellClass}>{formatCurrency(item.hargaSatuanMenjadi, false)}</span>
+          <span className={menjadiClassName}>{formatCurrency(item.hargaSatuanMenjadi, false)}</span>
         );
       
       case 'jumlahMenjadi':
-        return <span className={cellClass}>{formatCurrency(item.jumlahMenjadi)}</span>;
+        return <span className={menjadiClassName}>{formatCurrency(item.jumlahMenjadi)}</span>;
       
       case 'jumlahSemula':
         return <span>{formatCurrency(item.jumlahSemula)}</span>;
@@ -396,7 +391,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     );
     
     if (hideZeroBudget) {
-      return matchesSearch && item.jumlahSemula > 0;
+      return matchesSearch && !(item.jumlahSemula === 0 && item.jumlahMenjadi === 0);
     }
     
     return matchesSearch;
