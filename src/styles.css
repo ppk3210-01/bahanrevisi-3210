@@ -15,9 +15,9 @@
 
 /* Standardize month column widths */
 .rpd-table .month-cell {
-  min-width: 90px;
-  width: 90px;
-  max-width: 90px;
+  min-width: 80px;
+  width: 80px;
+  max-width: 80px;
 }
 
 /* Make the action column narrower */
