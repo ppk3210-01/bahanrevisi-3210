@@ -319,9 +319,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         }
         
         .rpd-table .month-cell {
-          min-width: 90px;
-          width: 90px;
-          max-width: 90px;
+          min-width: 75px;
+          width: 75px;
+          max-width: 75px;
           text-align: right;
         }
         
@@ -333,13 +333,17 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         .rpd-table .total-cell {
           font-weight: 600;
           text-align: right;
-          min-width: 90px;
+          min-width: 75px;
+          width: 75px;
+          max-width: 75px;
         }
 
         .rpd-table .pagu-cell {
           font-weight: 600;
           text-align: right;
-          min-width: 90px;
+          min-width: 75px;
+          width: 75px;
+          max-width: 75px;
         }
         
         .rpd-table .action-cell {
@@ -363,7 +367,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         }
         
         .rpd-table .input-cell input {
-          width: 90px;
+          width: 75px;
           text-align: right;
         }
         

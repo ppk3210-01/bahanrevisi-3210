@@ -200,17 +200,23 @@ export const useRPDData = (filters?: FilterSelection) => {
     try {
       isUpdatingRef.current = true;
       
-      const roundedValues: Partial<RPDMonthValues> = {};
+      // Ensure we're working with numbers
+      const updates: Partial<RPDMonthValues> = {};
+      
       Object.entries(monthValues).forEach(([key, value]) => {
-        roundedValues[key as keyof RPDMonthValues] = roundToThousands(value as number);
+        if (typeof value === 'string') {
+          updates[key as keyof RPDMonthValues] = roundToThousands(parseFloat(value) || 0);
+        } else {
+          updates[key as keyof RPDMonthValues] = roundToThousands(value || 0);
+        }
       });
       
-      console.log('Updating RPD item:', itemId, roundedValues);
+      console.log('Updating RPD item:', itemId, updates);
       
       const { error } = await supabase
         .from('rencana_penarikan_dana')
         .update({
-          ...roundedValues,
+          ...updates,
           updated_at: new Date().toISOString()
         })
         .eq('budget_item_id', itemId);
@@ -220,12 +226,13 @@ export const useRPDData = (filters?: FilterSelection) => {
         throw error;
       }
       
+      // Update local state
       setRpdItems(prevItems => 
         prevItems.map(item => {
           if (item.id === itemId) {
             const updatedItem = {
               ...item,
-              ...roundedValues
+              ...updates
             };
             
             const jumlah_rpd = roundToThousands(
