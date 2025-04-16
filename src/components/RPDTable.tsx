@@ -1,461 +1,742 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { AlertCircle, Check, Info, ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import { useRPDData, RPDItem } from '@/hooks/useRPDData';
-import { useAuth } from '@/contexts/AuthContext';
-import { FilterSelection } from '@/types/budget';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { formatCurrency } from '@/utils/budgetCalculations';
+import { PlusCircle, Trash2, FileEdit, Check, ArrowUpDown } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
-interface RPDTableProps {
-  filters?: FilterSelection;
+interface RPDItem {
+  id: string;
+  uraian: string;
+  total: number;
+  jan: number;
+  feb: number;
+  mar: number;
+  apr: number;
+  mei: number;
+  jun: number;
+  jul: number;
+  aug: number;
+  sep: number;
+  oct: number;
+  nov: number;
+  dec: number;
 }
 
-const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
-  const { rpdItems, loading, updateRPDItem, refreshData } = useRPDData(filters);
-  const { isAdmin, profile } = useAuth();
-  const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<Record<string, Record<string, number>>>({});
-  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  
-  useEffect(() => {
-    if (filters) {
-      refreshData();
+interface RPDTableProps {
+  items: RPDItem[];
+  onAdd: (item: Omit<RPDItem, 'id'>) => void;
+  onUpdate: (id: string, updates: Partial<RPDItem>) => void;
+  onDelete: (id: string) => void;
+  isLoading: boolean;
+  pagu: number;
+}
+
+const RPDTable: React.FC<RPDTableProps> = ({
+  items,
+  onAdd,
+  onUpdate,
+  onDelete,
+  isLoading,
+  pagu
+}) => {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [newItem, setNewItem] = useState<Omit<RPDItem, 'id'>>({
+    uraian: '',
+    total: 0,
+    jan: 0,
+    feb: 0,
+    mar: 0,
+    apr: 0,
+    mei: 0,
+    jun: 0,
+    jul: 0,
+    aug: 0,
+    sep: 0,
+    oct: 0,
+    nov: 0,
+    dec: 0
+  });
+  const [sortField, setSortField] = useState<keyof RPDItem | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const calculateTotal = (item: Partial<RPDItem>): number => {
+    return (
+      (item.jan || 0) +
+      (item.feb || 0) +
+      (item.mar || 0) +
+      (item.apr || 0) +
+      (item.mei || 0) +
+      (item.jun || 0) +
+      (item.jul || 0) +
+      (item.aug || 0) +
+      (item.sep || 0) +
+      (item.oct || 0) +
+      (item.nov || 0) +
+      (item.dec || 0)
+    );
+  };
+
+  const validateItem = (item: Partial<RPDItem>): boolean => {
+    if (!item.uraian || item.uraian.trim() === '') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Uraian harus diisi'
+      });
+      return false;
     }
-  }, [filters, refreshData]);
+    
+    return true;
+  };
 
-  const startEditing = (itemId: string) => {
-    const item = rpdItems.find(item => item.id === itemId);
-    if (!item) return;
+  const handleAddItem = async () => {
+    if (!validateItem(newItem)) {
+      return;
+    }
 
-    setEditingItem(itemId);
-    setEditValues({
-      [itemId]: {
-        januari: item.januari,
-        februari: item.februari,
-        maret: item.maret,
-        april: item.april,
-        mei: item.mei,
-        juni: item.juni,
-        juli: item.juli,
-        agustus: item.agustus,
-        september: item.september,
-        oktober: item.oktober,
-        november: item.november,
-        desember: item.desember
-      }
+    try {
+      const total = calculateTotal(newItem);
+      const itemToAdd = {
+        ...newItem,
+        total
+      };
+
+      await onAdd(itemToAdd);
+
+      setNewItem({
+        uraian: '',
+        total: 0,
+        jan: 0,
+        feb: 0,
+        mar: 0,
+        apr: 0,
+        mei: 0,
+        jun: 0,
+        jul: 0,
+        aug: 0,
+        sep: 0,
+        oct: 0,
+        nov: 0,
+        dec: 0
+      });
+
+      toast({
+        title: "Berhasil",
+        description: 'Item berhasil ditambahkan'
+      });
+    } catch (error) {
+      console.error('Failed to add item:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: 'Gagal menambahkan item. Silakan coba lagi.'
+      });
+    }
+  };
+
+  const startEditing = (item: RPDItem) => {
+    setEditingId(item.id);
+  };
+
+  const saveEditing = (id: string) => {
+    setEditingId(null);
+    toast({
+      title: "Berhasil",
+      description: 'Perubahan berhasil disimpan'
     });
   };
 
-  const handleInputChange = (itemId: string, month: string, value: string) => {
-    const numericValue = value === '' ? 0 : parseFloat(value);
-    
-    setEditValues(prev => ({
-      ...prev,
-      [itemId]: {
-        ...prev[itemId],
-        [month]: numericValue
+  const handleEditChange = (id: string, field: string, value: string | number) => {
+    if (field !== 'uraian') {
+      if (typeof value === 'string') {
+        const numValue = Number(value.replace(/,/g, ''));
+        if (isNaN(numValue)) return;
+        value = numValue;
       }
-    }));
-  };
-
-  const saveChanges = async (itemId: string) => {
-    const values = editValues[itemId];
-    const success = await updateRPDItem(itemId, values);
+      
+      if (value < 0) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: 'Nilai tidak boleh negatif'
+        });
+        return;
+      }
+    }
     
-    if (success) {
-      setEditingItem(null);
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+    
+    const updates: Partial<RPDItem> = { [field]: value };
+    
+    if (field !== 'uraian' && field !== 'total') {
+      const updatedItem = { ...item, ...updates };
+      updates.total = calculateTotal(updatedItem);
+    }
+    
+    onUpdate(id, updates);
+  };
+
+  const handleSort = (field: keyof RPDItem) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
     }
   };
 
-  const cancelEditing = () => {
-    setEditingItem(null);
-    setEditValues({});
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ok':
-        return <Check className="h-4 w-4 text-green-500" />;
-      case 'belum_isi':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case 'sisa':
-        return <Info className="h-4 w-4 text-orange-500" />;
-      default:
-        return null;
+  const sortedItems = [...items].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    const fieldA = a[sortField];
+    const fieldB = b[sortField];
+    
+    if (fieldA === undefined || fieldB === undefined) return 0;
+    
+    if (typeof fieldA === 'string' && typeof fieldB === 'string') {
+      return sortDirection === 'asc' 
+        ? fieldA.localeCompare(fieldB) 
+        : fieldB.localeCompare(fieldA);
     }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'ok':
-        return 'Ok';
-      case 'belum_isi':
-        return 'Belum Isi';
-      case 'belum_lengkap':
-        return 'Belum Lengkap';
-      case 'sisa':
-        return 'Sisa';
-      default:
-        return 'Lainnya';
+    
+    if (typeof fieldA === 'number' && typeof fieldB === 'number') {
+      return sortDirection === 'asc' 
+        ? fieldA - fieldB 
+        : fieldB - fieldA;
     }
+    
+    return 0;
+  });
+
+  const totalByMonth = {
+    jan: items.reduce((sum, item) => sum + item.jan, 0),
+    feb: items.reduce((sum, item) => sum + item.feb, 0),
+    mar: items.reduce((sum, item) => sum + item.mar, 0),
+    apr: items.reduce((sum, item) => sum + item.apr, 0),
+    mei: items.reduce((sum, item) => sum + item.mei, 0),
+    jun: items.reduce((sum, item) => sum + item.jun, 0),
+    jul: items.reduce((sum, item) => sum + item.jul, 0),
+    aug: items.reduce((sum, item) => sum + item.aug, 0),
+    sep: items.reduce((sum, item) => sum + item.sep, 0),
+    oct: items.reduce((sum, item) => sum + item.oct, 0),
+    nov: items.reduce((sum, item) => sum + item.nov, 0),
+    dec: items.reduce((sum, item) => sum + item.dec, 0)
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ok':
-        return 'bg-green-100 text-green-800';
-      case 'belum_isi':
-        return 'bg-red-100 text-red-800';
-      case 'sisa':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+  const sisaPagu = pagu - grandTotal;
 
-  const getRowBackground = (item: RPDItem) => {
-    if (item.status === 'belum_isi') return 'bg-red-50';
-    if (item.status === 'sisa') return 'bg-orange-50';
+  const getMonthClass = (month: keyof typeof totalByMonth): string => {
+    const total = totalByMonth[month];
+    if (total === 0) return 'belum-isi';
     return '';
   };
 
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('id-ID');
-  };
-  
-  const filteredItems = rpdItems.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
-      item.uraian.toLowerCase().includes(searchLower) ||
-      item.satuan_menjadi?.toLowerCase().includes(searchLower) ||
-      item.jumlah_menjadi.toString().includes(searchTerm) ||
-      item.volume_menjadi.toString().includes(searchTerm) ||
-      item.harga_satuan_menjadi.toString().includes(searchTerm) ||
-      item.januari.toString().includes(searchTerm) ||
-      item.februari.toString().includes(searchTerm) ||
-      item.maret.toString().includes(searchTerm) ||
-      item.april.toString().includes(searchTerm) ||
-      item.mei.toString().includes(searchTerm) ||
-      item.juni.toString().includes(searchTerm) ||
-      item.juli.toString().includes(searchTerm) ||
-      item.agustus.toString().includes(searchTerm) ||
-      item.september.toString().includes(searchTerm) ||
-      item.oktober.toString().includes(searchTerm) ||
-      item.november.toString().includes(searchTerm) ||
-      item.desember.toString().includes(searchTerm);
+  const renderItemField = (item: RPDItem, field: keyof RPDItem) => {
+    const isEditing = editingId === item.id;
     
-    if (hideZeroBudget) {
-      return matchesSearch && item.jumlah_menjadi > 0;
+    if (field === 'uraian') {
+      return isEditing ? (
+        <Input 
+          value={item.uraian} 
+          onChange={(e) => handleEditChange(item.id, 'uraian', e.target.value)}
+          className="w-full"
+        />
+      ) : (
+        <span>{item.uraian}</span>
+      );
     }
     
-    return matchesSearch;
-  });
-  
-  const totalPages = Math.ceil(filteredItems.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, filteredItems.length);
-  const paginatedItems = filteredItems.slice(startIndex, endIndex);
-  
-  const totals = {
-    jumlah_menjadi: filteredItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0),
-    jumlah_rpd: filteredItems.reduce((sum, item) => sum + item.jumlah_rpd, 0),
-    januari: filteredItems.reduce((sum, item) => sum + item.januari, 0),
-    februari: filteredItems.reduce((sum, item) => sum + item.februari, 0),
-    maret: filteredItems.reduce((sum, item) => sum + item.maret, 0),
-    april: filteredItems.reduce((sum, item) => sum + item.april, 0),
-    mei: filteredItems.reduce((sum, item) => sum + item.mei, 0),
-    juni: filteredItems.reduce((sum, item) => sum + item.juni, 0),
-    juli: filteredItems.reduce((sum, item) => sum + item.juli, 0),
-    agustus: filteredItems.reduce((sum, item) => sum + item.agustus, 0),
-    september: filteredItems.reduce((sum, item) => sum + item.september, 0),
-    oktober: filteredItems.reduce((sum, item) => sum + item.oktober, 0),
-    november: filteredItems.reduce((sum, item) => sum + item.november, 0),
-    desember: filteredItems.reduce((sum, item) => sum + item.desember, 0)
-  };
-  
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+    if (field === 'total') {
+      return <span>{formatCurrency(item.total)}</span>;
     }
+    
+    // For month fields
+    return isEditing ? (
+      <Input 
+        type="number"
+        value={item[field] as number} 
+        onChange={(e) => handleEditChange(item.id, field, e.target.value)}
+        className="w-full text-right"
+        min="0"
+      />
+    ) : (
+      <span>{formatCurrency(item[field] as number, false)}</span>
+    );
   };
-  
-  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSize = parseInt(e.target.value);
-    setPageSize(newSize);
-    setCurrentPage(1);
-  };
-  
-  const canEditMonths = isAdmin || (profile?.role === 'user');
+
+  if (isLoading) {
+    return <div className="flex justify-center p-4">Loading RPD data...</div>;
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-2">
-        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-          <div className="relative">
-            <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
-            <Input
-              placeholder="Cari rencana penarikan dana..."
-              className="pl-8 w-full sm:w-80 h-8 text-sm"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-            />
-          </div>
-          
-          <div className="filter-checkbox-container">
-            <Checkbox 
-              id="hideZeroBudgetRPD"
-              checked={hideZeroBudget}
-              onCheckedChange={(checked) => {
-                setHideZeroBudget(checked === true);
-                setCurrentPage(1);
-              }}
-              className="filter-checkbox"
-            />
-            <label htmlFor="hideZeroBudgetRPD" className="filter-checkbox-label text-slate-700">
-              Sembunyikan jumlah pagu 0
-            </label>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-700">Tampilkan:</span>
-          <select
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            className="border border-slate-300 rounded text-slate-700 px-2 py-1 text-sm"
-          >
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
-      </div>
-      
-      <div className="text-xs text-slate-700">
-        Menampilkan {paginatedItems.length} dari {filteredItems.length} item
-        {searchTerm && ` (filter: "${searchTerm}")`}
-        {hideZeroBudget && ` (menyembunyikan jumlah pagu 0)`}
-      </div>
-      
-      <div className="overflow-x-auto pb-4 border border-slate-200 rounded-md">
-        <div className="min-width-[1400px]">
-          <Table className="rpd-table table-fixed w-full">
-            <TableHeader className="bg-white">
-              <TableRow className="h-10">
-                <TableHead className="sticky-status w-[80px] text-center bg-white text-slate-700 font-medium border-r border-slate-200">Status</TableHead>
-                <TableHead className="sticky-uraian w-[350px] text-left bg-white text-slate-700 font-medium border-r border-slate-200">Uraian</TableHead>
-                <TableHead className="text-right w-[70px] text-slate-700 font-medium">Volume</TableHead>
-                <TableHead className="text-center w-[70px] text-slate-700 font-medium">Satuan</TableHead>
-                <TableHead className="text-right w-[100px] text-slate-700 font-medium">Harga Satuan</TableHead>
-                <TableHead className="text-right w-[120px] text-slate-700 font-medium">Jumlah Pagu</TableHead>
-                <TableHead className="text-right bg-slate-50 w-[120px] text-slate-700 font-medium">Jumlah RPD</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Januari</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Februari</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Maret</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">April</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Mei</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Juni</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Juli</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Agustus</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">September</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Oktober</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">November</TableHead>
-                <TableHead className="month-column text-right w-[100px] text-slate-700 font-medium">Desember</TableHead>
-                <TableHead className="w-20 text-center text-slate-700 font-medium">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            
-            <TableBody className="bg-white">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={index} className="h-8">
-                    {Array.from({ length: 20 }).map((_, cellIndex) => (
-                      <TableCell key={cellIndex} className="p-1">
-                        <Skeleton className="h-5 w-full" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : paginatedItems.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={20} className="text-center py-4 text-slate-600">
-                    {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data Rencana Penarikan Dana'}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                <>
-                  {paginatedItems.map(item => (
-                    <TableRow key={item.id} className={`h-8 ${getRowBackground(item)}`}>
-                      <TableCell className="sticky-status text-center p-1 bg-inherit border-r border-slate-200">
-                        <div className="flex items-center justify-center">
-                          <div className={`px-1.5 py-0.5 rounded-full flex items-center ${getStatusColor(item.status)}`}>
-                            {getStatusIcon(item.status)}
-                            <span className="ml-1 text-xs font-normal">{getStatusText(item.status)}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="sticky-uraian p-1 bg-inherit rpd-uraian-cell text-left border-r border-slate-200">{item.uraian}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.volume_menjadi)}</TableCell>
-                      <TableCell className="text-center p-1 font-normal">{item.satuan_menjadi}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.harga_satuan_menjadi)}</TableCell>
-                      <TableCell className="text-right p-1 font-normal">{formatCurrency(item.jumlah_menjadi)}</TableCell>
-                      <TableCell className="text-right p-1 font-normal bg-slate-50">{formatCurrency(item.jumlah_rpd)}</TableCell>
-                      
-                      {editingItem === item.id ? (
-                        <>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.januari || 0} onChange={(e) => handleInputChange(item.id, 'januari', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.februari || 0} onChange={(e) => handleInputChange(item.id, 'februari', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.maret || 0} onChange={(e) => handleInputChange(item.id, 'maret', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.april || 0} onChange={(e) => handleInputChange(item.id, 'april', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.mei || 0} onChange={(e) => handleInputChange(item.id, 'mei', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.juni || 0} onChange={(e) => handleInputChange(item.id, 'juni', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.juli || 0} onChange={(e) => handleInputChange(item.id, 'juli', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.agustus || 0} onChange={(e) => handleInputChange(item.id, 'agustus', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.september || 0} onChange={(e) => handleInputChange(item.id, 'september', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.oktober || 0} onChange={(e) => handleInputChange(item.id, 'oktober', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.november || 0} onChange={(e) => handleInputChange(item.id, 'november', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1"><Input type="number" min="0" value={editValues[item.id]?.desember || 0} onChange={(e) => handleInputChange(item.id, 'desember', e.target.value)} className="h-7 text-right text-xs" /></TableCell>
-                          <TableCell className="p-1">
-                            <div className="flex space-x-1">
-                              <Button size="sm" variant="default" onClick={() => saveChanges(item.id)} className="text-xs py-0 h-6">
-                                Simpan
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={cancelEditing} className="text-xs py-0 h-6">
-                                Batal
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </>
-                      ) : (
-                        <>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.januari)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.februari)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.maret)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.april)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.mei)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.juni)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.juli)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.agustus)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.september)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.oktober)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.november)}</TableCell>
-                          <TableCell className="text-right p-1 font-normal">{formatCurrency(item.desember)}</TableCell>
-                          <TableCell className="p-1 text-center">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="bg-white hover:bg-slate-50 border-slate-200 text-slate-700 text-xs h-6"
-                              onClick={() => startEditing(item.id)}
-                              disabled={!canEditMonths}
-                            >
-                              Edit
-                            </Button>
-                          </TableCell>
-                        </>
-                      )}
-                    </TableRow>
-                  ))}
-                  
-                  <TableRow className="bg-slate-100 font-medium">
-                    <TableCell className="sticky-status bg-slate-100 p-1 border-r border-slate-200" colSpan={1}>
-                      <span className="font-medium text-slate-700">TOTAL</span>
-                    </TableCell>
-                    <TableCell className="sticky-uraian bg-slate-100 p-1 border-r border-slate-200"></TableCell>
-                    <TableCell className="p-1" colSpan={3}></TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.jumlah_menjadi)}</TableCell>
-                    <TableCell className="text-right p-1 bg-slate-50">{formatCurrency(totals.jumlah_rpd)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.januari)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.februari)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.maret)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.april)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.mei)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.juni)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.juli)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.agustus)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.september)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.oktober)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.november)}</TableCell>
-                    <TableCell className="text-right p-1">{formatCurrency(totals.desember)}</TableCell>
-                    <TableCell className="p-1"></TableCell>
-                  </TableRow>
-                </>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-      
-      {!loading && filteredItems.length > 0 && (
-        <div className="pagination-controls">
-          <div className="page-size-selector">
-            <span className="text-sm text-slate-700">Menampilkan {startIndex + 1} - {endIndex} dari {filteredItems.length} item</span>
-          </div>
-          
-          <div className="page-navigation">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => goToPage(currentPage - 1)} 
-              disabled={currentPage === 1}
-              className="pagination-button"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <span className="px-3 py-1 text-sm text-slate-700">
-              Halaman {currentPage} dari {totalPages}
-            </span>
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => goToPage(currentPage + 1)} 
-              disabled={currentPage === totalPages}
-              className="pagination-button"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <style jsx global>{`
+    <div className="space-y-2">
+      <style>
+      {`
         .rpd-table th, .rpd-table td {
+          padding: 4px 6px;
+          font-size: 0.75rem;
+          text-align: center;
           white-space: nowrap;
+          min-width: 80px;
         }
-        .rpd-uraian-cell {
-          white-space: normal;
-          word-break: break-word;
-          min-width: 300px;
-          max-width: 350px;
-        }
-        .sticky-status {
+        
+        .rpd-table th {
+          background-color: #f1f5f9;
+          font-weight: 600;
           position: sticky;
-          left: 0;
-          z-index: 20;
+          top: 0;
+          z-index: 10;
         }
-        .sticky-uraian {
-          position: sticky;
-          left: 80px;
-          z-index: 19;
+        
+        .rpd-table .month-cell {
+          min-width: 80px;
+          width: 80px;
+          max-width: 80px;
         }
-        .month-column {
-          width: 90px !important;
-          min-width: 90px !important;
-          max-width: 90px !important;
+        
+        .rpd-table .description-cell {
+          text-align: left;
+          min-width: 200px;
         }
-      `}</style>
+        
+        .rpd-table .total-cell {
+          font-weight: 600;
+        }
+        
+        .rpd-table .action-cell {
+          width: 60px;
+        }
+        
+        .rpd-table .input-cell input {
+          width: 80px;
+          text-align: right;
+        }
+        
+        .rpd-table .header-row th {
+          border-bottom: 2px solid #cbd5e1;
+        }
+        
+        .rpd-table .footer-row td {
+          font-weight: 600;
+          border-top: 2px solid #cbd5e1;
+          background-color: #f8fafc;
+        }
+        
+        .rpd-table .belum-isi {
+          background-color: #fee2e2;
+        }
+        
+        .rpd-table .belum-lengkap {
+          background-color: #fef9c3;
+        }
+        
+        .rpd-table .sisa {
+          background-color: #e0f2fe;
+        }
+      `}
+      </style>
+      
+      <div className="rounded-md border border-gray-200 w-full overflow-x-auto">
+        <table className="w-full min-w-full rpd-table">
+          <thead>
+            <tr className="header-row">
+              <th className="py-2 px-1 w-8">#</th>
+              <th className="description-cell py-2 px-1">
+                <button 
+                  className="flex items-center" 
+                  onClick={() => handleSort('uraian')}
+                >
+                  Uraian
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('jan')}
+                >
+                  Jan
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('feb')}
+                >
+                  Feb
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('mar')}
+                >
+                  Mar
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('apr')}
+                >
+                  Apr
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('mei')}
+                >
+                  Mei
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('jun')}
+                >
+                  Jun
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('jul')}
+                >
+                  Jul
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('aug')}
+                >
+                  Agu
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('sep')}
+                >
+                  Sep
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('oct')}
+                >
+                  Okt
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('nov')}
+                >
+                  Nov
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="month-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('dec')}
+                >
+                  Des
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="total-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-center w-full" 
+                  onClick={() => handleSort('total')}
+                >
+                  Total
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="action-cell py-2 px-1">Aksi</th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            {sortedItems.length === 0 ? (
+              <tr>
+                <td colSpan={16} className="py-4 text-center text-slate-500">
+                  Tidak ada data
+                </td>
+              </tr>
+            ) : (
+              sortedItems.map((item, index) => (
+                <tr key={item.id} className={`${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
+                  <td className="text-center">{index + 1}</td>
+                  <td className="description-cell">{renderItemField(item, 'uraian')}</td>
+                  <td className={`month-cell ${getMonthClass('jan')}`}>{renderItemField(item, 'jan')}</td>
+                  <td className={`month-cell ${getMonthClass('feb')}`}>{renderItemField(item, 'feb')}</td>
+                  <td className={`month-cell ${getMonthClass('mar')}`}>{renderItemField(item, 'mar')}</td>
+                  <td className={`month-cell ${getMonthClass('apr')}`}>{renderItemField(item, 'apr')}</td>
+                  <td className={`month-cell ${getMonthClass('mei')}`}>{renderItemField(item, 'mei')}</td>
+                  <td className={`month-cell ${getMonthClass('jun')}`}>{renderItemField(item, 'jun')}</td>
+                  <td className={`month-cell ${getMonthClass('jul')}`}>{renderItemField(item, 'jul')}</td>
+                  <td className={`month-cell ${getMonthClass('aug')}`}>{renderItemField(item, 'aug')}</td>
+                  <td className={`month-cell ${getMonthClass('sep')}`}>{renderItemField(item, 'sep')}</td>
+                  <td className={`month-cell ${getMonthClass('oct')}`}>{renderItemField(item, 'oct')}</td>
+                  <td className={`month-cell ${getMonthClass('nov')}`}>{renderItemField(item, 'nov')}</td>
+                  <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
+                  <td className="total-cell">{renderItemField(item, 'total')}</td>
+                  <td className="action-cell">
+                    <div className="flex space-x-1 justify-center">
+                      {editingId === item.id ? (
+                        <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                          <Check className="h-3 w-3" />
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => startEditing(item)} 
+                          className="h-6 w-6"
+                        >
+                          <FileEdit className="h-3 w-3" />
+                        </Button>
+                      )}
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => {
+                          onDelete(item.id);
+                          toast({
+                            title: "Berhasil",
+                            description: 'Item berhasil dihapus'
+                          });
+                        }}
+                        className="h-6 w-6"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+
+            <tr className="bg-gray-50 h-9">
+              <td className="py-1 px-1 text-center">{items.length + 1}</td>
+              <td className="description-cell py-1 px-1">
+                <Input 
+                  placeholder="Tambah Uraian Baru" 
+                  value={newItem.uraian} 
+                  onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
+                  required
+                  className="h-7 text-xs"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.jan || ''} 
+                  onChange={(e) => setNewItem({...newItem, jan: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.feb || ''} 
+                  onChange={(e) => setNewItem({...newItem, feb: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.mar || ''} 
+                  onChange={(e) => setNewItem({...newItem, mar: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.apr || ''} 
+                  onChange={(e) => setNewItem({...newItem, apr: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.mei || ''} 
+                  onChange={(e) => setNewItem({...newItem, mei: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.jun || ''} 
+                  onChange={(e) => setNewItem({...newItem, jun: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.jul || ''} 
+                  onChange={(e) => setNewItem({...newItem, jul: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.aug || ''} 
+                  onChange={(e) => setNewItem({...newItem, aug: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.sep || ''} 
+                  onChange={(e) => setNewItem({...newItem, sep: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.oct || ''} 
+                  onChange={(e) => setNewItem({...newItem, oct: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.nov || ''} 
+                  onChange={(e) => setNewItem({...newItem, nov: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="month-cell py-1 px-1">
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={newItem.dec || ''} 
+                  onChange={(e) => setNewItem({...newItem, dec: Number(e.target.value)})}
+                  min="0"
+                  required
+                  className="h-7 text-xs text-right"
+                />
+              </td>
+              <td className="total-cell py-1 px-1">
+                {formatCurrency(calculateTotal(newItem))}
+              </td>
+              <td className="action-cell py-1 px-1">
+                <Button 
+                  onClick={handleAddItem} 
+                  size="sm" 
+                  className="w-full h-7 text-xs"
+                >
+                  <PlusCircle className="h-3 w-3 mr-1" />
+                  Tambah
+                </Button>
+              </td>
+            </tr>
+            
+            <tr className="footer-row">
+              <td colSpan={2} className="text-right">Total per Bulan</td>
+              <td className={`month-cell ${getMonthClass('jan')}`}>{formatCurrency(totalByMonth.jan, false)}</td>
+              <td className={`month-cell ${getMonthClass('feb')}`}>{formatCurrency(totalByMonth.feb, false)}</td>
+              <td className={`month-cell ${getMonthClass('mar')}`}>{formatCurrency(totalByMonth.mar, false)}</td>
+              <td className={`month-cell ${getMonthClass('apr')}`}>{formatCurrency(totalByMonth.apr, false)}</td>
+              <td className={`month-cell ${getMonthClass('mei')}`}>{formatCurrency(totalByMonth.mei, false)}</td>
+              <td className={`month-cell ${getMonthClass('jun')}`}>{formatCurrency(totalByMonth.jun, false)}</td>
+              <td className={`month-cell ${getMonthClass('jul')}`}>{formatCurrency(totalByMonth.jul, false)}</td>
+              <td className={`month-cell ${getMonthClass('aug')}`}>{formatCurrency(totalByMonth.aug, false)}</td>
+              <td className={`month-cell ${getMonthClass('sep')}`}>{formatCurrency(totalByMonth.sep, false)}</td>
+              <td className={`month-cell ${getMonthClass('oct')}`}>{formatCurrency(totalByMonth.oct, false)}</td>
+              <td className={`month-cell ${getMonthClass('nov')}`}>{formatCurrency(totalByMonth.nov, false)}</td>
+              <td className={`month-cell ${getMonthClass('dec')}`}>{formatCurrency(totalByMonth.dec, false)}</td>
+              <td className="total-cell">{formatCurrency(grandTotal)}</td>
+              <td></td>
+            </tr>
+            
+            <tr className="footer-row">
+              <td colSpan={2} className="text-right">Pagu Anggaran</td>
+              <td colSpan={12}></td>
+              <td className="total-cell">{formatCurrency(pagu)}</td>
+              <td></td>
+            </tr>
+            
+            <tr className="footer-row">
+              <td colSpan={2} className="text-right">Sisa Pagu</td>
+              <td colSpan={12}></td>
+              <td className={`total-cell sisa ${sisaPagu < 0 ? 'text-red-600' : ''}`}>
+                {formatCurrency(sisaPagu)}
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

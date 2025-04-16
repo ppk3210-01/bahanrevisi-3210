@@ -21,3 +21,43 @@ export const updateItemStatus = (item: any) => {
   
   return newItem;
 };
+
+// Add formatCurrency function
+export const formatCurrency = (amount: number, showPrefix: boolean = true): string => {
+  const formatter = new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  
+  const formattedAmount = formatter.format(amount);
+  return showPrefix ? `Rp ${formattedAmount}` : formattedAmount;
+};
+
+// Add calculateAmount function
+export const calculateAmount = (volume: number, unitPrice: number): number => {
+  return volume * unitPrice;
+};
+
+// Add calculateDifference function
+export const calculateDifference = (original: number, updated: number): number => {
+  return updated - original;
+};
+
+// Add roundToThousands function
+export const roundToThousands = (value: number): number => {
+  return Math.round(value / 1000) * 1000;
+};
+
+// Add getRowStyle function
+export const getRowStyle = (status: string): string => {
+  switch (status) {
+    case 'changed':
+      return 'bg-yellow-50';
+    case 'new':
+      return 'bg-blue-50';
+    case 'deleted':
+      return 'bg-red-50';
+    default:
+      return '';
+  }
+};

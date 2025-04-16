@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -65,7 +66,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     hargaSatuanMenjadi: 0,
     komponenOutput,
     subKomponen,
-    akun
+    akun,
+    programPembebanan: '',
+    kegiatan: '',
+    rincianOutput: ''
   });
   
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -170,6 +174,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         komponenOutput,
         subKomponen: subKomponen || '',
         akun: akun || '',
+        programPembebanan: '',
+        kegiatan: '',
+        rincianOutput: '',
         isApproved: false
       };
 
@@ -185,7 +192,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         hargaSatuanMenjadi: 0,
         komponenOutput,
         subKomponen,
-        akun
+        akun,
+        programPembebanan: '',
+        kegiatan: '',
+        rincianOutput: ''
       });
 
       toast({
