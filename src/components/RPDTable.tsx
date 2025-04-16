@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,8 @@ import {
 import { formatCurrency } from '@/utils/budgetCalculations';
 import { PlusCircle, Trash2, FileEdit, Check, ArrowUpDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { FilterSelection } from '@/types/budget';
+import { useRPDData } from '@/hooks/useRPDData';
 
 interface RPDItem {
   id: string;
@@ -31,128 +34,18 @@ interface RPDItem {
 }
 
 interface RPDTableProps {
-  items: RPDItem[];
-  onAdd: (item: Omit<RPDItem, 'id'>) => void;
-  onUpdate: (id: string, updates: Partial<RPDItem>) => void;
-  onDelete: (id: string) => void;
-  isLoading: boolean;
-  pagu: number;
+  filters: FilterSelection;
 }
 
-const RPDTable: React.FC<RPDTableProps> = ({
-  items,
-  onAdd,
-  onUpdate,
-  onDelete,
-  isLoading,
-  pagu
-}) => {
+const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
+  const { rpdItems, loading, updateRPDItem } = useRPDData(filters);
+
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [newItem, setNewItem] = useState<Omit<RPDItem, 'id'>>({
-    uraian: '',
-    total: 0,
-    jan: 0,
-    feb: 0,
-    mar: 0,
-    apr: 0,
-    mei: 0,
-    jun: 0,
-    jul: 0,
-    aug: 0,
-    sep: 0,
-    oct: 0,
-    nov: 0,
-    dec: 0
-  });
   const [sortField, setSortField] = useState<keyof RPDItem | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const calculateTotal = (item: Partial<RPDItem>): number => {
-    return (
-      (item.jan || 0) +
-      (item.feb || 0) +
-      (item.mar || 0) +
-      (item.apr || 0) +
-      (item.mei || 0) +
-      (item.jun || 0) +
-      (item.jul || 0) +
-      (item.aug || 0) +
-      (item.sep || 0) +
-      (item.oct || 0) +
-      (item.nov || 0) +
-      (item.dec || 0)
-    );
-  };
-
-  const validateItem = (item: Partial<RPDItem>): boolean => {
-    if (!item.uraian || item.uraian.trim() === '') {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: 'Uraian harus diisi'
-      });
-      return false;
-    }
-    
-    return true;
-  };
-
-  const handleAddItem = async () => {
-    if (!validateItem(newItem)) {
-      return;
-    }
-
-    try {
-      const total = calculateTotal(newItem);
-      const itemToAdd = {
-        ...newItem,
-        total
-      };
-
-      await onAdd(itemToAdd);
-
-      setNewItem({
-        uraian: '',
-        total: 0,
-        jan: 0,
-        feb: 0,
-        mar: 0,
-        apr: 0,
-        mei: 0,
-        jun: 0,
-        jul: 0,
-        aug: 0,
-        sep: 0,
-        oct: 0,
-        nov: 0,
-        dec: 0
-      });
-
-      toast({
-        title: "Berhasil",
-        description: 'Item berhasil ditambahkan'
-      });
-    } catch (error) {
-      console.error('Failed to add item:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: 'Gagal menambahkan item. Silakan coba lagi.'
-      });
-    }
-  };
-
-  const startEditing = (item: RPDItem) => {
-    setEditingId(item.id);
-  };
-
-  const saveEditing = (id: string) => {
-    setEditingId(null);
-    toast({
-      title: "Berhasil",
-      description: 'Perubahan berhasil disimpan'
-    });
-  };
+  // Calculate the pagu value from the rpdItems
+  const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
   const handleEditChange = (id: string, field: string, value: string | number) => {
     if (field !== 'uraian') {
@@ -172,17 +65,38 @@ const RPDTable: React.FC<RPDTableProps> = ({
       }
     }
     
-    const item = items.find(item => item.id === id);
-    if (!item) return;
+    // Convert field names to match the API
+    let apiField = field;
+    if (field === 'jan') apiField = 'januari';
+    if (field === 'feb') apiField = 'februari';
+    if (field === 'mar') apiField = 'maret';
+    if (field === 'apr') apiField = 'april';
+    if (field === 'mei') apiField = 'mei';
+    if (field === 'jun') apiField = 'juni';
+    if (field === 'jul') apiField = 'juli';
+    if (field === 'aug') apiField = 'agustus';
+    if (field === 'sep') apiField = 'september';
+    if (field === 'oct') apiField = 'oktober';
+    if (field === 'nov') apiField = 'november';
+    if (field === 'dec') apiField = 'desember';
     
-    const updates: Partial<RPDItem> = { [field]: value };
+    // Prepare updates object with the correct field name
+    const updates = { [apiField]: value };
     
-    if (field !== 'uraian' && field !== 'total') {
-      const updatedItem = { ...item, ...updates };
-      updates.total = calculateTotal(updatedItem);
-    }
-    
-    onUpdate(id, updates);
+    // Update the item
+    updateRPDItem(id, updates);
+  };
+
+  const startEditing = (item: any) => {
+    setEditingId(item.id);
+  };
+
+  const saveEditing = (id: string) => {
+    setEditingId(null);
+    toast({
+      title: "Berhasil",
+      description: 'Perubahan berhasil disimpan'
+    });
   };
 
   const handleSort = (field: keyof RPDItem) => {
@@ -194,11 +108,58 @@ const RPDTable: React.FC<RPDTableProps> = ({
     }
   };
 
-  const sortedItems = [...items].sort((a, b) => {
+  const sortedItems = [...rpdItems].sort((a, b) => {
     if (!sortField) return 0;
     
-    const fieldA = a[sortField];
-    const fieldB = b[sortField];
+    let fieldA: any, fieldB: any;
+    
+    // Map the sortField to the actual property names in the rpdItems
+    if (sortField === 'jan') {
+      fieldA = a.januari;
+      fieldB = b.januari;
+    } else if (sortField === 'feb') {
+      fieldA = a.februari;
+      fieldB = b.februari;
+    } else if (sortField === 'mar') {
+      fieldA = a.maret;
+      fieldB = b.maret;
+    } else if (sortField === 'apr') {
+      fieldA = a.april;
+      fieldB = b.april;
+    } else if (sortField === 'mei') {
+      fieldA = a.mei;
+      fieldB = b.mei;
+    } else if (sortField === 'jun') {
+      fieldA = a.juni;
+      fieldB = b.juni;
+    } else if (sortField === 'jul') {
+      fieldA = a.juli;
+      fieldB = b.juli;
+    } else if (sortField === 'aug') {
+      fieldA = a.agustus;
+      fieldB = b.agustus;
+    } else if (sortField === 'sep') {
+      fieldA = a.september;
+      fieldB = b.september;
+    } else if (sortField === 'oct') {
+      fieldA = a.oktober;
+      fieldB = b.oktober;
+    } else if (sortField === 'nov') {
+      fieldA = a.november;
+      fieldB = b.november;
+    } else if (sortField === 'dec') {
+      fieldA = a.desember;
+      fieldB = b.desember;
+    } else if (sortField === 'total') {
+      fieldA = a.jumlah_rpd;
+      fieldB = b.jumlah_rpd;
+    } else if (sortField === 'uraian') {
+      fieldA = a.uraian;
+      fieldB = b.uraian;
+    } else {
+      fieldA = (a as any)[sortField];
+      fieldB = (b as any)[sortField];
+    }
     
     if (fieldA === undefined || fieldB === undefined) return 0;
     
@@ -218,21 +179,21 @@ const RPDTable: React.FC<RPDTableProps> = ({
   });
 
   const totalByMonth = {
-    jan: items.reduce((sum, item) => sum + item.jan, 0),
-    feb: items.reduce((sum, item) => sum + item.feb, 0),
-    mar: items.reduce((sum, item) => sum + item.mar, 0),
-    apr: items.reduce((sum, item) => sum + item.apr, 0),
-    mei: items.reduce((sum, item) => sum + item.mei, 0),
-    jun: items.reduce((sum, item) => sum + item.jun, 0),
-    jul: items.reduce((sum, item) => sum + item.jul, 0),
-    aug: items.reduce((sum, item) => sum + item.aug, 0),
-    sep: items.reduce((sum, item) => sum + item.sep, 0),
-    oct: items.reduce((sum, item) => sum + item.oct, 0),
-    nov: items.reduce((sum, item) => sum + item.nov, 0),
-    dec: items.reduce((sum, item) => sum + item.dec, 0)
+    jan: rpdItems.reduce((sum, item) => sum + (item.januari || 0), 0),
+    feb: rpdItems.reduce((sum, item) => sum + (item.februari || 0), 0),
+    mar: rpdItems.reduce((sum, item) => sum + (item.maret || 0), 0),
+    apr: rpdItems.reduce((sum, item) => sum + (item.april || 0), 0),
+    mei: rpdItems.reduce((sum, item) => sum + (item.mei || 0), 0),
+    jun: rpdItems.reduce((sum, item) => sum + (item.juni || 0), 0),
+    jul: rpdItems.reduce((sum, item) => sum + (item.juli || 0), 0),
+    aug: rpdItems.reduce((sum, item) => sum + (item.agustus || 0), 0),
+    sep: rpdItems.reduce((sum, item) => sum + (item.september || 0), 0),
+    oct: rpdItems.reduce((sum, item) => sum + (item.oktober || 0), 0),
+    nov: rpdItems.reduce((sum, item) => sum + (item.november || 0), 0),
+    dec: rpdItems.reduce((sum, item) => sum + (item.desember || 0), 0)
   };
 
-  const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+  const grandTotal = rpdItems.reduce((sum, item) => sum + (item.jumlah_rpd || 0), 0);
   const sisaPagu = pagu - grandTotal;
 
   const getMonthClass = (month: keyof typeof totalByMonth): string => {
@@ -241,7 +202,7 @@ const RPDTable: React.FC<RPDTableProps> = ({
     return '';
   };
 
-  const renderItemField = (item: RPDItem, field: keyof RPDItem) => {
+  const renderItemField = (item: any, field: string) => {
     const isEditing = editingId === item.id;
     
     if (field === 'uraian') {
@@ -257,31 +218,45 @@ const RPDTable: React.FC<RPDTableProps> = ({
     }
     
     if (field === 'total') {
-      return <span>{formatCurrency(item.total)}</span>;
+      return <span>{formatCurrency(item.jumlah_rpd || 0)}</span>;
     }
+    
+    // Map field names to the actual properties in the data
+    let value = 0;
+    if (field === 'jan') value = item.januari || 0;
+    else if (field === 'feb') value = item.februari || 0;
+    else if (field === 'mar') value = item.maret || 0;
+    else if (field === 'apr') value = item.april || 0;
+    else if (field === 'mei') value = item.mei || 0;
+    else if (field === 'jun') value = item.juni || 0;
+    else if (field === 'jul') value = item.juli || 0;
+    else if (field === 'aug') value = item.agustus || 0;
+    else if (field === 'sep') value = item.september || 0;
+    else if (field === 'oct') value = item.oktober || 0;
+    else if (field === 'nov') value = item.november || 0;
+    else if (field === 'dec') value = item.desember || 0;
     
     // For month fields
     return isEditing ? (
       <Input 
         type="number"
-        value={item[field] as number} 
+        value={value} 
         onChange={(e) => handleEditChange(item.id, field, e.target.value)}
         className="w-full text-right"
         min="0"
       />
     ) : (
-      <span>{formatCurrency(item[field] as number, false)}</span>
+      <span>{formatCurrency(value, false)}</span>
     );
   };
 
-  if (isLoading) {
+  if (loading) {
     return <div className="flex justify-center p-4">Loading RPD data...</div>;
   }
 
   return (
     <div className="space-y-2">
-      <style>
-      {`
+      <style jsx>{`
         .rpd-table th, .rpd-table td {
           padding: 4px 6px;
           font-size: 0.75rem;
@@ -343,8 +318,7 @@ const RPDTable: React.FC<RPDTableProps> = ({
         .rpd-table .sisa {
           background-color: #e0f2fe;
         }
-      `}
-      </style>
+      `}</style>
       
       <div className="rounded-md border border-gray-200 w-full overflow-x-auto">
         <table className="w-full min-w-full rpd-table">
@@ -522,184 +496,11 @@ const RPDTable: React.FC<RPDTableProps> = ({
                           <FileEdit className="h-3 w-3" />
                         </Button>
                       )}
-                      
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => {
-                          onDelete(item.id);
-                          toast({
-                            title: "Berhasil",
-                            description: 'Item berhasil dihapus'
-                          });
-                        }}
-                        className="h-6 w-6"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
                     </div>
                   </td>
                 </tr>
               ))
             )}
-
-            <tr className="bg-gray-50 h-9">
-              <td className="py-1 px-1 text-center">{items.length + 1}</td>
-              <td className="description-cell py-1 px-1">
-                <Input 
-                  placeholder="Tambah Uraian Baru" 
-                  value={newItem.uraian} 
-                  onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
-                  required
-                  className="h-7 text-xs"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.jan || ''} 
-                  onChange={(e) => setNewItem({...newItem, jan: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.feb || ''} 
-                  onChange={(e) => setNewItem({...newItem, feb: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.mar || ''} 
-                  onChange={(e) => setNewItem({...newItem, mar: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.apr || ''} 
-                  onChange={(e) => setNewItem({...newItem, apr: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.mei || ''} 
-                  onChange={(e) => setNewItem({...newItem, mei: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.jun || ''} 
-                  onChange={(e) => setNewItem({...newItem, jun: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.jul || ''} 
-                  onChange={(e) => setNewItem({...newItem, jul: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.aug || ''} 
-                  onChange={(e) => setNewItem({...newItem, aug: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.sep || ''} 
-                  onChange={(e) => setNewItem({...newItem, sep: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.oct || ''} 
-                  onChange={(e) => setNewItem({...newItem, oct: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.nov || ''} 
-                  onChange={(e) => setNewItem({...newItem, nov: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="month-cell py-1 px-1">
-                <Input 
-                  type="number" 
-                  placeholder="0" 
-                  value={newItem.dec || ''} 
-                  onChange={(e) => setNewItem({...newItem, dec: Number(e.target.value)})}
-                  min="0"
-                  required
-                  className="h-7 text-xs text-right"
-                />
-              </td>
-              <td className="total-cell py-1 px-1">
-                {formatCurrency(calculateTotal(newItem))}
-              </td>
-              <td className="action-cell py-1 px-1">
-                <Button 
-                  onClick={handleAddItem} 
-                  size="sm" 
-                  className="w-full h-7 text-xs"
-                >
-                  <PlusCircle className="h-3 w-3 mr-1" />
-                  Tambah
-                </Button>
-              </td>
-            </tr>
             
             <tr className="footer-row">
               <td colSpan={2} className="text-right">Total per Bulan</td>
