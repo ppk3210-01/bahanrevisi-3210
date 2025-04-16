@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -317,7 +318,7 @@ const BudgetComparison: React.FC = () => {
                       <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-md" ref={changesContentRef}>
                         <h4 className="text-lg font-medium mb-2 text-blue-600 text-left">Kesimpulan</h4>
                         <p className="text-slate-700 mb-2 text-left">
-                          Berdasarkan hasil analisis usulan revisi anggaran, total pagu anggaran semula sebesar Rp {totalSemula.toLocaleString('id-ID')} menjadi Rp {totalMenjadi.toLocaleString('id-ID')}, dengan selisih Rp {totalSelisih.toLocaleString('id-ID')} atau {totalSelisih === 0 ? 'pagu tetap' : totalSelisih > 0 ? 'pagu bertambah' : 'pagu berkurang'}.
+                          Berdasarkan hasil analisis usulan revisi anggaran, total pagu anggaran semula sebesar Rp {Math.round(totalSemula / 1000) * 1000 .toLocaleString('id-ID')} menjadi Rp {Math.round(totalMenjadi / 1000) * 1000 .toLocaleString('id-ID')}, dengan selisih Rp {Math.round(totalSelisih / 1000) * 1000 .toLocaleString('id-ID')} atau {totalSelisih === 0 ? 'pagu tetap' : totalSelisih > 0 ? 'pagu bertambah' : 'pagu berkurang'}.
                         </p>
                         <p className="text-slate-700 mb-2 text-left">
                           Perubahan ini terdiri dari:

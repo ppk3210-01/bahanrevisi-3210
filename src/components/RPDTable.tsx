@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ import { PlusCircle, Trash2, FileEdit, Check, ArrowUpDown, Search } from 'lucide
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
 import { useRPDData } from '@/hooks/useRPDData';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface RPDItem {
   id: string;
@@ -39,6 +41,7 @@ interface RPDTableProps {
 
 const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const { rpdItems, loading, updateRPDItem } = useRPDData(filters);
+  const { isAdmin, user } = useAuth();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<string | null>(null);
@@ -88,7 +91,16 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   };
 
   const startEditing = (item: any) => {
-    setEditingId(item.id);
+    // Only allow editing for admin or regular users
+    if (isAdmin || (user && user.role === 'user')) {
+      setEditingId(item.id);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Akses Ditolak",
+        description: 'Anda tidak memiliki izin untuk mengedit data ini.'
+      });
+    }
   };
 
   const saveEditing = (id: string) => {
@@ -224,27 +236,36 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     setCurrentPage(page);
   };
 
+  const getStatusClass = (item: any): string => {
+    if (item.jumlah_rpd === item.jumlah_menjadi) {
+      return 'status-ok';
+    } else {
+      return 'status-sisa';
+    }
+  };
+
+  const getStatusText = (item: any): string => {
+    if (item.jumlah_rpd === item.jumlah_menjadi) {
+      return 'OK';
+    } else {
+      return 'Sisa';
+    }
+  };
+
   const renderItemField = (item: any, field: string) => {
     const isEditing = editingId === item.id;
     
     if (field === 'uraian') {
-      return isEditing ? (
-        <Input 
-          value={item.uraian} 
-          onChange={(e) => handleEditChange(item.id, 'uraian', e.target.value)}
-          className="w-full"
-        />
-      ) : (
-        <span>{item.uraian}</span>
-      );
+      // Uraian is never editable
+      return <span>{item.uraian}</span>;
     }
     
     if (field === 'total') {
-      return <span>{formatCurrency(item.jumlah_rpd || 0)}</span>;
+      return <span className="text-right block w-full">{formatCurrency(item.jumlah_rpd || 0)}</span>;
     }
 
     if (field === 'pagu') {
-      return <span>{formatCurrency(item.jumlah_menjadi || 0)}</span>;
+      return <span className="text-right block w-full">{formatCurrency(item.jumlah_menjadi || 0)}</span>;
     }
     
     let value = 0;
@@ -270,7 +291,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         min="0"
       />
     ) : (
-      <span>{formatCurrency(value, false)}</span>
+      <span className="text-right block w-full">{formatCurrency(value, false)}</span>
     );
   };
 
@@ -298,9 +319,10 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         }
         
         .rpd-table .month-cell {
-          min-width: 80px;
-          width: 80px;
-          max-width: 80px;
+          min-width: 90px;
+          width: 90px;
+          max-width: 90px;
+          text-align: right;
         }
         
         .rpd-table .description-cell {
@@ -310,18 +332,38 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         
         .rpd-table .total-cell {
           font-weight: 600;
+          text-align: right;
+          min-width: 90px;
         }
 
         .rpd-table .pagu-cell {
           font-weight: 600;
+          text-align: right;
+          min-width: 90px;
         }
         
         .rpd-table .action-cell {
-          width: 40px;
+          width: 30px;
+          max-width: 30px;
+        }
+
+        .rpd-table .status-cell {
+          width: 50px;
+          max-width: 50px;
+        }
+
+        .status-ok {
+          color: green;
+          font-weight: 600;
+        }
+
+        .status-sisa {
+          color: red;
+          font-weight: 600;
         }
         
         .rpd-table .input-cell input {
-          width: 80px;
+          width: 90px;
           text-align: right;
         }
         
@@ -333,6 +375,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           font-weight: 600;
           border-top: 2px solid #cbd5e1;
           background-color: #f8fafc;
+          text-align: right;
         }
         
         .rpd-table .belum-isi {
@@ -413,6 +456,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           <thead>
             <tr className="header-row">
               <th className="py-2 px-1 w-8">#</th>
+              <th className="status-cell py-2 px-1">Status</th>
               <th className="description-cell py-2 px-1">
                 <button 
                   className="flex items-center" 
@@ -424,7 +468,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('jan')}
                 >
                   Jan
@@ -433,7 +477,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('feb')}
                 >
                   Feb
@@ -442,7 +486,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('mar')}
                 >
                   Mar
@@ -451,7 +495,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('apr')}
                 >
                   Apr
@@ -460,7 +504,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('mei')}
                 >
                   Mei
@@ -469,7 +513,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('jun')}
                 >
                   Jun
@@ -478,7 +522,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('jul')}
                 >
                   Jul
@@ -487,7 +531,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('aug')}
                 >
                   Agu
@@ -496,7 +540,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('sep')}
                 >
                   Sep
@@ -505,7 +549,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('oct')}
                 >
                   Okt
@@ -514,7 +558,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('nov')}
                 >
                   Nov
@@ -523,7 +567,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="month-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('dec')}
                 >
                   Des
@@ -532,7 +576,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               </th>
               <th className="total-cell py-2 px-1">
                 <button 
-                  className="flex items-center justify-center w-full" 
+                  className="flex items-center justify-end w-full" 
                   onClick={() => handleSort('total')}
                 >
                   Total
@@ -542,14 +586,14 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               <th className="pagu-cell py-2 px-1">
                 Pagu Anggaran
               </th>
-              <th className="action-cell py-2 px-1">Aksi</th>
+              <th className="action-cell py-2 px-1"></th>
             </tr>
           </thead>
           
           <tbody>
             {paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={17} className="py-4 text-center text-slate-500">
+                <td colSpan={18} className="py-4 text-center text-slate-500">
                   Tidak ada data
                 </td>
               </tr>
@@ -557,6 +601,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               paginatedItems.map((item, index) => (
                 <tr key={item.id} className={`${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
                   <td className="text-center">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
+                  <td className="status-cell">
+                    <span className={getStatusClass(item)}>{getStatusText(item)}</span>
+                  </td>
                   <td className="description-cell">{renderItemField(item, 'uraian')}</td>
                   <td className={`month-cell ${getMonthClass('jan')}`}>{renderItemField(item, 'jan')}</td>
                   <td className={`month-cell ${getMonthClass('feb')}`}>{renderItemField(item, 'feb')}</td>
@@ -573,29 +620,31 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   <td className="total-cell">{renderItemField(item, 'total')}</td>
                   <td className="pagu-cell">{renderItemField(item, 'pagu')}</td>
                   <td className="action-cell">
-                    <div className="flex space-x-1 justify-center">
-                      {editingId === item.id ? (
-                        <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
-                          <Check className="h-3 w-3" />
-                        </Button>
-                      ) : (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => startEditing(item)} 
-                          className="h-6 w-6"
-                        >
-                          <FileEdit className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
+                    {(isAdmin || (user && user.role === 'user')) && (
+                      <div className="flex space-x-1 justify-center">
+                        {editingId === item.id ? (
+                          <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                            <Check className="h-3 w-3" />
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => startEditing(item)} 
+                            className="h-6 w-6"
+                          >
+                            <FileEdit className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))
             )}
             
             <tr className="footer-row">
-              <td colSpan={2} className="text-right">Total per Bulan</td>
+              <td colSpan={3} className="text-right">Total per Bulan</td>
               <td className={`month-cell ${getMonthClass('jan')}`}>{formatCurrency(totalByMonth.jan, false)}</td>
               <td className={`month-cell ${getMonthClass('feb')}`}>{formatCurrency(totalByMonth.feb, false)}</td>
               <td className={`month-cell ${getMonthClass('mar')}`}>{formatCurrency(totalByMonth.mar, false)}</td>
@@ -614,7 +663,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
             </tr>
             
             <tr className="footer-row">
-              <td colSpan={14} className="text-right">Sisa Pagu</td>
+              <td colSpan={15} className="text-right">Sisa Pagu</td>
               <td className={`total-cell sisa ${sisaPagu < 0 ? 'text-red-600' : ''}`} colSpan={2}>
                 {formatCurrency(sisaPagu)}
               </td>

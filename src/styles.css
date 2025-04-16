@@ -1,0 +1,38 @@
+
+/* Add styling for the summary tables */
+
+/* Remove blue text color from summary tables */
+.summary-table td {
+  color: #000 !important;
+}
+
+/* Ensure right-alignment for numeric columns in RPD table */
+.rpd-table .month-cell,
+.rpd-table .total-cell,
+.rpd-table .pagu-cell {
+  text-align: right;
+}
+
+/* Standardize month column widths */
+.rpd-table .month-cell {
+  min-width: 90px;
+  width: 90px;
+  max-width: 90px;
+}
+
+/* Make the action column narrower */
+.rpd-table .action-cell {
+  width: 30px;
+  max-width: 30px;
+}
+
+/* Status styles */
+.status-ok {
+  color: green;
+  font-weight: 600;
+}
+
+.status-sisa {
+  color: red;
+  font-weight: 600;
+}
