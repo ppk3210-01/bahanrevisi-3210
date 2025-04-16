@@ -10,7 +10,7 @@ interface BudgetSummaryBoxProps {
   newItems?: number;
   changedItems?: number;
   totalItems?: number;
-  // Add missing props that are used in BudgetComparison.tsx
+  // Add props that are used in BudgetComparison.tsx
   title?: string;
   totalValue?: number;
   details?: string;

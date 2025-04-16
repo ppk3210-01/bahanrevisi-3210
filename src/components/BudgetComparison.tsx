@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -13,31 +14,16 @@ import BudgetChangesSummary from './BudgetChangesSummary';
 import { Download, FileDown, Printer } from 'lucide-react';
 import SummaryDialog from './SummaryDialog';
 import ExportOptions from './ExportOptions';
-import SummaryChart from './SummaryChart';
+import SummaryChart, { SummaryViewType } from './SummaryChart';
 import DetailedSummaryView from './DetailedSummaryView';
 import useBudgetData from '@/hooks/useBudgetData';
 import RPDTable from './RPDTable';
 import { toast } from '@/hooks/use-toast';
 import { exportToJpeg } from '@/utils/exportUtils';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
+import { BudgetSummaryRecord } from '@/types/database';
 
-type SummarySectionView = 
-  'changes' |
-  'komponen_output' | 
-  'program_pembebanan' |
-  'kegiatan' |
-  'rincian_output' |
-  'sub_komponen' |
-  'akun' |
-  'akun_group' |
-  'account_group';
-
-const exportElementToJpeg = (elementRef: React.RefObject<HTMLDivElement>, fileName: string) => {
-  if (elementRef.current) {
-    const element = elementRef.current;
-    exportToJpeg(element, fileName);
-  }
-};
+type SummarySectionView = SummaryViewType;
 
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
@@ -79,15 +65,35 @@ const BudgetComparison: React.FC = () => {
   const getBudgetSummary = (type: string) => {
     const items = (summaryData || []).filter(item => item.type === type);
     return items.map(item => {
-      const name = 
-        type === 'komponen_output' ? item.komponen_output :
-        type === 'akun' ? item.akun : 
-        type === 'program_pembebanan' ? item.program_pembebanan :
-        type === 'kegiatan' ? item.kegiatan :
-        type === 'rincian_output' ? item.rincian_output :
-        type === 'sub_komponen' ? item.sub_komponen :
-        type === 'account_group' ? item.account_group_name || item.account_group :
-        type === 'akun_group' ? item.akun_group_name || item.akun_group : '';
+      let name = '';
+      
+      // Use type-safe approach to access properties based on record type
+      switch (item.type) {
+        case 'komponen_output':
+          name = item.komponen_output || '';
+          break;
+        case 'akun':
+          name = item.akun || '';
+          break;
+        case 'program_pembebanan':
+          name = item.program_pembebanan || '';
+          break;
+        case 'kegiatan':
+          name = item.kegiatan || '';
+          break;
+        case 'rincian_output':
+          name = item.rincian_output || '';
+          break;
+        case 'sub_komponen':
+          name = item.sub_komponen || '';
+          break;
+        case 'account_group':
+          name = item.account_group_name || item.account_group || '';
+          break;
+        case 'akun_group':
+          name = item.akun_group_name || item.akun_group || '';
+          break;
+      }
       
       return {
         id: name,
@@ -130,17 +136,23 @@ const BudgetComparison: React.FC = () => {
   const totalDeletedValue = 0;
 
   const handleExportChanges = () => {
-    exportElementToJpeg(changesContentRef, 'changes_summary');
+    if (changesContentRef.current) {
+      exportToJpeg(changesContentRef.current, 'changes_summary');
+    }
     setOpenExport(false);
   };
 
   const handleExportTable = () => {
-    exportElementToJpeg(tableContentRef, 'budget_table');
+    if (tableContentRef.current) {
+      exportToJpeg(tableContentRef.current, 'budget_table');
+    }
     setOpenExport(false);
   };
 
   const handleExportChart = () => {
-    exportElementToJpeg(chartContentRef, 'budget_chart');
+    if (chartContentRef.current) {
+      exportToJpeg(chartContentRef.current, 'budget_chart');
+    }
     setOpenExport(false);
   };
 
@@ -198,7 +210,7 @@ const BudgetComparison: React.FC = () => {
                     <SummaryChart 
                       summaryData={[]}
                       chartType="bar"
-                      view="komponen_output"
+                      view="changes"
                       customData={{
                         semula: roundToThousands(totalSemula),
                         menjadi: roundToThousands(totalMenjadi),
@@ -212,7 +224,7 @@ const BudgetComparison: React.FC = () => {
                     <SummaryChart 
                       summaryData={[]}
                       chartType="composition"
-                      view="komponen_output"
+                      view="changes"
                       customData={{
                         new: roundToThousands(totalNewValue),
                         changed: roundToThousands(totalChangedValue),
@@ -455,8 +467,10 @@ const BudgetComparison: React.FC = () => {
             
             <DetailedSummaryView 
               summaryData={summaryData}
-              view={summaryView}
-              setView={setSummaryView}
+              loading={loadingItems}
+              view={summaryView === 'changes' ? 'komponen_output' : summaryView}
+              setView={setSummaryView as (view: SummaryViewType) => void}
+              defaultView="table"
             />
           </div>
         </TabsContent>

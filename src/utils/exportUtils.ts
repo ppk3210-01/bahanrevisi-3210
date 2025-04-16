@@ -1,25 +1,14 @@
 
 import html2canvas from 'html2canvas';
 
-export const exportToJpeg = async (elementId: string, fileName: string = 'export') => {
+export const exportToJpeg = async (element: HTMLElement, fileName: string) => {
   try {
-    const element = document.getElementById(elementId);
-    if (!element) {
-      throw new Error(`Element with ID "${elementId}" not found`);
-    }
-
-    const canvas = await html2canvas(element, {
-      scale: 2, // Increase quality
-      backgroundColor: '#ffffff',
-      logging: false
-    });
-
+    const canvas = await html2canvas(element);
     const link = document.createElement('a');
     link.download = `${fileName}.jpeg`;
-    link.href = canvas.toDataURL('image/jpeg', 0.9);
+    link.href = canvas.toDataURL('image/jpeg');
     link.click();
   } catch (error) {
     console.error('Error exporting to JPEG:', error);
-    throw error;
   }
 };

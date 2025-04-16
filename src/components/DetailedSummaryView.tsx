@@ -7,9 +7,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BudgetSummaryRecord } from '@/types/database';
 import SummaryTable from './SummaryTable';
-import SummaryChart from './SummaryChart';
-
-type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group' | 'akun_group';
+import SummaryChart, { SummaryViewType } from './SummaryChart';
 
 interface DetailedSummaryViewProps {
   summaryData?: BudgetSummaryRecord[];
@@ -17,22 +15,6 @@ interface DetailedSummaryViewProps {
   view?: SummaryViewType;
   setView?: (view: SummaryViewType) => void;
   defaultView?: 'table' | 'bar';
-  // Add props used in BudgetComparison.tsx
-  totalSemula?: number;
-  totalMenjadi?: number;
-  totalSelisih?: number;
-  totalNewValue?: number;
-  totalChangedValue?: number;
-  totalNewItems?: number;
-  totalChangedItems?: number;
-  summaryByProgramPembebanan?: any[];
-  summaryByKegiatan?: any[];
-  summaryByRincianOutput?: any[];
-  summaryByKomponenOutput?: any[];
-  summaryBySubKomponen?: any[];
-  summaryByAkun?: any[];
-  summaryByAkunGroup?: any[];
-  summaryByAccountGroup?: any[];
 }
 
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({ 
@@ -48,24 +30,27 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   
   // Filter data to remove empty entries
   const filteredSummaryData = summaryData.filter(item => {
-    if (view === 'komponen_output') {
-      return item.type === 'komponen_output' && 'komponen_output' in item && item.komponen_output !== null && item.komponen_output !== '-';
-    } else if (view === 'akun') {
-      return item.type === 'akun' && 'akun' in item && item.akun !== null && item.akun !== '-';
-    } else if (view === 'program_pembebanan') {
-      return item.type === 'program_pembebanan' && 'program_pembebanan' in item && item.program_pembebanan !== null && item.program_pembebanan !== '-';
-    } else if (view === 'kegiatan') {
-      return item.type === 'kegiatan' && 'kegiatan' in item && item.kegiatan !== null && item.kegiatan !== '-';
-    } else if (view === 'rincian_output') {
-      return item.type === 'rincian_output' && 'rincian_output' in item && item.rincian_output !== null && item.rincian_output !== '-';
-    } else if (view === 'sub_komponen') {
-      return item.type === 'sub_komponen' && 'sub_komponen' in item && item.sub_komponen !== null && item.sub_komponen !== '-';
-    } else if (view === 'account_group') {
-      return item.type === 'account_group' && 'account_group' in item && item.account_group !== null && item.account_group !== '-';
-    } else if (view === 'akun_group') {
-      return item.type === 'akun_group' && 'akun_group' in item && item.akun_group !== null && item.akun_group !== '-';
+    if (item.type === view) {
+      switch (item.type) {
+        case 'komponen_output':
+          return item.komponen_output !== null && item.komponen_output !== '-';
+        case 'akun':
+          return item.akun !== null && item.akun !== '-';
+        case 'program_pembebanan':
+          return item.program_pembebanan !== null && item.program_pembebanan !== '-';
+        case 'kegiatan':
+          return item.kegiatan !== null && item.kegiatan !== '-';
+        case 'rincian_output':
+          return item.rincian_output !== null && item.rincian_output !== '-';
+        case 'sub_komponen':
+          return item.sub_komponen !== null && item.sub_komponen !== '-';
+        case 'account_group':
+          return item.account_group !== null && item.account_group !== '-';
+        case 'akun_group':
+          return item.akun_group !== null && item.akun_group !== '-';
+      }
     }
-    return true;
+    return false;
   });
 
   return (
@@ -106,7 +91,39 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           
           {/* Always show table below the chart */}
           <div className="table-container">
-            <SummaryTable summaryData={filteredSummaryData} view={view} />
+            <SummaryTable data={filteredSummaryData.map(item => ({
+              id: item.type === 'komponen_output' ? item.komponen_output || '' :
+                  item.type === 'akun' ? item.akun || '' :
+                  item.type === 'program_pembebanan' ? item.program_pembebanan || '' :
+                  item.type === 'kegiatan' ? item.kegiatan || '' :
+                  item.type === 'rincian_output' ? item.rincian_output || '' :
+                  item.type === 'sub_komponen' ? item.sub_komponen || '' :
+                  item.type === 'account_group' ? item.account_group_name || item.account_group || '' :
+                  item.type === 'akun_group' ? item.akun_group_name || item.akun_group || '' : '',
+              name: item.type === 'komponen_output' ? item.komponen_output || '' :
+                  item.type === 'akun' ? item.akun || '' :
+                  item.type === 'program_pembebanan' ? item.program_pembebanan || '' :
+                  item.type === 'kegiatan' ? item.kegiatan || '' :
+                  item.type === 'rincian_output' ? item.rincian_output || '' :
+                  item.type === 'sub_komponen' ? item.sub_komponen || '' :
+                  item.type === 'account_group' ? item.account_group_name || item.account_group || '' :
+                  item.type === 'akun_group' ? item.akun_group_name || item.akun_group || '' : '',
+              totalSemula: item.total_semula || 0,
+              totalMenjadi: item.total_menjadi || 0,
+              totalSelisih: item.total_selisih || 0,
+              newItems: item.new_items || 0,
+              changedItems: item.changed_items || 0,
+              totalItems: item.total_items || 0
+            }))} title={`Ringkasan Anggaran per ${
+              view === 'komponen_output' ? 'Komponen Output' :
+              view === 'akun' ? 'Akun' :
+              view === 'program_pembebanan' ? 'Program Pembebanan' :
+              view === 'kegiatan' ? 'Kegiatan' :
+              view === 'rincian_output' ? 'Rincian Output' :
+              view === 'sub_komponen' ? 'Sub Komponen' :
+              view === 'account_group' ? 'Kelompok Belanja' :
+              view === 'akun_group' ? 'Kelompok Akun' : 'Kategori'
+            }`} />
           </div>
         </div>
       )}
