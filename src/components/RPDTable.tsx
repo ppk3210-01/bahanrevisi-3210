@@ -44,6 +44,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const { isAdmin, user } = useAuth();
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<{[key: string]: {[key: string]: number}}>({});
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageSize, setPageSize] = useState<number>(10);
@@ -53,15 +54,45 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
+  // Initialize or update edit values when editing an item
+  useEffect(() => {
+    if (editingId) {
+      const item = rpdItems.find(item => item.id === editingId);
+      if (item) {
+        setEditValues(prev => ({
+          ...prev,
+          [editingId]: {
+            januari: item.januari || 0,
+            februari: item.februari || 0,
+            maret: item.maret || 0,
+            april: item.april || 0,
+            mei: item.mei || 0,
+            juni: item.juni || 0,
+            juli: item.juli || 0,
+            agustus: item.agustus || 0,
+            september: item.september || 0,
+            oktober: item.oktober || 0,
+            november: item.november || 0,
+            desember: item.desember || 0
+          }
+        }));
+      }
+    }
+  }, [editingId, rpdItems]);
+
   const handleEditChange = (id: string, field: string, value: string | number) => {
     if (field !== 'uraian') {
+      let numValue: number;
+      
       if (typeof value === 'string') {
-        const numValue = Number(value.replace(/,/g, ''));
-        if (isNaN(numValue)) return;
-        value = numValue;
+        // Remove any non-numeric characters except decimal point
+        const cleanValue = value.replace(/[^0-9.]/g, '');
+        numValue = parseFloat(cleanValue) || 0;
+      } else {
+        numValue = value as number;
       }
       
-      if (value < 0) {
+      if (numValue < 0) {
         toast({
           variant: "destructive",
           title: "Error",
@@ -69,25 +100,34 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         });
         return;
       }
+      
+      // Update local edit state
+      setEditValues(prev => {
+        const itemValues = prev[id] || {};
+        let apiField = field;
+        
+        if (field === 'jan') apiField = 'januari';
+        if (field === 'feb') apiField = 'februari';
+        if (field === 'mar') apiField = 'maret';
+        if (field === 'apr') apiField = 'april';
+        if (field === 'mei') apiField = 'mei';
+        if (field === 'jun') apiField = 'juni';
+        if (field === 'jul') apiField = 'juli';
+        if (field === 'aug') apiField = 'agustus';
+        if (field === 'sep') apiField = 'september';
+        if (field === 'oct') apiField = 'oktober';
+        if (field === 'nov') apiField = 'november';
+        if (field === 'dec') apiField = 'desember';
+        
+        return {
+          ...prev,
+          [id]: {
+            ...itemValues,
+            [apiField]: numValue
+          }
+        };
+      });
     }
-    
-    let apiField = field;
-    if (field === 'jan') apiField = 'januari';
-    if (field === 'feb') apiField = 'februari';
-    if (field === 'mar') apiField = 'maret';
-    if (field === 'apr') apiField = 'april';
-    if (field === 'mei') apiField = 'mei';
-    if (field === 'jun') apiField = 'juni';
-    if (field === 'jul') apiField = 'juli';
-    if (field === 'aug') apiField = 'agustus';
-    if (field === 'sep') apiField = 'september';
-    if (field === 'oct') apiField = 'oktober';
-    if (field === 'nov') apiField = 'november';
-    if (field === 'dec') apiField = 'desember';
-    
-    const updates = { [apiField]: roundToThousands(value as number) };
-    
-    updateRPDItem(id, updates);
   };
 
   const startEditing = (item: any) => {
@@ -103,12 +143,19 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     }
   };
 
-  const saveEditing = (id: string) => {
-    setEditingId(null);
-    toast({
-      title: "Berhasil",
-      description: 'Perubahan berhasil disimpan'
-    });
+  const saveEditing = async (id: string) => {
+    if (editingId && editValues[editingId]) {
+      const updates = editValues[editingId];
+      const success = await updateRPDItem(id, updates);
+      
+      if (success) {
+        setEditingId(null);
+        toast({
+          title: "Berhasil",
+          description: 'Perubahan berhasil disimpan'
+        });
+      }
+    }
   };
 
   const handleSort = (field: string) => {
@@ -269,25 +316,30 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     }
     
     let value = 0;
-    if (field === 'jan') value = item.januari || 0;
-    else if (field === 'feb') value = item.februari || 0;
-    else if (field === 'mar') value = item.maret || 0;
-    else if (field === 'apr') value = item.april || 0;
-    else if (field === 'mei') value = item.mei || 0;
-    else if (field === 'jun') value = item.juni || 0;
-    else if (field === 'jul') value = item.juli || 0;
-    else if (field === 'aug') value = item.agustus || 0;
-    else if (field === 'sep') value = item.september || 0;
-    else if (field === 'oct') value = item.oktober || 0;
-    else if (field === 'nov') value = item.november || 0;
-    else if (field === 'dec') value = item.desember || 0;
+    let fieldKey = '';
+    
+    if (field === 'jan') { value = item.januari || 0; fieldKey = 'januari'; }
+    else if (field === 'feb') { value = item.februari || 0; fieldKey = 'februari'; }
+    else if (field === 'mar') { value = item.maret || 0; fieldKey = 'maret'; }
+    else if (field === 'apr') { value = item.april || 0; fieldKey = 'april'; }
+    else if (field === 'mei') { value = item.mei || 0; fieldKey = 'mei'; }
+    else if (field === 'jun') { value = item.juni || 0; fieldKey = 'juni'; }
+    else if (field === 'jul') { value = item.juli || 0; fieldKey = 'juli'; }
+    else if (field === 'aug') { value = item.agustus || 0; fieldKey = 'agustus'; }
+    else if (field === 'sep') { value = item.september || 0; fieldKey = 'september'; }
+    else if (field === 'oct') { value = item.oktober || 0; fieldKey = 'oktober'; }
+    else if (field === 'nov') { value = item.november || 0; fieldKey = 'november'; }
+    else if (field === 'dec') { value = item.desember || 0; fieldKey = 'desember'; }
+    
+    // If editing, use the value from editValues if available
+    const editValue = isEditing && editValues[item.id] ? editValues[item.id][fieldKey] : value;
     
     return isEditing ? (
       <Input 
-        type="number"
-        value={value} 
+        type="text"
+        value={editValue} 
         onChange={(e) => handleEditChange(item.id, field, e.target.value)}
-        className="w-full text-right"
+        className="w-full text-right px-2 py-1 h-7"
         min="0"
       />
     ) : (

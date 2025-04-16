@@ -83,8 +83,8 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       {isLoading ? (
         <p>Loading summary data...</p>
       ) : (
-        <div className="space-y-8">
-          {/* Always show chart first, as requested (issue #4) */}
+        <div className="space-y-6">
+          {/* Always show chart first, as requested */}
           <div className="chart-container">
             <SummaryChart summaryData={filteredSummaryData} chartType="bar" view={view} />
           </div>

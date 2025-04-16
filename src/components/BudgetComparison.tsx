@@ -1,34 +1,24 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import SummaryTable from './SummaryTable';
 import BudgetSummaryBox from './BudgetSummaryBox';
-import BudgetChangesSummary from './BudgetChangesSummary';
-import { Download, FileDown, Printer } from 'lucide-react';
-import SummaryDialog from './SummaryDialog';
-import ExportOptions from './ExportOptions';
 import SummaryChart, { SummaryViewType } from './SummaryChart';
 import DetailedSummaryView from './DetailedSummaryView';
 import useBudgetData from '@/hooks/useBudgetData';
 import RPDTable from './RPDTable';
-import { toast } from '@/hooks/use-toast';
-import { exportToJpeg } from '@/utils/exportUtils';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
-import { BudgetSummaryRecord } from '@/types/database';
+import ExcelImportExport from './ExcelImportExport';
+import { useAuth } from '@/contexts/AuthContext';
 
 type SummarySectionView = SummaryViewType;
 
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
-  const [openExport, setOpenExport] = useState<boolean>(false);
-  const [openSummary, setOpenSummary] = useState<boolean>(false);
   const [summaryView, setSummaryView] = useState<SummarySectionView>('changes');
   const [filters, setFilters] = useState({
     programPembebanan: 'all',
@@ -39,9 +29,7 @@ const BudgetComparison: React.FC = () => {
     akun: 'all'
   });
 
-  const changesContentRef = useRef<HTMLDivElement>(null);
-  const tableContentRef = useRef<HTMLDivElement>(null);
-  const chartContentRef = useRef<HTMLDivElement>(null);
+  const { isAdmin } = useAuth();
   
   const { 
     budgetItems,
@@ -62,61 +50,6 @@ const BudgetComparison: React.FC = () => {
   const subKomponenOptions = [];
   const akunOptions = [];
 
-  const getBudgetSummary = (type: string) => {
-    const items = (summaryData || []).filter(item => item.type === type);
-    return items.map(item => {
-      let name = '';
-      
-      // Use type-safe approach to access properties based on record type
-      switch (item.type) {
-        case 'komponen_output':
-          name = item.komponen_output || '';
-          break;
-        case 'akun':
-          name = item.akun || '';
-          break;
-        case 'program_pembebanan':
-          name = item.program_pembebanan || '';
-          break;
-        case 'kegiatan':
-          name = item.kegiatan || '';
-          break;
-        case 'rincian_output':
-          name = item.rincian_output || '';
-          break;
-        case 'sub_komponen':
-          name = item.sub_komponen || '';
-          break;
-        case 'account_group':
-          name = item.account_group_name || item.account_group || '';
-          break;
-        case 'akun_group':
-          name = item.akun_group_name || item.akun_group || '';
-          break;
-      }
-      
-      return {
-        id: name,
-        name,
-        totalSemula: item.total_semula || 0,
-        totalMenjadi: item.total_menjadi || 0,
-        totalSelisih: item.total_selisih || 0,
-        newItems: item.new_items || 0,
-        changedItems: item.changed_items || 0,
-        totalItems: item.total_items || 0
-      };
-    });
-  };
-
-  const summaryByProgramPembebanan = getBudgetSummary('program_pembebanan');
-  const summaryByKegiatan = getBudgetSummary('kegiatan');
-  const summaryByRincianOutput = getBudgetSummary('rincian_output');
-  const summaryByKomponenOutput = getBudgetSummary('komponen_output');
-  const summaryBySubKomponen = getBudgetSummary('sub_komponen');
-  const summaryByAkun = getBudgetSummary('akun');
-  const summaryByAkunGroup = getBudgetSummary('akun_group');
-  const summaryByAccountGroup = getBudgetSummary('account_group');
-
   const filteredItems = budgetItems;
   const areFiltersComplete = filters.akun !== 'all' && filters.komponenOutput !== 'all';
   
@@ -131,147 +64,58 @@ const BudgetComparison: React.FC = () => {
   const changedItems = filteredItems.filter(item => item.status === 'changed');
   const totalChangedItems = changedItems.length;
   const totalChangedValue = changedItems.reduce((sum, item) => sum + item.selisih, 0);
-  
-  const totalDeletedItems = 0;
-  const totalDeletedValue = 0;
 
-  const handleExportChanges = () => {
-    if (changesContentRef.current) {
-      exportToJpeg(changesContentRef.current, 'changes_summary');
-    }
-    setOpenExport(false);
-  };
-
-  const handleExportTable = () => {
-    if (tableContentRef.current) {
-      exportToJpeg(tableContentRef.current, 'budget_table');
-    }
-    setOpenExport(false);
-  };
-
-  const handleExportChart = () => {
-    if (chartContentRef.current) {
-      exportToJpeg(chartContentRef.current, 'budget_chart');
-    }
-    setOpenExport(false);
-  };
-
-  const renderSummarySectionContent = () => {
-    switch (summaryView) {
-      case 'changes':
-        return (
-          <div className="space-y-6">
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <BudgetSummaryBox 
-                  title="Kesimpulan Perubahan" 
-                  totalItems={filteredItems.length}
-                  totalValue={roundToThousands(totalSelisih)}
-                  details={`${totalNewItems} item baru, ${totalChangedItems} item berubah`}
-                  valueType={totalSelisih > 0 ? 'positive' : totalSelisih < 0 ? 'negative' : 'neutral'}
-                />
-                
-                <BudgetSummaryBox 
-                  title="Pagu Anggaran Semula" 
-                  totalItems={filteredItems.length - totalNewItems}
-                  totalValue={roundToThousands(totalSemula)}
-                  details="Anggaran sebelum perubahan"
-                  valueType="neutral"
-                />
-                
-                <BudgetSummaryBox 
-                  title="Pagu Anggaran Menjadi" 
-                  totalItems={filteredItems.length}
-                  totalValue={roundToThousands(totalMenjadi)}
-                  details={`${roundToThousands(totalSelisih) > 0 ? '+' : ''}${formatCurrency(roundToThousands(totalSelisih))}`}
-                  valueType={totalSelisih > 0 ? 'positive' : totalSelisih < 0 ? 'negative' : 'neutral'}
-                />
-              </div>
-              
-              <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-md" ref={changesContentRef}>
-                <h4 className="text-lg font-medium mb-2 text-blue-600 text-left">Kesimpulan</h4>
-                <p className="text-slate-700 mb-2 text-left">
-                  Berdasarkan hasil analisis usulan revisi anggaran, total pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih {formatCurrency(roundToThousands(totalSelisih))} atau {totalSelisih === 0 ? 'pagu tetap' : totalSelisih > 0 ? 'pagu bertambah' : 'pagu berkurang'}.
-                </p>
-                <p className="text-slate-700 mb-2 text-left">
-                  Perubahan ini terdiri dari:
-                </p>
-                <ul className="list-disc pl-6 text-slate-700 mb-4 text-left">
-                  <li>{totalNewItems} item anggaran baru dengan total nilai {formatCurrency(roundToThousands(totalNewValue))}</li>
-                  <li>{totalChangedItems} item anggaran berubah dengan total perubahan {formatCurrency(roundToThousands(totalChangedValue))}</li>
-                  <li>{totalDeletedItems} item anggaran dihapus dengan total nilai {formatCurrency(roundToThousands(totalDeletedValue))}</li>
-                </ul>
-              </div>
-              
-              <div ref={chartContentRef}>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                  <Card className="p-4">
-                    <h4 className="text-lg font-medium mb-2 text-blue-600">Diagram Perubahan</h4>
-                    <SummaryChart 
-                      summaryData={[]}
-                      chartType="bar"
-                      view="changes"
-                      customData={{
-                        semula: roundToThousands(totalSemula),
-                        menjadi: roundToThousands(totalMenjadi),
-                        selisih: roundToThousands(totalSelisih)
-                      }}
-                    />
-                  </Card>
-                  
-                  <Card className="p-4">
-                    <h4 className="text-lg font-medium mb-2 text-blue-600">Diagram Komposisi</h4>
-                    <SummaryChart 
-                      summaryData={[]}
-                      chartType="composition"
-                      view="changes"
-                      customData={{
-                        new: roundToThousands(totalNewValue),
-                        changed: roundToThousands(totalChangedValue),
-                        unchanged: roundToThousands(totalMenjadi - totalNewValue - totalChangedValue)
-                      }}
-                    />
-                  </Card>
-                </div>
-              </div>
-              
-              <div className="space-y-4" ref={tableContentRef}>
-                <Card className="p-4">
-                  <h4 className="text-lg font-medium mb-4 text-blue-600">Detail Perubahan Per Item</h4>
-                  <BudgetChangesSummary items={[...newItems, ...changedItems]} />
-                </Card>
-              </div>
-            </div>
+  const renderSummarySection = () => {
+    if (summaryView === 'changes') {
+      return (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <BudgetSummaryBox 
+              title="Kesimpulan Perubahan" 
+              totalItems={filteredItems.length}
+              totalValue={roundToThousands(totalSelisih)}
+              details={`${totalNewItems} item baru, ${totalChangedItems} item berubah`}
+              valueType={totalSelisih > 0 ? 'text-blue-600' : totalSelisih < 0 ? 'text-red-600' : 'text-gray-600'}
+            />
+            
+            <BudgetSummaryBox 
+              title="Pagu Anggaran Semula" 
+              totalItems={filteredItems.length - totalNewItems}
+              totalValue={roundToThousands(totalSemula)}
+              details="Anggaran sebelum perubahan"
+              valueType="text-gray-600"
+            />
+            
+            <BudgetSummaryBox 
+              title="Pagu Anggaran Menjadi" 
+              totalItems={filteredItems.length}
+              totalValue={roundToThousands(totalMenjadi)}
+              details={`${roundToThousands(totalSelisih) > 0 ? '+' : ''}${formatCurrency(roundToThousands(totalSelisih))}`}
+              valueType={totalSelisih > 0 ? 'text-blue-600' : totalSelisih < 0 ? 'text-red-600' : 'text-gray-600'}
+            />
           </div>
-        );
-
-      case 'program_pembebanan':
-        return <SummaryTable data={summaryByProgramPembebanan} title="Ringkasan Anggaran per Program Pembebanan" />;
-      
-      case 'kegiatan':
-        return <SummaryTable data={summaryByKegiatan} title="Ringkasan Anggaran per Kegiatan" />;
-      
-      case 'rincian_output':
-        return <SummaryTable data={summaryByRincianOutput} title="Ringkasan Anggaran per Rincian Output" />;
-      
-      case 'komponen_output':
-        return <SummaryTable data={summaryByKomponenOutput} title="Ringkasan Anggaran per Komponen Output" />;
-
-      case 'sub_komponen':
-        return <SummaryTable data={summaryBySubKomponen} title="Ringkasan Anggaran per Sub Komponen" />;
-
-      case 'akun':
-        return <SummaryTable data={summaryByAkun} title="Ringkasan Anggaran per Akun" />;
-
-      case 'akun_group':
-        return <SummaryTable data={summaryByAkunGroup} title="Ringkasan Anggaran per Kelompok Akun" />;
-
-      case 'account_group':
-        return <SummaryTable data={summaryByAccountGroup} title="Ringkasan Anggaran per Kelompok Belanja" />;
-
-      default:
-        return <div>Pilih view ringkasan</div>;
+          
+          <div className="space-y-4">
+            <Card className="p-4">
+              <h4 className="text-lg font-medium mb-2 text-gray-800">Ringkasan Perubahan</h4>
+              <SummaryChart 
+                summaryData={[]}
+                chartType="bar"
+                view="changes"
+                customData={{
+                  semula: roundToThousands(totalSemula),
+                  menjadi: roundToThousands(totalMenjadi),
+                  selisih: roundToThousands(totalSelisih)
+                }}
+              />
+            </Card>
+          </div>
+        </div>
+      );
     }
+
+    // For other views, we'll use DetailedSummaryView
+    return null;
   };
 
   return (
@@ -303,60 +147,18 @@ const BudgetComparison: React.FC = () => {
           </Badge>
         </div>
         
-        <div className="flex gap-2">
-          <Dialog open={openExport} onOpenChange={setOpenExport}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs">
-                <Download className="h-3 w-3 mr-1" />
-                Export
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Export Data</DialogTitle>
-                <DialogDescription>
-                  Pilih format export yang diinginkan
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4 py-4">
-                <Button onClick={handleExportChanges} className="w-full">Export Ringkasan Perubahan</Button>
-                <Button onClick={handleExportTable} className="w-full">Export Tabel Anggaran</Button>  
-                <Button onClick={handleExportChart} className="w-full">Export Diagram</Button>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpenExport(false)}>
-                  Cancel
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog open={openSummary} onOpenChange={setOpenSummary}>
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="text-xs">
-                Lihat Ringkasan
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Ringkasan Anggaran</DialogTitle>
-                <DialogDescription>
-                  Informasi ringkasan anggaran
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <div>Semula: {formatCurrency(roundToThousands(totalSemula))}</div>
-                <div>Menjadi: {formatCurrency(roundToThousands(totalMenjadi))}</div>
-                <div>Selisih: {formatCurrency(roundToThousands(totalSelisih))}</div>
-              </div>
-              <DialogFooter>
-                <Button onClick={() => setOpenSummary(false)}>Tutup</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <ExcelImportExport
+              items={filteredItems}
+              onImport={addBudgetItem}
+              komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
+              subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+              akun={filters.akun !== 'all' ? filters.akun : undefined}
+              smallText={true}
+            />
+          </div>
+        )}
       </div>
       
       <Tabs 
@@ -461,17 +263,19 @@ const BudgetComparison: React.FC = () => {
               </div>
               
               <div className="mt-4">
-                {renderSummarySectionContent()}
+                {renderSummarySection()}
               </div>
             </Card>
             
-            <DetailedSummaryView 
-              summaryData={summaryData}
-              loading={loadingItems}
-              view={summaryView === 'changes' ? 'komponen_output' : summaryView}
-              setView={setSummaryView as (view: SummaryViewType) => void}
-              defaultView="table"
-            />
+            {summaryView !== 'changes' && (
+              <DetailedSummaryView 
+                summaryData={summaryData}
+                loading={loadingItems}
+                view={summaryView}
+                setView={setSummaryView as (view: SummaryViewType) => void}
+                defaultView="table"
+              />
+            )}
           </div>
         </TabsContent>
       </Tabs>
