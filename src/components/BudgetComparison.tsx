@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -20,8 +19,8 @@ import BudgetChangesSummary from './BudgetChangesSummary';
 import RPDTable from './RPDTable';
 import { toast } from '@/hooks/use-toast';
 import { exportToJpeg } from '@/utils/exportUtils';
+import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 
-// Define the type for summary section view
 type SummarySectionView = 
   'changes' |
   'komponen_output' | 
@@ -318,7 +317,7 @@ const BudgetComparison: React.FC = () => {
                       <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-md" ref={changesContentRef}>
                         <h4 className="text-lg font-medium mb-2 text-blue-600 text-left">Kesimpulan</h4>
                         <p className="text-slate-700 mb-2 text-left">
-                          Berdasarkan hasil analisis usulan revisi anggaran, total pagu anggaran semula sebesar Rp {Math.round(totalSemula / 1000) * 1000 .toLocaleString('id-ID')} menjadi Rp {Math.round(totalMenjadi / 1000) * 1000 .toLocaleString('id-ID')}, dengan selisih Rp {Math.round(totalSelisih / 1000) * 1000 .toLocaleString('id-ID')} atau {totalSelisih === 0 ? 'pagu tetap' : totalSelisih > 0 ? 'pagu bertambah' : 'pagu berkurang'}.
+                          Berdasarkan hasil analisis usulan revisi anggaran, total pagu anggaran semula sebesar {formatCurrency(roundToThousands(totalSemula))} menjadi {formatCurrency(roundToThousands(totalMenjadi))}, dengan selisih {formatCurrency(roundToThousands(totalSelisih))} atau {totalSelisih === 0 ? 'pagu tetap' : totalSelisih > 0 ? 'pagu bertambah' : 'pagu berkurang'}.
                         </p>
                         <p className="text-slate-700 mb-2 text-left">
                           Perubahan ini terdiri dari:
