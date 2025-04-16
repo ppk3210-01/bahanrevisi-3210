@@ -371,9 +371,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         }
         
         .rpd-table .month-cell {
-          min-width: 90px;
-          width: 90px;
-          max-width: 90px;
+          min-width: 100px;
+          width: 100px;
+          max-width: 100px;
           text-align: right;
         }
         

@@ -346,8 +346,8 @@ button, a, h1, h2, h3, h4, h5, h6, p, span, div {
 
 .rpd-table th:nth-child(n+8):nth-child(-n+19),
 .rpd-table td:nth-child(n+8):nth-child(-n+19) {
-  min-width: 90px;
-  width: 90px;
+  min-width: 100px;
+  width: 100px;
 }
 
 .budget-table th button {
