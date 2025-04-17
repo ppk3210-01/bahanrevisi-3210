@@ -25,10 +25,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
-
-  // Set default page size to -1 to show all items
-  const pageSize = -1;
-  const currentPage = 1;
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
@@ -256,7 +254,12 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return '';
   };
   
-  const paginatedItems = sortedItems;
+  // Pagination
+  const paginatedItems = pageSize === -1 
+    ? sortedItems 
+    : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  
+  const totalPages = pageSize === -1 ? 1 : Math.ceil(sortedItems.length / pageSize);
 
   const getStatusClass = (item: any): string => {
     if (item.jumlah_rpd === item.jumlah_menjadi) {
@@ -291,7 +294,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     }
     
     if (field === 'selisih') {
-      return <span className={`text-right block w-full ${item.selisih < 0 ? 'text-red-500' : ''}`}>
+      return <span className={`text-right block w-full ${item.selisih !== 0 ? 'text-red-500' : 'text-green-500'}`}>
         {formatCurrency(item.selisih || 0)}
       </span>;
     }
@@ -336,10 +339,15 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     <div className="space-y-2">
       <style>
         {`
+        .rpd-table-container {
+          position: relative;
+          overflow-x: auto;
+          max-width: 100%;
+        }
+        
         .rpd-table th, .rpd-table td {
           padding: 4px 6px;
           font-size: 0.75rem;
-          text-align: center;
           white-space: nowrap;
         }
         
@@ -349,6 +357,27 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           position: sticky;
           top: 0;
           z-index: 10;
+        }
+        
+        .rpd-table .fixed-column {
+          position: sticky;
+          left: 0;
+          background-color: #fff;
+          z-index: 5;
+          border-right: 1px solid #e2e8f0;
+        }
+        
+        .rpd-table tr:nth-child(even) .fixed-column {
+          background-color: #f8fafc;
+        }
+        
+        .rpd-table .fixed-column:last-of-type {
+          border-right: 2px solid #e2e8f0;
+        }
+        
+        .rpd-table th.fixed-column {
+          z-index: 15;
+          background-color: #f1f5f9;
         }
         
         .rpd-table .month-cell {
@@ -364,6 +393,11 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           max-width: 300px;
           white-space: normal;
           overflow-wrap: break-word;
+        }
+        
+        .rpd-table .number-cell {
+          min-width: 30px;
+          text-align: center;
         }
         
         .rpd-table .total-cell {
@@ -398,6 +432,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         .rpd-table .status-cell {
           width: 50px;
           max-width: 50px;
+          text-align: center;
         }
 
         .status-ok {
@@ -424,6 +459,13 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           border-top: 2px solid #cbd5e1;
           background-color: #f8fafc;
           text-align: right;
+          position: sticky;
+          bottom: 0;
+          z-index: 5;
+        }
+        
+        .rpd-table .footer-row td.fixed-column {
+          z-index: 8;
         }
         
         .rpd-table .belum-isi {
@@ -436,6 +478,20 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         
         .rpd-table .sisa {
           background-color: #e0f2fe;
+        }
+        
+        .pagination {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: 1rem;
+          gap: 0.5rem;
+        }
+        
+        .pagination-info {
+          margin: 0 1rem;
+          font-size: 0.875rem;
+          color: #64748b;
         }
       `}
       </style>
@@ -468,6 +524,27 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
             </label>
           </div>
         </div>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Tampilkan:</span>
+          <Select 
+            value={String(pageSize)} 
+            onValueChange={(value) => {
+              setPageSize(parseInt(value));
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="h-8 w-20">
+              <SelectValue placeholder="10" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="-1">Semua</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       <div className="text-xs text-gray-500">
@@ -476,236 +553,292 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         {hideZeroBudget && ` (menyembunyikan jumlah pagu 0)`}
       </div>
       
-      <div className="rounded-md border border-gray-200 w-full overflow-x-auto">
-        <table className="w-full min-w-full rpd-table">
-          <thead>
-            <tr className="header-row">
-              <th className="py-2 px-1 w-8">#</th>
-              <th className="status-cell py-2 px-1">Status</th>
-              <th className="description-cell py-2 px-1">
-                <button 
-                  className="flex items-center" 
-                  onClick={() => handleSort('uraian')}
-                >
-                  Uraian
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="pagu-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('total_pagu')}
-                >
-                  Total Pagu
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="total-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('total_rpd')}
-                >
-                  Total RPD
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="selisih-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('selisih')}
-                >
-                  Selisih
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('jan')}
-                >
-                  Jan
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('feb')}
-                >
-                  Feb
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('mar')}
-                >
-                  Mar
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('apr')}
-                >
-                  Apr
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('mei')}
-                >
-                  Mei
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('jun')}
-                >
-                  Jun
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('jul')}
-                >
-                  Jul
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('aug')}
-                >
-                  Agu
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('sep')}
-                >
-                  Sep
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('oct')}
-                >
-                  Okt
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('nov')}
-                >
-                  Nov
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="month-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('dec')}
-                >
-                  Des
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="action-cell py-2 px-1"></th>
-            </tr>
-          </thead>
-          
-          <tbody>
-            {paginatedItems.length === 0 ? (
-              <tr>
-                <td colSpan={20} className="py-4 text-center text-slate-500">
-                  Tidak ada data
-                </td>
+      <div className="rounded-md border border-gray-200 overflow-hidden">
+        <div className="rpd-table-container">
+          <table className="w-full min-w-full rpd-table">
+            <thead>
+              <tr className="header-row">
+                <th className="number-cell fixed-column" style={{left: '0px'}}>#</th>
+                <th className="status-cell fixed-column" style={{left: '30px'}}>Status</th>
+                <th className="description-cell fixed-column" style={{left: '80px'}}>
+                  <button 
+                    className="flex items-center" 
+                    onClick={() => handleSort('uraian')}
+                  >
+                    Uraian
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="pagu-cell fixed-column" style={{left: '380px'}}>
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('total_pagu')}
+                  >
+                    Total Pagu
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="total-cell fixed-column" style={{left: '480px'}}>
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('total_rpd')}
+                  >
+                    Total RPD
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="selisih-cell fixed-column" style={{left: '580px'}}>
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('selisih')}
+                  >
+                    Selisih
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('jan')}
+                  >
+                    Jan
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('feb')}
+                  >
+                    Feb
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('mar')}
+                  >
+                    Mar
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('apr')}
+                  >
+                    Apr
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('mei')}
+                  >
+                    Mei
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('jun')}
+                  >
+                    Jun
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('jul')}
+                  >
+                    Jul
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('aug')}
+                  >
+                    Agu
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('sep')}
+                  >
+                    Sep
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('oct')}
+                  >
+                    Okt
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('nov')}
+                  >
+                    Nov
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="month-cell">
+                  <button 
+                    className="flex items-center justify-end w-full" 
+                    onClick={() => handleSort('dec')}
+                  >
+                    Des
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="action-cell"></th>
               </tr>
-            ) : (
-              paginatedItems.map((item, index) => (
-                <tr key={item.id} className={`${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
-                  <td className="text-center">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
-                  <td className="status-cell">
-                    <span className={getStatusClass(item)}>{getStatusText(item)}</span>
-                  </td>
-                  <td className="description-cell">{renderItemField(item, 'uraian')}</td>
-                  <td className="pagu-cell">{renderItemField(item, 'total_pagu')}</td>
-                  <td className="total-cell">{renderItemField(item, 'total_rpd')}</td>
-                  <td className="selisih-cell">{renderItemField(item, 'selisih')}</td>
-                  <td className={`month-cell ${getMonthClass('jan')}`}>{renderItemField(item, 'jan')}</td>
-                  <td className={`month-cell ${getMonthClass('feb')}`}>{renderItemField(item, 'feb')}</td>
-                  <td className={`month-cell ${getMonthClass('mar')}`}>{renderItemField(item, 'mar')}</td>
-                  <td className={`month-cell ${getMonthClass('apr')}`}>{renderItemField(item, 'apr')}</td>
-                  <td className={`month-cell ${getMonthClass('mei')}`}>{renderItemField(item, 'mei')}</td>
-                  <td className={`month-cell ${getMonthClass('jun')}`}>{renderItemField(item, 'jun')}</td>
-                  <td className={`month-cell ${getMonthClass('jul')}`}>{renderItemField(item, 'jul')}</td>
-                  <td className={`month-cell ${getMonthClass('aug')}`}>{renderItemField(item, 'aug')}</td>
-                  <td className={`month-cell ${getMonthClass('sep')}`}>{renderItemField(item, 'sep')}</td>
-                  <td className={`month-cell ${getMonthClass('oct')}`}>{renderItemField(item, 'oct')}</td>
-                  <td className={`month-cell ${getMonthClass('nov')}`}>{renderItemField(item, 'nov')}</td>
-                  <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
-                  <td className="action-cell">
-                    {(isAdmin || (user && user.role === 'user')) && (
-                      <div className="flex space-x-1 justify-center">
-                        {editingId === item.id ? (
-                          <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
-                            <Check className="h-3 w-3" />
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => startEditing(item)} 
-                            className="h-6 w-6"
-                          >
-                            <FileEdit className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    )}
+            </thead>
+            
+            <tbody>
+              {paginatedItems.length === 0 ? (
+                <tr>
+                  <td colSpan={20} className="py-4 text-center text-slate-500">
+                    Tidak ada data
                   </td>
                 </tr>
-              ))
-            )}
-            
-            <tr className="footer-row">
-              <td colSpan={3} className="text-right">Total per Bulan</td>
-              <td className="pagu-cell">{formatCurrency(pagu)}</td>
-              <td className="total-cell">{formatCurrency(grandTotal)}</td>
-              <td className={`selisih-cell ${sisaPagu < 0 ? 'text-red-600' : ''}`}>{formatCurrency(sisaPagu)}</td>
-              <td className={`month-cell ${getMonthClass('jan')}`}>{formatCurrency(totalByMonth.jan, false)}</td>
-              <td className={`month-cell ${getMonthClass('feb')}`}>{formatCurrency(totalByMonth.feb, false)}</td>
-              <td className={`month-cell ${getMonthClass('mar')}`}>{formatCurrency(totalByMonth.mar, false)}</td>
-              <td className={`month-cell ${getMonthClass('apr')}`}>{formatCurrency(totalByMonth.apr, false)}</td>
-              <td className={`month-cell ${getMonthClass('mei')}`}>{formatCurrency(totalByMonth.mei, false)}</td>
-              <td className={`month-cell ${getMonthClass('jun')}`}>{formatCurrency(totalByMonth.jun, false)}</td>
-              <td className={`month-cell ${getMonthClass('jul')}`}>{formatCurrency(totalByMonth.jul, false)}</td>
-              <td className={`month-cell ${getMonthClass('aug')}`}>{formatCurrency(totalByMonth.aug, false)}</td>
-              <td className={`month-cell ${getMonthClass('sep')}`}>{formatCurrency(totalByMonth.sep, false)}</td>
-              <td className={`month-cell ${getMonthClass('oct')}`}>{formatCurrency(totalByMonth.oct, false)}</td>
-              <td className={`month-cell ${getMonthClass('nov')}`}>{formatCurrency(totalByMonth.nov, false)}</td>
-              <td className={`month-cell ${getMonthClass('dec')}`}>{formatCurrency(totalByMonth.dec, false)}</td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
+              ) : (
+                paginatedItems.map((item, index) => (
+                  <tr key={item.id} className={`${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
+                    <td className="number-cell fixed-column" style={{left: '0px'}}>
+                      {(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}
+                    </td>
+                    <td className="status-cell fixed-column" style={{left: '30px'}}>
+                      <span className={getStatusClass(item)}>{getStatusText(item)}</span>
+                    </td>
+                    <td className="description-cell fixed-column" style={{left: '80px'}}>
+                      {renderItemField(item, 'uraian')}
+                    </td>
+                    <td className="pagu-cell fixed-column" style={{left: '380px'}}>
+                      {renderItemField(item, 'total_pagu')}
+                    </td>
+                    <td className="total-cell fixed-column" style={{left: '480px'}}>
+                      {renderItemField(item, 'total_rpd')}
+                    </td>
+                    <td className="selisih-cell fixed-column" style={{left: '580px'}}>
+                      {renderItemField(item, 'selisih')}
+                    </td>
+                    <td className={`month-cell ${getMonthClass('jan')}`}>{renderItemField(item, 'jan')}</td>
+                    <td className={`month-cell ${getMonthClass('feb')}`}>{renderItemField(item, 'feb')}</td>
+                    <td className={`month-cell ${getMonthClass('mar')}`}>{renderItemField(item, 'mar')}</td>
+                    <td className={`month-cell ${getMonthClass('apr')}`}>{renderItemField(item, 'apr')}</td>
+                    <td className={`month-cell ${getMonthClass('mei')}`}>{renderItemField(item, 'mei')}</td>
+                    <td className={`month-cell ${getMonthClass('jun')}`}>{renderItemField(item, 'jun')}</td>
+                    <td className={`month-cell ${getMonthClass('jul')}`}>{renderItemField(item, 'jul')}</td>
+                    <td className={`month-cell ${getMonthClass('aug')}`}>{renderItemField(item, 'aug')}</td>
+                    <td className={`month-cell ${getMonthClass('sep')}`}>{renderItemField(item, 'sep')}</td>
+                    <td className={`month-cell ${getMonthClass('oct')}`}>{renderItemField(item, 'oct')}</td>
+                    <td className={`month-cell ${getMonthClass('nov')}`}>{renderItemField(item, 'nov')}</td>
+                    <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
+                    <td className="action-cell">
+                      {(isAdmin || (user && user.role === 'user')) && (
+                        <div className="flex space-x-1 justify-center">
+                          {editingId === item.id ? (
+                            <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => startEditing(item)} 
+                              className="h-6 w-6"
+                            >
+                              <FileEdit className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+            <tfoot>
+              <tr className="footer-row">
+                <td className="fixed-column" style={{left: '0px'}}></td>
+                <td className="fixed-column" style={{left: '30px'}}></td>
+                <td className="fixed-column text-right" style={{left: '80px'}}>Total per Bulan</td>
+                <td className="pagu-cell fixed-column" style={{left: '380px'}}>{formatCurrency(pagu)}</td>
+                <td className="total-cell fixed-column" style={{left: '480px'}}>{formatCurrency(grandTotal)}</td>
+                <td className={`selisih-cell fixed-column ${sisaPagu !== 0 ? 'text-red-600' : 'text-green-600'}`} style={{left: '580px'}}>{formatCurrency(sisaPagu)}</td>
+                <td className={`month-cell ${getMonthClass('jan')}`}>{formatCurrency(totalByMonth.jan, false)}</td>
+                <td className={`month-cell ${getMonthClass('feb')}`}>{formatCurrency(totalByMonth.feb, false)}</td>
+                <td className={`month-cell ${getMonthClass('mar')}`}>{formatCurrency(totalByMonth.mar, false)}</td>
+                <td className={`month-cell ${getMonthClass('apr')}`}>{formatCurrency(totalByMonth.apr, false)}</td>
+                <td className={`month-cell ${getMonthClass('mei')}`}>{formatCurrency(totalByMonth.mei, false)}</td>
+                <td className={`month-cell ${getMonthClass('jun')}`}>{formatCurrency(totalByMonth.jun, false)}</td>
+                <td className={`month-cell ${getMonthClass('jul')}`}>{formatCurrency(totalByMonth.jul, false)}</td>
+                <td className={`month-cell ${getMonthClass('aug')}`}>{formatCurrency(totalByMonth.aug, false)}</td>
+                <td className={`month-cell ${getMonthClass('sep')}`}>{formatCurrency(totalByMonth.sep, false)}</td>
+                <td className={`month-cell ${getMonthClass('oct')}`}>{formatCurrency(totalByMonth.oct, false)}</td>
+                <td className={`month-cell ${getMonthClass('nov')}`}>{formatCurrency(totalByMonth.nov, false)}</td>
+                <td className={`month-cell ${getMonthClass('dec')}`}>{formatCurrency(totalByMonth.dec, false)}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
+      
+      {/* Pagination controls */}
+      {pageSize !== -1 && (
+        <div className="pagination">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+          >
+            &lt;&lt;
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            &lt;
+          </Button>
+          <span className="pagination-info">
+            Halaman {currentPage} dari {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            &gt;
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            &gt;&gt;
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

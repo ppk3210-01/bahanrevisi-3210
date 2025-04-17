@@ -233,6 +233,7 @@ export const useRPDData = (filters?: FilterSelection) => {
         }
       });
       
+      // Fix: Correct the column name to match the database schema - budget_item_id
       const { error } = await supabase
         .from('rencana_penarikan_dana')
         .update({

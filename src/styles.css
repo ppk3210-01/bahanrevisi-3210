@@ -36,3 +36,51 @@
   color: red;
   font-weight: 600;
 }
+
+/* Selisih styles for consistency across all tables */
+.selisih-zero {
+  color: #16a34a !important;
+  font-weight: 600;
+}
+
+.selisih-non-zero {
+  color: #dc2626 !important;
+  font-weight: 600;
+}
+
+/* Fixed columns styling */
+.rpd-table-container {
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.rpd-table .fixed-column {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background-color: #fff;
+  border-right: 1px solid #e2e8f0;
+}
+
+.rpd-table tr:nth-child(even) .fixed-column {
+  background-color: #f8fafc;
+}
+
+.rpd-table th.fixed-column {
+  z-index: 15;
+  background-color: #f1f5f9;
+}
+
+/* Fixed footer row for totals */
+.rpd-table .footer-row td {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background-color: #f8fafc;
+  border-top: 2px solid #cbd5e1;
+}
+
+.rpd-table .footer-row td.fixed-column {
+  z-index: 10;
+}

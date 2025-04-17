@@ -24,6 +24,8 @@ export const updateItemStatus = (item: any) => {
 
 // Add formatCurrency function
 export const formatCurrency = (amount: number, showPrefix: boolean = true): string => {
+  if (isNaN(amount)) amount = 0;
+  
   const formatter = new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
@@ -33,8 +35,9 @@ export const formatCurrency = (amount: number, showPrefix: boolean = true): stri
   return showPrefix ? `Rp ${formattedAmount}` : formattedAmount;
 };
 
-// Add calculateAmount function - apply rounding
+// Modified calculateAmount function - Do not round harga_satuan_menjadi
 export const calculateAmount = (volume: number, unitPrice: number): number => {
+  // Calculate total amount with rounding to thousands
   return roundToThousands(volume * unitPrice);
 };
 
@@ -61,4 +64,10 @@ export const getRowStyle = (status: string): string => {
     default:
       return '';
   }
+};
+
+// Add a function to determine text color based on value (for selisih columns)
+export const getSelisihTextColor = (value: number): string => {
+  if (value === 0) return 'text-green-600';
+  return 'text-red-600';
 };

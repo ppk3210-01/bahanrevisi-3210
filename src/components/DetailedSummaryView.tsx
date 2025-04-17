@@ -8,6 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table"
 import { BudgetSummaryRecord } from '@/types/database';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
@@ -85,6 +86,15 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
     return <div className="flex justify-center p-4">Loading summary data...</div>;
   }
 
+  // Calculate totals for the footer
+  const filteredData = summaryData.filter(item => item.type === view);
+  const totalSemula = filteredData.reduce((sum, item) => sum + item.total_semula, 0);
+  const totalMenjadi = filteredData.reduce((sum, item) => sum + item.total_menjadi, 0);
+  const totalSelisih = filteredData.reduce((sum, item) => sum + item.total_selisih, 0);
+  const totalNewItems = filteredData.reduce((sum, item) => sum + item.new_items, 0);
+  const totalChangedItems = filteredData.reduce((sum, item) => sum + item.changed_items, 0);
+  const totalItems = filteredData.reduce((sum, item) => sum + item.total_items, 0);
+
   const renderSummaryTable = () => (
     <div className="rounded-md border border-gray-200">
       <Table>
@@ -101,20 +111,33 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {summaryData
-            .filter(item => item.type === view)
-            .map((item, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{getSummaryName(item)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_semula))}</TableCell>
-                <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_menjadi))}</TableCell>
-                <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_selisih))}</TableCell>
-                <TableCell className="text-center">{item.new_items}</TableCell>
-                <TableCell className="text-center">{item.changed_items}</TableCell>
-                <TableCell className="text-center">{item.total_items}</TableCell>
-              </TableRow>
-            ))}
+          {filteredData.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell className="font-medium">{getSummaryName(item)}</TableCell>
+              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_semula))}</TableCell>
+              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_menjadi))}</TableCell>
+              <TableCell className={`text-right ${item.total_selisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
+                {formatCurrency(roundToThousands(item.total_selisih))}
+              </TableCell>
+              <TableCell className="text-center">{item.new_items}</TableCell>
+              <TableCell className="text-center">{item.changed_items}</TableCell>
+              <TableCell className="text-center">{item.total_items}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell className="font-bold">Total</TableCell>
+            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
+            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
+            <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {formatCurrency(roundToThousands(totalSelisih))}
+            </TableCell>
+            <TableCell className="text-center font-bold">{totalNewItems}</TableCell>
+            <TableCell className="text-center font-bold">{totalChangedItems}</TableCell>
+            <TableCell className="text-center font-bold">{totalItems}</TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );
