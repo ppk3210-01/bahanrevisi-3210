@@ -7,10 +7,26 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 interface DetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: BudgetItem;
+  item: BudgetItem | null;
 }
 
 const DetailDialog: React.FC<DetailDialogProps> = ({ open, onOpenChange, item }) => {
+  // If item is null, render a simplified dialog
+  if (!item) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">Detail Item Anggaran</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 text-center text-gray-500">
+            Tidak ada data item yang dipilih.
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+  
   // Calculate % change
   const percentChange = item.jumlahSemula > 0 
     ? ((item.jumlahMenjadi - item.jumlahSemula) / item.jumlahSemula * 100).toFixed(2) 
