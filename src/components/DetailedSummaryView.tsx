@@ -11,7 +11,7 @@ import {
   TableFooter,
 } from "@/components/ui/table"
 import { BudgetSummaryRecord } from '@/types/database';
-import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
+import { formatCurrency, roundToThousands, getSelisihTextColor } from '@/utils/budgetCalculations';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import SummaryChart, { SummaryViewType } from './SummaryChart';
@@ -41,7 +41,8 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       case 'komponen_output':
         return item.komponen_output || 'Tidak ada Komponen';
       case 'akun':
-        return item.akun || 'Tidak ada Akun';
+        // Include the akun code and name
+        return `${item.akun} - ${(item as any).akun_name || 'Tidak ada Akun'}`;
       case 'program_pembebanan':
         return item.program_pembebanan || 'Tidak ada Program';
       case 'kegiatan':
@@ -51,9 +52,10 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       case 'sub_komponen':
         return item.sub_komponen || 'Tidak ada Sub Komponen';
       case 'account_group':
-        return item.account_group || 'Tidak ada Kelompok Belanja';
+        // Include the account group code and name
+        return `${item.account_group} - ${item.account_group_name || 'Tidak ada Kelompok Belanja'}`;
       case 'akun_group':
-        return item.akun_group || 'Tidak ada Kelompok Akun';
+        return `${item.akun_group} - ${item.akun_group_name || 'Tidak ada Kelompok Akun'}`;
       default:
         return 'Tidak ada Keterangan';
     }
@@ -88,12 +90,12 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
 
   // Calculate totals for the footer
   const filteredData = summaryData.filter(item => item.type === view);
-  const totalSemula = filteredData.reduce((sum, item) => sum + item.total_semula, 0);
-  const totalMenjadi = filteredData.reduce((sum, item) => sum + item.total_menjadi, 0);
-  const totalSelisih = filteredData.reduce((sum, item) => sum + item.total_selisih, 0);
-  const totalNewItems = filteredData.reduce((sum, item) => sum + item.new_items, 0);
-  const totalChangedItems = filteredData.reduce((sum, item) => sum + item.changed_items, 0);
-  const totalItems = filteredData.reduce((sum, item) => sum + item.total_items, 0);
+  const totalSemula = filteredData.reduce((sum, item) => sum + (item.total_semula || 0), 0);
+  const totalMenjadi = filteredData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0);
+  const totalSelisih = filteredData.reduce((sum, item) => sum + (item.total_selisih || 0), 0);
+  const totalNewItems = filteredData.reduce((sum, item) => sum + (item.new_items || 0), 0);
+  const totalChangedItems = filteredData.reduce((sum, item) => sum + (item.changed_items || 0), 0);
+  const totalItems = filteredData.reduce((sum, item) => sum + (item.total_items || 0), 0);
 
   const renderSummaryTable = () => (
     <div className="rounded-md border border-gray-200">
@@ -114,14 +116,14 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           {filteredData.map((item, index) => (
             <TableRow key={index}>
               <TableCell className="font-medium">{getSummaryName(item)}</TableCell>
-              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_semula))}</TableCell>
-              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_menjadi))}</TableCell>
-              <TableCell className={`text-right ${item.total_selisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
-                {formatCurrency(roundToThousands(item.total_selisih))}
+              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_semula || 0))}</TableCell>
+              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_menjadi || 0))}</TableCell>
+              <TableCell className={`text-right ${(item.total_selisih || 0) !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
+                {formatCurrency(roundToThousands(item.total_selisih || 0))}
               </TableCell>
-              <TableCell className="text-center">{item.new_items}</TableCell>
-              <TableCell className="text-center">{item.changed_items}</TableCell>
-              <TableCell className="text-center">{item.total_items}</TableCell>
+              <TableCell className="text-center">{item.new_items || 0}</TableCell>
+              <TableCell className="text-center">{item.changed_items || 0}</TableCell>
+              <TableCell className="text-center">{item.total_items || 0}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -130,7 +132,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
             <TableCell className="font-bold">Total</TableCell>
             <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
             <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
-            <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
               {formatCurrency(roundToThousands(totalSelisih))}
             </TableCell>
             <TableCell className="text-center font-bold">{totalNewItems}</TableCell>

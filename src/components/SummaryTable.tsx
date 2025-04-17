@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { BudgetSummaryRecord } from '@/types/database';
 
@@ -29,7 +30,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summ
   const [sortField, setSortField] = useState<keyof SummaryRow>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   const handleSort = (field: keyof SummaryRow) => {
     if (sortField === field) {
@@ -59,15 +60,47 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summ
   });
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const currentItems = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentItems = itemsPerPage === -1 
+    ? sortedData 
+    : sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
+  const handleItemsPerPageChange = (value: string) => {
+    const newItemsPerPage = parseInt(value);
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
+  // Calculate totals for the footer
+  const totalSemula = sortedData.reduce((sum, item) => sum + item.totalSemula, 0);
+  const totalMenjadi = sortedData.reduce((sum, item) => sum + item.totalMenjadi, 0);
+  const totalSelisih = sortedData.reduce((sum, item) => sum + item.totalSelisih, 0);
+  const totalNewItems = sortedData.reduce((sum, item) => sum + item.newItems, 0);
+  const totalChangedItems = sortedData.reduce((sum, item) => sum + item.changedItems, 0);
+  const totalItems = sortedData.reduce((sum, item) => sum + item.totalItems, 0);
+
   return (
     <div>
-      <h3 className="text-md font-semibold mb-2">{title}</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-md font-semibold">{title}</h3>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-500">Tampilkan:</span>
+          <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+            <SelectTrigger className="w-[100px] h-8">
+              <SelectValue placeholder="10 items" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10 items</SelectItem>
+              <SelectItem value="25">25 items</SelectItem>
+              <SelectItem value="50">50 items</SelectItem>
+              <SelectItem value="-1">Semua</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       <div className="border rounded-md">
         <Table>
           <TableHeader>
@@ -148,11 +181,11 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summ
             ) : (
               currentItems.map((row, index) => (
                 <TableRow key={row.id} className={index % 2 === 0 ? "bg-slate-50" : ""}>
-                  <TableCell className="text-center">{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
+                  <TableCell className="text-center">{(currentPage - 1) * (itemsPerPage === -1 ? 0 : itemsPerPage) + index + 1}</TableCell>
                   <TableCell>{row.name || '-'}</TableCell>
                   <TableCell className="text-right">{formatCurrency(roundToThousands(row.totalSemula))}</TableCell>
                   <TableCell className="text-right text-black">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
-                  <TableCell className={`text-right ${row.totalSelisih > 0 ? 'text-green-600' : row.totalSelisih < 0 ? 'text-red-600' : ''}`}>
+                  <TableCell className={`text-right ${row.totalSelisih !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
                     {formatCurrency(roundToThousands(row.totalSelisih))}
                   </TableCell>
                   <TableCell className="text-right">{row.newItems}</TableCell>
@@ -162,9 +195,22 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summ
               ))
             )}
           </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell className="font-bold" colSpan={2}>Total</TableCell>
+              <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
+              <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
+              <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
+                {formatCurrency(roundToThousands(totalSelisih))}
+              </TableCell>
+              <TableCell className="text-right font-bold">{totalNewItems}</TableCell>
+              <TableCell className="text-right font-bold">{totalChangedItems}</TableCell>
+              <TableCell className="text-right font-bold">{totalItems}</TableCell>
+            </TableRow>
+          </TableFooter>
         </Table>
 
-        {totalPages > 1 && (
+        {totalPages > 1 && itemsPerPage !== -1 && (
           <div className="p-2 flex justify-center">
             <Pagination>
               <PaginationContent>

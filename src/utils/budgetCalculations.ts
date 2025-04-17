@@ -35,9 +35,9 @@ export const formatCurrency = (amount: number, showPrefix: boolean = true): stri
   return showPrefix ? `Rp ${formattedAmount}` : formattedAmount;
 };
 
-// Modified calculateAmount function - Do not round harga_satuan_menjadi
+// Updated calculateAmount function - No rounding for harga_satuan_menjadi
 export const calculateAmount = (volume: number, unitPrice: number): number => {
-  // Calculate total amount with rounding to thousands
+  // Calculate total amount with rounding to thousands for the final result only
   return roundToThousands(volume * unitPrice);
 };
 
@@ -68,6 +68,6 @@ export const getRowStyle = (status: string): string => {
 
 // Add a function to determine text color based on value (for selisih columns)
 export const getSelisihTextColor = (value: number): string => {
-  if (value === 0) return 'text-green-600';
-  return 'text-red-600';
+  if (value === 0) return 'selisih-zero';
+  return 'selisih-non-zero';
 };

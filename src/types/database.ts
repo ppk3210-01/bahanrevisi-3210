@@ -16,7 +16,7 @@ export type AkunRecord = { id: string, name: string, code: string };
 
 // Create union types for different summary records
 export type BudgetSummaryByKomponenRecord = Views['budget_summary_by_komponen']['Row'];
-export type BudgetSummaryByAkunRecord = Views['budget_summary_by_akun']['Row'];
+export type BudgetSummaryByAkunRecord = Views['budget_summary_by_akun']['Row'] & { akun_name?: string };
 export type BudgetSummaryByProgramPembebananRecord = Views['budget_summary_by_program_pembebanan']['Row'];
 export type BudgetSummaryByKegiatanRecord = Views['budget_summary_by_kegiatan']['Row']; 
 export type BudgetSummaryByRincianOutputRecord = Views['budget_summary_by_rincian_output']['Row']; 
@@ -42,6 +42,7 @@ export interface BudgetSummaryByKomponen extends BudgetSummaryBase {
 
 export interface BudgetSummaryByAkun extends BudgetSummaryBase {
   akun: string | null;
+  akun_name?: string | null;
   type: 'akun';
 }
 
