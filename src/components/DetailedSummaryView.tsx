@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Table,
@@ -18,7 +19,7 @@ import { Card } from '@/components/ui/card';
 interface DetailedSummaryViewProps {
   summaryData: BudgetSummaryRecord[];
   loading: boolean;
-  view: string;
+  view: SummaryViewType;
   setView: (view: SummaryViewType) => void;
   defaultView?: 'table' | 'chart';
   initialPageSize?: number;
