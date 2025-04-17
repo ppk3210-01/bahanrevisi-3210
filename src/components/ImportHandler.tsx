@@ -18,7 +18,7 @@ interface ImportHandlerProps {
   onComplete: () => void;
 }
 
-// Changed from FC to hook function
+// Hook function for handling import
 export const useImportHandler = ({
   onImport,
   komponenOutput,
@@ -95,6 +95,7 @@ export const useImportHandler = ({
           return;
         }
         
+        // Ensure we're passing an array of items to onImport
         onImport(dataRows)
           .then(() => {
             toast({

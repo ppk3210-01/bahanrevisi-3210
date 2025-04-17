@@ -222,7 +222,7 @@ export default function useBudgetData(filters: FilterSelection) {
     fetchData();
   }, [filters]);
 
-  const addBudgetItem = async (item: Omit<BudgetItem, 'id' | 'jumlahSemula' | 'jumlahMenjadi' | 'selisih' | 'status'>) => {
+  const addBudgetItem = async (item: Omit<BudgetItem, "id" | "jumlahSemula" | "jumlahMenjadi" | "selisih" | "status">) => {
     try {
       const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
       const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
@@ -274,7 +274,7 @@ export default function useBudgetData(filters: FilterSelection) {
     }
   };
 
-  const importBudgetItems = async (items: Partial<BudgetItem>[]) => {
+  const importBudgetItems = async (items: Partial<BudgetItem>[]): Promise<void> => {
     try {
       setLoading(true);
       
@@ -323,8 +323,6 @@ export default function useBudgetData(filters: FilterSelection) {
           title: "Berhasil",
           description: `${savedItems.length} item anggaran berhasil diimpor.`
         });
-        setLoading(false);
-        return savedItems;
       }
       
       setLoading(false);

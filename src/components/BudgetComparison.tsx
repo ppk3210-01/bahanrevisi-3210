@@ -44,7 +44,9 @@ const BudgetComparison: React.FC = () => {
   } = useBudgetData(filters);
 
   const handleImportItems = async (items: Partial<BudgetItem>[]): Promise<void> => {
-    await importBudgetItems(items);
+    if (items && items.length > 0) {
+      await importBudgetItems(items);
+    }
   };
 
   const loadingOptions = false;

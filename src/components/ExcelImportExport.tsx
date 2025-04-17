@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -40,7 +39,6 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
 
   const buttonClass = smallText ? "text-xs px-2 py-1 h-8" : "";
   
-  // Now using the hook instead of the component
   const { handleImportFile } = useImportHandler({
     onImport,
     komponenOutput,
@@ -52,16 +50,11 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
     }
   });
 
-  // Template handling
   const downloadTemplate = () => {
-    // Create a template workbook
     const wb = createTemplateWorkbook(komponenOutput, subKomponen, akun);
-    
-    // Save the file
     XLSX.writeFile(wb, "Budget_Import_Template.xlsx");
   };
 
-  // Trigger file input click when the import button is clicked
   const triggerFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
