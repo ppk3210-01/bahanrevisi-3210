@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -14,6 +13,7 @@ import RPDTable from './RPDTable';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import ExcelImportExport from './ExcelImportExport';
 import { useAuth } from '@/contexts/AuthContext';
+import { BudgetItem } from '@/types/budget';
 
 type SummarySectionView = SummaryViewType;
 
@@ -35,12 +35,17 @@ const BudgetComparison: React.FC = () => {
     budgetItems,
     loading: loadingItems,
     addBudgetItem,
+    importBudgetItems,
     updateBudgetItem,
     deleteBudgetItem,
     approveBudgetItem,
     rejectBudgetItem,
     summaryData
   } = useBudgetData(filters);
+
+  const handleImportItems = async (items: Partial<BudgetItem>[]): Promise<void> => {
+    await importBudgetItems(items);
+  };
 
   const loadingOptions = false;
   const programPembebananOptions = [];
@@ -114,7 +119,6 @@ const BudgetComparison: React.FC = () => {
       );
     }
 
-    // For other views, we'll use DetailedSummaryView
     return null;
   };
 
@@ -151,7 +155,7 @@ const BudgetComparison: React.FC = () => {
           <div className="flex gap-2">
             <ExcelImportExport
               items={filteredItems}
-              onImport={addBudgetItem}
+              onImport={handleImportItems}
               komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
               subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
               akun={filters.akun !== 'all' ? filters.akun : undefined}
