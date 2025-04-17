@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -876,4 +877,247 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="text-red
+                              className="text-red-600 h-6 w-6" 
+                              onClick={() => {
+                                if (isAdmin) {
+                                  onReject(item.id);
+                                  toast({
+                                    title: "Ditolak",
+                                    description: 'Item ditolak oleh PPK',
+                                    variant: "destructive"
+                                  });
+                                }
+                              }}
+                              title="Tolak"
+                              disabled={!isAdmin}
+                            >
+                              <X className="h-3 w-3 font-bold" />
+                            </Button>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Pagination */}
+      {renderPagination()}
+      
+      {/* Summary row */}
+      <div className="rounded-md border border-gray-200 w-full p-2">
+        <h4 className="text-xs font-medium mb-1">Ringkasan Halaman</h4>
+        <div className="grid grid-cols-3 text-xs gap-2">
+          <div>
+            <span className="font-medium">Total Semula: </span>
+            <span>{formatCurrency(pageTotalSemula)}</span>
+          </div>
+          <div>
+            <span className="font-medium">Total Menjadi: </span>
+            <span>{formatCurrency(pageTotalMenjadi)}</span>
+          </div>
+          <div>
+            <span className="font-medium">Total Selisih: </span>
+            <span className={pageTotalSelisih > 0 ? 'text-green-600' : pageTotalSelisih < 0 ? 'text-red-600' : ''}>
+              {formatCurrency(pageTotalSelisih)}
+            </span>
+          </div>
+        </div>
+        
+        <h4 className="text-xs font-medium mt-2 mb-1">Ringkasan Keseluruhan</h4>
+        <div className="grid grid-cols-3 text-xs gap-2">
+          <div>
+            <span className="font-medium">Total Semula: </span>
+            <span>{formatCurrency(grandTotalSemula)}</span>
+          </div>
+          <div>
+            <span className="font-medium">Total Menjadi: </span>
+            <span>{formatCurrency(grandTotalMenjadi)}</span>
+          </div>
+          <div>
+            <span className="font-medium">Total Selisih: </span>
+            <span className={grandTotalSelisih > 0 ? 'text-green-600' : grandTotalSelisih < 0 ? 'text-red-600' : ''}>
+              {formatCurrency(grandTotalSelisih)}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Add new item form */}
+      {!isViewer && areFiltersComplete && (
+        <div className="rounded-md border border-gray-200 p-2 w-full">
+          <h4 className="text-xs font-semibold mb-2">Tambah Item Baru</h4>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 text-xs">
+            <div className="lg:col-span-3">
+              <label className="block text-gray-600 mb-1">Uraian</label>
+              <Input
+                value={newItem.uraian}
+                onChange={(e) => setNewItem({ ...newItem, uraian: e.target.value })}
+                className="text-xs h-8"
+                placeholder="Masukkan uraian"
+              />
+            </div>
+            
+            {isAdmin && (
+              <>
+                <div className="lg:col-span-1">
+                  <label className="block text-gray-600 mb-1">Vol Semula</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={newItem.volumeSemula}
+                    onChange={(e) => setNewItem({ ...newItem, volumeSemula: Number(e.target.value) })}
+                    className="text-xs h-8"
+                  />
+                </div>
+                
+                <div className="lg:col-span-1">
+                  <label className="block text-gray-600 mb-1">Satuan Semula</label>
+                  <Select
+                    value={newItem.satuanSemula}
+                    onValueChange={(value) => setNewItem({ ...newItem, satuanSemula: value })}
+                  >
+                    <SelectTrigger className="text-xs h-8">
+                      <SelectValue placeholder="Satuan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNIT_OPTIONS.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="lg:col-span-1">
+                  <label className="block text-gray-600 mb-1">Harga Semula</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={newItem.hargaSatuanSemula}
+                    onChange={(e) => setNewItem({ ...newItem, hargaSatuanSemula: Number(e.target.value) })}
+                    className="text-xs h-8"
+                  />
+                </div>
+                
+                <div className="lg:col-span-1">
+                  <label className="block text-gray-600 mb-1">Jml Semula</label>
+                  <Input
+                    type="text"
+                    value={formatCurrency(newItemJumlahSemula)}
+                    readOnly
+                    className="text-xs h-8 bg-gray-50"
+                  />
+                </div>
+              </>
+            )}
+            
+            <div className="lg:col-span-1">
+              <label className="block text-gray-600 mb-1">Vol Menjadi</label>
+              <Input
+                type="number"
+                min="0"
+                value={newItem.volumeMenjadi}
+                onChange={(e) => setNewItem({ ...newItem, volumeMenjadi: Number(e.target.value) })}
+                className="text-xs h-8"
+              />
+            </div>
+            
+            <div className="lg:col-span-1">
+              <label className="block text-gray-600 mb-1">Satuan Menjadi</label>
+              <Select
+                value={newItem.satuanMenjadi}
+                onValueChange={(value) => setNewItem({ ...newItem, satuanMenjadi: value })}
+              >
+                <SelectTrigger className="text-xs h-8">
+                  <SelectValue placeholder="Satuan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {UNIT_OPTIONS.map((unit) => (
+                    <SelectItem key={unit} value={unit}>
+                      {unit}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="lg:col-span-1">
+              <label className="block text-gray-600 mb-1">Harga Menjadi</label>
+              <Input
+                type="number"
+                min="0"
+                value={newItem.hargaSatuanMenjadi}
+                onChange={(e) => setNewItem({ ...newItem, hargaSatuanMenjadi: Number(e.target.value) })}
+                className="text-xs h-8"
+              />
+            </div>
+            
+            <div className="lg:col-span-1">
+              <label className="block text-gray-600 mb-1">Jml Menjadi</label>
+              <Input
+                type="text"
+                value={formatCurrency(newItemJumlahMenjadi)}
+                readOnly
+                className="text-xs h-8 bg-gray-50"
+              />
+            </div>
+            
+            <div className="lg:col-span-1">
+              <label className="block text-gray-600 mb-1">Selisih</label>
+              <Input
+                type="text"
+                value={formatCurrency(newItemSelisih)}
+                readOnly
+                className={`text-xs h-8 bg-gray-50 ${newItemSelisih > 0 ? 'text-green-600' : newItemSelisih < 0 ? 'text-red-600' : ''}`}
+              />
+            </div>
+            
+            <div className="lg:col-span-1 flex items-end">
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={handleAddItem}
+                className="w-full flex items-center text-xs"
+              >
+                <PlusCircle className="h-3 w-3 mr-1" />
+                Tambah
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Hapus</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Detail Dialog */}
+      <DetailDialog 
+        open={isDetailOpen} 
+        onOpenChange={setIsDetailOpen}
+        item={detailItem}
+      />
+    </div>
+  );
+};
+
+export default BudgetTable;
+
