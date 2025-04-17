@@ -1,9 +1,6 @@
-
-// Updated the roundToThousands function in this file
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
-import { calculateAmount, calculateDifference, updateItemStatus, roundToThousands } from '@/utils/budgetCalculations';
+import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { 
@@ -19,6 +16,7 @@ import {
   BudgetSummaryByAccountGroup,
   BudgetSummaryByAkunGroup
 } from '@/types/database';
+import { roundToThousands } from '@/utils/budgetCalculations';
 
 type SummaryType = 'komponen_output' | 'akun' | 'program_pembebanan' | 'kegiatan' | 'rincian_output' | 'sub_komponen' | 'account_group' | 'akun_group';
 
@@ -61,7 +59,6 @@ export default function useBudgetData(filters: FilterSelection) {
         }
 
         if (data) {
-          // Make sure to apply roundToThousands to numeric values
           const transformedData: BudgetItem[] = data.map((item: BudgetItemRecord) => {
             const budgetItem = convertToBudgetItem(item);
             budgetItem.jumlahSemula = roundToThousands(budgetItem.jumlahSemula);
@@ -124,6 +121,7 @@ export default function useBudgetData(filters: FilterSelection) {
         if (akunResult.data) {
           const akunData: BudgetSummaryByAkun[] = akunResult.data.map(item => ({
             akun: item.akun || '',
+            akun_name: item.akun_name || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),

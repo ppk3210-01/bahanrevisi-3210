@@ -159,6 +159,7 @@ export const useRPDData = (filters?: FilterSelection) => {
         return {
           ...item,
           jumlah_menjadi: roundToThousands(item.jumlah_menjadi),
+          // Do not round harga_satuan_menjadi
           januari: roundToThousands(item.januari || 0),
           februari: roundToThousands(item.februari || 0),
           maret: roundToThousands(item.maret || 0),

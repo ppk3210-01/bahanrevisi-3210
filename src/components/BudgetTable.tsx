@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -250,7 +249,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
     
     if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || 
-        field === 'volumeMenjadi' || field === 'hargaSatuanMenjadi') {
+        field === 'volumeMenjadi') {
       if (typeof value === 'string') {
         const numValue = Number(value.replace(/,/g, ''));
         if (isNaN(numValue)) return;
@@ -266,9 +265,30 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         return;
       }
       
-      if (field === 'hargaSatuanSemula' || field === 'hargaSatuanMenjadi') {
+      // Don't round harga_satuan_menjadi
+      if (field === 'hargaSatuanSemula') {
         value = roundToThousands(value as number);
       }
+    }
+    
+    // For hargaSatuanMenjadi specifically, don't round
+    if (field === 'hargaSatuanMenjadi') {
+      if (typeof value === 'string') {
+        const numValue = Number(value.replace(/,/g, ''));
+        if (isNaN(numValue)) return;
+        value = numValue;
+      }
+      
+      if (value < 0) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: 'Nilai tidak boleh negatif'
+        });
+        return;
+      }
+      
+      // Don't round this value
     }
     
     onUpdate(id, { [field]: value });
@@ -856,213 +876,4 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="text-red-600 h-6 w-6" 
-                              onClick={() => {
-                                if (isAdmin) {
-                                  onReject(item.id);
-                                  toast({
-                                    title: "Info",
-                                    description: 'Item ditolak oleh PPK'
-                                  });
-                                }
-                              }}
-                              title="Tolak"
-                              disabled={!isAdmin}
-                            >
-                              <X className="h-3 w-3 font-bold" />
-                            </Button>
-                          </div>
-                        )}
-                        {item.isApproved && (
-                          <span className="text-green-600 font-medium">OK</span>
-                        )}
-                      </td>
-                    )}
-                  </tr>
-                ))
-              )}
-
-              {!isViewer && (
-                <tr className="bg-gray-50 h-9">
-                  <td className="py-1 px-1 text-center">{filteredItems.length + 1}</td>
-                  <td className="uraian-cell py-1 px-1">
-                    <Input 
-                      placeholder="Tambah Uraian Baru" 
-                      value={newItem.uraian || ''} 
-                      onChange={(e) => setNewItem({...newItem, uraian: e.target.value})}
-                      required
-                      className="h-7 text-xs"
-                      disabled={!isAdmin && !areFiltersComplete}
-                    />
-                  </td>
-                  <td className="number-cell py-1 px-1">
-                    <Input 
-                      type="number" 
-                      placeholder="0" 
-                      value={newItem.volumeSemula || ''} 
-                      onChange={(e) => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
-                      min="0"
-                      required
-                      className="h-7 text-xs"
-                      disabled={!isAdmin}
-                    />
-                  </td>
-                  <td className="unit-cell py-1 px-1">
-                    <Select 
-                      value={newItem.satuanSemula} 
-                      onValueChange={(value) => setNewItem({...newItem, satuanSemula: value})}
-                      required
-                      disabled={!isAdmin}
-                    >
-                      <SelectTrigger className="h-7 text-xs">
-                        <SelectValue placeholder="Satuan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {UNIT_OPTIONS.map((unit) => (
-                          <SelectItem key={unit} value={unit} className="text-xs">
-                            {unit}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </td>
-                  <td className="number-cell py-1 px-1">
-                    <Input 
-                      type="number" 
-                      placeholder="0" 
-                      value={newItem.hargaSatuanSemula || ''} 
-                      onChange={(e) => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
-                      min="0"
-                      required
-                      className="h-7 text-xs"
-                      disabled={!isAdmin}
-                    />
-                  </td>
-                  <td className="number-cell py-1 px-1">
-                    {formatCurrency(newItemJumlahSemula)}
-                  </td>
-                  <td className="number-cell py-1 px-1 border-l-2">
-                    <Input 
-                      type="number" 
-                      placeholder="0" 
-                      value={newItem.volumeMenjadi || ''} 
-                      onChange={(e) => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
-                      min="0"
-                      required
-                      className="h-7 text-xs"
-                      disabled={!isAdmin && !areFiltersComplete}
-                    />
-                  </td>
-                  <td className="unit-cell py-1 px-1">
-                    <Select 
-                      value={newItem.satuanMenjadi} 
-                      onValueChange={(value) => setNewItem({...newItem, satuanMenjadi: value})}
-                      required
-                      disabled={!isAdmin && !areFiltersComplete}
-                    >
-                      <SelectTrigger className="h-7 text-xs">
-                        <SelectValue placeholder="Satuan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {UNIT_OPTIONS.map((unit) => (
-                          <SelectItem key={unit} value={unit} className="text-xs">
-                            {unit}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </td>
-                  <td className="number-cell py-1 px-1">
-                    <Input 
-                      type="number" 
-                      placeholder="0" 
-                      value={newItem.hargaSatuanMenjadi || ''} 
-                      onChange={(e) => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
-                      min="0"
-                      required
-                      className="h-7 text-xs"
-                      disabled={!isAdmin && !areFiltersComplete}
-                    />
-                  </td>
-                  <td className="number-cell py-1 px-1">
-                    {formatCurrency(newItemJumlahMenjadi)}
-                  </td>
-                  <td className="number-cell py-1 px-1">
-                    <span className={newItemSelisih > 0 ? 'text-green-600' : newItemSelisih < 0 ? 'text-red-600' : ''}>
-                      {formatCurrency(newItemSelisih)}
-                    </span>
-                  </td>
-                  <td className="py-1 px-1" colSpan={2}>
-                    <Button 
-                      onClick={handleAddItem} 
-                      size="sm" 
-                      className="w-full h-7 text-xs"
-                      disabled={!isAdmin && !areFiltersComplete}
-                    >
-                      <PlusCircle className="h-3 w-3 mr-1" />
-                      Tambah
-                    </Button>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-        <div className="text-xs text-gray-500">
-          Total halaman ini: {formatCurrency(pageTotalSemula)} → {formatCurrency(pageTotalMenjadi)} 
-          <span className={pageTotalSelisih > 0 ? 'text-green-600 ml-1' : pageTotalSelisih < 0 ? 'text-red-600 ml-1' : 'ml-1'}>
-            ({formatCurrency(pageTotalSelisih)})
-          </span>
-        </div>
-        
-        <div className="text-xs font-medium">
-          Total keseluruhan: {formatCurrency(grandTotalSemula)} → {formatCurrency(grandTotalMenjadi)}
-          <span className={grandTotalSelisih > 0 ? 'text-green-600 ml-1' : grandTotalSelisih < 0 ? 'text-red-600 ml-1' : 'ml-1'}>
-            ({formatCurrency(grandTotalSelisih)})
-          </span>
-        </div>
-      </div>
-      
-      {renderPagination()}
-      
-      {detailItem && (
-        <DetailDialog
-          open={isDetailOpen}
-          onOpenChange={setIsDetailOpen}
-          item={detailItem}
-        />
-      )}
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Konfirmasi Hapus
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus uraian ini? Tindakan ini tidak dapat dibatalkan.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Hapus
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-};
-
-export default BudgetTable;
+                              className="text-red

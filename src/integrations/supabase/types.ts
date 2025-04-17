@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      account_group_lookup: {
+        Row: {
+          code: string
+          name: string
+        }
+        Insert: {
+          code: string
+          name: string
+        }
+        Update: {
+          code?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      account_lookup: {
+        Row: {
+          code: string
+          name: string
+        }
+        Insert: {
+          code: string
+          name: string
+        }
+        Update: {
+          code?: string
+          name?: string
+        }
+        Relationships: []
+      }
       budget_items: {
         Row: {
           akun: string | null
@@ -194,6 +224,7 @@ export type Database = {
       budget_summary_by_akun: {
         Row: {
           akun: string | null
+          akun_name: string | null
           changed_items: number | null
           new_items: number | null
           total_items: number | null
@@ -295,6 +326,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           akun: string | null
+          akun_name: string | null
           changed_items: number | null
           new_items: number | null
           total_items: number | null
