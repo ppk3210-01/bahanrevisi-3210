@@ -1,186 +1,174 @@
 
-import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableFooter,
-} from "@/components/ui/table"
-import { BudgetSummaryRecord } from '@/types/database';
-import { formatCurrency, roundToThousands, getSelisihTextColor } from '@/utils/budgetCalculations';
+import React, { useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import SummaryChart, { SummaryViewType } from './SummaryChart';
-import { Card } from '@/components/ui/card';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { FileImage, FilePdf } from 'lucide-react';
+import SummaryTable from './SummaryTable';
+import { formatCurrency } from '@/utils/budgetCalculations';
+import { exportToJpeg, exportToPdf } from '@/utils/exportUtils';
+import { toast } from '@/hooks/use-toast';
+
+interface SummaryRow {
+  id: string;
+  name: string;
+  totalSemula: number;
+  totalMenjadi: number;
+  totalSelisih: number;
+  newItems: number;
+  changedItems: number;
+  totalItems: number;
+}
 
 interface DetailedSummaryViewProps {
-  summaryData: BudgetSummaryRecord[];
-  loading: boolean;
-  view: SummaryViewType;
-  setView: (view: SummaryViewType) => void;
-  defaultView?: 'table' | 'chart';
-  initialPageSize?: number;
+  title: string;
+  data: SummaryRow[];
+  totalSemula: number;
+  totalMenjadi: number;
+  totalSelisih: number;
 }
 
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
-  summaryData,
-  loading,
-  view,
-  setView,
-  defaultView = 'table',
-  initialPageSize = 10
+  title,
+  data,
+  totalSemula,
+  totalMenjadi,
+  totalSelisih
 }) => {
-  const [currentView, setCurrentView] = React.useState(defaultView);
-
-  const getSummaryName = (item: BudgetSummaryRecord): string => {
-    switch (item.type) {
-      case 'komponen_output':
-        return item.komponen_output || 'Tidak ada Komponen';
-      case 'akun':
-        // Include the akun code and name
-        return `${item.akun} - ${(item as any).akun_name || 'Tidak ada Akun'}`;
-      case 'program_pembebanan':
-        return item.program_pembebanan || 'Tidak ada Program';
-      case 'kegiatan':
-        return item.kegiatan || 'Tidak ada Kegiatan';
-      case 'rincian_output':
-        return item.rincian_output || 'Tidak ada Rincian Output';
-      case 'sub_komponen':
-        return item.sub_komponen || 'Tidak ada Sub Komponen';
-      case 'account_group':
-        // Include the account group code and name
-        return `${item.account_group} - ${item.account_group_name || 'Tidak ada Kelompok Belanja'}`;
-      case 'akun_group':
-        return `${item.akun_group} - ${item.akun_group_name || 'Tidak ada Kelompok Akun'}`;
-      default:
-        return 'Tidak ada Keterangan';
+  const chartAndTableRef = useRef<HTMLDivElement>(null);
+  
+  const chartData = data
+    .filter(item => item.totalMenjadi !== 0 || item.totalSemula !== 0)
+    .map(item => ({
+      name: item.name.length > 20 ? `${item.name.substring(0, 20)}...` : item.name,
+      semula: item.totalSemula,
+      menjadi: item.totalMenjadi,
+      selisih: item.totalSelisih
+    }));
+  
+  const handleExportJPEG = async () => {
+    if (!chartAndTableRef.current) return;
+    try {
+      await exportToJpeg(chartAndTableRef.current, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
+      toast({
+        title: "Berhasil",
+        description: 'Berhasil mengekspor sebagai JPEG'
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: 'Gagal mengekspor sebagai JPEG'
+      });
     }
   };
   
-  const getColumnTitle = (): string => {
-    switch (view) {
-      case 'komponen_output':
-        return 'Komponen Output';
-      case 'akun':
-        return 'Akun';
-      case 'program_pembebanan':
-        return 'Program Pembebanan';
-      case 'kegiatan':
-        return 'Kegiatan';
-      case 'rincian_output':
-        return 'Rincian Output';
-      case 'sub_komponen':
-        return 'Sub Komponen';
-      case 'account_group':
-        return 'Kelompok Belanja';
-      case 'akun_group':
-        return 'Kelompok Akun';
-      default:
-        return 'Keterangan';
+  const handleExportPDF = async () => {
+    if (!chartAndTableRef.current) return;
+    try {
+      await exportToPdf(chartAndTableRef.current, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
+      toast({
+        title: "Berhasil",
+        description: 'Berhasil mengekspor sebagai PDF'
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: 'Gagal mengekspor sebagai PDF'
+      });
     }
   };
-
-  if (loading) {
-    return <div className="flex justify-center p-4">Loading summary data...</div>;
-  }
-
-  // Calculate totals for the footer
-  const filteredData = summaryData.filter(item => item.type === view);
-  const totalSemula = filteredData.reduce((sum, item) => sum + (item.total_semula || 0), 0);
-  const totalMenjadi = filteredData.reduce((sum, item) => sum + (item.total_menjadi || 0), 0);
-  const totalSelisih = filteredData.reduce((sum, item) => sum + (item.total_selisih || 0), 0);
-  const totalNewItems = filteredData.reduce((sum, item) => sum + (item.new_items || 0), 0);
-  const totalChangedItems = filteredData.reduce((sum, item) => sum + (item.changed_items || 0), 0);
-  const totalItems = filteredData.reduce((sum, item) => sum + (item.total_items || 0), 0);
-
-  const renderSummaryTable = () => (
-    <div className="rounded-md border border-gray-200">
-      <Table>
-        <TableCaption>Ringkasan Data Berdasarkan {getColumnTitle()}</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-left">{getColumnTitle()}</TableHead>
-            <TableHead className="text-right">Total Semula</TableHead>
-            <TableHead className="text-right">Total Menjadi</TableHead>
-            <TableHead className="text-right">Selisih</TableHead>
-            <TableHead className="text-center">Item Baru</TableHead>
-            <TableHead className="text-center">Item Berubah</TableHead>
-            <TableHead className="text-center">Total Item</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredData.map((item, index) => (
-            <TableRow key={index}>
-              <TableCell className="font-medium">{getSummaryName(item)}</TableCell>
-              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_semula || 0))}</TableCell>
-              <TableCell className="text-right">{formatCurrency(roundToThousands(item.total_menjadi || 0))}</TableCell>
-              <TableCell className={`text-right ${(item.total_selisih || 0) !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
-                {formatCurrency(roundToThousands(item.total_selisih || 0))}
-              </TableCell>
-              <TableCell className="text-center">{item.new_items || 0}</TableCell>
-              <TableCell className="text-center">{item.changed_items || 0}</TableCell>
-              <TableCell className="text-center">{item.total_items || 0}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableCell className="font-bold">Total</TableCell>
-            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
-            <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
-            <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
-              {formatCurrency(roundToThousands(totalSelisih))}
-            </TableCell>
-            <TableCell className="text-center font-bold">{totalNewItems}</TableCell>
-            <TableCell className="text-center font-bold">{totalChangedItems}</TableCell>
-            <TableCell className="text-center font-bold">{totalItems}</TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </div>
-  );
   
-  const renderSummaryChart = () => (
-    <Card className="p-4">
-      <h4 className="text-lg font-medium mb-2 text-gray-800">Grafik Ringkasan {getColumnTitle()}</h4>
-      <SummaryChart 
-        summaryData={summaryData.filter(item => item.type === view)}
-        chartType="bar"
-        view={view}
-      />
-    </Card>
-  );
-
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Button variant="outline" size="sm" onClick={() => setView('changes')}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Kembali
+      <div className="flex justify-end space-x-2">
+        <Button variant="outline" size="sm" onClick={handleExportJPEG}>
+          <FileImage className="h-4 w-4 mr-2" />
+          Export JPEG
         </Button>
-        <div>
-          <Button 
-            variant={currentView === 'table' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setCurrentView('table')}
-          >
-            Tabel
-          </Button>
-          <Button 
-            variant={currentView === 'chart' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setCurrentView('chart')}
-          >
-            Grafik
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={handleExportPDF}>
+          <FilePdf className="h-4 w-4 mr-2" />
+          Export PDF
+        </Button>
       </div>
       
-      {currentView === 'table' ? renderSummaryTable() : renderSummaryChart()}
+      <div ref={chartAndTableRef} className="space-y-6 bg-white p-4 rounded-lg">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Grafik Perbandingan {title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
+                  tick={{ fontSize: 10 }}
+                />
+                <YAxis 
+                  tickFormatter={(value) => formatCurrency(value, false)} 
+                  width={80}
+                />
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)} 
+                  labelFormatter={(label) => `${label}`}
+                />
+                <Legend />
+                <Bar 
+                  dataKey="semula" 
+                  name="Total Semula" 
+                  fill="#8884d8" 
+                />
+                <Bar 
+                  dataKey="menjadi" 
+                  name="Total Menjadi" 
+                  fill="#82ca9d" 
+                />
+                <Bar 
+                  dataKey="selisih" 
+                  name="Selisih" 
+                  fill="#ffc658"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.selisih === 0 ? '#4ade80' : '#ef4444'} 
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            
+            <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+              <div className="bg-blue-50 p-3 rounded-md">
+                <div className="text-xs text-gray-500 mb-1">Total Semula</div>
+                <div className="text-lg font-semibold">{formatCurrency(totalSemula)}</div>
+              </div>
+              <div className="bg-green-50 p-3 rounded-md">
+                <div className="text-xs text-gray-500 mb-1">Total Menjadi</div>
+                <div className="text-lg font-semibold">{formatCurrency(totalMenjadi)}</div>
+              </div>
+              <div className={`p-3 rounded-md ${totalSelisih === 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                <div className="text-xs text-gray-500 mb-1">Selisih</div>
+                <div className={`text-lg font-semibold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatCurrency(totalSelisih)}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <SummaryTable title={`Tabel Perbandingan ${title}`} data={data} />
+      </div>
     </div>
   );
 };

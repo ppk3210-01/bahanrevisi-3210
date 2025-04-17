@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -905,10 +904,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
       </div>
       
-      {/* Pagination */}
       {renderPagination()}
       
-      {/* Summary row */}
       <div className="rounded-md border border-gray-200 w-full p-2">
         <h4 className="text-xs font-medium mb-1">Ringkasan Halaman</h4>
         <div className="grid grid-cols-3 text-xs gap-2">
@@ -947,7 +944,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
       </div>
       
-      {/* Add new item form */}
       {!isViewer && areFiltersComplete && (
         <div className="rounded-md border border-gray-200 p-2 w-full">
           <h4 className="text-xs font-semibold mb-2">Tambah Item Baru</h4>
@@ -1093,7 +1089,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
       )}
       
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1109,7 +1104,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Detail Dialog */}
       <DetailDialog 
         open={isDetailOpen} 
         onOpenChange={setIsDetailOpen}
@@ -1120,4 +1114,3 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
 };
 
 export default BudgetTable;
-

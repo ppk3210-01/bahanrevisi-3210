@@ -185,7 +185,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summ
                   <TableCell>{row.name || '-'}</TableCell>
                   <TableCell className="text-right">{formatCurrency(roundToThousands(row.totalSemula))}</TableCell>
                   <TableCell className="text-right text-black">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
-                  <TableCell className={`text-right ${row.totalSelisih !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
+                  <TableCell className={`text-right ${row.totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(roundToThousands(row.totalSelisih))}
                   </TableCell>
                   <TableCell className="text-right">{row.newItems}</TableCell>
@@ -200,7 +200,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summ
               <TableCell className="font-bold" colSpan={2}>Total</TableCell>
               <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
               <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
-              <TableCell className={`text-right font-bold ${totalSelisih !== 0 ? 'selisih-non-zero' : 'selisih-zero'}`}>
+              <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(roundToThousands(totalSelisih))}
               </TableCell>
               <TableCell className="text-right font-bold">{totalNewItems}</TableCell>
