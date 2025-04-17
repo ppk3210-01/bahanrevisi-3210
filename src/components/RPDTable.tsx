@@ -2,38 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
-import { PlusCircle, Trash2, FileEdit, Check, ArrowUpDown, Search } from 'lucide-react';
+import { FileEdit, Check, ArrowUpDown, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
 import { useRPDData } from '@/hooks/useRPDData';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface RPDItem {
-  id: string;
-  uraian: string;
-  total: number;
-  jan: number;
-  feb: number;
-  mar: number;
-  apr: number;
-  mei: number;
-  jun: number;
-  jul: number;
-  aug: number;
-  sep: number;
-  oct: number;
-  nov: number;
-  dec: number;
-}
 
 interface RPDTableProps {
   filters: FilterSelection;
@@ -47,10 +23,12 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [editValues, setEditValues] = useState<{[key: string]: {[key: string]: number}}>({});
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // Set default page size to -1 to show all items
+  const pageSize = -1;
+  const currentPage = 1;
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
@@ -220,9 +198,15 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     } else if (sortField === 'dec') {
       fieldA = a.desember;
       fieldB = b.desember;
-    } else if (sortField === 'total') {
+    } else if (sortField === 'total_rpd') {
       fieldA = a.jumlah_rpd;
       fieldB = b.jumlah_rpd;
+    } else if (sortField === 'total_pagu') {
+      fieldA = a.jumlah_menjadi;
+      fieldB = b.jumlah_menjadi;
+    } else if (sortField === 'selisih') {
+      fieldA = a.selisih;
+      fieldB = b.selisih;
     } else if (sortField === 'uraian') {
       fieldA = a.uraian;
       fieldB = b.uraian;
@@ -272,16 +256,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return '';
   };
   
-  const paginatedItems = pageSize === -1 
-    ? sortedItems 
-    : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  
-  const totalPages = pageSize === -1 ? 1 : Math.ceil(sortedItems.length / pageSize);
-  
-  const handlePageChange = (page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-  };
+  const paginatedItems = sortedItems;
 
   const getStatusClass = (item: any): string => {
     if (item.jumlah_rpd === item.jumlah_menjadi) {
@@ -304,15 +279,21 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     
     if (field === 'uraian') {
       // Uraian is never editable
-      return <span>{item.uraian}</span>;
+      return <span className="line-clamp-3 text-left">{item.uraian}</span>;
     }
     
-    if (field === 'total') {
+    if (field === 'total_rpd') {
       return <span className="text-right block w-full">{formatCurrency(item.jumlah_rpd || 0)}</span>;
     }
 
-    if (field === 'pagu') {
+    if (field === 'total_pagu') {
       return <span className="text-right block w-full">{formatCurrency(item.jumlah_menjadi || 0)}</span>;
+    }
+    
+    if (field === 'selisih') {
+      return <span className={`text-right block w-full ${item.selisih < 0 ? 'text-red-500' : ''}`}>
+        {formatCurrency(item.selisih || 0)}
+      </span>;
     }
     
     let value = 0;
@@ -371,31 +352,42 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         }
         
         .rpd-table .month-cell {
-          min-width: 100px;
-          width: 100px;
-          max-width: 100px;
+          min-width: 80px;
+          width: 80px;
+          max-width: 80px;
           text-align: right;
         }
         
         .rpd-table .description-cell {
           text-align: left;
-          min-width: 200px;
+          min-width: 300px;
+          max-width: 300px;
+          white-space: normal;
+          overflow-wrap: break-word;
         }
         
         .rpd-table .total-cell {
           font-weight: 600;
           text-align: right;
-          min-width: 75px;
-          width: 75px;
-          max-width: 75px;
+          min-width: 100px;
+          width: 100px;
+          max-width: 100px;
         }
 
         .rpd-table .pagu-cell {
           font-weight: 600;
           text-align: right;
-          min-width: 75px;
-          width: 75px;
-          max-width: 75px;
+          min-width: 100px;
+          width: 100px;
+          max-width: 100px;
+        }
+
+        .rpd-table .selisih-cell {
+          font-weight: 600;
+          text-align: right;
+          min-width: 100px;
+          width: 100px;
+          max-width: 100px;
         }
         
         .rpd-table .action-cell {
@@ -458,7 +450,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1);
               }}
             />
           </div>
@@ -469,7 +460,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               checked={hideZeroBudget}
               onCheckedChange={(checked) => {
                 setHideZeroBudget(checked === true);
-                setCurrentPage(1);
               }}
               className="filter-checkbox"
             />
@@ -477,27 +467,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               Sembunyikan jumlah pagu 0
             </label>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Tampilkan:</span>
-          <Select
-            value={pageSize.toString()} 
-            onValueChange={(value) => {
-              setPageSize(parseInt(value));
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-20 h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white z-50">
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="-1">Semua</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
       
@@ -519,6 +488,33 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   onClick={() => handleSort('uraian')}
                 >
                   Uraian
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="pagu-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-end w-full" 
+                  onClick={() => handleSort('total_pagu')}
+                >
+                  Total Pagu
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="total-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-end w-full" 
+                  onClick={() => handleSort('total_rpd')}
+                >
+                  Total RPD
+                  <ArrowUpDown className="h-3 w-3 ml-1" />
+                </button>
+              </th>
+              <th className="selisih-cell py-2 px-1">
+                <button 
+                  className="flex items-center justify-end w-full" 
+                  onClick={() => handleSort('selisih')}
+                >
+                  Selisih
                   <ArrowUpDown className="h-3 w-3 ml-1" />
                 </button>
               </th>
@@ -630,18 +626,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   <ArrowUpDown className="h-3 w-3 ml-1" />
                 </button>
               </th>
-              <th className="total-cell py-2 px-1">
-                <button 
-                  className="flex items-center justify-end w-full" 
-                  onClick={() => handleSort('total')}
-                >
-                  Total
-                  <ArrowUpDown className="h-3 w-3 ml-1" />
-                </button>
-              </th>
-              <th className="pagu-cell py-2 px-1">
-                Pagu Anggaran
-              </th>
               <th className="action-cell py-2 px-1"></th>
             </tr>
           </thead>
@@ -649,7 +633,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           <tbody>
             {paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={18} className="py-4 text-center text-slate-500">
+                <td colSpan={20} className="py-4 text-center text-slate-500">
                   Tidak ada data
                 </td>
               </tr>
@@ -661,6 +645,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                     <span className={getStatusClass(item)}>{getStatusText(item)}</span>
                   </td>
                   <td className="description-cell">{renderItemField(item, 'uraian')}</td>
+                  <td className="pagu-cell">{renderItemField(item, 'total_pagu')}</td>
+                  <td className="total-cell">{renderItemField(item, 'total_rpd')}</td>
+                  <td className="selisih-cell">{renderItemField(item, 'selisih')}</td>
                   <td className={`month-cell ${getMonthClass('jan')}`}>{renderItemField(item, 'jan')}</td>
                   <td className={`month-cell ${getMonthClass('feb')}`}>{renderItemField(item, 'feb')}</td>
                   <td className={`month-cell ${getMonthClass('mar')}`}>{renderItemField(item, 'mar')}</td>
@@ -673,8 +660,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   <td className={`month-cell ${getMonthClass('oct')}`}>{renderItemField(item, 'oct')}</td>
                   <td className={`month-cell ${getMonthClass('nov')}`}>{renderItemField(item, 'nov')}</td>
                   <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
-                  <td className="total-cell">{renderItemField(item, 'total')}</td>
-                  <td className="pagu-cell">{renderItemField(item, 'pagu')}</td>
                   <td className="action-cell">
                     {(isAdmin || (user && user.role === 'user')) && (
                       <div className="flex space-x-1 justify-center">
@@ -701,6 +686,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
             
             <tr className="footer-row">
               <td colSpan={3} className="text-right">Total per Bulan</td>
+              <td className="pagu-cell">{formatCurrency(pagu)}</td>
+              <td className="total-cell">{formatCurrency(grandTotal)}</td>
+              <td className={`selisih-cell ${sisaPagu < 0 ? 'text-red-600' : ''}`}>{formatCurrency(sisaPagu)}</td>
               <td className={`month-cell ${getMonthClass('jan')}`}>{formatCurrency(totalByMonth.jan, false)}</td>
               <td className={`month-cell ${getMonthClass('feb')}`}>{formatCurrency(totalByMonth.feb, false)}</td>
               <td className={`month-cell ${getMonthClass('mar')}`}>{formatCurrency(totalByMonth.mar, false)}</td>
@@ -713,84 +701,11 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
               <td className={`month-cell ${getMonthClass('oct')}`}>{formatCurrency(totalByMonth.oct, false)}</td>
               <td className={`month-cell ${getMonthClass('nov')}`}>{formatCurrency(totalByMonth.nov, false)}</td>
               <td className={`month-cell ${getMonthClass('dec')}`}>{formatCurrency(totalByMonth.dec, false)}</td>
-              <td className="total-cell">{formatCurrency(grandTotal)}</td>
-              <td className="pagu-cell">{formatCurrency(pagu)}</td>
-              <td></td>
-            </tr>
-            
-            <tr className="footer-row">
-              <td colSpan={15} className="text-right">Sisa Pagu</td>
-              <td className={`total-cell sisa ${sisaPagu < 0 ? 'text-red-600' : ''}`} colSpan={2}>
-                {formatCurrency(sisaPagu)}
-              </td>
               <td></td>
             </tr>
           </tbody>
         </table>
       </div>
-      
-      {pageSize !== -1 && totalPages > 1 && (
-        <div className="flex justify-center mt-4">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => handlePageChange(1)} 
-              disabled={currentPage === 1}
-            >
-              First
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => handlePageChange(currentPage - 1)} 
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNumber;
-                if (totalPages <= 5) {
-                  pageNumber = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNumber = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNumber = totalPages - 4 + i;
-                } else {
-                  pageNumber = currentPage - 2 + i;
-                }
-                return (
-                  <Button 
-                    key={pageNumber}
-                    variant={currentPage === pageNumber ? "default" : "outline"} 
-                    size="sm"
-                    onClick={() => handlePageChange(pageNumber)}
-                  >
-                    {pageNumber}
-                  </Button>
-                );
-              })}
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => handlePageChange(currentPage + 1)} 
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => handlePageChange(totalPages)} 
-              disabled={currentPage === totalPages}
-            >
-              Last
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

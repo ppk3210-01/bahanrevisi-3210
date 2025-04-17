@@ -43,8 +43,9 @@ export const calculateDifference = (original: number, updated: number): number =
   return updated - original;
 };
 
-// Update roundToThousands function to properly round to thousands
+// Improved roundToThousands function to properly round to thousands
 export const roundToThousands = (value: number): number => {
+  if (isNaN(value)) return 0;
   return Math.round(value / 1000) * 1000;
 };
 

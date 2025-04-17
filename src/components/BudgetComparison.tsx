@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -100,22 +101,6 @@ const BudgetComparison: React.FC = () => {
               details={`${roundToThousands(totalSelisih) > 0 ? '+' : ''}${formatCurrency(roundToThousands(totalSelisih))}`}
               valueType={totalSelisih > 0 ? 'text-blue-600' : totalSelisih < 0 ? 'text-red-600' : 'text-gray-600'}
             />
-          </div>
-          
-          <div className="space-y-4">
-            <Card className="p-4">
-              <h4 className="text-lg font-medium mb-2 text-gray-800">Ringkasan Perubahan</h4>
-              <SummaryChart 
-                summaryData={[]}
-                chartType="bar"
-                view="changes"
-                customData={{
-                  semula: roundToThousands(totalSemula),
-                  menjadi: roundToThousands(totalMenjadi),
-                  selisih: roundToThousands(totalSelisih)
-                }}
-              />
-            </Card>
           </div>
         </div>
       );
@@ -280,6 +265,7 @@ const BudgetComparison: React.FC = () => {
                 view={summaryView}
                 setView={setSummaryView as (view: SummaryViewType) => void}
                 defaultView="table"
+                initialPageSize={-1}
               />
             )}
           </div>

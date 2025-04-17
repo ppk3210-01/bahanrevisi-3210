@@ -25,6 +25,7 @@ export type RPDItem = {
   november: number;
   desember: number;
   jumlah_rpd: number;
+  selisih: number; // Added selisih property
   status: 'ok' | 'belum_isi' | 'belum_lengkap' | 'sisa' | string;
 };
 
@@ -137,23 +138,43 @@ export const useRPDData = (filters?: FilterSelection) => {
       
       console.log('Filtered RPD data:', filteredData.length, 'items');
       
-      const roundedData = filteredData.map(item => ({
-        ...item,
-        jumlah_menjadi: roundToThousands(item.jumlah_menjadi),
-        januari: roundToThousands(item.januari || 0),
-        februari: roundToThousands(item.februari || 0),
-        maret: roundToThousands(item.maret || 0),
-        april: roundToThousands(item.april || 0),
-        mei: roundToThousands(item.mei || 0),
-        juni: roundToThousands(item.juni || 0),
-        juli: roundToThousands(item.juli || 0),
-        agustus: roundToThousands(item.agustus || 0),
-        september: roundToThousands(item.september || 0),
-        oktober: roundToThousands(item.oktober || 0),
-        november: roundToThousands(item.november || 0),
-        desember: roundToThousands(item.desember || 0),
-        jumlah_rpd: roundToThousands(item.jumlah_rpd || 0),
-      }));
+      const roundedData = filteredData.map(item => {
+        const jumlahRpd = roundToThousands(
+          (item.januari || 0) +
+          (item.februari || 0) +
+          (item.maret || 0) +
+          (item.april || 0) +
+          (item.mei || 0) +
+          (item.juni || 0) +
+          (item.juli || 0) +
+          (item.agustus || 0) +
+          (item.september || 0) +
+          (item.oktober || 0) +
+          (item.november || 0) +
+          (item.desember || 0)
+        );
+        
+        const selisihValue = roundToThousands(item.jumlah_menjadi - jumlahRpd);
+        
+        return {
+          ...item,
+          jumlah_menjadi: roundToThousands(item.jumlah_menjadi),
+          januari: roundToThousands(item.januari || 0),
+          februari: roundToThousands(item.februari || 0),
+          maret: roundToThousands(item.maret || 0),
+          april: roundToThousands(item.april || 0),
+          mei: roundToThousands(item.mei || 0),
+          juni: roundToThousands(item.juni || 0),
+          juli: roundToThousands(item.juli || 0),
+          agustus: roundToThousands(item.agustus || 0),
+          september: roundToThousands(item.september || 0),
+          oktober: roundToThousands(item.oktober || 0),
+          november: roundToThousands(item.november || 0),
+          desember: roundToThousands(item.desember || 0),
+          jumlah_rpd: jumlahRpd,
+          selisih: selisihValue
+        };
+      });
       
       setRpdItems(roundedData);
       dataFetchedRef.current = true;
@@ -199,8 +220,9 @@ export const useRPDData = (filters?: FilterSelection) => {
   const updateRPDItem = async (itemId: string, monthValues: Partial<RPDMonthValues>) => {
     try {
       isUpdatingRef.current = true;
+      console.log('Updating RPD item in database:', itemId, monthValues);
       
-      // Ensure we're working with numbers
+      // Ensure we're working with numbers and rounding to thousands
       const updates: Partial<RPDMonthValues> = {};
       
       Object.entries(monthValues).forEach(([key, value]) => {
@@ -210,8 +232,6 @@ export const useRPDData = (filters?: FilterSelection) => {
           updates[key as keyof RPDMonthValues] = roundToThousands(value || 0);
         }
       });
-      
-      console.log('Updating RPD item:', itemId, updates);
       
       const { error } = await supabase
         .from('rencana_penarikan_dana')
@@ -251,6 +271,7 @@ export const useRPDData = (filters?: FilterSelection) => {
             );
             
             updatedItem.jumlah_rpd = jumlah_rpd;
+            updatedItem.selisih = roundToThousands(updatedItem.jumlah_menjadi - jumlah_rpd);
             
             if (jumlah_rpd === updatedItem.jumlah_menjadi) {
               updatedItem.status = 'ok';
