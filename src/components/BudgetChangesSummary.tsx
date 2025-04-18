@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,16 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const { isAdmin } = useAuth();
-  const { filteredBudgetItems } = useBudgetData();
+  // Initialize useBudgetData with an empty filter
+  const emptyFilter: FilterSelection = {
+    programPembebanan: 'all',
+    kegiatan: 'all',
+    rincianOutput: 'all',
+    komponenOutput: 'all',
+    subKomponen: 'all',
+    akun: 'all'
+  };
+  const { budgetItems } = useBudgetData(emptyFilter);
   const { rpdItems } = useRPDData();
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
@@ -110,9 +120,6 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
         description: 'Sedang menyiapkan data ekspor...'
       });
 
-      // Get necessary data from various hooks
-      // We're using the filteredBudgetItems directly to get current set
-      
       // Define empty FilterSelection object with required properties
       const emptyFilters: FilterSelection = {
         programPembebanan: 'all',
@@ -125,7 +132,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
       
       // Export to multi-sheet Excel
       const success = await exportToMultiSheetExcel(
-        filteredBudgetItems,
+        budgetItems,
         rpdItems,
         {}, // summaries data - could be fetched from API in future enhancements
         emptyFilters
@@ -151,10 +158,10 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
     }
   };
 
-  const changedItems = filteredBudgetItems.filter(item => item.status === 'changed')
+  const changedItems = budgetItems.filter(item => item.status === 'changed')
     .slice(0, 5); // Limit to 5 items for preview
   
-  const newItems = filteredBudgetItems.filter(item => item.status === 'new')
+  const newItems = budgetItems.filter(item => item.status === 'new')
     .slice(0, 5); // Limit to 5 items for preview
 
   return (

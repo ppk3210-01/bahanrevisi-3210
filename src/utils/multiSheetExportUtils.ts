@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 import { BudgetItem, FilterSelection } from '@/types/budget';
 import { formatCurrency, roundToThousands } from './budgetCalculations';
@@ -990,6 +991,7 @@ const addRPDSheet = (wb: XLSX.WorkBook, rpdItems: RPDItem[]) => {
   const totalRPD = rpdItems.reduce((sum, item) => sum + (item.jumlah_rpd || 0), 0);
   const totalSelisih = rpdItems.reduce((sum, item) => sum + (item.selisih || 0), 0);
   
+  // Fix: Convert numbers to formatted strings to resolve type errors
   sheetData.push([
     '', 'TOTAL', '', '', '', 
     formatCurrency(roundToThousands(totalPagu)),
