@@ -1,13 +1,15 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
-import { FileImage, FileText } from 'lucide-react';
+import { FileImage, FileText, FileSpreadsheet } from 'lucide-react';
 import SummaryTable from './SummaryTable';
 import { formatCurrency } from '@/utils/budgetCalculations';
-import { exportToJpeg, exportToPdf } from '@/utils/exportUtils';
+import { exportToJpeg, exportToPdf, exportToExcel } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SummaryRow {
   id: string;
@@ -36,6 +38,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   totalSelisih
 }) => {
   const chartAndTableRef = useRef<HTMLDivElement>(null);
+  const { isAdmin } = useAuth();
   
   const chartData = data
     .filter(item => item.totalMenjadi !== 0 || item.totalSemula !== 0)
@@ -79,19 +82,41 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       });
     }
   };
+
+  const handleExportExcel = async () => {
+    try {
+      await exportToExcel(data, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
+      toast({
+        title: "Berhasil",
+        description: 'Berhasil mengekspor sebagai Excel'
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: 'Gagal mengekspor sebagai Excel'
+      });
+    }
+  };
   
   return (
     <div className="space-y-4">
-      <div className="flex justify-end space-x-2">
-        <Button variant="outline" size="sm" onClick={handleExportJPEG}>
-          <FileImage className="h-4 w-4 mr-2" />
-          Export JPEG
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleExportPDF}>
-          <FileText className="h-4 w-4 mr-2" />
-          Export PDF
-        </Button>
-      </div>
+      {isAdmin && (
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" size="sm" onClick={handleExportJPEG}>
+            <FileImage className="h-4 w-4 mr-2" />
+            Export JPEG
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportPDF}>
+            <FileText className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel}>
+            <FileSpreadsheet className="h-4 w-4 mr-2" />
+            Export Excel
+          </Button>
+        </div>
+      )}
       
       <div ref={chartAndTableRef} className="space-y-6 bg-white p-4 rounded-lg">
         <Card className="shadow-sm">
@@ -166,7 +191,11 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           </CardContent>
         </Card>
         
-        <SummaryTable title={`Tabel Perbandingan ${title}`} data={data} />
+        <SummaryTable 
+          title={`Tabel Perbandingan ${title}`} 
+          data={data} 
+          initialPageSize={-1} // Always show all data
+        />
       </div>
     </div>
   );

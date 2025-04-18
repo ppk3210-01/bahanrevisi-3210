@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -15,11 +16,9 @@ import ExcelImportExport from './ExcelImportExport';
 import { useAuth } from '@/contexts/AuthContext';
 import { BudgetItem } from '@/types/budget';
 
-type SummarySectionView = SummaryViewType;
-
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
-  const [summaryView, setSummaryView] = useState<SummarySectionView>('changes');
+  const [summaryView, setSummaryView] = useState<SummaryViewType>('changes');
   const [filters, setFilters] = useState({
     programPembebanan: 'all',
     kegiatan: 'all',
@@ -132,20 +131,25 @@ const BudgetComparison: React.FC = () => {
             name = item.sub_komponen || '';
             break;
           case 'akun':
-            name = item.akun_name || item.akun || '';
+            // For akun, show code + name format
+            name = item.akun_name ? `${item.akun} - ${item.akun_name}` : item.akun || '';
             break;
           case 'account_group':
-            name = item.account_group_name || item.account_group || '';
+            // For account_group, show code - name format
+            name = item.account_group_name ? `${item.account_group} – ${item.account_group_name}` : item.account_group || '';
             break;
           case 'akun_group':
-            name = item.akun_group_name || item.akun_group || '';
+            // For akun_group, also show code + name format
+            name = item.akun_group_name ? `${item.akun_group} - ${item.akun_group_name}` : item.akun_group || '';
             break;
           default:
             name = '';
         }
 
         return {
-          id: name,
+          id: item.type === 'akun' ? item.akun || name : 
+              item.type === 'account_group' ? item.account_group || name : 
+              item.type === 'akun_group' ? item.akun_group || name : name,
           name,
           totalSemula: item.total_semula || 0,
           totalMenjadi: item.total_menjadi || 0,

@@ -2,6 +2,8 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { formatCurrency } from './budgetCalculations';
 
 export const exportToJpeg = async (element: HTMLElement, fileName: string) => {
   try {
@@ -46,5 +48,35 @@ export const exportToPdf = async (element: HTMLElement, fileName: string) => {
   } catch (error) {
     console.error('Error exporting to PDF:', error);
     throw new Error('Failed to export to PDF');
+  }
+};
+
+export const exportToExcel = async (data: any[], fileName: string) => {
+  try {
+    // Format the data for Excel
+    const formattedData = data.map(item => ({
+      'Nama': item.name,
+      'Total Semula': formatCurrency(item.totalSemula, false),
+      'Total Menjadi': formatCurrency(item.totalMenjadi, false),
+      'Selisih': formatCurrency(item.totalSelisih, false),
+      'Item Baru': item.newItems,
+      'Item Berubah': item.changedItems,
+      'Total Item': item.totalItems
+    }));
+
+    // Create a worksheet
+    const ws = XLSX.utils.json_to_sheet(formattedData);
+
+    // Create a workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Data');
+
+    // Generate Excel file
+    XLSX.writeFile(wb, `${fileName}.xlsx`);
+
+    return true;
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    throw new Error('Failed to export to Excel');
   }
 };

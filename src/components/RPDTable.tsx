@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
-import { FileEdit, Check, ArrowUpDown, Search } from 'lucide-react';
+import { FileEdit, Check, ArrowUpDown, Search, Eye } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
 import { useRPDData } from '@/hooks/useRPDData';
@@ -27,6 +28,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [showDetailDialog, setShowDetailDialog] = useState<boolean>(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
@@ -331,6 +334,68 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     );
   };
 
+  const handleShowDetail = (itemId: string) => {
+    setSelectedItemId(itemId);
+    setShowDetailDialog(true);
+  };
+
+  const getSelectedItem = () => {
+    return rpdItems.find(item => item.id === selectedItemId);
+  };
+
+  const renderDetailDialog = () => {
+    const item = getSelectedItem();
+    
+    if (!item) return null;
+    
+    return (
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Detail Anggaran</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="text-sm">
+              <div className="grid grid-cols-3 gap-x-4 gap-y-2">
+                <div className="font-semibold">Uraian</div>
+                <div className="col-span-2">{item.uraian}</div>
+                
+                <div className="font-semibold">Program Pembebanan</div>
+                <div className="col-span-2">{item.program_pembebanan || '-'}</div>
+                
+                <div className="font-semibold">Kegiatan</div>
+                <div className="col-span-2">{item.kegiatan || '-'}</div>
+                
+                <div className="font-semibold">Rincian Output</div>
+                <div className="col-span-2">{item.rincian_output || '-'}</div>
+                
+                <div className="font-semibold">Komponen Output</div>
+                <div className="col-span-2">{item.komponen_output || '-'}</div>
+                
+                <div className="font-semibold">Sub Komponen</div>
+                <div className="col-span-2">{item.sub_komponen || '-'}</div>
+                
+                <div className="font-semibold">Akun</div>
+                <div className="col-span-2">{item.akun || '-'}</div>
+                
+                <div className="font-semibold">Volume</div>
+                <div className="col-span-2">
+                  {item.volume_menjadi} {item.satuan_menjadi}
+                </div>
+                
+                <div className="font-semibold">Harga Satuan</div>
+                <div className="col-span-2">{formatCurrency(item.harga_satuan_menjadi)}</div>
+                
+                <div className="font-semibold">Total</div>
+                <div className="col-span-2 font-medium">{formatCurrency(item.jumlah_menjadi)}</div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   if (loading) {
     return <div className="flex justify-center p-4">Loading RPD data...</div>;
   }
@@ -425,8 +490,8 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         }
         
         .rpd-table .action-cell {
-          width: 30px;
-          max-width: 30px;
+          width: 70px;
+          max-width: 70px;
         }
 
         .rpd-table .status-cell {
@@ -749,9 +814,18 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                     <td className={`month-cell ${getMonthClass('nov')}`}>{renderItemField(item, 'nov')}</td>
                     <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
                     <td className="action-cell">
-                      {(isAdmin || (user && user.role === 'user')) && (
-                        <div className="flex space-x-1 justify-center">
-                          {editingId === item.id ? (
+                      <div className="flex space-x-1 justify-center">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleShowDetail(item.id)} 
+                          className="h-6 w-6"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                        {(isAdmin || (user && user.role === 'user')) && (
+                          editingId === item.id ? (
                             <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
                               <Check className="h-3 w-3" />
                             </Button>
@@ -761,12 +835,13 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                               size="icon" 
                               onClick={() => startEditing(item)} 
                               className="h-6 w-6"
+                              title="Edit"
                             >
                               <FileEdit className="h-3 w-3" />
                             </Button>
-                          )}
-                        </div>
-                      )}
+                          )
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -839,6 +914,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           </Button>
         </div>
       )}
+      
+      {/* Detail Dialog */}
+      {renderDetailDialog()}
     </div>
   );
 };

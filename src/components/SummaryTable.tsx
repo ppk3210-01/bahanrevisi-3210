@@ -24,13 +24,20 @@ interface SummaryTableProps {
   title?: string;
   summaryData?: BudgetSummaryRecord[];
   view?: string;
+  initialPageSize?: number;
 }
 
-const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summaryData, view }) => {
+const SummaryTable: React.FC<SummaryTableProps> = ({ 
+  data = [], 
+  title = "", 
+  summaryData, 
+  view,
+  initialPageSize = 10
+}) => {
   const [sortField, setSortField] = useState<keyof SummaryRow>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(initialPageSize);
 
   const handleSort = (field: keyof SummaryRow) => {
     if (sortField === field) {
@@ -86,20 +93,22 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data = [], title = "", summ
     <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-md font-semibold">{title}</h3>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-500">Tampilkan:</span>
-          <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
-            <SelectTrigger className="w-[100px] h-8">
-              <SelectValue placeholder="10 items" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10 items</SelectItem>
-              <SelectItem value="25">25 items</SelectItem>
-              <SelectItem value="50">50 items</SelectItem>
-              <SelectItem value="-1">Semua</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {initialPageSize !== -1 && (
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Tampilkan:</span>
+            <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
+              <SelectTrigger className="w-[100px] h-8">
+                <SelectValue placeholder="10 items" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 items</SelectItem>
+                <SelectItem value="25">25 items</SelectItem>
+                <SelectItem value="50">50 items</SelectItem>
+                <SelectItem value="-1">Semua</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
       <div className="border rounded-md">
         <Table>
