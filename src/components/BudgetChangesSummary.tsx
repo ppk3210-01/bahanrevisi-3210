@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -135,47 +134,33 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
           </div>
           
           <div className="mt-8 space-y-4">
-            <h3 className="text-md font-semibold text-green-700">Pagu Anggaran Berubah</h3>
+            <h3 className="text-md font-semibold text-red-700">Pagu Anggaran Berubah</h3>
             
             <div className="overflow-x-auto">
               <table className="w-full min-w-full divide-y divide-gray-200 text-sm">
                 <thead>
-                  <tr className="bg-blue-100/60">
+                  <tr className="bg-red-50">
                     <th className="px-2 py-2 text-left">No</th>
                     <th className="px-2 py-2 text-left">Pembebanan</th>
                     <th className="px-2 py-2 text-left">Uraian</th>
-                    <th className="px-2 py-2 text-center">Detail Perubahan</th>
+                    <th className="px-2 py-2 text-left">Detail Perubahan</th>
                     <th className="px-2 py-2 text-right">Jumlah Semula</th>
                     <th className="px-2 py-2 text-right">Jumlah Menjadi</th>
                     <th className="px-2 py-2 text-right">Selisih</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {/* This is a placeholder. In a real app, you'd map through actual data */}
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                      <td className="px-2 py-2">{i + 1}</td>
-                      <td className="px-2 py-2">(04.01) XXXXX</td>
-                      <td className="px-2 py-2">Honorarium pengelola keuangan</td>
-                      <td className="px-2 py-2">
-                        Volume: {i + 2} → {i + 3}<br />
-                        Harga: Rp {formatCurrency((i + 1) * 100000)} → Rp {formatCurrency((i + 1) * 110000)}
-                      </td>
-                      <td className="px-2 py-2 text-right">{formatCurrency((i + 1) * (i + 2) * 100000)}</td>
-                      <td className="px-2 py-2 text-right">{formatCurrency((i + 1) * (i + 3) * 110000)}</td>
-                      <td className="px-2 py-2 text-right text-red-500">{formatCurrency((i + 1) * (i + 3) * 110000 - (i + 1) * (i + 2) * 100000)}</td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {/* Placeholder rows - in real app, map through changed items data */}
                 </tbody>
               </table>
             </div>
             
-            <h3 className="text-md font-semibold text-blue-700">Pagu Anggaran Baru</h3>
+            <h3 className="text-md font-semibold text-green-700">Pagu Anggaran Baru</h3>
             
             <div className="overflow-x-auto">
               <table className="w-full min-w-full divide-y divide-gray-200 text-sm">
                 <thead>
-                  <tr className="bg-blue-100/60">
+                  <tr className="bg-green-50">
                     <th className="px-2 py-2 text-left">No</th>
                     <th className="px-2 py-2 text-left">Pembebanan</th>
                     <th className="px-2 py-2 text-left">Uraian</th>
@@ -185,63 +170,56 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
                     <th className="px-2 py-2 text-right">Jumlah</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {/* This is a placeholder. In a real app, you'd map through actual data */}
-                  {Array.from({ length: 3 }, (_, i) => (
-                    <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                      <td className="px-2 py-2">{i + 1}</td>
-                      <td className="px-2 py-2">(04.01) XXXXX</td>
-                      <td className="px-2 py-2">Briefing petugas survei</td>
-                      <td className="px-2 py-2 text-center">{i + 1}</td>
-                      <td className="px-2 py-2 text-center">OK</td>
-                      <td className="px-2 py-2 text-right">{formatCurrency((i + 1) * 100000)}</td>
-                      <td className="px-2 py-2 text-right">{formatCurrency((i + 1) * (i + 1) * 100000)}</td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {/* Placeholder rows - in real app, map through new items data */}
                 </tbody>
-                <tfoot>
-                  <tr className="bg-gray-100 font-semibold">
-                    <td className="px-2 py-2 text-right" colSpan={6}>Total</td>
-                    <td className="px-2 py-2 text-right">{formatCurrency(600000)}</td>
-                  </tr>
-                </tfoot>
               </table>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-700">Total Anggaran</h4>
-                <div className="grid grid-cols-3 gap-1">
-                  <div className="text-sm">Semula:</div>
-                  <div className="col-span-2 text-sm font-medium text-right">{formatCurrency(totalSemula)}</div>
-                  
-                  <div className="text-sm">Menjadi:</div>
-                  <div className="col-span-2 text-sm font-medium text-right">{formatCurrency(totalMenjadi)}</div>
-                  
-                  <div className="text-sm">Selisih:</div>
-                  <div className={`col-span-2 text-sm font-medium text-right ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(totalSelisih)}
+            <div className="grid grid-cols-2 gap-8">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Total Anggaran</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Semula:</span>
+                    <span className="text-sm font-medium">{formatCurrency(totalSemula)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Menjadi:</span>
+                    <span className="text-sm font-medium">{formatCurrency(totalMenjadi)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <span className="text-sm text-gray-600">Selisih:</span>
+                    <span className={`text-sm font-medium ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatCurrency(totalSelisih)}
+                    </span>
                   </div>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-700">Jumlah Item</h4>
-                <div className="grid grid-cols-3 gap-1">
-                  <div className="text-sm">Total Item:</div>
-                  <div className="col-span-2 text-sm font-medium text-right">{totalItems}</div>
-                  
-                  <div className="text-sm">Item Tidak Berubah:</div>
-                  <div className="col-span-2 text-sm font-medium text-right">{totalUnchangedItems}</div>
-                  
-                  <div className="text-sm">Item Berubah:</div>
-                  <div className="col-span-2 text-sm font-medium text-right">{totalChangedItems}</div>
-                  
-                  <div className="text-sm">Item Baru:</div>
-                  <div className="col-span-2 text-sm font-medium text-right">{totalNewItems}</div>
-                  
-                  <div className="text-sm">Item Dihapus:</div>
-                  <div className="col-span-2 text-sm font-medium text-right">{totalDeletedItems}</div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Jumlah Item</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Total Item:</span>
+                    <span className="text-sm font-medium">{totalItems}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Item Tidak Berubah:</span>
+                    <span className="text-sm font-medium">{totalUnchangedItems}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Item Berubah:</span>
+                    <span className="text-sm font-medium">{totalChangedItems}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Item Baru:</span>
+                    <span className="text-sm font-medium">{totalNewItems}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Item Dihapus:</span>
+                    <span className="text-sm font-medium">{totalDeletedItems}</span>
+                  </div>
                 </div>
               </div>
             </div>

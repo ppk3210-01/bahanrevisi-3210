@@ -96,21 +96,6 @@ const DetailDialog: React.FC<DetailDialogProps> = ({ open, onOpenChange, item })
           
           <div className="grid grid-cols-3 gap-4 pt-2">
             <div>
-              <h4 className="text-xs text-gray-500 mb-1">Komponen Output</h4>
-              <p className="text-sm font-medium">{item.komponenOutput}</p>
-            </div>
-            <div>
-              <h4 className="text-xs text-gray-500 mb-1">Sub Komponen</h4>
-              <p className="text-sm font-medium">{item.subKomponen || '-'}</p>
-            </div>
-            <div>
-              <h4 className="text-xs text-gray-500 mb-1">Akun</h4>
-              <p className="text-sm font-medium">{item.akun || '-'}</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div>
               <h4 className="text-xs text-gray-500 mb-1">Program Pembebanan</h4>
               <p className="text-sm font-medium">{item.programPembebanan || '-'}</p>
             </div>
@@ -121,6 +106,21 @@ const DetailDialog: React.FC<DetailDialogProps> = ({ open, onOpenChange, item })
             <div>
               <h4 className="text-xs text-gray-500 mb-1">Rincian Output</h4>
               <p className="text-sm font-medium">{item.rincianOutput || '-'}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <h4 className="text-xs text-gray-500 mb-1">Komponen Output</h4>
+              <p className="text-sm font-medium">{item.komponenOutput || '-'}</p>
+            </div>
+            <div>
+              <h4 className="text-xs text-gray-500 mb-1">Sub Komponen</h4>
+              <p className="text-sm font-medium">{item.subKomponen || '-'}</p>
+            </div>
+            <div>
+              <h4 className="text-xs text-gray-500 mb-1">Akun</h4>
+              <p className="text-sm font-medium">{item.akun || '-'}</p>
             </div>
           </div>
           
