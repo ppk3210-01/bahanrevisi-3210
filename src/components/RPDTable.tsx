@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
+  // Initialize or update edit values when editing an item
   useEffect(() => {
     if (editingId) {
       const item = rpdItems.find(item => item.id === editingId);
@@ -62,6 +64,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       let numValue: number;
       
       if (typeof value === 'string') {
+        // Remove any non-numeric characters except decimal point
         const cleanValue = value.replace(/[^0-9.]/g, '');
         numValue = parseFloat(cleanValue) || 0;
       } else {
@@ -77,6 +80,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         return;
       }
       
+      // Update local edit state
       setEditValues(prev => {
         const itemValues = prev[id] || {};
         let apiField = field;
@@ -106,6 +110,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   };
 
   const startEditing = (item: any) => {
+    // Only allow editing for admin or regular users
     if (isAdmin || (user && user.role === 'user')) {
       setEditingId(item.id);
     } else {
@@ -252,6 +257,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return '';
   };
   
+  // Pagination
   const paginatedItems = pageSize === -1 
     ? sortedItems 
     : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -278,6 +284,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     const isEditing = editingId === item.id;
     
     if (field === 'uraian') {
+      // Uraian is never editable
       return <span className="line-clamp-3 text-left">{item.uraian}</span>;
     }
     
@@ -311,6 +318,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     else if (field === 'nov') { value = item.november || 0; fieldKey = 'november'; }
     else if (field === 'dec') { value = item.desember || 0; fieldKey = 'desember'; }
     
+    // If editing, use the value from editValues if available
     const editValue = isEditing && editValues[item.id] ? editValues[item.id][fieldKey] : value;
     
     return isEditing ? (
@@ -866,6 +874,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         </div>
       </div>
       
+      {/* Pagination controls */}
       {pageSize !== -1 && (
         <div className="pagination">
           <Button
@@ -906,6 +915,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         </div>
       )}
       
+      {/* Detail Dialog */}
       {renderDetailDialog()}
     </div>
   );
