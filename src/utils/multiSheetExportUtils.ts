@@ -1,4 +1,3 @@
-
 import * as XLSX from 'xlsx';
 import { BudgetItem, FilterSelection } from '@/types/budget';
 import { formatCurrency, roundToThousands } from './budgetCalculations';
@@ -9,7 +8,14 @@ export const createMultiSheetWorkbook = async (
   budgetItems: BudgetItem[],
   rpdItems: RPDItem[] | undefined = undefined,
   summaries: any = {},
-  filters: FilterSelection = {}
+  filters: FilterSelection = {
+    programPembebanan: 'all',
+    kegiatan: 'all',
+    rincianOutput: 'all',
+    komponenOutput: 'all',
+    subKomponen: 'all',
+    akun: 'all'
+  }
 ) => {
   try {
     // Create a new workbook
@@ -1097,7 +1103,17 @@ export const exportToMultiSheetExcel = async (
   fileName = 'rekap-anggaran'
 ) => {
   try {
-    const wb = await createMultiSheetWorkbook(budgetItems, rpdItems, summaries, filters);
+    // Ensure filters has the required properties
+    const safeFilters: FilterSelection = filters || {
+      programPembebanan: 'all',
+      kegiatan: 'all',
+      rincianOutput: 'all',
+      komponenOutput: 'all',
+      subKomponen: 'all',
+      akun: 'all'
+    };
+    
+    const wb = await createMultiSheetWorkbook(budgetItems, rpdItems, summaries, safeFilters);
     
     XLSX.writeFile(wb, `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`);
     return true;

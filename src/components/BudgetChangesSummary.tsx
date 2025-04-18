@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,9 @@ import { exportToJpeg, exportToPdf, exportToExcel } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { exportToMultiSheetExcel } from '@/utils/multiSheetExportUtils';
-import { useBudgetData } from '@/hooks/useBudgetData';
+import useBudgetData from '@/hooks/useBudgetData';
 import { useRPDData } from '@/hooks/useRPDData';
+import { FilterSelection } from '@/types/budget';
 
 interface BudgetChangesSummaryProps {
   totalSemula: number;
@@ -113,12 +113,22 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
       // Get necessary data from various hooks
       // We're using the filteredBudgetItems directly to get current set
       
+      // Define empty FilterSelection object with required properties
+      const emptyFilters: FilterSelection = {
+        programPembebanan: 'all',
+        kegiatan: 'all',
+        rincianOutput: 'all',
+        komponenOutput: 'all',
+        subKomponen: 'all',
+        akun: 'all'
+      };
+      
       // Export to multi-sheet Excel
       const success = await exportToMultiSheetExcel(
         filteredBudgetItems,
         rpdItems,
         {}, // summaries data - could be fetched from API in future enhancements
-        {} // filters
+        emptyFilters
       );
       
       if (success) {
@@ -141,11 +151,9 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
     }
   };
 
-  // Get changed items for the table
   const changedItems = filteredBudgetItems.filter(item => item.status === 'changed')
     .slice(0, 5); // Limit to 5 items for preview
   
-  // Get new items for the table
   const newItems = filteredBudgetItems.filter(item => item.status === 'new')
     .slice(0, 5); // Limit to 5 items for preview
 
@@ -175,7 +183,6 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
       
       <Card ref={cardRef} className="bg-blue-50/50 border-blue-100">
         <CardContent className="pt-6 space-y-6">
-          {/* Kesimpulan section */}
           <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
             <h2 className="text-lg font-semibold text-blue-900 border-b pb-2">Kesimpulan</h2>
             
@@ -195,7 +202,6 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
             </div>
           </div>
           
-          {/* Pagu Anggaran Berubah section */}
           <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
             <h2 className="text-lg font-semibold text-red-700 border-b pb-2">Pagu Anggaran Berubah</h2>
             
@@ -250,7 +256,6 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
             </div>
           </div>
           
-          {/* Pagu Anggaran Baru section */}
           <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
             <h2 className="text-lg font-semibold text-green-700 border-b pb-2">Pagu Anggaran Baru</h2>
             
