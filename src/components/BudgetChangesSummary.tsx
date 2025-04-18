@@ -44,7 +44,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
     subKomponen: 'all',
     akun: 'all'
   };
-  const { budgetItems } = useBudgetData(emptyFilter);
+  const { budgetItems, summaryData } = useBudgetData(emptyFilter);
   const { rpdItems } = useRPDData();
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
@@ -134,7 +134,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
       const success = await exportToMultiSheetExcel(
         budgetItems,
         rpdItems,
-        {}, // summaries data - could be fetched from API in future enhancements
+        summaryData || {}, // Use summary data if available
         emptyFilters
       );
       
