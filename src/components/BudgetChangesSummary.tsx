@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+
+import React, { useRef, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileImage, FileText, FileSpreadsheet } from 'lucide-react';
@@ -6,6 +7,9 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg, exportToPdf, exportToExcel } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { exportToMultiSheetExcel } from '@/utils/multiSheetExportUtils';
+import { useBudgetData } from '@/hooks/useBudgetData';
+import { useRPDData } from '@/hooks/useRPDData';
 
 interface BudgetChangesSummaryProps {
   totalSemula: number;
@@ -30,6 +34,9 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const { isAdmin } = useAuth();
+  const { filteredBudgetItems } = useBudgetData();
+  const { rpdItems } = useRPDData();
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
   const handleExportJPEG = async () => {
     if (!cardRef.current) return;
@@ -95,6 +102,53 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
     }
   };
 
+  const handleExportMultiSheetExcel = async () => {
+    try {
+      setIsExporting(true);
+      toast({
+        title: "Memproses",
+        description: 'Sedang menyiapkan data ekspor...'
+      });
+
+      // Get necessary data from various hooks
+      // We're using the filteredBudgetItems directly to get current set
+      
+      // Export to multi-sheet Excel
+      const success = await exportToMultiSheetExcel(
+        filteredBudgetItems,
+        rpdItems,
+        {}, // summaries data - could be fetched from API in future enhancements
+        {} // filters
+      );
+      
+      if (success) {
+        toast({
+          title: "Berhasil",
+          description: 'Berhasil mengekspor sebagai Excel dengan banyak sheet'
+        });
+      } else {
+        throw new Error("Export failed");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: 'Gagal mengekspor data. Silakan coba lagi.'
+      });
+      console.error("Export error:", error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Get changed items for the table
+  const changedItems = filteredBudgetItems.filter(item => item.status === 'changed')
+    .slice(0, 5); // Limit to 5 items for preview
+  
+  // Get new items for the table
+  const newItems = filteredBudgetItems.filter(item => item.status === 'new')
+    .slice(0, 5); // Limit to 5 items for preview
+
   return (
     <div className="w-full space-y-4">
       {isAdmin && (
@@ -107,34 +161,43 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
             <FileText className="h-4 w-4 mr-2" />
             Export PDF
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportExcel}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleExportMultiSheetExcel}
+            disabled={isExporting}
+          >
             <FileSpreadsheet className="h-4 w-4 mr-2" />
-            Export Excel
+            {isExporting ? 'Memproses...' : 'Export Excel'}
           </Button>
         </div>
       )}
       
       <Card ref={cardRef} className="bg-blue-50/50 border-blue-100">
-        <CardContent className="pt-6 space-y-4">
-          <h2 className="text-lg font-semibold text-blue-900">Kesimpulan</h2>
-          
-          <div className="space-y-2 text-sm">
-            <p>
-              Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(totalSemula)} mengalami perubahan menjadi {formatCurrency(totalMenjadi)}, dengan selisih {formatCurrency(totalSelisih == 0 ? totalSelisih : Math.abs(totalSelisih))} {totalSelisih > 0 ? 'penambahan' : totalSelisih < 0 ? 'pengurangan' : 'atau tetap'}.
-            </p>
-            <p>
-              Perubahan ini terdiri dari {totalChangedItems} komponen anggaran yang mengalami penyesuaian nilai, {totalNewItems} komponen anggaran baru yang ditambahkan, dan {totalDeletedItems} komponen anggaran yang dihapus.
-            </p>
-            <p>
-              Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {totalChangedItems + totalNewItems} perubahan ini, diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
-            </p>
-            <p>
-              Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
-            </p>
+        <CardContent className="pt-6 space-y-6">
+          {/* Kesimpulan section */}
+          <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
+            <h2 className="text-lg font-semibold text-blue-900 border-b pb-2">Kesimpulan</h2>
+            
+            <div className="space-y-2 text-sm">
+              <p>
+                Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(totalSemula)} mengalami perubahan menjadi {formatCurrency(totalMenjadi)}, dengan selisih {formatCurrency(totalSelisih == 0 ? totalSelisih : Math.abs(totalSelisih))} {totalSelisih > 0 ? 'penambahan' : totalSelisih < 0 ? 'pengurangan' : 'atau tetap'}.
+              </p>
+              <p>
+                Perubahan ini terdiri dari {totalChangedItems} komponen anggaran yang mengalami penyesuaian nilai, {totalNewItems} komponen anggaran baru yang ditambahkan, dan {totalDeletedItems} komponen anggaran yang dihapus.
+              </p>
+              <p>
+                Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {totalChangedItems + totalNewItems} perubahan ini, diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
+              </p>
+              <p>
+                Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
+              </p>
+            </div>
           </div>
           
-          <div className="mt-8 space-y-4">
-            <h3 className="text-md font-semibold text-red-700">Pagu Anggaran Berubah</h3>
+          {/* Pagu Anggaran Berubah section */}
+          <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
+            <h2 className="text-lg font-semibold text-red-700 border-b pb-2">Pagu Anggaran Berubah</h2>
             
             <div className="overflow-x-auto">
               <table className="w-full min-w-full divide-y divide-gray-200 text-sm">
@@ -150,12 +213,46 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {/* Placeholder rows - in real app, map through changed items data */}
+                  {changedItems.length > 0 ? (
+                    changedItems.map((item, index) => (
+                      <tr key={item.id}>
+                        <td className="px-2 py-2">{index + 1}</td>
+                        <td className="px-2 py-2">{item.programPembebanan || '-'}</td>
+                        <td className="px-2 py-2">{item.uraian}</td>
+                        <td className="px-2 py-2">
+                          Volume: {item.volumeSemula} {item.satuanSemula} → {item.volumeMenjadi} {item.satuanMenjadi}, 
+                          Harga: {formatCurrency(item.hargaSatuanSemula)} → {formatCurrency(item.hargaSatuanMenjadi)}
+                        </td>
+                        <td className="px-2 py-2 text-right">{formatCurrency(item.jumlahSemula)}</td>
+                        <td className="px-2 py-2 text-right">{formatCurrency(item.jumlahMenjadi)}</td>
+                        <td className="px-2 py-2 text-right">
+                          {formatCurrency(item.jumlahMenjadi - item.jumlahSemula)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
+                        Tidak ada data perubahan anggaran
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {changedItems.length > 0 && totalChangedItems > 5 && (
+                    <tr>
+                      <td colSpan={7} className="px-2 py-2 italic text-center text-gray-500">
+                        ...dan {totalChangedItems - 5} item lainnya
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-            
-            <h3 className="text-md font-semibold text-green-700">Pagu Anggaran Baru</h3>
+          </div>
+          
+          {/* Pagu Anggaran Baru section */}
+          <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
+            <h2 className="text-lg font-semibold text-green-700 border-b pb-2">Pagu Anggaran Baru</h2>
             
             <div className="overflow-x-auto">
               <table className="w-full min-w-full divide-y divide-gray-200 text-sm">
@@ -171,55 +268,81 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {/* Placeholder rows - in real app, map through new items data */}
+                  {newItems.length > 0 ? (
+                    newItems.map((item, index) => (
+                      <tr key={item.id}>
+                        <td className="px-2 py-2">{index + 1}</td>
+                        <td className="px-2 py-2">{item.programPembebanan || '-'}</td>
+                        <td className="px-2 py-2">{item.uraian}</td>
+                        <td className="px-2 py-2 text-center">{item.volumeMenjadi}</td>
+                        <td className="px-2 py-2 text-center">{item.satuanMenjadi}</td>
+                        <td className="px-2 py-2 text-right">{formatCurrency(item.hargaSatuanMenjadi)}</td>
+                        <td className="px-2 py-2 text-right">{formatCurrency(item.jumlahMenjadi)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="px-2 py-4 text-center text-gray-500">
+                        Tidak ada data anggaran baru
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {newItems.length > 0 && totalNewItems > 5 && (
+                    <tr>
+                      <td colSpan={7} className="px-2 py-2 italic text-center text-gray-500">
+                        ...dan {totalNewItems - 5} item lainnya
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-            
-            <div className="grid grid-cols-2 gap-8">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Total Anggaran</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Semula:</span>
-                    <span className="text-sm font-medium">{formatCurrency(totalSemula)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Menjadi:</span>
-                    <span className="text-sm font-medium">{formatCurrency(totalMenjadi)}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t">
-                    <span className="text-sm text-gray-600">Selisih:</span>
-                    <span className={`text-sm font-medium ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatCurrency(totalSelisih)}
-                    </span>
-                  </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-8">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Total Anggaran</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Semula:</span>
+                  <span className="text-sm font-medium">{formatCurrency(totalSemula)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Menjadi:</span>
+                  <span className="text-sm font-medium">{formatCurrency(totalMenjadi)}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t">
+                  <span className="text-sm text-gray-600">Selisih:</span>
+                  <span className={`text-sm font-medium ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(totalSelisih)}
+                  </span>
                 </div>
               </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Jumlah Item</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Total Item:</span>
-                    <span className="text-sm font-medium">{totalItems}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Item Tidak Berubah:</span>
-                    <span className="text-sm font-medium">{totalUnchangedItems}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Item Berubah:</span>
-                    <span className="text-sm font-medium">{totalChangedItems}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Item Baru:</span>
-                    <span className="text-sm font-medium">{totalNewItems}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Item Dihapus:</span>
-                    <span className="text-sm font-medium">{totalDeletedItems}</span>
-                  </div>
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Jumlah Item</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Total Item:</span>
+                  <span className="text-sm font-medium">{totalItems}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Item Tidak Berubah:</span>
+                  <span className="text-sm font-medium">{totalUnchangedItems}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Item Berubah:</span>
+                  <span className="text-sm font-medium">{totalChangedItems}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Item Baru:</span>
+                  <span className="text-sm font-medium">{totalNewItems}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Item Dihapus:</span>
+                  <span className="text-sm font-medium">{totalDeletedItems}</span>
                 </div>
               </div>
             </div>
