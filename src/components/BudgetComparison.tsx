@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -107,6 +106,83 @@ const BudgetComparison: React.FC = () => {
     }
 
     return null;
+  };
+
+  const getFilteredSummaryData = () => {
+    if (!summaryData || summaryData.length === 0) return [];
+    
+    return summaryData
+      .filter(item => item.type === summaryView)
+      .map(item => {
+        let name = '';
+        switch(item.type) {
+          case 'program_pembebanan':
+            name = item.program_pembebanan || '';
+            break;
+          case 'kegiatan':
+            name = item.kegiatan || '';
+            break;
+          case 'rincian_output':
+            name = item.rincian_output || '';
+            break;
+          case 'komponen_output':
+            name = item.komponen_output || '';
+            break;
+          case 'sub_komponen':
+            name = item.sub_komponen || '';
+            break;
+          case 'akun':
+            name = item.akun_name || item.akun || '';
+            break;
+          case 'account_group':
+            name = item.account_group_name || item.account_group || '';
+            break;
+          case 'akun_group':
+            name = item.akun_group_name || item.akun_group || '';
+            break;
+          default:
+            name = '';
+        }
+
+        return {
+          id: name,
+          name,
+          totalSemula: item.total_semula || 0,
+          totalMenjadi: item.total_menjadi || 0,
+          totalSelisih: item.total_selisih || 0,
+          newItems: item.new_items || 0,
+          changedItems: item.changed_items || 0,
+          totalItems: item.total_items || 0
+        };
+      });
+  };
+
+  const getSummaryTitle = () => {
+    switch(summaryView) {
+      case 'program_pembebanan': return 'Program Pembebanan';
+      case 'kegiatan': return 'Kegiatan';
+      case 'rincian_output': return 'Rincian Output';
+      case 'komponen_output': return 'Komponen Output';
+      case 'sub_komponen': return 'Sub Komponen';
+      case 'akun': return 'Akun';
+      case 'akun_group': return 'Kelompok Akun';
+      case 'account_group': return 'Kelompok Belanja';
+      default: return '';
+    }
+  };
+
+  const getTotalSummaryValues = () => {
+    if (!summaryData || summaryData.length === 0) return { semula: 0, menjadi: 0, selisih: 0 };
+    
+    const filteredSummary = summaryData.filter(item => item.type === summaryView);
+    
+    if (filteredSummary.length === 0) return { semula: 0, menjadi: 0, selisih: 0 };
+    
+    const totalSemula = filteredSummary.reduce((sum, item) => sum + (item.total_semula || 0), 0);
+    const totalMenjadi = filteredSummary.reduce((sum, item) => sum + (item.total_menjadi || 0), 0);
+    const totalSelisih = filteredSummary.reduce((sum, item) => sum + (item.total_selisih || 0), 0);
+    
+    return { semula: totalSemula, menjadi: totalMenjadi, selisih: totalSelisih };
   };
 
   return (
@@ -260,12 +336,11 @@ const BudgetComparison: React.FC = () => {
             
             {summaryView !== 'changes' && (
               <DetailedSummaryView 
-                summaryData={summaryData}
-                loading={loadingItems}
-                view={summaryView}
-                setView={setSummaryView as (view: SummaryViewType) => void}
-                defaultView="table"
-                initialPageSize={-1}
+                title={getSummaryTitle()}
+                data={getFilteredSummaryData()}
+                totalSemula={getTotalSummaryValues().semula}
+                totalMenjadi={getTotalSummaryValues().menjadi}
+                totalSelisih={getTotalSummaryValues().selisih}
               />
             )}
           </div>

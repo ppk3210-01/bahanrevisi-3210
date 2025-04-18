@@ -1,10 +1,9 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
-import { FileImage, FilePdf } from 'lucide-react';
+import { FileImage, FileText } from 'lucide-react';
 import SummaryTable from './SummaryTable';
 import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg, exportToPdf } from '@/utils/exportUtils';
@@ -89,7 +88,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           Export JPEG
         </Button>
         <Button variant="outline" size="sm" onClick={handleExportPDF}>
-          <FilePdf className="h-4 w-4 mr-2" />
+          <FileText className="h-4 w-4 mr-2" />
           Export PDF
         </Button>
       </div>

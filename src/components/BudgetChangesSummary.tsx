@@ -1,8 +1,7 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileImage, FilePdf } from 'lucide-react';
+import { FileImage, FileText } from 'lucide-react';
 import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg, exportToPdf } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
@@ -74,7 +73,7 @@ const BudgetChangesSummary: React.FC<BudgetChangesSummaryProps> = ({
           Export JPEG
         </Button>
         <Button variant="outline" size="sm" onClick={handleExportPDF}>
-          <FilePdf className="h-4 w-4 mr-2" />
+          <FileText className="h-4 w-4 mr-2" />
           Export PDF
         </Button>
       </div>
