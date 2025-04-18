@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
-import { FileEdit, Check, ArrowUpDown, Search, Eye } from 'lucide-react';
+import { FileEdit, Check, ArrowUpDown, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { FilterSelection } from '@/types/budget';
 import { useRPDData } from '@/hooks/useRPDData';
@@ -29,11 +28,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [showDetailDialog, setShowDetailDialog] = useState<boolean>(false);
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   const pagu = rpdItems.reduce((sum, item) => sum + item.jumlah_menjadi, 0);
 
-  // Initialize or update edit values when editing an item
   useEffect(() => {
     if (editingId) {
       const item = rpdItems.find(item => item.id === editingId);
@@ -64,7 +61,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       let numValue: number;
       
       if (typeof value === 'string') {
-        // Remove any non-numeric characters except decimal point
         const cleanValue = value.replace(/[^0-9.]/g, '');
         numValue = parseFloat(cleanValue) || 0;
       } else {
@@ -80,7 +76,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         return;
       }
       
-      // Update local edit state
       setEditValues(prev => {
         const itemValues = prev[id] || {};
         let apiField = field;
@@ -110,7 +105,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   };
 
   const startEditing = (item: any) => {
-    // Only allow editing for admin or regular users
     if (isAdmin || (user && user.role === 'user')) {
       setEditingId(item.id);
     } else {
@@ -257,7 +251,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     return '';
   };
   
-  // Pagination
   const paginatedItems = pageSize === -1 
     ? sortedItems 
     : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -284,7 +277,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     const isEditing = editingId === item.id;
     
     if (field === 'uraian') {
-      // Uraian is never editable
       return <span className="line-clamp-3 text-left">{item.uraian}</span>;
     }
     
@@ -318,7 +310,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
     else if (field === 'nov') { value = item.november || 0; fieldKey = 'november'; }
     else if (field === 'dec') { value = item.desember || 0; fieldKey = 'desember'; }
     
-    // If editing, use the value from editValues if available
     const editValue = isEditing && editValues[item.id] ? editValues[item.id][fieldKey] : value;
     
     return isEditing ? (
@@ -331,68 +322,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
       />
     ) : (
       <span className="text-right block w-full">{formatCurrency(value, false)}</span>
-    );
-  };
-
-  const handleShowDetail = (itemId: string) => {
-    setSelectedItemId(itemId);
-    setShowDetailDialog(true);
-  };
-
-  const getSelectedItem = () => {
-    return rpdItems.find(item => item.id === selectedItemId);
-  };
-
-  const renderDetailDialog = () => {
-    const item = getSelectedItem();
-    
-    if (!item) return null;
-    
-    return (
-      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Detail Anggaran</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="text-sm">
-              <div className="grid grid-cols-3 gap-x-4 gap-y-2">
-                <div className="font-semibold">Uraian</div>
-                <div className="col-span-2">{item.uraian}</div>
-                
-                <div className="font-semibold">Program Pembebanan</div>
-                <div className="col-span-2">{item.program_pembebanan || '-'}</div>
-                
-                <div className="font-semibold">Kegiatan</div>
-                <div className="col-span-2">{item.kegiatan || '-'}</div>
-                
-                <div className="font-semibold">Rincian Output</div>
-                <div className="col-span-2">{item.rincian_output || '-'}</div>
-                
-                <div className="font-semibold">Komponen Output</div>
-                <div className="col-span-2">{item.komponen_output || '-'}</div>
-                
-                <div className="font-semibold">Sub Komponen</div>
-                <div className="col-span-2">{item.sub_komponen || '-'}</div>
-                
-                <div className="font-semibold">Akun</div>
-                <div className="col-span-2">{item.akun || '-'}</div>
-                
-                <div className="font-semibold">Volume</div>
-                <div className="col-span-2">
-                  {item.volume_menjadi} {item.satuan_menjadi}
-                </div>
-                
-                <div className="font-semibold">Harga Satuan</div>
-                <div className="col-span-2">{formatCurrency(item.harga_satuan_menjadi)}</div>
-                
-                <div className="font-semibold">Total</div>
-                <div className="col-span-2 font-medium">{formatCurrency(item.jumlah_menjadi)}</div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     );
   };
 
@@ -815,15 +744,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                     <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
                     <td className="action-cell">
                       <div className="flex space-x-1 justify-center">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => handleShowDetail(item.id)} 
-                          className="h-6 w-6"
-                          title="Lihat Detail"
-                        >
-                          <Eye className="h-3 w-3" />
-                        </Button>
                         {(isAdmin || (user && user.role === 'user')) && (
                           editingId === item.id ? (
                             <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
@@ -874,7 +794,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
         </div>
       </div>
       
-      {/* Pagination controls */}
       {pageSize !== -1 && (
         <div className="pagination">
           <Button
@@ -914,9 +833,6 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           </Button>
         </div>
       )}
-      
-      {/* Detail Dialog */}
-      {renderDetailDialog()}
     </div>
   );
 };
