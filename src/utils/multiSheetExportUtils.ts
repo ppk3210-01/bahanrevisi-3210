@@ -723,7 +723,7 @@ const addRPDSheet = (wb: XLSX.WorkBook, rpdItems: RPDItem[]) => {
     );
     
     return [
-      item.budget_item_id,
+      item.id, // Changed from budget_item_id to id as per the RPDItem type
       formatCurrency(item.januari),
       formatCurrency(item.februari),
       formatCurrency(item.maret),
@@ -898,3 +898,4 @@ export const exportToMultiSheetExcel = async (
     return false;
   }
 };
+
