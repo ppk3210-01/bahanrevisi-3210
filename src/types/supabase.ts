@@ -41,6 +41,37 @@ export type UserRole = 'admin' | 'user';
 // Define profile record type that matches the profiles table
 export type ProfileRecord = Database['public']['Tables']['profiles']['Row'];
 
+// Define RPDItem type for Supabase compatibility
+export type RPDItemRecord = {
+  id: string;
+  uraian: string;
+  volume_menjadi: number;
+  satuan_menjadi: string;
+  harga_satuan_menjadi: number;
+  jumlah_menjadi: number;
+  januari: number;
+  februari: number;
+  maret: number;
+  april: number;
+  mei: number;
+  juni: number;
+  juli: number;
+  agustus: number;
+  september: number;
+  oktober: number;
+  november: number;
+  desember: number;
+  jumlah_rpd: number;
+  selisih: number;
+  status: string;
+  program_pembebanan?: string;
+  kegiatan?: string;
+  rincian_output?: string;
+  komponen_output?: string;
+  sub_komponen?: string;
+  akun?: string;
+};
+
 // This is a simplified version of the Database type that includes our tables
 export type TemporaryDatabase = {
   public: {

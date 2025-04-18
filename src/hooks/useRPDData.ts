@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -25,8 +24,15 @@ export type RPDItem = {
   november: number;
   desember: number;
   jumlah_rpd: number;
-  selisih: number; // Added selisih property
+  selisih: number;
   status: 'ok' | 'belum_isi' | 'belum_lengkap' | 'sisa' | string;
+  // Adding the missing fields that are used in DetailDialog
+  program_pembebanan?: string;
+  kegiatan?: string;
+  rincian_output?: string;
+  komponen_output?: string;
+  sub_komponen?: string;
+  akun?: string;
 };
 
 type RPDMonthValues = {
@@ -138,7 +144,25 @@ export const useRPDData = (filters?: FilterSelection) => {
       
       console.log('Filtered RPD data:', filteredData.length, 'items');
       
+      const { data: budgetDetails, error: budgetError } = await supabase
+        .from('budget_items')
+        .select('id, program_pembebanan, kegiatan, rincian_output, komponen_output, sub_komponen, akun')
+        .in('id', filteredData.map(item => item.id));
+      
+      if (budgetError) {
+        console.error('Error fetching budget details:', budgetError);
+      }
+      
+      const budgetDetailsMap = new Map();
+      if (budgetDetails) {
+        budgetDetails.forEach(item => {
+          budgetDetailsMap.set(item.id, item);
+        });
+      }
+      
       const roundedData = filteredData.map(item => {
+        const budgetItem = budgetDetailsMap.get(item.id) || {};
+        
         const jumlahRpd = roundToThousands(
           (item.januari || 0) +
           (item.februari || 0) +
@@ -173,7 +197,14 @@ export const useRPDData = (filters?: FilterSelection) => {
           november: roundToThousands(item.november || 0),
           desember: roundToThousands(item.desember || 0),
           jumlah_rpd: jumlahRpd,
-          selisih: selisihValue
+          selisih: selisihValue,
+          // Add budget item details
+          program_pembebanan: budgetItem.program_pembebanan || null,
+          kegiatan: budgetItem.kegiatan || null,
+          rincian_output: budgetItem.rincian_output || null,
+          komponen_output: budgetItem.komponen_output || null,
+          sub_komponen: budgetItem.sub_komponen || null,
+          akun: budgetItem.akun || null
         };
       });
       
