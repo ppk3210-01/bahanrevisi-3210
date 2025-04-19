@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -71,40 +70,97 @@ const BudgetComparison: React.FC = () => {
   const totalChangedItems = changedItems.length;
   const totalChangedValue = changedItems.reduce((sum, item) => sum + item.selisih, 0);
 
+  const getChangedBudgetItems = () => {
+    return filteredItems
+      .filter(item => item.status === 'changed')
+      .map(item => ({
+        id: item.id,
+        pembebanan: getCombinedPembebananCode(item),
+        uraian: item.uraian,
+        detailPerubahan: getDetailPerubahan(item),
+        jumlahSemula: item.jumlahSemula,
+        jumlahMenjadi: item.jumlahMenjadi,
+        selisih: item.selisih
+      }));
+  };
+
+  const getNewBudgetItems = () => {
+    return filteredItems
+      .filter(item => item.status === 'new')
+      .map(item => ({
+        id: item.id,
+        pembebanan: getCombinedPembebananCode(item),
+        uraian: item.uraian,
+        volume: item.volumeMenjadi,
+        satuan: item.satuanMenjadi,
+        hargaSatuan: item.hargaSatuanMenjadi,
+        jumlah: item.jumlahMenjadi
+      }));
+  };
+
+  const getDetailPerubahan = (item: BudgetItem) => {
+    const changes: string[] = [];
+    
+    if (item.volumeSemula !== item.volumeMenjadi) {
+      changes.push(`Volume: ${item.volumeSemula} → ${item.volumeMenjadi}`);
+    }
+    
+    if (item.satuanSemula !== item.satuanMenjadi) {
+      changes.push(`Satuan: ${item.satuanSemula} → ${item.satuanMenjadi}`);
+    }
+    
+    if (item.hargaSatuanSemula !== item.hargaSatuanMenjadi) {
+      changes.push(`Harga: ${formatCurrency(item.hargaSatuanSemula)} → ${formatCurrency(item.hargaSatuanMenjadi)}`);
+    }
+    
+    return changes.join('\n');
+  };
+
+  const getCombinedPembebananCode = (item: BudgetItem): string => {
+    const codes = [
+      item.programPembebanan,
+      item.komponenOutput,
+      item.subKomponen,
+      'A',
+      item.akun
+    ].filter(Boolean);
+    
+    return codes.join('.');
+  };
+
   const renderSummarySection = () => {
     if (summaryView === 'changes') {
       return (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <BudgetSummaryBox 
-              title="Kesimpulan Perubahan" 
-              totalItems={filteredItems.length}
-              totalValue={roundToThousands(totalSelisih)}
-              details={`${totalNewItems} item baru, ${totalChangedItems} item berubah`}
-              valueType={totalSelisih > 0 ? 'text-blue-600' : totalSelisih < 0 ? 'text-red-600' : 'text-gray-600'}
-            />
-            
-            <BudgetSummaryBox 
-              title="Pagu Anggaran Semula" 
-              totalItems={filteredItems.length - totalNewItems}
-              totalValue={roundToThousands(totalSemula)}
-              details="Anggaran sebelum perubahan"
-              valueType="text-gray-600"
-            />
-            
-            <BudgetSummaryBox 
-              title="Pagu Anggaran Menjadi" 
-              totalItems={filteredItems.length}
-              totalValue={roundToThousands(totalMenjadi)}
-              details={`${roundToThousands(totalSelisih) > 0 ? '+' : ''}${formatCurrency(roundToThousands(totalSelisih))}`}
-              valueType={totalSelisih > 0 ? 'text-blue-600' : totalSelisih < 0 ? 'text-red-600' : 'text-gray-600'}
-            />
-          </div>
+          <BudgetChangesConclusion
+            totalSemula={totalSemula}
+            totalMenjadi={totalMenjadi}
+            totalSelisih={totalSelisih}
+            changedItems={totalChangedItems}
+            newItems={totalNewItems}
+            deletedItems={deletedItems}
+          />
+          <BudgetChangesTable
+            title="Pagu Anggaran Berubah"
+            items={getChangedBudgetItems()}
+          />
+          <NewBudgetTable
+            items={getNewBudgetItems()}
+          />
         </div>
       );
     }
 
-    return null;
+    return (
+      <DetailedSummaryView 
+        title={getSummaryTitle()}
+        data={getFilteredSummaryData()}
+        totalSemula={getTotalSummaryValues().semula}
+        totalMenjadi={getTotalSummaryValues().menjadi}
+        totalSelisih={getTotalSummaryValues().selisih}
+        showSummaryBoxes={false}
+      />
+    );
   };
 
   const getFilteredSummaryData = () => {
@@ -131,15 +187,12 @@ const BudgetComparison: React.FC = () => {
             name = item.sub_komponen || '';
             break;
           case 'akun':
-            // For akun, show code + name format
             name = item.akun_name ? `${item.akun} - ${item.akun_name}` : item.akun || '';
             break;
           case 'account_group':
-            // For account_group, show code - name format
             name = item.account_group_name ? `${item.account_group} – ${item.account_group_name}` : item.account_group || '';
             break;
           case 'akun_group':
-            // For akun_group, also show code + name format
             name = item.akun_group_name ? `${item.akun_group} - ${item.akun_group_name}` : item.akun_group || '';
             break;
           default:
@@ -345,6 +398,7 @@ const BudgetComparison: React.FC = () => {
                 totalSemula={getTotalSummaryValues().semula}
                 totalMenjadi={getTotalSummaryValues().menjadi}
                 totalSelisih={getTotalSummaryValues().selisih}
+                showSummaryBoxes={false}
               />
             )}
           </div>

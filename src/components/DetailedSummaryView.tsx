@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -28,6 +27,7 @@ interface DetailedSummaryViewProps {
   totalSemula: number;
   totalMenjadi: number;
   totalSelisih: number;
+  showSummaryBoxes?: boolean;
 }
 
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
@@ -35,7 +35,8 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   data,
   totalSemula,
   totalMenjadi,
-  totalSelisih
+  totalSelisih,
+  showSummaryBoxes = true
 }) => {
   const chartAndTableRef = useRef<HTMLDivElement>(null);
   const { isAdmin } = useAuth();
@@ -172,29 +173,31 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
               </BarChart>
             </ResponsiveContainer>
             
-            <div className="grid grid-cols-3 gap-4 mt-4 text-center">
-              <div className="bg-blue-50 p-3 rounded-md">
-                <div className="text-xs text-gray-500 mb-1">Total Semula</div>
-                <div className="text-lg font-semibold">{formatCurrency(totalSemula)}</div>
-              </div>
-              <div className="bg-green-50 p-3 rounded-md">
-                <div className="text-xs text-gray-500 mb-1">Total Menjadi</div>
-                <div className="text-lg font-semibold">{formatCurrency(totalMenjadi)}</div>
-              </div>
-              <div className={`p-3 rounded-md ${totalSelisih === 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-                <div className="text-xs text-gray-500 mb-1">Selisih</div>
-                <div className={`text-lg font-semibold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(totalSelisih)}
+            {showSummaryBoxes && (
+              <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+                <div className="bg-blue-50 p-3 rounded-md">
+                  <div className="text-xs text-gray-500 mb-1">Total Semula</div>
+                  <div className="text-lg font-semibold">{formatCurrency(totalSemula)}</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded-md">
+                  <div className="text-xs text-gray-500 mb-1">Total Menjadi</div>
+                  <div className="text-lg font-semibold">{formatCurrency(totalMenjadi)}</div>
+                </div>
+                <div className={`p-3 rounded-md ${totalSelisih === 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                  <div className="text-xs text-gray-500 mb-1">Selisih</div>
+                  <div className={`text-lg font-semibold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(totalSelisih)}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
         
         <SummaryTable 
           title={`Tabel Perbandingan ${title}`} 
           data={data} 
-          initialPageSize={-1} // Always show all data
+          initialPageSize={-1}
         />
       </div>
     </div>
