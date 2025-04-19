@@ -55,4 +55,3 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
 };
 
 export default BudgetChangesConclusion;
-

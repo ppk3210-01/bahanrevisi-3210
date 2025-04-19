@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { BudgetItem } from '@/types/budget';
 import { BudgetChangesTable } from './BudgetChangesTable';
 import { NewBudgetTable } from './NewBudgetTable';
-import { BudgetChangesConclusion } from './BudgetChangesConclusion';
+import BudgetChangesConclusion from './BudgetChangesConclusion';
 
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
