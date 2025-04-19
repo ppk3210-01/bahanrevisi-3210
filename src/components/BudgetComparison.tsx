@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -14,6 +15,9 @@ import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import ExcelImportExport from './ExcelImportExport';
 import { useAuth } from '@/contexts/AuthContext';
 import { BudgetItem } from '@/types/budget';
+import { BudgetChangesTable } from './BudgetChangesTable';
+import { NewBudgetTable } from './NewBudgetTable';
+import { BudgetChangesConclusion } from './BudgetChangesConclusion';
 
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
@@ -69,6 +73,9 @@ const BudgetComparison: React.FC = () => {
   const changedItems = filteredItems.filter(item => item.status === 'changed');
   const totalChangedItems = changedItems.length;
   const totalChangedValue = changedItems.reduce((sum, item) => sum + item.selisih, 0);
+  
+  // Count deleted items (need to add this variable)
+  const deletedItems = filteredItems.filter(item => item.status === 'deleted').length;
 
   const getChangedBudgetItems = () => {
     return filteredItems
