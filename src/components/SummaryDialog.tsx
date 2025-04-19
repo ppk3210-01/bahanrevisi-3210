@@ -52,65 +52,65 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
   const handleExportAll = () => {
     const workbook = XLSX.utils.book_new();
     
-    // Create summary sheet
-    const summarySheet = createSummarySheet(items);
-    XLSX.utils.book_append_sheet(workbook, summarySheet, "Ringkasan Total");
-    
-    // Create changed items sheet
-    const changedItemsSheet = createChangedItemsSheet(items);
-    XLSX.utils.book_append_sheet(workbook, changedItemsSheet, "Anggaran Berubah");
-    
-    // Create new items sheet
-    const newItemsSheet = createNewItemsSheet(items);
-    XLSX.utils.book_append_sheet(workbook, newItemsSheet, "Anggaran Baru");
-    
-    // Create detailed items sheet
+    // Create budget items sheet (Data Tabel Anggaran)
     const itemsSheet = createItemsSheet(items);
-    XLSX.utils.book_append_sheet(workbook, itemsSheet, "Detail Anggaran");
+    XLSX.utils.book_append_sheet(workbook, itemsSheet, "Data Tabel Anggaran");
     
-    // Create program_pembebanan summary sheet if available
+    // Create summary sheet (Kesimpulan)
+    const summarySheet = createSummarySheet(items);
+    XLSX.utils.book_append_sheet(workbook, summarySheet, "Kesimpulan");
+    
+    // Create changed items sheet (Pagu Anggaran Berubah)
+    const changedItemsSheet = createChangedItemsSheet(items);
+    XLSX.utils.book_append_sheet(workbook, changedItemsSheet, "Pagu Anggaran Berubah");
+    
+    // Create new items sheet (Pagu Anggaran Baru)
+    const newItemsSheet = createNewItemsSheet(items);
+    XLSX.utils.book_append_sheet(workbook, newItemsSheet, "Pagu Anggaran Baru");
+    
+    // Create program_pembebanan summary sheet
     const programItems = summaryData.filter(item => 'program_pembebanan' in item);
     if (programItems.length > 0) {
       const programSheet = createGroupSummarySheet(programItems, 'Program Pembebanan');
       XLSX.utils.book_append_sheet(workbook, programSheet, "Ringkasan Program");
     }
     
-    // Create kegiatan summary sheet if available
+    // Create kegiatan summary sheet
     const kegiatanItems = summaryData.filter(item => 'kegiatan' in item);
     if (kegiatanItems.length > 0) {
       const kegiatanSheet = createGroupSummarySheet(kegiatanItems, 'Kegiatan');
       XLSX.utils.book_append_sheet(workbook, kegiatanSheet, "Ringkasan Kegiatan");
     }
     
-    // Create rincian_output summary sheet if available
+    // Create rincian_output summary sheet
     const rincianItems = summaryData.filter(item => 'rincian_output' in item);
     if (rincianItems.length > 0) {
       const rincianSheet = createGroupSummarySheet(rincianItems, 'Rincian Output');
       XLSX.utils.book_append_sheet(workbook, rincianSheet, "Ringkasan Rincian Output");
     }
     
-    // Create komponen summary sheet if available
+    // Create komponen summary sheet
     const komponentItems = summaryData.filter(item => 'komponen_output' in item);
     if (komponentItems.length > 0) {
       const komponenSheet = createGroupSummarySheet(komponentItems, 'Komponen Output');
       XLSX.utils.book_append_sheet(workbook, komponenSheet, "Ringkasan Komponen Output");
     }
     
-    // Create sub_komponen summary sheet if available
+    // Create sub_komponen summary sheet
     const subKomponenItems = summaryData.filter(item => 'sub_komponen' in item);
     if (subKomponenItems.length > 0) {
       const subKomponenSheet = createGroupSummarySheet(subKomponenItems, 'Sub Komponen');
       XLSX.utils.book_append_sheet(workbook, subKomponenSheet, "Ringkasan Sub Komponen");
     }
     
-    // Create akun summary sheet if available
+    // Create akun summary sheet
     const akunItems = summaryData.filter(item => 'akun' in item);
     if (akunItems.length > 0) {
       const akunSheet = createGroupSummarySheet(akunItems, 'Akun');
       XLSX.utils.book_append_sheet(workbook, akunSheet, "Ringkasan Akun");
     }
     
-    // Create account group summary sheet if available
+    // Create account group summary sheet
     const accountGroupItems = summaryData.filter(item => 'account_group' in item);
     if (accountGroupItems.length > 0) {
       const accountGroupSheet = createGroupSummarySheet(accountGroupItems, 'Kelompok Akun');
@@ -165,6 +165,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     return worksheet;
   };
 
+  // Create a sheet with changed budget items
   const createChangedItemsSheet = (items: BudgetItem[]) => {
     const headers = [
       "No",
@@ -190,7 +191,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       
       return [
         index + 1,
-        getCombinedPembebananCode(item), // Use combined format here
+        getCombinedPembebananCode(item),
         item.uraian,
         detailPerubahan,
         item.jumlahSemula,
@@ -219,8 +220,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Set column widths
     worksheet['!cols'] = [
       { wch: 5 },   // No
-      { wch: 25 },  // Pembebanan (narrowed width per req #5)
-      { wch: 50 },  // Uraian (increased width per req #5)
+      { wch: 25 },  // Pembebanan
+      { wch: 50 },  // Uraian
       { wch: 40 },  // Detail Perubahan
       { wch: 20 },  // Jumlah Semula
       { wch: 20 },  // Jumlah Menjadi
@@ -246,7 +247,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     
     const data = newItems.map((item, index) => [
       index + 1,
-      getCombinedPembebananCode(item), // Use combined format here
+      getCombinedPembebananCode(item),
       item.uraian,
       item.volumeMenjadi,
       item.satuanMenjadi,
@@ -272,8 +273,8 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Set column widths
     worksheet['!cols'] = [
       { wch: 5 },   // No
-      { wch: 25 },  // Pembebanan (narrowed width per req #5)
-      { wch: 50 },  // Uraian (increased width per req #5)
+      { wch: 25 },  // Pembebanan
+      { wch: 50 },  // Uraian
       { wch: 10 },  // Volume
       { wch: 15 },  // Satuan
       { wch: 20 },  // Harga Satuan
@@ -315,7 +316,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
       item.satuanMenjadi,
       item.hargaSatuanMenjadi,
       item.jumlahMenjadi,
-      item.jumlahMenjadi - item.jumlahSemula, // Calculate selisih correctly
+      item.jumlahMenjadi - item.jumlahSemula,
       item.status
     ]);
     
@@ -452,7 +453,7 @@ const SummaryDialog: React.FC<SummaryDialogProps> = ({
     // Add total row
     const totalSemula = dataRows.reduce((sum, row) => sum + (row[1] || 0), 0);
     const totalMenjadi = dataRows.reduce((sum, row) => sum + (row[2] || 0), 0);
-    const totalSelisih = totalMenjadi - totalSemula; // Calculate total selisih correctly
+    const totalSelisih = totalMenjadi - totalSemula;
     const totalNewItems = dataRows.reduce((sum, row) => sum + (row[4] || 0), 0);
     const totalChangedItems = dataRows.reduce((sum, row) => sum + (row[5] || 0), 0);
     const totalItems = dataRows.reduce((sum, row) => sum + (row[6] || 0), 0);
