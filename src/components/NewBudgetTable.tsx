@@ -1,8 +1,13 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileImage } from 'lucide-react';
 import { formatCurrency } from '@/utils/budgetCalculations';
+import { exportToJpeg } from '@/utils/exportUtils';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NewBudgetItem {
   id: string;
@@ -19,41 +24,68 @@ interface NewBudgetTableProps {
 }
 
 export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
-  const total = items.reduce((sum, item) => sum + item.jumlah, 0);
+  const { isAdmin } = useAuth();
+
+  const handleExportJPEG = async () => {
+    try {
+      const element = document.getElementById('new-budget-table');
+      if (element) {
+        await exportToJpeg(element, 'pagu-anggaran-baru');
+        toast({
+          title: "Berhasil",
+          description: 'Berhasil mengekspor sebagai JPEG'
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Gagal",
+        description: 'Gagal mengekspor sebagai JPEG'
+      });
+    }
+  };
 
   return (
-    <Card className="p-6">
-      <h3 className="text-green-600 text-lg font-semibold mb-4">Pagu Anggaran Baru</h3>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-16">No</TableHead>
-            <TableHead className="w-64">Pembebanan</TableHead>
-            <TableHead className="w-96">Uraian</TableHead>
-            <TableHead className="w-24 text-center">Volume</TableHead>
-            <TableHead className="w-24">Satuan</TableHead>
-            <TableHead className="w-36 text-right">Harga Satuan</TableHead>
-            <TableHead className="w-36 text-right">Jumlah</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item, index) => (
-            <TableRow key={item.id}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell className="font-mono text-sm">{item.pembebanan}</TableCell>
-              <TableCell>{item.uraian}</TableCell>
-              <TableCell className="text-center">{item.volume}</TableCell>
-              <TableCell>{item.satuan}</TableCell>
-              <TableCell className="text-right">{formatCurrency(item.hargaSatuan)}</TableCell>
-              <TableCell className="text-right">{formatCurrency(item.jumlah)}</TableCell>
-            </TableRow>
-          ))}
-          <TableRow>
-            <TableCell colSpan={6} className="text-right font-semibold">Total</TableCell>
-            <TableCell className="text-right font-semibold">{formatCurrency(total)}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-semibold">Pagu Anggaran Baru</CardTitle>
+        {isAdmin && (
+          <Button variant="outline" size="sm" onClick={handleExportJPEG}>
+            <FileImage className="h-4 w-4 mr-2" />
+            Export JPEG
+          </Button>
+        )}
+      </CardHeader>
+      <CardContent>
+        <div id="new-budget-table" className="budget-changes-summary">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">No</TableHead>
+                <TableHead className="pembebanan-column">Pembebanan</TableHead>
+                <TableHead className="uraian-column">Uraian</TableHead>
+                <TableHead className="w-[100px] text-center">Volume</TableHead>
+                <TableHead className="w-[100px] text-center">Satuan</TableHead>
+                <TableHead className="number-column">Harga Satuan</TableHead>
+                <TableHead className="number-column">Jumlah</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.map((item, index) => (
+                <TableRow key={item.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell className="pembebanan-column">{item.pembebanan}</TableCell>
+                  <TableCell className="uraian-column">{item.uraian}</TableCell>
+                  <TableCell className="text-center">{item.volume}</TableCell>
+                  <TableCell className="text-center">{item.satuan}</TableCell>
+                  <TableCell className="number-column">{formatCurrency(item.hargaSatuan)}</TableCell>
+                  <TableCell className="number-column">{formatCurrency(item.jumlah)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
     </Card>
   );
 };

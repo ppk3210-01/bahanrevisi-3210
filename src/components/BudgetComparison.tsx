@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -74,7 +73,6 @@ const BudgetComparison: React.FC = () => {
   const totalChangedItems = changedItems.length;
   const totalChangedValue = changedItems.reduce((sum, item) => sum + item.selisih, 0);
   
-  // Count deleted items (need to add this variable)
   const deletedItems = filteredItems.filter(item => item.status === 'deleted').length;
 
   const getChangedBudgetItems = () => {
