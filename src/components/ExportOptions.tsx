@@ -9,10 +9,11 @@ import {
 import { BudgetItem } from '@/types/budget';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { toast } from '@/hooks/use-toast';
-import * as XLSX from 'xlsx';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { exportComprehensiveExcel } from '@/utils/excelUtils';
+import { BudgetSummaryRecord } from '@/types/database';
 
 // Add type declaration for jsPDF with autoTable
 declare module 'jspdf' {
@@ -24,33 +25,16 @@ declare module 'jspdf' {
 interface ExportOptionsProps {
   items: BudgetItem[];
   komponenOutput: string;
+  summaryData?: BudgetSummaryRecord[];
   onClose?: () => void;
 }
 
-const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, onClose }) => {
-  const prepareExportData = () => {
-    return items.map((item, index) => ({
-      'No': index + 1,
-      'Program Pembebanan': item.programPembebanan || '-',
-      'Kegiatan': item.kegiatan || '-',
-      'Rincian Output': item.rincianOutput || '-',
-      'Komponen Output': item.komponenOutput || '-',
-      'Sub Komponen': item.subKomponen || '-',
-      'Akun': item.akun || '-',
-      'Uraian': item.uraian,
-      'Volume Semula': item.volumeSemula,
-      'Satuan Semula': item.satuanSemula,
-      'Harga Satuan Semula': roundToThousands(item.hargaSatuanSemula), 
-      'Jumlah Semula': roundToThousands(item.jumlahSemula),
-      'Volume Menjadi': item.volumeMenjadi,
-      'Satuan Menjadi': item.satuanMenjadi,
-      'Harga Satuan Menjadi': roundToThousands(item.hargaSatuanMenjadi), 
-      'Jumlah Menjadi': roundToThousands(item.jumlahMenjadi),
-      'Selisih': roundToThousands(item.jumlahMenjadi - item.jumlahSemula),
-      'Status': item.status
-    }));
-  };
-
+const ExportOptions: React.FC<ExportOptionsProps> = ({ 
+  items, 
+  komponenOutput, 
+  summaryData = [],
+  onClose 
+}) => {
   const exportToExcel = () => {
     if (items.length === 0) {
       toast({
@@ -62,21 +46,13 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
     }
 
     try {
-      const exportData = prepareExportData();
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Budget");
+      toast({
+        title: "Memproses",
+        description: "Menyiapkan file Excel..."
+      });
       
-      const totalSemula = roundToThousands(items.reduce((sum, item) => sum + item.jumlahSemula, 0));
-      const totalMenjadi = roundToThousands(items.reduce((sum, item) => sum + item.jumlahMenjadi, 0));
-      const totalSelisih = roundToThousands(totalMenjadi - totalSemula);
-      
-      XLSX.utils.sheet_add_aoa(worksheet, [
-        ["", "TOTAL", "", "", "", "", "", "", "", "", "", totalSemula, "", "", "", totalMenjadi, totalSelisih, ""]
-      ], {origin: -1});
-      
-      const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
+      const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}`;
+      exportComprehensiveExcel(items, summaryData, fileName);
       
       toast({
         title: "Berhasil!",
@@ -151,6 +127,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         th.style.padding = '8px';
         th.style.border = '1px solid #ddd';
         th.style.backgroundColor = '#f2f2f2';
+        th.style.textAlign = 'center';
         headerRow.appendChild(th);
       });
       
@@ -180,11 +157,19 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
           item.status
         ];
         
-        cells.forEach(cellText => {
+        cells.forEach((cellText, idx) => {
           const td = document.createElement('td');
           td.textContent = cellText !== null ? String(cellText) : '';
           td.style.padding = '8px';
           td.style.border = '1px solid #ddd';
+          
+          // Center align specific columns
+          if ([0, 2, 3, 6, 7, 11].includes(idx)) {
+            td.style.textAlign = 'center';
+          } else if ([4, 5, 8, 9, 10].includes(idx)) {
+            td.style.textAlign = 'right';
+          }
+          
           row.appendChild(td);
         });
         
@@ -209,11 +194,17 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         formatCurrency(totalMenjadi), formatCurrency(totalSelisih), ''
       ];
       
-      footerCells.forEach((cellText, index) => {
+      footerCells.forEach((cellText, idx) => {
         const td = document.createElement('td');
         td.textContent = cellText;
         td.style.padding = '8px';
         td.style.border = '1px solid #ddd';
+        
+        // Right-align currency columns
+        if ([5, 9, 10].includes(idx)) {
+          td.style.textAlign = 'right';
+        }
+        
         footerRow.appendChild(td);
       });
       
@@ -328,7 +319,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
         headerStyles: {
           fillColor: [220, 220, 220],
           textColor: [0, 0, 0],
-          fontStyle: 'bold'
+          fontStyle: 'bold',
+          halign: 'center'
         },
         footerStyles: {
           fillColor: [240, 240, 240],
@@ -339,8 +331,18 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({ items, komponenOutput, on
           fillColor: [245, 245, 245]
         },
         columnStyles: {
-          0: { cellWidth: 15 },
-          1: { cellWidth: 70 },
+          0: { cellWidth: 15, halign: 'center' }, // No
+          1: { cellWidth: 70 }, // Uraian
+          2: { cellWidth: 15, halign: 'center' }, // Volume Semula
+          3: { cellWidth: 15, halign: 'center' }, // Satuan Semula
+          4: { cellWidth: 20, halign: 'right' }, // Harga Satuan Semula
+          5: { cellWidth: 20, halign: 'right' }, // Jumlah Semula
+          6: { cellWidth: 15, halign: 'center' }, // Volume Menjadi
+          7: { cellWidth: 15, halign: 'center' }, // Satuan Menjadi
+          8: { cellWidth: 20, halign: 'right' }, // Harga Satuan Menjadi
+          9: { cellWidth: 20, halign: 'right' }, // Jumlah Menjadi
+          10: { cellWidth: 20, halign: 'right' }, // Selisih
+          11: { cellWidth: 15, halign: 'center' } // Status
         },
         margin: { top: 30 }
       });

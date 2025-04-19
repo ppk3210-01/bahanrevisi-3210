@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { createTemplateWorkbook } from '@/utils/excelUtils';
 import { useImportHandler } from './ImportHandler';
+import { BudgetSummaryRecord } from '@/types/database';
 
 interface ExcelImportExportProps {
   items: BudgetItem[];
@@ -23,6 +24,7 @@ interface ExcelImportExportProps {
   subKomponen?: string;
   akun?: string;
   smallText?: boolean;
+  summaryData?: BudgetSummaryRecord[];
 }
 
 const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
@@ -31,7 +33,8 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
   komponenOutput,
   subKomponen,
   akun,
-  smallText = false
+  smallText = false,
+  summaryData = []
 }) => {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -100,6 +103,16 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           className="hidden"
           disabled={isImporting}
         />
+
+        <Button
+          variant="outline"
+          className={`flex items-center ${buttonClass}`}
+          size={smallText ? "sm" : undefined}
+          onClick={() => setIsExportDialogOpen(true)}
+        >
+          <FileSpreadsheet className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
+          <span>Export</span>
+        </Button>
       </div>
 
       <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
@@ -113,6 +126,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           <ExportOptions 
             items={items} 
             komponenOutput={komponenOutput || 'Default'}
+            summaryData={summaryData}
             onClose={() => setIsExportDialogOpen(false)} 
           />
         </DialogContent>
