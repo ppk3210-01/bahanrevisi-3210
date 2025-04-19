@@ -12,7 +12,7 @@ interface BudgetChangesConclusionProps {
   deletedItems: number;
 }
 
-export const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
+const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
   totalSemula,
   totalMenjadi,
   totalSelisih,
@@ -20,22 +20,32 @@ export const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = (
   newItems,
   deletedItems,
 }) => {
+  const selisihText = totalSelisih > 0 ? 'pagu bertambah' : totalSelisih < 0 ? 'pagu berkurang' : 'atau tetap';
+
   return (
-    <Card className="bg-blue-50/50 border-blue-100">
+    <Card className="bg-blue-100/50 border-blue-200">
       <CardContent className="pt-6">
-        <h2 className="text-lg font-semibold text-blue-900 mb-4 text-left">Kesimpulan</h2>
+        <h2 className="text-lg font-semibold text-blue-700 mb-4 text-left">Kesimpulan</h2>
         
-        <div className="space-y-2 text-sm text-left">
-          <p>
-            Berdasarkan hasil analisis terhadap alokasi anggaran, total pagu anggaran semula sebesar {formatCurrency(totalSemula)} mengalami perubahan menjadi {formatCurrency(totalMenjadi)}, dengan selisih {formatCurrency(totalSelisih == 0 ? totalSelisih : Math.abs(totalSelisih))} {totalSelisih > 0 ? 'penambahan' : totalSelisih < 0 ? 'pengurangan' : 'atau tetap'}.
+        <div className="space-y-4 text-sm text-left">
+          <p className="text-blue-900">
+            Berdasarkan hasil analisis terhadap alokasi revisi anggaran, total pagu anggaran semula sebesar {formatCurrency(totalSemula)} mengalami perubahan menjadi {formatCurrency(totalMenjadi)}, dengan selisih {formatCurrency(Math.abs(totalSelisih))} ({selisihText}).
           </p>
-          <p>
-            Perubahan ini terdiri dari {changedItems} komponen anggaran yang mengalami penyesuaian nilai, {newItems} komponen anggaran baru yang ditambahkan, dan {deletedItems} komponen anggaran yang dihapus.
-          </p>
-          <p>
+          
+          <div className="text-blue-900">
+            <p className="mb-2">Rincian revisi:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>{changedItems} detil anggaran yang mengalami penyesuaian nilai</li>
+              <li>{newItems} detil anggaran baru yang ditambahkan</li>
+              <li>{deletedItems} detil anggaran yang dihapus</li>
+            </ul>
+          </div>
+
+          <p className="text-blue-900">
             Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {changedItems + newItems} perubahan ini, diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
           </p>
-          <p>
+          
+          <p className="text-blue-900">
             Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
           </p>
         </div>
@@ -45,3 +55,4 @@ export const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = (
 };
 
 export default BudgetChangesConclusion;
+

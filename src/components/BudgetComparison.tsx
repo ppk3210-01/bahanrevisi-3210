@@ -163,7 +163,6 @@ const BudgetComparison: React.FC = () => {
         totalSemula={getTotalSummaryValues().semula}
         totalMenjadi={getTotalSummaryValues().menjadi}
         totalSelisih={getTotalSummaryValues().selisih}
-        showSummaryBoxes={false}
       />
     );
   };
@@ -395,17 +394,6 @@ const BudgetComparison: React.FC = () => {
                 {renderSummarySection()}
               </div>
             </Card>
-            
-            {summaryView !== 'changes' && (
-              <DetailedSummaryView 
-                title={getSummaryTitle()}
-                data={getFilteredSummaryData()}
-                totalSemula={getTotalSummaryValues().semula}
-                totalMenjadi={getTotalSummaryValues().menjadi}
-                totalSelisih={getTotalSummaryValues().selisih}
-                showSummaryBoxes={false}
-              />
-            )}
           </div>
         </TabsContent>
       </Tabs>

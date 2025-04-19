@@ -46,9 +46,9 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
   };
 
   return (
-    <Card>
+    <Card className="bg-green-50/50 border-green-100">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold">Pagu Anggaran Baru</CardTitle>
+        <CardTitle className="text-lg font-semibold text-green-700">Pagu Anggaran Baru</CardTitle>
         {isAdmin && (
           <Button variant="outline" size="sm" onClick={handleExportJPEG}>
             <FileImage className="h-4 w-4 mr-2" />
@@ -60,26 +60,26 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
         <div id="new-budget-table" className="budget-changes-summary">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">No</TableHead>
-                <TableHead className="pembebanan-column">Pembebanan</TableHead>
-                <TableHead className="uraian-column">Uraian</TableHead>
+              <TableRow className="bg-green-100/50">
+                <TableHead className="w-[50px] text-center">No</TableHead>
+                <TableHead className="pembebanan-column text-center">Pembebanan</TableHead>
+                <TableHead className="uraian-column text-center">Uraian</TableHead>
                 <TableHead className="w-[100px] text-center">Volume</TableHead>
                 <TableHead className="w-[100px] text-center">Satuan</TableHead>
-                <TableHead className="number-column">Harga Satuan</TableHead>
-                <TableHead className="number-column">Jumlah</TableHead>
+                <TableHead className="w-[180px] text-center">Harga Satuan</TableHead>
+                <TableHead className="w-[180px] text-center">Jumlah</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {items.map((item, index) => (
                 <TableRow key={item.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell className="pembebanan-column">{item.pembebanan}</TableCell>
+                  <TableCell className="text-center">{index + 1}</TableCell>
+                  <TableCell className="pembebanan-column whitespace-normal">{item.pembebanan}</TableCell>
                   <TableCell className="uraian-column">{item.uraian}</TableCell>
                   <TableCell className="text-center">{item.volume}</TableCell>
                   <TableCell className="text-center">{item.satuan}</TableCell>
-                  <TableCell className="number-column">{formatCurrency(item.hargaSatuan)}</TableCell>
-                  <TableCell className="number-column">{formatCurrency(item.jumlah)}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(item.hargaSatuan)}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(item.jumlah)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -89,3 +89,4 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
     </Card>
   );
 };
+
