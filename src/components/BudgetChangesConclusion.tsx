@@ -12,7 +12,7 @@ interface BudgetChangesConclusionProps {
   deletedItems: number;
 }
 
-const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
+export const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
   totalSemula,
   totalMenjadi,
   totalSelisih,
@@ -23,7 +23,7 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
   return (
     <Card className="bg-blue-50/50 border-blue-100">
       <CardContent className="pt-6">
-        <h2 className="text-lg font-semibold text-blue-900 mb-4">Kesimpulan</h2>
+        <h2 className="text-lg font-semibold text-blue-900 mb-4 text-left">Kesimpulan</h2>
         
         <div className="space-y-2 text-sm text-left">
           <p>
