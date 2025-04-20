@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,7 +86,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const [pageSize, setPageSize] = useState<number>(10);
   const [sortField, setSortField] = useState<keyof BudgetItem | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(true);
+  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
   
   const [detailItem, setDetailItem] = useState<BudgetItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
