@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,7 +23,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [editValues, setEditValues] = useState<{[key: string]: {[key: string]: number}}>({});
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
+  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
