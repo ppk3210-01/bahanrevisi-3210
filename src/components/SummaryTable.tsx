@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -7,7 +6,6 @@ import { ArrowUpDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { BudgetSummaryRecord } from '@/types/database';
-
 interface SummaryRow {
   id: string;
   name: string;
@@ -18,7 +16,6 @@ interface SummaryRow {
   changedItems: number;
   totalItems: number;
 }
-
 interface SummaryTableProps {
   data?: SummaryRow[];
   title?: string;
@@ -26,11 +23,10 @@ interface SummaryTableProps {
   view?: string;
   initialPageSize?: number;
 }
-
-const SummaryTable: React.FC<SummaryTableProps> = ({ 
-  data = [], 
-  title = "", 
-  summaryData, 
+const SummaryTable: React.FC<SummaryTableProps> = ({
+  data = [],
+  title = "",
+  summaryData,
   view,
   initialPageSize = 10
 }) => {
@@ -38,7 +34,6 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(initialPageSize);
-
   const handleSort = (field: keyof SummaryRow) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -50,31 +45,22 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
 
   // If summaryData is provided, process it instead of using data directly
   const processedData = data && data.length > 0 ? data : [];
-
   const sortedData = [...processedData].sort((a, b) => {
     const fieldA = a[sortField];
     const fieldB = b[sortField];
-    
     if (typeof fieldA === 'string' && typeof fieldB === 'string') {
       return sortDirection === 'asc' ? fieldA.localeCompare(fieldB) : fieldB.localeCompare(fieldA);
     }
-    
     if (typeof fieldA === 'number' && typeof fieldB === 'number') {
       return sortDirection === 'asc' ? fieldA - fieldB : fieldB - fieldA;
     }
-    
     return 0;
   });
-
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const currentItems = itemsPerPage === -1 
-    ? sortedData 
-    : sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
+  const currentItems = itemsPerPage === -1 ? sortedData : sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const handlePageChange = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
-
   const handleItemsPerPageChange = (value: string) => {
     const newItemsPerPage = parseInt(value);
     setItemsPerPage(newItemsPerPage);
@@ -88,13 +74,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
   const totalNewItems = sortedData.reduce((sum, item) => sum + item.newItems, 0);
   const totalChangedItems = sortedData.reduce((sum, item) => sum + item.changedItems, 0);
   const totalItems = sortedData.reduce((sum, item) => sum + item.totalItems, 0);
-
-  return (
-    <div>
+  return <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-md font-semibold">{title}</h3>
-        {initialPageSize !== -1 && (
-          <div className="flex items-center space-x-2">
+        {initialPageSize !== -1 && <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-500">Tampilkan:</span>
             <Select value={itemsPerPage.toString()} onValueChange={handleItemsPerPageChange}>
               <SelectTrigger className="w-[100px] h-8">
@@ -107,8 +90,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
                 <SelectItem value="-1">Semua</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-        )}
+          </div>}
       </div>
       <div className="border rounded-md">
         <Table>
@@ -116,64 +98,43 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
             <TableRow className="bg-slate-100">
               <TableHead className="w-8">No</TableHead>
               <TableHead className="w-[30%]">
-                <button 
-                  className="flex items-center font-semibold"
-                  onClick={() => handleSort('name')}
-                >
+                <button className="flex items-center font-semibold" onClick={() => handleSort('name')}>
                   Nama
                   <ArrowUpDown className="ml-1 h-4 w-4" />
                 </button>
               </TableHead>
               <TableHead className="text-right">
-                <button 
-                  className="flex items-center justify-end font-semibold w-full"
-                  onClick={() => handleSort('totalSemula')}
-                >
+                <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('totalSemula')}>
                   Total Semula
                   <ArrowUpDown className="ml-1 h-4 w-4" />
                 </button>
               </TableHead>
               <TableHead className="text-right">
-                <button 
-                  className="flex items-center justify-end font-semibold w-full"
-                  onClick={() => handleSort('totalMenjadi')}
-                >
+                <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('totalMenjadi')}>
                   Total Menjadi
                   <ArrowUpDown className="ml-1 h-4 w-4" />
                 </button>
               </TableHead>
               <TableHead className="text-right">
-                <button 
-                  className="flex items-center justify-end font-semibold w-full"
-                  onClick={() => handleSort('totalSelisih')}
-                >
+                <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('totalSelisih')}>
                   Selisih
                   <ArrowUpDown className="ml-1 h-4 w-4" />
                 </button>
               </TableHead>
               <TableHead className="text-right">
-                <button 
-                  className="flex items-center justify-end font-semibold w-full"
-                  onClick={() => handleSort('newItems')}
-                >
+                <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('newItems')}>
                   Items Baru
                   <ArrowUpDown className="ml-1 h-4 w-4" />
                 </button>
               </TableHead>
               <TableHead className="text-right">
-                <button 
-                  className="flex items-center justify-end font-semibold w-full"
-                  onClick={() => handleSort('changedItems')}
-                >
+                <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('changedItems')}>
                   Items Berubah
                   <ArrowUpDown className="ml-1 h-4 w-4" />
                 </button>
               </TableHead>
               <TableHead className="text-right">
-                <button 
-                  className="flex items-center justify-end font-semibold w-full"
-                  onClick={() => handleSort('totalItems')}
-                >
+                <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('totalItems')}>
                   Total Items
                   <ArrowUpDown className="ml-1 h-4 w-4" />
                 </button>
@@ -181,17 +142,13 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentItems.length === 0 ? (
-              <TableRow>
+            {currentItems.length === 0 ? <TableRow>
                 <TableCell colSpan={8} className="text-center py-4">
                   Tidak ada data
                 </TableCell>
-              </TableRow>
-            ) : (
-              currentItems.map((row, index) => (
-                <TableRow key={row.id} className={index % 2 === 0 ? "bg-slate-50" : ""}>
+              </TableRow> : currentItems.map((row, index) => <TableRow key={row.id} className={index % 2 === 0 ? "bg-slate-50" : ""}>
                   <TableCell className="text-center">{(currentPage - 1) * (itemsPerPage === -1 ? 0 : itemsPerPage) + index + 1}</TableCell>
-                  <TableCell>{row.name || '-'}</TableCell>
+                  <TableCell className="text-left">{row.name || '-'}</TableCell>
                   <TableCell className="text-right">{formatCurrency(roundToThousands(row.totalSemula))}</TableCell>
                   <TableCell className="text-right text-black">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
                   <TableCell className={`text-right ${row.totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -200,9 +157,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
                   <TableCell className="text-right">{row.newItems}</TableCell>
                   <TableCell className="text-right">{row.changedItems}</TableCell>
                   <TableCell className="text-right">{row.totalItems}</TableCell>
-                </TableRow>
-              ))
-            )}
+                </TableRow>)}
           </TableBody>
           <TableFooter>
             <TableRow>
@@ -219,63 +174,43 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
           </TableFooter>
         </Table>
 
-        {totalPages > 1 && itemsPerPage !== -1 && (
-          <div className="p-2 flex justify-center">
+        {totalPages > 1 && itemsPerPage !== -1 && <div className="p-2 flex justify-center">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    href="#" 
-                    aria-disabled={currentPage === 1}
-                  />
+                  <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} href="#" aria-disabled={currentPage === 1} />
                 </PaginationItem>
 
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNumber;
-                  
-                  if (totalPages <= 5) {
-                    pageNumber = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNumber = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNumber = totalPages - 4 + i;
-                  } else {
-                    pageNumber = currentPage - 2 + i;
-                  }
-                  
-                  return (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink 
-                        href="#" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(pageNumber);
-                        }}
-                        isActive={currentPage === pageNumber}
-                      >
+                {Array.from({
+              length: Math.min(5, totalPages)
+            }, (_, i) => {
+              let pageNumber;
+              if (totalPages <= 5) {
+                pageNumber = i + 1;
+              } else if (currentPage <= 3) {
+                pageNumber = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNumber = totalPages - 4 + i;
+              } else {
+                pageNumber = currentPage - 2 + i;
+              }
+              return <PaginationItem key={pageNumber}>
+                      <PaginationLink href="#" onClick={e => {
+                  e.preventDefault();
+                  handlePageChange(pageNumber);
+                }} isActive={currentPage === pageNumber}>
                         {pageNumber}
                       </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
+                    </PaginationItem>;
+            })}
 
                 <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    href="#" 
-                    aria-disabled={currentPage === totalPages}
-                  />
+                  <PaginationNext onClick={() => handlePageChange(currentPage + 1)} className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} href="#" aria-disabled={currentPage === totalPages} />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SummaryTable;
