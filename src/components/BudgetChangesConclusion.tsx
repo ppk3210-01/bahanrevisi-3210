@@ -28,7 +28,7 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
           </p>
           
           <div className="text-blue-900">
-            <p className="mb-2">Rincian usulan revisi:</p>
+            <p className="mb-2 text-blue-800">Rincian usulan revisi:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>{changedItems} detil anggaran yang mengalami penyesuaian nilai</li>
               <li>{newItems} detil anggaran baru yang ditambahkan</li>
