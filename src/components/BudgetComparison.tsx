@@ -229,7 +229,7 @@ const BudgetComparison: React.FC = () => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="anggaran" className="bg-slate-300 hover:bg-slate-200">Anggaran</TabsTrigger>
           <TabsTrigger value="rpd" className="bg-slate-300 hover:bg-slate-200">Rencana Penarikan Dana</TabsTrigger>
-          <TabsTrigger value="ringkasan" className="bg-slate-300 hover:bg-slate-200">Ringkasan</TabsTrigger>
+          <TabsTrigger value="ringkasan" className="bg-slate-300 hover:bg-slate-200">Ringkasan Usulan Revisi</TabsTrigger>
         </TabsList>
         
         <TabsContent value="anggaran" className="space-y-4">
