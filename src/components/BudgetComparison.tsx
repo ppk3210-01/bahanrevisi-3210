@@ -244,31 +244,31 @@ const BudgetComparison: React.FC = () => {
           <div className="grid grid-cols-1 gap-4">
             <Card className="p-4">
               <div className="flex flex-wrap gap-2 mb-4">
-                <Button variant={summaryView === 'changes' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('changes')}>
+                <Button variant={summaryView === 'changes' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('changes')} className="text-xs">
                   Ringkasan Perubahan
                 </Button>
-                <Button variant={summaryView === 'program_pembebanan' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('program_pembebanan')}>
+                <Button variant={summaryView === 'program_pembebanan' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('program_pembebanan')} className="text-xs">
                   Program Pembebanan
                 </Button>
-                <Button variant={summaryView === 'kegiatan' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('kegiatan')}>
+                <Button variant={summaryView === 'kegiatan' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('kegiatan')} className="text-xs">
                   Kegiatan
                 </Button>
-                <Button variant={summaryView === 'rincian_output' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('rincian_output')}>
+                <Button variant={summaryView === 'rincian_output' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('rincian_output')} className="text-xs">
                   Rincian Output
                 </Button>
-                <Button variant={summaryView === 'komponen_output' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('komponen_output')}>
+                <Button variant={summaryView === 'komponen_output' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('komponen_output')} className="text-xs">
                   Komponen Output
                 </Button>
-                <Button variant={summaryView === 'sub_komponen' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('sub_komponen')}>
+                <Button variant={summaryView === 'sub_komponen' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('sub_komponen')} className="text-xs">
                   Sub Komponen
                 </Button>
-                <Button variant={summaryView === 'akun' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('akun')}>
+                <Button variant={summaryView === 'akun' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('akun')} className="text-xs">
                   Akun
                 </Button>
-                <Button variant={summaryView === 'akun_group' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('akun_group')}>
+                <Button variant={summaryView === 'akun_group' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('akun_group')} className="text-xs">
                   Kelompok Akun
                 </Button>
-                <Button variant={summaryView === 'account_group' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('account_group')}>
+                <Button variant={summaryView === 'account_group' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('account_group')} className="text-xs">
                   Kelompok Belanja
                 </Button>
               </div>
