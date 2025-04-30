@@ -113,7 +113,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Grafik Perbandingan {title}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="rounded-lg">
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={chartData} margin={{
               top: 20,
