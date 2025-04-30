@@ -617,15 +617,15 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         <h4 className="text-xs font-medium mb-1">Ringkasan Halaman</h4>
         <div className="grid grid-cols-3 text-xs gap-2">
           <div>
-            <span className="font-medium">Total Semula: </span>
+            <span className="font-medium">Total Pagu Semula: </span>
             <span>{formatCurrency(pageTotalSemula)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Menjadi: </span>
+            <span className="font-medium">Total Pagu Menjadi: </span>
             <span>{formatCurrency(pageTotalMenjadi)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Selisih: </span>
+            <span className="font-medium">Total Selisih Pagu: </span>
             <span className={pageTotalSelisih > 0 ? 'text-green-600' : pageTotalSelisih < 0 ? 'text-red-600' : ''}>
               {formatCurrency(pageTotalSelisih)}
             </span>
@@ -635,15 +635,15 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         <h4 className="text-xs font-medium mt-2 mb-1">Ringkasan Keseluruhan</h4>
         <div className="grid grid-cols-3 text-xs gap-2">
           <div>
-            <span className="font-medium">Total Semula: </span>
+            <span className="font-medium">Total Pagu Semula: </span>
             <span>{formatCurrency(grandTotalSemula)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Menjadi: </span>
+            <span className="font-medium">Total Pagu Menjadi: </span>
             <span>{formatCurrency(grandTotalMenjadi)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Selisih: </span>
+            <span className="font-medium">Total Selisih Pagu: </span>
             <span className={grandTotalSelisih > 0 ? 'text-green-600' : grandTotalSelisih < 0 ? 'text-red-600' : ''}>
               {formatCurrency(grandTotalSelisih)}
             </span>
