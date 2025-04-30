@@ -40,7 +40,7 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
             Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {changedItems + newItems} perubahan ini, diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
           </p>
           
-          <p className="text-blue-900">Usulan revisi / perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.</p>
+          <p className="text-blue-900">Usulan perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.</p>
         </div>
       </CardContent>
     </Card>;
