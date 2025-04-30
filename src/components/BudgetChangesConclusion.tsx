@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from '@/utils/budgetCalculations';
-
 interface BudgetChangesConclusionProps {
   totalSemula: number;
   totalMenjadi: number;
@@ -11,19 +9,16 @@ interface BudgetChangesConclusionProps {
   newItems: number;
   deletedItems: number;
 }
-
 const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
   totalSemula,
   totalMenjadi,
   totalSelisih,
   changedItems,
   newItems,
-  deletedItems,
+  deletedItems
 }) => {
   const selisihText = totalSelisih > 0 ? 'pagu bertambah' : totalSelisih < 0 ? 'pagu berkurang' : 'atau tetap';
-
-  return (
-    <Card className="bg-blue-100/50 border-blue-200">
+  return <Card className="bg-blue-100/50 border-blue-200">
       <CardContent className="pt-6">
         <h2 className="text-lg font-semibold text-blue-700 mb-4 text-left">Kesimpulan</h2>
         
@@ -33,7 +28,7 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
           </p>
           
           <div className="text-blue-900">
-            <p className="mb-2">Rincian revisi:</p>
+            <p className="mb-2">Rincian usulan revisi:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>{changedItems} detil anggaran yang mengalami penyesuaian nilai</li>
               <li>{newItems} detil anggaran baru yang ditambahkan</li>
@@ -45,13 +40,9 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
             Penyesuaian anggaran ini dilakukan untuk mengoptimalkan penggunaan sumber daya keuangan sesuai dengan prioritas program dan kegiatan yang telah ditetapkan. Dengan adanya {changedItems + newItems} perubahan ini, diharapkan pelaksanaan program dapat berjalan dengan lebih efektif dan efisien.
           </p>
           
-          <p className="text-blue-900">
-            Perubahan anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.
-          </p>
+          <p className="text-blue-900">Perubahan usulan revisi anggaran ini perlu disetujui oleh pejabat yang berwenang sesuai dengan ketentuan yang berlaku.</p>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default BudgetChangesConclusion;
