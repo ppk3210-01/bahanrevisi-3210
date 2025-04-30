@@ -209,7 +209,7 @@ const BudgetComparison: React.FC = () => {
       
       <div className="flex flex-wrap gap-2 justify-between items-center">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="text-xs font-normal bg-amber-200">
+          <Badge variant="outline" className="text-xs font-normal bg-green-200">
             Total Semula: {formatCurrency(roundToThousands(totalSemula))}
           </Badge>
           <Badge variant="outline" className="text-xs font-normal bg-green-200">
