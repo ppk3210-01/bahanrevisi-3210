@@ -549,7 +549,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   </td>
                 </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
                     <td className="text-center">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
-                    <td className="uraian-cell my-0 px-[3px] mx-0 py-[11px]">{renderItemField(item, 'uraian')}</td>
+                    <td className="uraian-cell my-0 mx-0 px-[6px] rounded-none py-[12px]">{renderItemField(item, 'uraian')}</td>
                     <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
                     <td className="unit-cell">{renderItemField(item, 'satuanSemula')}</td>
                     <td className="number-cell">{renderItemField(item, 'hargaSatuanSemula')}</td>
