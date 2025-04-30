@@ -227,9 +227,9 @@ const BudgetComparison: React.FC = () => {
       
       <Tabs defaultValue={selectedTab} value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="anggaran">Anggaran</TabsTrigger>
-          <TabsTrigger value="rpd">Rencana Penarikan Dana</TabsTrigger>
-          <TabsTrigger value="ringkasan">Ringkasan</TabsTrigger>
+          <TabsTrigger value="anggaran" className="bg-blue-200 hover:bg-blue-100">Anggaran</TabsTrigger>
+          <TabsTrigger value="rpd" className="bg-blue-200 hover:bg-blue-100">Rencana Penarikan Dana</TabsTrigger>
+          <TabsTrigger value="ringkasan" className="bg-blue-200 hover:bg-blue-100">Ringkasan</TabsTrigger>
         </TabsList>
         
         <TabsContent value="anggaran" className="space-y-4">
