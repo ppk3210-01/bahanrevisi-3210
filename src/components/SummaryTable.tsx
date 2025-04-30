@@ -150,7 +150,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
                   <TableCell className="text-center">{(currentPage - 1) * (itemsPerPage === -1 ? 0 : itemsPerPage) + index + 1}</TableCell>
                   <TableCell className="text-left">{row.name || '-'}</TableCell>
                   <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.totalSemula))}</TableCell>
-                  <TableCell className="text-right text-black px-[3px]">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
+                  <TableCell className="text-right text-black px-[4px]">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
                   <TableCell className={`text-right ${row.totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(roundToThousands(row.totalSelisih))}
                   </TableCell>
