@@ -46,7 +46,7 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({
   return <Card className="bg-green-50/50 border-green-100">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg text-green-700 font-bold">Pagu Anggaran Baru</CardTitle>
-        {isAdmin && <Button variant="outline" size="sm" onClick={handleExportJPEG}>
+        {isAdmin && <Button variant="outline" size="sm" onClick={handleExportJPEG} className="text-xs">
             <FileImage className="h-4 w-4 mr-2" />
             Export JPEG
           </Button>}
