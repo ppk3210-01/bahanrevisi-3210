@@ -149,8 +149,8 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
               </TableRow> : currentItems.map((row, index) => <TableRow key={row.id} className={index % 2 === 0 ? "bg-slate-50" : ""}>
                   <TableCell className="text-center">{(currentPage - 1) * (itemsPerPage === -1 ? 0 : itemsPerPage) + index + 1}</TableCell>
                   <TableCell className="text-left">{row.name || '-'}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(roundToThousands(row.totalSemula))}</TableCell>
-                  <TableCell className="text-right text-black">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
+                  <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.totalSemula))}</TableCell>
+                  <TableCell className="text-right text-black px-[3px]">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
                   <TableCell className={`text-right ${row.totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(roundToThousands(row.totalSelisih))}
                   </TableCell>
@@ -162,8 +162,8 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
           <TableFooter>
             <TableRow>
               <TableCell className="font-bold" colSpan={2}>Total</TableCell>
-              <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
-              <TableCell className="text-right font-bold">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
+              <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
+              <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
               <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(roundToThousands(totalSelisih))}
               </TableCell>
