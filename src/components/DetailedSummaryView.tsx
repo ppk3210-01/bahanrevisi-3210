@@ -94,15 +94,15 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   };
   return <div className="space-y-4">
       {isAdmin && <div className="flex justify-end space-x-2">
-          <Button variant="outline" size="sm" onClick={handleExportJPEG}>
+          <Button variant="outline" size="sm" onClick={handleExportJPEG} className="text-xs">
             <FileImage className="h-4 w-4 mr-2" />
             Export JPEG
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportPDF}>
+          <Button variant="outline" size="sm" onClick={handleExportPDF} className="text-xs">
             <FileText className="h-4 w-4 mr-2" />
             Export PDF
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportExcel}>
+          <Button variant="outline" size="sm" onClick={handleExportExcel} className="text-xs font-semibold">
             <FileSpreadsheet className="h-4 w-4 mr-2" />
             Export Excel
           </Button>
