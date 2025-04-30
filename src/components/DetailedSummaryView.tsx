@@ -9,7 +9,6 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg, exportToPdf, exportToExcel } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-
 interface SummaryRow {
   id: string;
   name: string;
@@ -20,7 +19,6 @@ interface SummaryRow {
   changedItems: number;
   totalItems: number;
 }
-
 interface DetailedSummaryViewProps {
   title: string;
   data: SummaryRow[];
@@ -29,7 +27,6 @@ interface DetailedSummaryViewProps {
   totalSelisih: number;
   showSummaryBoxes?: boolean;
 }
-
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   title,
   data,
@@ -39,17 +36,15 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   showSummaryBoxes = true
 }) => {
   const chartAndTableRef = useRef<HTMLDivElement>(null);
-  const { isAdmin } = useAuth();
-  
-  const chartData = data
-    .filter(item => item.totalMenjadi !== 0 || item.totalSemula !== 0)
-    .map(item => ({
-      name: item.name.length > 20 ? `${item.name.substring(0, 20)}...` : item.name,
-      semula: item.totalSemula,
-      menjadi: item.totalMenjadi,
-      selisih: item.totalSelisih
-    }));
-  
+  const {
+    isAdmin
+  } = useAuth();
+  const chartData = data.filter(item => item.totalMenjadi !== 0 || item.totalSemula !== 0).map(item => ({
+    name: item.name.length > 20 ? `${item.name.substring(0, 20)}...` : item.name,
+    semula: item.totalSemula,
+    menjadi: item.totalMenjadi,
+    selisih: item.totalSelisih
+  }));
   const handleExportJPEG = async () => {
     if (!chartAndTableRef.current) return;
     try {
@@ -66,7 +61,6 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       });
     }
   };
-  
   const handleExportPDF = async () => {
     if (!chartAndTableRef.current) return;
     try {
@@ -83,7 +77,6 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       });
     }
   };
-
   const handleExportExcel = async () => {
     try {
       await exportToExcel(data, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
@@ -99,11 +92,8 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       });
     }
   };
-  
-  return (
-    <div className="space-y-4">
-      {isAdmin && (
-        <div className="flex justify-end space-x-2">
+  return <div className="space-y-4">
+      {isAdmin && <div className="flex justify-end space-x-2">
           <Button variant="outline" size="sm" onClick={handleExportJPEG}>
             <FileImage className="h-4 w-4 mr-2" />
             Export JPEG
@@ -116,8 +106,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
             <FileSpreadsheet className="h-4 w-4 mr-2" />
             Export Excel
           </Button>
-        </div>
-      )}
+        </div>}
       
       <div ref={chartAndTableRef} className="space-y-6 bg-white p-4 rounded-lg">
         <Card className="shadow-sm">
@@ -126,82 +115,37 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart
-                data={chartData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
-              >
+              <BarChart data={chartData} margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: 80
+            }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="name" 
-                  angle={-45} 
-                  textAnchor="end"
-                  height={80}
-                  interval={0}
-                  tick={{ fontSize: 10 }}
-                />
-                <YAxis 
-                  tickFormatter={(value) => formatCurrency(value, false)} 
-                  width={80}
-                />
-                <Tooltip 
-                  formatter={(value: number) => formatCurrency(value)} 
-                  labelFormatter={(label) => `${label}`}
-                />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} tick={{
+                fontSize: 10
+              }} />
+                <YAxis tickFormatter={value => formatCurrency(value, false)} width={80} />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} labelFormatter={label => `${label}`} />
                 <Legend />
-                <Bar 
-                  dataKey="semula" 
-                  name="Total Semula" 
-                  fill="#8884d8" 
-                />
-                <Bar 
-                  dataKey="menjadi" 
-                  name="Total Menjadi" 
-                  fill="#82ca9d" 
-                />
-                <Bar 
-                  dataKey="selisih" 
-                  name="Selisih" 
-                  fill="#ffc658"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.selisih === 0 ? '#4ade80' : '#ef4444'} 
-                    />
-                  ))}
+                <Bar dataKey="semula" name="Total Semula" fill="#8884d8" />
+                <Bar dataKey="menjadi" name="Total Menjadi" fill="#82ca9d" />
+                <Bar dataKey="selisih" name="Selisih" fill="#ffc658">
+                  {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.selisih === 0 ? '#4ade80' : '#ef4444'} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
             
-            {showSummaryBoxes && (
-              <div className="grid grid-cols-3 gap-4 mt-4 text-center">
-                <div className="bg-blue-50 p-3 rounded-md">
-                  <div className="text-xs text-gray-500 mb-1">Total Semula</div>
-                  <div className="text-lg font-semibold">{formatCurrency(totalSemula)}</div>
-                </div>
-                <div className="bg-green-50 p-3 rounded-md">
-                  <div className="text-xs text-gray-500 mb-1">Total Menjadi</div>
-                  <div className="text-lg font-semibold">{formatCurrency(totalMenjadi)}</div>
-                </div>
-                <div className={`p-3 rounded-md ${totalSelisih === 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-                  <div className="text-xs text-gray-500 mb-1">Selisih</div>
-                  <div className={`text-lg font-semibold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(totalSelisih)}
-                  </div>
-                </div>
-              </div>
-            )}
+            {showSummaryBoxes && <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+                
+                
+                
+              </div>}
           </CardContent>
         </Card>
         
-        <SummaryTable 
-          title={`Tabel Perbandingan ${title}`} 
-          data={data} 
-          initialPageSize={-1}
-        />
+        <SummaryTable title={`Tabel Perbandingan ${title}`} data={data} initialPageSize={-1} />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DetailedSummaryView;
