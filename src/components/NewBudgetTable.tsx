@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,6 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-
 interface NewBudgetItem {
   id: string;
   pembebanan: string;
@@ -18,14 +16,15 @@ interface NewBudgetItem {
   hargaSatuan: number;
   jumlah: number;
 }
-
 interface NewBudgetTableProps {
   items: NewBudgetItem[];
 }
-
-export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
-  const { isAdmin } = useAuth();
-
+export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({
+  items
+}) => {
+  const {
+    isAdmin
+  } = useAuth();
   const handleExportJPEG = async () => {
     try {
       const element = document.getElementById('new-budget-table');
@@ -44,17 +43,13 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
       });
     }
   };
-
-  return (
-    <Card className="bg-green-50/50 border-green-100">
+  return <Card className="bg-green-50/50 border-green-100">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold text-green-700">Pagu Anggaran Baru</CardTitle>
-        {isAdmin && (
-          <Button variant="outline" size="sm" onClick={handleExportJPEG}>
+        <CardTitle className="text-lg text-green-700 font-bold">Pagu Anggaran Baru</CardTitle>
+        {isAdmin && <Button variant="outline" size="sm" onClick={handleExportJPEG}>
             <FileImage className="h-4 w-4 mr-2" />
             Export JPEG
-          </Button>
-        )}
+          </Button>}
       </CardHeader>
       <CardContent>
         <div id="new-budget-table" className="budget-changes-summary">
@@ -71,8 +66,7 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((item, index) => (
-                <TableRow key={item.id}>
+              {items.map((item, index) => <TableRow key={item.id}>
                   <TableCell className="text-center">{index + 1}</TableCell>
                   <TableCell className="pembebanan-column whitespace-normal">{item.pembebanan}</TableCell>
                   <TableCell className="uraian-column">{item.uraian}</TableCell>
@@ -80,13 +74,10 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({ items }) => {
                   <TableCell className="text-center">{item.satuan}</TableCell>
                   <TableCell className="text-right">{formatCurrency(item.hargaSatuan)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(item.jumlah)}</TableCell>
-                </TableRow>
-              ))}
+                </TableRow>)}
             </TableBody>
           </Table>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-

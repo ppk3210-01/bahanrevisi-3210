@@ -20,7 +20,7 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
   const selisihText = totalSelisih > 0 ? 'pagu bertambah' : totalSelisih < 0 ? 'pagu berkurang' : 'atau tetap';
   return <Card className="bg-blue-100/50 border-blue-200">
       <CardContent className="pt-6">
-        <h2 className="text-lg font-semibold text-blue-700 mb-4 text-left">Kesimpulan</h2>
+        <h2 className="text-lg text-blue-700 mb-4 text-left font-bold">Kesimpulan</h2>
         
         <div className="space-y-4 text-sm text-left">
           <p className="text-blue-900">
@@ -28,7 +28,7 @@ const BudgetChangesConclusion: React.FC<BudgetChangesConclusionProps> = ({
           </p>
           
           <div className="text-blue-900">
-            <p className="mb-2 text-blue-800">Rincian usulan revisi:</p>
+            <p className="mb-2 text-blue-900">Rincian usulan revisi:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>{changedItems} detil anggaran yang mengalami penyesuaian nilai</li>
               <li>{newItems} detil anggaran baru yang ditambahkan</li>
