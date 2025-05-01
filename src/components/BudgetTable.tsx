@@ -12,7 +12,6 @@ import { toast } from '@/hooks/use-toast';
 import DetailDialog from './DetailDialog';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useAuth } from '@/contexts/AuthContext';
-
 interface BudgetTableProps {
   items: BudgetItem[];
   komponenOutput: string;
@@ -26,7 +25,6 @@ interface BudgetTableProps {
   akun?: string;
   areFiltersComplete: boolean;
 }
-
 const BudgetTable: React.FC<BudgetTableProps> = ({
   items,
   komponenOutput,
@@ -72,7 +70,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const isViewer = !user;
-
   useEffect(() => {
     setNewItem(prev => ({
       ...prev,
@@ -81,11 +78,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       akun
     }));
   }, [komponenOutput, subKomponen, akun]);
-
   const newItemJumlahSemula = roundToThousands(calculateAmount(newItem.volumeSemula || 0, newItem.hargaSatuanSemula || 0));
   const newItemJumlahMenjadi = roundToThousands(calculateAmount(newItem.volumeMenjadi || 0, newItem.hargaSatuanMenjadi || 0));
   const newItemSelisih = calculateDifference(newItemJumlahSemula, newItemJumlahMenjadi);
-
   const validateItem = (item: Partial<BudgetItem>): boolean => {
     if (!item.uraian || item.uraian.trim() === '') {
       toast({
@@ -121,7 +116,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
     return true;
   };
-
   const handleAddItem = async () => {
     if (!validateItem(newItem)) {
       return;
@@ -172,7 +166,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       });
     }
   };
-
   const startEditing = (item: BudgetItem) => {
     if (isViewer) return;
     if (!isAdmin) {
@@ -187,7 +180,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
     setEditingId(item.id);
   };
-
   const saveEditing = (id: string) => {
     setEditingId(null);
     toast({
@@ -195,7 +187,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       description: 'Perubahan berhasil disimpan'
     });
   };
-
   const handleEditChange = (id: string, field: string, value: string | number) => {
     if (!isAdmin) {
       const allowedFields = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'];
@@ -251,17 +242,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       [field]: value
     });
   };
-
   const showDetailDialog = (item: BudgetItem) => {
     setDetailItem(item);
     setIsDetailOpen(true);
   };
-
   const confirmDelete = (id: string) => {
     setItemToDelete(id);
     setIsDeleteDialogOpen(true);
   };
-
   const handleDelete = () => {
     if (itemToDelete) {
       onDelete(itemToDelete);
@@ -273,27 +261,22 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       });
     }
   };
-
   const canDeleteItem = (item: BudgetItem): boolean => {
     if (isAdmin) return true;
     if (isViewer) return false;
     return item.status === 'new' && !item.isApproved;
   };
-
   const renderItemField = (item: BudgetItem, field: keyof BudgetItem) => {
     const isEditing = editingId === item.id;
     const isMenjadiField = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'jumlahMenjadi'].includes(field);
     const isDifferentValue = field === 'volumeMenjadi' && item.volumeMenjadi !== item.volumeSemula || field === 'satuanMenjadi' && item.satuanMenjadi !== item.satuanSemula || field === 'hargaSatuanMenjadi' && item.hargaSatuanMenjadi !== item.hargaSatuanSemula || field === 'jumlahMenjadi' && item.jumlahMenjadi !== item.jumlahSemula;
     const menjadiClassName = isMenjadiField && isDifferentValue ? 'text-blue-600 font-bold' : '';
-
     if (isViewer && isEditing) {
       return;
     }
-
     if (isEditing && !isAdmin && !areFiltersComplete && ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'].includes(field as string)) {
       return;
     }
-
     switch (field) {
       case 'uraian':
         return isEditing ? <Input value={item.uraian} onChange={e => handleEditChange(item.id, 'uraian', e.target.value)} className="w-full" disabled={!isAdmin} /> : <span>{item.uraian}</span>;
@@ -326,7 +309,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         return <span>{String(item[field])}</span>;
     }
   };
-
   const filteredItems = items.filter(item => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = item.uraian?.toLowerCase().includes(searchLower) || item.satuanSemula?.toLowerCase().includes(searchLower) || item.satuanMenjadi?.toLowerCase().includes(searchLower) || item.subKomponen?.toLowerCase().includes(searchLower) || item.akun?.toLowerCase().includes(searchLower) || item.jumlahSemula.toString().includes(searchTerm) || item.jumlahMenjadi.toString().includes(searchTerm) || item.volumeSemula.toString().includes(searchTerm) || item.volumeMenjadi.toString().includes(searchTerm) || item.hargaSatuanSemula.toString().includes(searchTerm) || item.hargaSatuanMenjadi.toString().includes(searchTerm);
@@ -335,7 +317,6 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
     return matchesSearch;
   });
-
   const sortedItems = [...filteredItems].sort((a, b) => {
     if (!sortField) return 0;
     const fieldA = a[sortField];
@@ -352,18 +333,14 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     }
     return 0;
   });
-
   const paginatedItems = pageSize === -1 ? sortedItems : sortedItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const totalPages = pageSize === -1 ? 1 : Math.ceil(sortedItems.length / pageSize);
-
   const pageTotalSemula = paginatedItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const pageTotalMenjadi = paginatedItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const pageTotalSelisih = pageTotalMenjadi - pageTotalSemula;
-
   const grandTotalSemula = filteredItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const grandTotalMenjadi = filteredItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const grandTotalSelisih = grandTotalMenjadi - grandTotalSemula;
-
   const handleSort = (field: keyof BudgetItem) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -372,16 +349,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       setSortDirection('asc');
     }
   };
-
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
-
   const needsApproval = (item: BudgetItem): boolean => {
     return (item.status === 'new' || item.status === 'changed') && !item.isApproved;
   };
-
   const renderPagination = () => {
     if (pageSize === -1 || totalPages <= 1) return null;
     const showMaxPages = 7;
@@ -441,28 +415,25 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </PaginationContent>
       </Pagination>;
   };
-
   if (isLoading) {
     return <div className="flex justify-center p-4">Loading budget data...</div>;
   }
-
-  return (
-    <div className="space-y-2">
+  return <div className="space-y-2">
       <div className="flex flex-col sm:flex-row justify-between gap-2 mb-2">
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
           <div className="relative">
             <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
             <Input placeholder="Cari anggaran..." className="pl-8 w-full sm:w-[300px] h-8 text-sm" value={searchTerm} onChange={e => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }} />
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }} />
           </div>
           
           <div className="filter-checkbox-container flex items-center gap-2">
             <Checkbox id="hideZeroBudget" checked={hideZeroBudget} onCheckedChange={checked => {
-              setHideZeroBudget(checked === true);
-              setCurrentPage(1);
-            }} className="filter-checkbox" />
+            setHideZeroBudget(checked === true);
+            setCurrentPage(1);
+          }} className="filter-checkbox" />
             <label htmlFor="hideZeroBudget" className="filter-checkbox-label text-xs">
               Sembunyikan jumlah pagu 0
             </label>
@@ -472,9 +443,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">Tampilkan:</span>
           <Select value={pageSize.toString()} onValueChange={value => {
-            setPageSize(parseInt(value));
-            setCurrentPage(1);
-          }}>
+          setPageSize(parseInt(value));
+          setCurrentPage(1);
+        }}>
             <SelectTrigger className="w-20 h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
@@ -610,26 +581,26 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 {!isViewer && <td className="text-center">
                   {needsApproval(item) && <div className="flex space-x-1 justify-center">
                     <Button variant="ghost" size="icon" className="text-green-600 h-6 w-6" onClick={() => {
-                      if (isAdmin) {
-                        onApprove(item.id);
-                        toast({
-                          title: "Berhasil",
-                          description: 'Item disetujui oleh PPK'
-                        });
-                      }
-                    }} title="Setujui" disabled={!isAdmin}>
+                    if (isAdmin) {
+                      onApprove(item.id);
+                      toast({
+                        title: "Berhasil",
+                        description: 'Item disetujui oleh PPK'
+                      });
+                    }
+                  }} title="Setujui" disabled={!isAdmin}>
                       <Check className="h-3 w-3 font-bold" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-red-600 h-6 w-6" onClick={() => {
-                      if (isAdmin) {
-                        onReject(item.id);
-                        toast({
-                          title: "Ditolak",
-                          description: 'Item ditolak oleh PPK',
-                          variant: "destructive"
-                        });
-                      }
-                    }} title="Tolak" disabled={!isAdmin}>
+                    if (isAdmin) {
+                      onReject(item.id);
+                      toast({
+                        title: "Ditolak",
+                        description: 'Item ditolak oleh PPK',
+                        variant: "destructive"
+                      });
+                    }
+                  }} title="Tolak" disabled={!isAdmin}>
                       <X className="h-3 w-3 font-bold" />
                     </Button>
                   </div>}
@@ -643,7 +614,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       {renderPagination()}
       
       <div className="rounded-md border border-gray-200 w-full p-2">
-        <h4 className="text-xs font-medium mb-1">Ringkasan Halaman</h4>
+        <h4 className="text-xs mb-1 text-red-600 font-semibold">Ringkasan Halaman</h4>
         <div className="grid grid-cols-3 text-xs gap-2">
           <div>
             <span className="font-medium">Total Pagu Semula: </span>
@@ -661,7 +632,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
           </div>
         </div>
         
-        <h4 className="text-xs font-medium mt-2 mb-1">Ringkasan Keseluruhan</h4>
+        <h4 className="text-xs mt-2 mb-1 text-green-600 font-semibold">Ringkasan Keseluruhan</h4>
         <div className="grid grid-cols-3 text-xs gap-2">
           <div>
             <span className="font-medium">Total Pagu Semula: </span>
@@ -680,99 +651,78 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
       </div>
       
-      {!isViewer && areFiltersComplete && (
-        <div className="rounded-md border border-gray-200 p-2 w-full">
+      {!isViewer && areFiltersComplete && <div className="rounded-md border border-gray-200 p-2 w-full">
           <h4 className="text-xs font-semibold mb-2">Tambah Item Baru</h4>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
             {/* Form inputs for adding new item */}
             <div className="lg:col-span-6">
               <label className="block text-xs mb-1">Uraian</label>
-              <Input 
-                value={newItem.uraian} 
-                onChange={e => setNewItem({...newItem, uraian: e.target.value})}
-                className="h-8 text-xs"
-                placeholder="Masukkan uraian"
-              />
+              <Input value={newItem.uraian} onChange={e => setNewItem({
+            ...newItem,
+            uraian: e.target.value
+          })} className="h-8 text-xs" placeholder="Masukkan uraian" />
             </div>
 
             {/* Volume dan Satuan Semula */}
-            {isAdmin && (
-              <>
+            {isAdmin && <>
                 <div className="lg:col-span-2">
                   <label className="block text-xs mb-1">Volume Semula</label>
-                  <Input 
-                    type="number"
-                    value={newItem.volumeSemula} 
-                    onChange={e => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
-                    className="h-8 text-xs"
-                    min="0"
-                  />
+                  <Input type="number" value={newItem.volumeSemula} onChange={e => setNewItem({
+              ...newItem,
+              volumeSemula: Number(e.target.value)
+            })} className="h-8 text-xs" min="0" />
                 </div>
                 <div className="lg:col-span-2">
                   <label className="block text-xs mb-1">Satuan Semula</label>
-                  <Select 
-                    value={newItem.satuanSemula} 
-                    onValueChange={value => setNewItem({...newItem, satuanSemula: value})}
-                  >
+                  <Select value={newItem.satuanSemula} onValueChange={value => setNewItem({
+              ...newItem,
+              satuanSemula: value
+            })}>
                     <SelectTrigger className="h-8 text-xs">
                       <SelectValue placeholder="Pilih satuan" />
                     </SelectTrigger>
                     <SelectContent>
-                      {UNIT_OPTIONS.map(unit => (
-                        <SelectItem key={`semula-${unit}`} value={unit}>{unit}</SelectItem>
-                      ))}
+                      {UNIT_OPTIONS.map(unit => <SelectItem key={`semula-${unit}`} value={unit}>{unit}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="lg:col-span-2">
                   <label className="block text-xs mb-1">Harga Satuan Semula</label>
-                  <Input 
-                    type="number"
-                    value={newItem.hargaSatuanSemula} 
-                    onChange={e => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
-                    className="h-8 text-xs"
-                    min="0"
-                  />
+                  <Input type="number" value={newItem.hargaSatuanSemula} onChange={e => setNewItem({
+              ...newItem,
+              hargaSatuanSemula: Number(e.target.value)
+            })} className="h-8 text-xs" min="0" />
                 </div>
-              </>
-            )}
+              </>}
 
             {/* Volume dan Satuan Menjadi */}
             <div className="lg:col-span-2">
               <label className="block text-xs mb-1">Volume Menjadi</label>
-              <Input 
-                type="number"
-                value={newItem.volumeMenjadi} 
-                onChange={e => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
-                className="h-8 text-xs"
-                min="0"
-              />
+              <Input type="number" value={newItem.volumeMenjadi} onChange={e => setNewItem({
+            ...newItem,
+            volumeMenjadi: Number(e.target.value)
+          })} className="h-8 text-xs" min="0" />
             </div>
             <div className="lg:col-span-2">
               <label className="block text-xs mb-1">Satuan Menjadi</label>
-              <Select 
-                value={newItem.satuanMenjadi} 
-                onValueChange={value => setNewItem({...newItem, satuanMenjadi: value})}
-              >
+              <Select value={newItem.satuanMenjadi} onValueChange={value => setNewItem({
+            ...newItem,
+            satuanMenjadi: value
+          })}>
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue placeholder="Pilih satuan" />
                 </SelectTrigger>
                 <SelectContent>
-                  {UNIT_OPTIONS.map(unit => (
-                    <SelectItem key={`menjadi-${unit}`} value={unit}>{unit}</SelectItem>
-                  ))}
+                  {UNIT_OPTIONS.map(unit => <SelectItem key={`menjadi-${unit}`} value={unit}>{unit}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="lg:col-span-2">
               <label className="block text-xs mb-1">Harga Satuan Menjadi</label>
-              <Input 
-                type="number"
-                value={newItem.hargaSatuanMenjadi} 
-                onChange={e => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
-                className="h-8 text-xs"
-                min="0"
-              />
+              <Input type="number" value={newItem.hargaSatuanMenjadi} onChange={e => setNewItem({
+            ...newItem,
+            hargaSatuanMenjadi: Number(e.target.value)
+          })} className="h-8 text-xs" min="0" />
             </div>
 
             {/* Jumlah dan Tombol */}
@@ -788,8 +738,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               </Button>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
       
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -806,13 +755,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </AlertDialogContent>
       </AlertDialog>
 
-      <DetailDialog
-        open={isDetailOpen}
-        onOpenChange={setIsDetailOpen}
-        item={detailItem}
-      />
-    </div>
-  );
+      <DetailDialog open={isDetailOpen} onOpenChange={setIsDetailOpen} item={detailItem} />
+    </div>;
 };
-
 export default BudgetTable;
