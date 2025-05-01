@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -808,8 +807,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       </AlertDialog>
 
       <DetailDialog
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
         item={detailItem}
       />
     </div>
