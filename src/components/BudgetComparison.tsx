@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -17,6 +18,7 @@ import { BudgetItem } from '@/types/budget';
 import { BudgetChangesTable } from './BudgetChangesTable';
 import { NewBudgetTable } from './NewBudgetTable';
 import BudgetChangesConclusion from './BudgetChangesConclusion';
+
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
   const [summaryView, setSummaryView] = useState<SummaryViewType>('changes');
@@ -28,9 +30,11 @@ const BudgetComparison: React.FC = () => {
     subKomponen: 'all',
     akun: 'all'
   });
+
   const {
     isAdmin
   } = useAuth();
+
   const {
     budgetItems,
     loading: loadingItems,
@@ -42,11 +46,13 @@ const BudgetComparison: React.FC = () => {
     rejectBudgetItem,
     summaryData
   } = useBudgetData(filters);
+
   const handleImportItems = async (items: Partial<BudgetItem>[]): Promise<void> => {
     if (items && items.length > 0) {
       await importBudgetItems(items);
     }
   };
+
   const loadingOptions = false;
   const programPembebananOptions = [];
   const kegiatanOptions = [];
@@ -54,18 +60,24 @@ const BudgetComparison: React.FC = () => {
   const komponenOutputOptions = [];
   const subKomponenOptions = [];
   const akunOptions = [];
+
   const filteredItems = budgetItems;
   const areFiltersComplete = filters.akun !== 'all' && filters.komponenOutput !== 'all';
+
   const totalSemula = filteredItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalMenjadi = filteredItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
+
   const newItems = filteredItems.filter(item => item.status === 'new');
   const totalNewItems = newItems.length;
   const totalNewValue = newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+
   const changedItems = filteredItems.filter(item => item.status === 'changed');
   const totalChangedItems = changedItems.length;
   const totalChangedValue = changedItems.reduce((sum, item) => sum + item.selisih, 0);
+
   const deletedItems = filteredItems.filter(item => item.status === 'deleted').length;
+
   const getChangedBudgetItems = () => {
     return filteredItems.filter(item => item.status === 'changed').map(item => ({
       id: item.id,
@@ -77,6 +89,7 @@ const BudgetComparison: React.FC = () => {
       selisih: item.selisih
     }));
   };
+
   const getNewBudgetItems = () => {
     return filteredItems.filter(item => item.status === 'new').map(item => ({
       id: item.id,
@@ -88,6 +101,7 @@ const BudgetComparison: React.FC = () => {
       jumlah: item.jumlahMenjadi
     }));
   };
+
   const getDetailPerubahan = (item: BudgetItem) => {
     const changes: string[] = [];
     if (item.volumeSemula !== item.volumeMenjadi) {
@@ -101,10 +115,12 @@ const BudgetComparison: React.FC = () => {
     }
     return changes.join('\n');
   };
+
   const getCombinedPembebananCode = (item: BudgetItem): string => {
     const codes = [item.programPembebanan, item.komponenOutput, item.subKomponen, 'A', item.akun].filter(Boolean);
     return codes.join('.');
   };
+
   const renderSummarySection = () => {
     if (summaryView === 'changes') {
       return <div className="space-y-4">
@@ -113,10 +129,13 @@ const BudgetComparison: React.FC = () => {
           <NewBudgetTable items={getNewBudgetItems()} />
         </div>;
     }
+
     return <DetailedSummaryView title={getSummaryTitle()} data={getFilteredSummaryData()} totalSemula={getTotalSummaryValues().semula} totalMenjadi={getTotalSummaryValues().menjadi} totalSelisih={getTotalSummaryValues().selisih} />;
   };
+
   const getFilteredSummaryData = () => {
     if (!summaryData || summaryData.length === 0) return [];
+
     return summaryData.filter(item => item.type === summaryView).map(item => {
       let name = '';
       switch (item.type) {
@@ -147,6 +166,7 @@ const BudgetComparison: React.FC = () => {
         default:
           name = '';
       }
+
       return {
         id: item.type === 'akun' ? item.akun || name : item.type === 'account_group' ? item.account_group || name : item.type === 'akun_group' ? item.akun_group || name : name,
         name,
@@ -159,6 +179,7 @@ const BudgetComparison: React.FC = () => {
       };
     });
   };
+
   const getSummaryTitle = () => {
     switch (summaryView) {
       case 'program_pembebanan':
@@ -181,27 +202,32 @@ const BudgetComparison: React.FC = () => {
         return '';
     }
   };
+
   const getTotalSummaryValues = () => {
     if (!summaryData || summaryData.length === 0) return {
       semula: 0,
       menjadi: 0,
       selisih: 0
     };
+
     const filteredSummary = summaryData.filter(item => item.type === summaryView);
     if (filteredSummary.length === 0) return {
       semula: 0,
       menjadi: 0,
       selisih: 0
     };
+
     const totalSemula = filteredSummary.reduce((sum, item) => sum + (item.total_semula || 0), 0);
     const totalMenjadi = filteredSummary.reduce((sum, item) => sum + (item.total_menjadi || 0), 0);
     const totalSelisih = filteredSummary.reduce((sum, item) => sum + (item.total_selisih || 0), 0);
+
     return {
       semula: totalSemula,
       menjadi: totalMenjadi,
       selisih: totalSelisih
     };
   };
+
   return <div className="space-y-4">
       <h1 className="text-xl font-semibold">Revisi Anggaran</h1>
       
@@ -282,4 +308,5 @@ const BudgetComparison: React.FC = () => {
       </Tabs>
     </div>;
 };
+
 export default BudgetComparison;

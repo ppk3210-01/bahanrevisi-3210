@@ -23,7 +23,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
   const [editValues, setEditValues] = useState<{[key: string]: {[key: string]: number}}>({});
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(false);
+  const [hideZeroBudget, setHideZeroBudget] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -337,6 +337,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           position: relative;
           overflow-x: auto;
           max-width: 100%;
+          width: 100%;
         }
         
         .rpd-table th, .rpd-table td {
@@ -486,6 +487,10 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
           margin: 0 1rem;
           font-size: 0.875rem;
           color: #64748b;
+        }
+
+        .highlight-sisa {
+          background-color: rgba(234, 56, 76, 0.2) !important;
         }
       `}
       </style>
@@ -710,7 +715,9 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                   </td>
                 </tr>
               ) : (
-                paginatedItems.map((item, index) => (
+                paginatedItems.map((item, index) => {
+                  const isSisa = getStatusText(item) === 'Sisa';
+                  return (
                   <tr key={item.id} className={`${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
                     <td className="number-cell fixed-column" style={{left: '0px'}}>
                       {(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}
@@ -730,18 +737,18 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                     <td className="selisih-cell fixed-column" style={{left: '580px'}}>
                       {renderItemField(item, 'selisih')}
                     </td>
-                    <td className={`month-cell ${getMonthClass('jan')}`}>{renderItemField(item, 'jan')}</td>
-                    <td className={`month-cell ${getMonthClass('feb')}`}>{renderItemField(item, 'feb')}</td>
-                    <td className={`month-cell ${getMonthClass('mar')}`}>{renderItemField(item, 'mar')}</td>
-                    <td className={`month-cell ${getMonthClass('apr')}`}>{renderItemField(item, 'apr')}</td>
-                    <td className={`month-cell ${getMonthClass('mei')}`}>{renderItemField(item, 'mei')}</td>
-                    <td className={`month-cell ${getMonthClass('jun')}`}>{renderItemField(item, 'jun')}</td>
-                    <td className={`month-cell ${getMonthClass('jul')}`}>{renderItemField(item, 'jul')}</td>
-                    <td className={`month-cell ${getMonthClass('aug')}`}>{renderItemField(item, 'aug')}</td>
-                    <td className={`month-cell ${getMonthClass('sep')}`}>{renderItemField(item, 'sep')}</td>
-                    <td className={`month-cell ${getMonthClass('oct')}`}>{renderItemField(item, 'oct')}</td>
-                    <td className={`month-cell ${getMonthClass('nov')}`}>{renderItemField(item, 'nov')}</td>
-                    <td className={`month-cell ${getMonthClass('dec')}`}>{renderItemField(item, 'dec')}</td>
+                    <td className={`month-cell ${getMonthClass('jan')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'jan')}</td>
+                    <td className={`month-cell ${getMonthClass('feb')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'feb')}</td>
+                    <td className={`month-cell ${getMonthClass('mar')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'mar')}</td>
+                    <td className={`month-cell ${getMonthClass('apr')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'apr')}</td>
+                    <td className={`month-cell ${getMonthClass('mei')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'mei')}</td>
+                    <td className={`month-cell ${getMonthClass('jun')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'jun')}</td>
+                    <td className={`month-cell ${getMonthClass('jul')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'jul')}</td>
+                    <td className={`month-cell ${getMonthClass('aug')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'aug')}</td>
+                    <td className={`month-cell ${getMonthClass('sep')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'sep')}</td>
+                    <td className={`month-cell ${getMonthClass('oct')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'oct')}</td>
+                    <td className={`month-cell ${getMonthClass('nov')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'nov')}</td>
+                    <td className={`month-cell ${getMonthClass('dec')} ${isSisa ? 'highlight-sisa' : ''}`}>{renderItemField(item, 'dec')}</td>
                     <td className="action-cell">
                       <div className="flex space-x-1 justify-center">
                         {(isAdmin || (user && user.role === 'user')) && (
@@ -764,7 +771,7 @@ const RPDTable: React.FC<RPDTableProps> = ({ filters }) => {
                       </div>
                     </td>
                   </tr>
-                ))
+                )})
               )}
             </tbody>
             <tfoot>
