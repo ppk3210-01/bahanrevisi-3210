@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, FileEdit, Check, Search, Eye, ArrowUpDown, X, ChevronsRight, ChevronLeft, ChevronRight, ChevronsLeft, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -446,23 +447,24 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     return <div className="flex justify-center p-4">Loading budget data...</div>;
   }
 
-  return <div className="space-y-2">
+  return (
+    <div className="space-y-2">
       <div className="flex flex-col sm:flex-row justify-between gap-2 mb-2">
         <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
           <div className="relative">
             <Search className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
-            <Input placeholder="Cari anggaran..." className="pl-8 w-full sm:w-80 h-8 text-sm" value={searchTerm} onChange={e => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }} />
+            <Input placeholder="Cari anggaran..." className="pl-8 w-full sm:w-[300px] h-8 text-sm" value={searchTerm} onChange={e => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }} />
           </div>
           
-          <div className="filter-checkbox-container">
+          <div className="filter-checkbox-container flex items-center gap-2">
             <Checkbox id="hideZeroBudget" checked={hideZeroBudget} onCheckedChange={checked => {
-            setHideZeroBudget(checked === true);
-            setCurrentPage(1);
-          }} className="filter-checkbox" />
-            <label htmlFor="hideZeroBudget" className="filter-checkbox-label">
+              setHideZeroBudget(checked === true);
+              setCurrentPage(1);
+            }} className="filter-checkbox" />
+            <label htmlFor="hideZeroBudget" className="filter-checkbox-label text-xs">
               Sembunyikan jumlah pagu 0
             </label>
           </div>
@@ -471,9 +473,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">Tampilkan:</span>
           <Select value={pageSize.toString()} onValueChange={value => {
-          setPageSize(parseInt(value));
-          setCurrentPage(1);
-        }}>
+            setPageSize(parseInt(value));
+            setCurrentPage(1);
+          }}>
             <SelectTrigger className="w-20 h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
@@ -496,8 +498,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
       
       <div className="rounded-md border border-gray-200 w-full">
         {komponenOutput && <div className="bg-gradient-to-r from-blue-50 to-slate-100 p-2 border-b border-gray-200">
-            <h3 className="font-medium text-sm text-slate-700">Komponen Output: {komponenOutput}</h3>
-          </div>}
+          <h3 className="font-medium text-sm text-slate-700">Komponen Output: {komponenOutput}</h3>
+        </div>}
         
         <div className="overflow-x-auto w-full">
           <table className="w-full min-w-full data-table text-xs">
@@ -572,68 +574,68 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             
             <tbody className="text-xs">
               {paginatedItems.length === 0 ? <tr>
-                  <td colSpan={!isViewer ? 13 : 11} className="py-4 text-center text-slate-500">
-                    {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data'}
-                  </td>
-                </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
-                    <td className="text-center">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
-                    <td className="uraian-cell my-0 mx-0 px-[6px] rounded-none py-[12px]">{renderItemField(item, 'uraian')}</td>
-                    <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
-                    <td className="unit-cell">{renderItemField(item, 'satuanSemula')}</td>
-                    <td className="number-cell">{renderItemField(item, 'hargaSatuanSemula')}</td>
-                    <td className="number-cell">{renderItemField(item, 'jumlahSemula')}</td>
-                    <td className="number-cell border-l-2">{renderItemField(item, 'volumeMenjadi')}</td>
-                    <td className="unit-cell">{renderItemField(item, 'satuanMenjadi')}</td>
-                    <td className="number-cell">{renderItemField(item, 'hargaSatuanMenjadi')}</td>
-                    <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
-                    <td className="number-cell">{renderItemField(item, 'selisih')}</td>
-                    
-                    {!isViewer && <td>
-                        <div className="flex space-x-1 justify-center">
-                          <Button variant="ghost" size="icon" onClick={() => showDetailDialog(item)} title="Lihat Detail" className="h-6 w-6">
-                            <Eye className="h-3 w-3" />
-                          </Button>
+                <td colSpan={!isViewer ? 13 : 11} className="py-4 text-center text-slate-500">
+                  {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data'}
+                </td>
+              </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
+                <td className="text-center">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
+                <td className="uraian-cell my-0 mx-0 px-[6px] rounded-none py-[12px]">{renderItemField(item, 'uraian')}</td>
+                <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
+                <td className="unit-cell">{renderItemField(item, 'satuanSemula')}</td>
+                <td className="number-cell">{renderItemField(item, 'hargaSatuanSemula')}</td>
+                <td className="number-cell">{renderItemField(item, 'jumlahSemula')}</td>
+                <td className="number-cell border-l-2">{renderItemField(item, 'volumeMenjadi')}</td>
+                <td className="unit-cell">{renderItemField(item, 'satuanMenjadi')}</td>
+                <td className="number-cell">{renderItemField(item, 'hargaSatuanMenjadi')}</td>
+                <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
+                <td className="number-cell">{renderItemField(item, 'selisih')}</td>
+                
+                {!isViewer && <td>
+                  <div className="flex space-x-1 justify-center">
+                    <Button variant="ghost" size="icon" onClick={() => showDetailDialog(item)} title="Lihat Detail" className="h-6 w-6">
+                      <Eye className="h-3 w-3" />
+                    </Button>
 
-                          {editingId === item.id ? <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
-                              <Check className="h-3 w-3" />
-                            </Button> : <Button variant="ghost" size="icon" onClick={() => startEditing(item)} className="h-6 w-6" disabled={!isAdmin && !areFiltersComplete}>
-                              <FileEdit className="h-3 w-3" />
-                            </Button>}
-                          
-                          {canDeleteItem(item) && <Button variant="ghost" size="icon" onClick={() => confirmDelete(item.id)} className="h-6 w-6">
-                              <Trash2 className="h-3 w-3" />
-                            </Button>}
-                        </div>
-                      </td>}
+                    {editingId === item.id ? <Button variant="ghost" size="icon" onClick={() => saveEditing(item.id)} className="h-6 w-6">
+                      <Check className="h-3 w-3" />
+                    </Button> : <Button variant="ghost" size="icon" onClick={() => startEditing(item)} className="h-6 w-6" disabled={!isAdmin && !areFiltersComplete}>
+                      <FileEdit className="h-3 w-3" />
+                    </Button>}
                     
-                    {!isViewer && <td className="text-center">
-                        {needsApproval(item) && <div className="flex space-x-1 justify-center">
-                            <Button variant="ghost" size="icon" className="text-green-600 h-6 w-6" onClick={() => {
-                    if (isAdmin) {
-                      onApprove(item.id);
-                      toast({
-                        title: "Berhasil",
-                        description: 'Item disetujui oleh PPK'
-                      });
-                    }
-                  }} title="Setujui" disabled={!isAdmin}>
-                              <Check className="h-3 w-3 font-bold" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="text-red-600 h-6 w-6" onClick={() => {
-                    if (isAdmin) {
-                      onReject(item.id);
-                      toast({
-                        title: "Ditolak",
-                        description: 'Item ditolak oleh PPK',
-                        variant: "destructive"
-                      });
-                    }
-                  }} title="Tolak" disabled={!isAdmin}>
-                              <X className="h-3 w-3 font-bold" />
-                            </Button>
-                          </div>}
-                      </td>}
-                  </tr>)}
+                    {canDeleteItem(item) && <Button variant="ghost" size="icon" onClick={() => confirmDelete(item.id)} className="h-6 w-6">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>}
+                  </div>
+                </td>}
+                
+                {!isViewer && <td className="text-center">
+                  {needsApproval(item) && <div className="flex space-x-1 justify-center">
+                    <Button variant="ghost" size="icon" className="text-green-600 h-6 w-6" onClick={() => {
+                      if (isAdmin) {
+                        onApprove(item.id);
+                        toast({
+                          title: "Berhasil",
+                          description: 'Item disetujui oleh PPK'
+                        });
+                      }
+                    }} title="Setujui" disabled={!isAdmin}>
+                      <Check className="h-3 w-3 font-bold" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-red-600 h-6 w-6" onClick={() => {
+                      if (isAdmin) {
+                        onReject(item.id);
+                        toast({
+                          title: "Ditolak",
+                          description: 'Item ditolak oleh PPK',
+                          variant: "destructive"
+                        });
+                      }
+                    }} title="Tolak" disabled={!isAdmin}>
+                      <X className="h-3 w-3 font-bold" />
+                    </Button>
+                  </div>}
+                </td>}
+              </tr>)}
             </tbody>
           </table>
         </div>
@@ -679,6 +681,139 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         </div>
       </div>
       
-      {!isViewer && areFiltersComplete && <div className="rounded-md border border-gray-200 p-2 w-full">
+      {!isViewer && areFiltersComplete && (
+        <div className="rounded-md border border-gray-200 p-2 w-full">
           <h4 className="text-xs font-semibold mb-2">Tambah Item Baru</h4>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
+            {/* Form inputs for adding new item */}
+            <div className="lg:col-span-6">
+              <label className="block text-xs mb-1">Uraian</label>
+              <Input 
+                value={newItem.uraian} 
+                onChange={e => setNewItem({...newItem, uraian: e.target.value})}
+                className="h-8 text-xs"
+                placeholder="Masukkan uraian"
+              />
+            </div>
+
+            {/* Volume dan Satuan Semula */}
+            {isAdmin && (
+              <>
+                <div className="lg:col-span-2">
+                  <label className="block text-xs mb-1">Volume Semula</label>
+                  <Input 
+                    type="number"
+                    value={newItem.volumeSemula} 
+                    onChange={e => setNewItem({...newItem, volumeSemula: Number(e.target.value)})}
+                    className="h-8 text-xs"
+                    min="0"
+                  />
+                </div>
+                <div className="lg:col-span-2">
+                  <label className="block text-xs mb-1">Satuan Semula</label>
+                  <Select 
+                    value={newItem.satuanSemula} 
+                    onValueChange={value => setNewItem({...newItem, satuanSemula: value})}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Pilih satuan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNIT_OPTIONS.map(unit => (
+                        <SelectItem key={`semula-${unit}`} value={unit}>{unit}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="lg:col-span-2">
+                  <label className="block text-xs mb-1">Harga Satuan Semula</label>
+                  <Input 
+                    type="number"
+                    value={newItem.hargaSatuanSemula} 
+                    onChange={e => setNewItem({...newItem, hargaSatuanSemula: Number(e.target.value)})}
+                    className="h-8 text-xs"
+                    min="0"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Volume dan Satuan Menjadi */}
+            <div className="lg:col-span-2">
+              <label className="block text-xs mb-1">Volume Menjadi</label>
+              <Input 
+                type="number"
+                value={newItem.volumeMenjadi} 
+                onChange={e => setNewItem({...newItem, volumeMenjadi: Number(e.target.value)})}
+                className="h-8 text-xs"
+                min="0"
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <label className="block text-xs mb-1">Satuan Menjadi</label>
+              <Select 
+                value={newItem.satuanMenjadi} 
+                onValueChange={value => setNewItem({...newItem, satuanMenjadi: value})}
+              >
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Pilih satuan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {UNIT_OPTIONS.map(unit => (
+                    <SelectItem key={`menjadi-${unit}`} value={unit}>{unit}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="lg:col-span-2">
+              <label className="block text-xs mb-1">Harga Satuan Menjadi</label>
+              <Input 
+                type="number"
+                value={newItem.hargaSatuanMenjadi} 
+                onChange={e => setNewItem({...newItem, hargaSatuanMenjadi: Number(e.target.value)})}
+                className="h-8 text-xs"
+                min="0"
+              />
+            </div>
+
+            {/* Jumlah dan Tombol */}
+            <div className="flex items-end lg:col-span-12 justify-between mt-2">
+              <div className="text-xs">
+                <span>Jumlah Semula: <strong>{formatCurrency(newItemJumlahSemula)}</strong></span>
+                <span className="mx-4">Jumlah Menjadi: <strong>{formatCurrency(newItemJumlahMenjadi)}</strong></span>
+                <span>Selisih: <strong className={newItemSelisih > 0 ? 'text-green-600' : newItemSelisih < 0 ? 'text-red-600' : ''}>{formatCurrency(newItemSelisih)}</strong></span>
+              </div>
+              <Button size="sm" onClick={handleAddItem} className="h-8 text-xs">
+                <PlusCircle className="h-3 w-3 mr-1" />
+                Tambah Item
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Hapus</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <DetailDialog
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        item={detailItem}
+      />
+    </div>
+  );
+};
+
+export default BudgetTable;
