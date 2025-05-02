@@ -161,7 +161,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
           </TableBody>
           <TableFooter>
             <TableRow>
-              <TableCell className="font-bold" colSpan={2}>Total</TableCell>
+              <TableCell className="font-bold" colSpan={2}>Total Pagu</TableCell>
               <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
               <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
               <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
