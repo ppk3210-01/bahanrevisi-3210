@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -149,7 +150,17 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                   formatter={(value: number) => formatCurrency(value)} 
                   labelFormatter={label => `${label}`} 
                 />
-                <Legend verticalAlign="bottom" height={36} />
+                <Legend 
+                  verticalAlign="top" 
+                  align="right"
+                  height={36}
+                  wrapperStyle={{ 
+                    paddingBottom: 0, 
+                    paddingTop: 0,
+                    right: 10,
+                    top: 0
+                  }}
+                />
                 <Bar dataKey="semula" name="Total Semula" fill="#8884d8" />
                 <Bar dataKey="menjadi" name="Total Menjadi" fill="#82ca9d" />
                 <Bar dataKey="selisih" name="Selisih" fill="#ffc658">

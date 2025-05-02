@@ -135,7 +135,17 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, view, customDa
             tick={{ fontSize: 9 }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend verticalAlign="bottom" height={36} />
+          <Legend 
+            verticalAlign="top" 
+            align="right" 
+            height={36}
+            wrapperStyle={{ 
+              paddingBottom: 0, 
+              paddingTop: 0, 
+              right: 10,
+              top: 0
+            }}
+          />
           <Bar dataKey="totalSemula" name="Total Semula" fill="#8884d8" />
           <Bar dataKey="totalMenjadi" name="Total Menjadi" fill="#82ca9d" />
         </BarChart>
