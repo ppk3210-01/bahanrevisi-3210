@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BudgetSummaryRecord } from '@/types/database';
 import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 
@@ -8,19 +8,16 @@ export type SummaryViewType = 'komponen_output' | 'akun' | 'program_pembebanan' 
 
 interface SummaryChartProps {
   summaryData: BudgetSummaryRecord[];
-  chartType: 'bar' | 'composition';
+  chartType: 'bar';
   view: SummaryViewType;
   customData?: {
     semula?: number;
     menjadi?: number;
     selisih?: number;
-    new?: number;
-    changed?: number;
-    unchanged?: number;
   };
 }
 
-const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, view, customData }) => {
+const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, view, customData }) => {
   const getValueFromRecord = (record: BudgetSummaryRecord): string | null => {
     switch (record.type) {
       case 'komponen_output':
@@ -46,15 +43,9 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
 
   const transformChartData = () => {
     if (customData) {
-      if (chartType === 'bar' && customData.semula !== undefined && customData.menjadi !== undefined && customData.selisih !== undefined) {
+      if (customData.semula !== undefined && customData.menjadi !== undefined && customData.selisih !== undefined) {
         return [
           { name: 'Anggaran', totalSemula: customData.semula, totalMenjadi: customData.menjadi, selisih: customData.selisih }
-        ];
-      } else if (chartType === 'composition' && customData.new !== undefined && customData.changed !== undefined && customData.unchanged !== undefined) {
-        return [
-          { name: 'Item Baru', value: customData.new },
-          { name: 'Item Berubah', value: customData.changed },
-          { name: 'Item Tidak Berubah', value: customData.unchanged }
         ];
       }
       return [];
@@ -103,16 +94,6 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       
-      if (chartType === 'composition') {
-        return (
-          <div className="bg-white p-2 border border-gray-200 shadow-lg rounded-md">
-            <p className="font-medium">{data.name}</p>
-            <p className="text-sm">Nilai: {formatCurrency(data.value)}</p>
-            <p className="text-sm">Persentase: {((data.value / chartData.reduce((sum: number, item: any) => sum + item.value, 0)) * 100).toFixed(1)}%</p>
-          </div>
-        );
-      }
-      
       return (
         <div className="bg-white p-2 border border-gray-200 shadow-lg rounded-md">
           <p className="font-medium">{data.fullName || label}</p>
@@ -129,35 +110,6 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
 
   if (chartData.length === 0) {
     return <div className="p-4 text-center">Tidak ada data untuk ditampilkan.</div>;
-  }
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
-  if (chartType === 'composition') {
-    return (
-      <div className="h-[450px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={180}
-              fill="#8884d8"
-              dataKey="value"
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    );
   }
 
   return (
