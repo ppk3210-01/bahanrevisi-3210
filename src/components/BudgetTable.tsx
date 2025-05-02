@@ -434,7 +434,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             setHideZeroBudget(checked === true);
             setCurrentPage(1);
           }} className="filter-checkbox" />
-            <label htmlFor="hideZeroBudget" className="filter-checkbox-label text-xs">
+            <label htmlFor="hideZeroBudget" className="filter-checkbox-label text-xs text-gray-500">
               Sembunyikan jumlah pagu 0
             </label>
           </div>
