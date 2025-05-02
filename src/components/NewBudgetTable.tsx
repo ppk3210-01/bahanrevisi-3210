@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableFooter } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +46,6 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({
 
   // Calculate total for the footer
   const totalJumlah = items.reduce((sum, item) => sum + item.jumlah, 0);
-  
   return <Card className="bg-green-50/50 border-green-100">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg text-green-700 font-bold">Pagu Anggaran Baru</CardTitle>
@@ -83,7 +81,7 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={6} className="font-bold text-right">Total</TableCell>
+                <TableCell colSpan={6} className="font-bold text-right">Total Pagu Anggaran Baru</TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalJumlah)}</TableCell>
               </TableRow>
             </TableFooter>

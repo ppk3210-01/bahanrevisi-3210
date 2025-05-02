@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableFooter } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,7 +50,6 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
   const totalJumlahSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalJumlahMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = items.reduce((sum, item) => sum + item.selisih, 0);
-
   return <Card className="bg-orange-50/50 border-orange-100">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg text-orange-700 font-bold">{title}</CardTitle>
@@ -91,7 +89,7 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={4} className="font-bold text-right">Total</TableCell>
+                <TableCell colSpan={4} className="font-bold text-right">Total Pagu Anggaran Berubah</TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalJumlahSemula)}</TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalJumlahMenjadi)}</TableCell>
                 <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
