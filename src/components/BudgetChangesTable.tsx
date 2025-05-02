@@ -79,7 +79,7 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
                   <TableCell className="uraian-column">{item.uraian}</TableCell>
                   <TableCell style={{
                 whiteSpace: 'pre-line'
-              }}>{item.detailPerubahan}</TableCell>
+              }} className="text-left">{item.detailPerubahan}</TableCell>
                   <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
                   <TableCell className={`text-right ${item.selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -89,7 +89,7 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={4} className="font-bold text-right">Total Pagu Anggaran Berubah</TableCell>
+                <TableCell colSpan={4} className="font-bold text-center">Total Pagu Anggaran Berubah</TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalJumlahSemula)}</TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalJumlahMenjadi)}</TableCell>
                 <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>

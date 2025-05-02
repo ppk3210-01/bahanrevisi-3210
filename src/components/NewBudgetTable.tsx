@@ -81,7 +81,7 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={6} className="font-bold text-right">Total Pagu Anggaran Baru</TableCell>
+                <TableCell colSpan={6} className="font-bold text-center">Total Pagu Anggaran Baru</TableCell>
                 <TableCell className="text-right font-bold">{formatCurrency(totalJumlah)}</TableCell>
               </TableRow>
             </TableFooter>
