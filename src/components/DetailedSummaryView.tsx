@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -114,18 +115,18 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
             <CardTitle className="text-lg">Grafik Perbandingan {title}</CardTitle>
           </CardHeader>
           <CardContent className="rounded">
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={450}>
               <BarChart data={chartData} margin={{
               top: 20,
               right: 30,
-              left: 20,
+              left: 5,
               bottom: 80
             }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} tick={{
                 fontSize: 10
               }} />
-                <YAxis tickFormatter={value => formatCurrency(value, false)} width={80} />
+                <YAxis tickFormatter={value => formatCurrency(value, false)} tick={{ fontSize: 10 }} width={65} />
                 <Tooltip formatter={(value: number) => formatCurrency(value)} labelFormatter={label => `${label}`} />
                 <Legend />
                 <Bar dataKey="semula" name="Total Semula" fill="#8884d8" />

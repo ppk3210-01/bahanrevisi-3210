@@ -135,7 +135,7 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
 
   if (chartType === 'composition') {
     return (
-      <div className="h-[400px] w-full">
+      <div className="h-[450px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -143,7 +143,7 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={150}
+              outerRadius={180}
               fill="#8884d8"
               dataKey="value"
               label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
@@ -161,11 +161,11 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
   }
 
   return (
-    <div className="h-[400px] w-full">
+    <div className="h-[450px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
+          margin={{ top: 20, right: 30, left: 5, bottom: 70 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -174,9 +174,12 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, chartType, vie
             textAnchor="end" 
             height={70}
             interval={0}
+            tick={{ fontSize: 10 }}
           />
           <YAxis 
             tickFormatter={(value) => formatCurrency(value)}
+            width={65}
+            tick={{ fontSize: 10 }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
