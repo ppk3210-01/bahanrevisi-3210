@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -10,6 +9,7 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg, exportToPdf, exportToExcel } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+
 interface SummaryRow {
   id: string;
   name: string;
@@ -20,6 +20,7 @@ interface SummaryRow {
   changedItems: number;
   totalItems: number;
 }
+
 interface DetailedSummaryViewProps {
   title: string;
   data: SummaryRow[];
@@ -28,6 +29,7 @@ interface DetailedSummaryViewProps {
   totalSelisih: number;
   showSummaryBoxes?: boolean;
 }
+
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   title,
   data,
@@ -40,12 +42,14 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   const {
     isAdmin
   } = useAuth();
+  
   const chartData = data.filter(item => item.totalMenjadi !== 0 || item.totalSemula !== 0).map(item => ({
     name: item.name.length > 20 ? `${item.name.substring(0, 20)}...` : item.name,
     semula: item.totalSemula,
     menjadi: item.totalMenjadi,
     selisih: item.totalSelisih
   }));
+  
   const handleExportJPEG = async () => {
     if (!chartAndTableRef.current) return;
     try {
@@ -62,6 +66,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       });
     }
   };
+  
   const handleExportPDF = async () => {
     if (!chartAndTableRef.current) return;
     try {
@@ -78,6 +83,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       });
     }
   };
+  
   const handleExportExcel = async () => {
     try {
       await exportToExcel(data, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
@@ -93,6 +99,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       });
     }
   };
+  
   return <div className="space-y-4">
       {isAdmin && <div className="flex justify-end space-x-2">
           <Button variant="outline" size="sm" onClick={handleExportJPEG} className="text-xs">
@@ -109,26 +116,40 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           </Button>
         </div>}
       
-      <div ref={chartAndTableRef} className="space-y-6 bg-white p-4 rounded-lg">
-        <Card className="shadow-sm">
+      <div ref={chartAndTableRef} className="space-y-4 bg-white p-4 rounded-lg">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Grafik Perbandingan {title}</CardTitle>
           </CardHeader>
-          <CardContent className="rounded">
+          <CardContent className="rounded p-2">
             <ResponsiveContainer width="100%" height={450}>
               <BarChart data={chartData} margin={{
-              top: 20,
-              right: 30,
-              left: 5,
-              bottom: 80
-            }}>
+                top: 20,
+                right: 30,
+                left: 5,
+                bottom: 25
+              }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} tick={{
-                fontSize: 10
-              }} />
-                <YAxis tickFormatter={value => formatCurrency(value, false)} tick={{ fontSize: 10 }} width={65} />
-                <Tooltip formatter={(value: number) => formatCurrency(value)} labelFormatter={label => `${label}`} />
-                <Legend />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45} 
+                  textAnchor="end" 
+                  height={50} 
+                  interval={0} 
+                  tick={{
+                    fontSize: 10
+                  }} 
+                />
+                <YAxis 
+                  tickFormatter={value => formatCurrency(value, false)} 
+                  tick={{ fontSize: 9 }} 
+                  width={60} 
+                />
+                <Tooltip 
+                  formatter={(value: number) => formatCurrency(value)} 
+                  labelFormatter={label => `${label}`} 
+                />
+                <Legend verticalAlign="bottom" height={36} />
                 <Bar dataKey="semula" name="Total Semula" fill="#8884d8" />
                 <Bar dataKey="menjadi" name="Total Menjadi" fill="#82ca9d" />
                 <Bar dataKey="selisih" name="Selisih" fill="#ffc658">
@@ -137,7 +158,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
               </BarChart>
             </ResponsiveContainer>
             
-            {showSummaryBoxes && <div className="grid grid-cols-3 gap-4 mt-4 text-center">
+            {showSummaryBoxes && <div className="grid grid-cols-3 gap-4 mt-2 text-center">
                 
                 
                 
@@ -149,4 +170,5 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
       </div>
     </div>;
 };
+
 export default DetailedSummaryView;

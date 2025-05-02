@@ -117,24 +117,25 @@ const SummaryChart: React.FC<SummaryChartProps> = ({ summaryData, view, customDa
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 5, bottom: 70 }}
+          margin={{ top: 20, right: 30, left: 5, bottom: 25 }}
+          layout="vertical"
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             dataKey="name" 
             angle={-45} 
             textAnchor="end" 
-            height={70}
+            height={50}
             interval={0}
             tick={{ fontSize: 10 }}
           />
           <YAxis 
             tickFormatter={(value) => formatCurrency(value)}
-            width={65}
-            tick={{ fontSize: 10 }}
+            width={60}
+            tick={{ fontSize: 9 }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend />
+          <Legend verticalAlign="bottom" height={36} />
           <Bar dataKey="totalSemula" name="Total Semula" fill="#8884d8" />
           <Bar dataKey="totalMenjadi" name="Total Menjadi" fill="#82ca9d" />
         </BarChart>
