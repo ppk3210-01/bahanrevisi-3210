@@ -617,15 +617,15 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         <h4 className="text-xs mb-1 text-red-600 font-semibold">Ringkasan Halaman</h4>
         <div className="grid grid-cols-3 text-xs gap-2">
           <div>
-            <span className="font-medium">Total Pagu Semula: </span>
+            <span className="font-medium">Total Pagu Semula (Halaman): </span>
             <span>{formatCurrency(pageTotalSemula)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Pagu Menjadi: </span>
+            <span className="font-medium">Total Pagu Menjadi (Halaman): </span>
             <span>{formatCurrency(pageTotalMenjadi)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Selisih Pagu: </span>
+            <span className="font-medium">Total Selisih Pagu (Halaman): </span>
             <span className={pageTotalSelisih > 0 ? 'text-green-600' : pageTotalSelisih < 0 ? 'text-red-600' : ''}>
               {formatCurrency(pageTotalSelisih)}
             </span>
@@ -635,15 +635,15 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         <h4 className="text-xs mt-2 mb-1 text-green-600 font-semibold">Ringkasan Keseluruhan</h4>
         <div className="grid grid-cols-3 text-xs gap-2">
           <div>
-            <span className="font-medium">Total Pagu Semula: </span>
+            <span className="font-medium">Total Pagu Semula (Keseluruhan): </span>
             <span>{formatCurrency(grandTotalSemula)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Pagu Menjadi: </span>
+            <span className="font-medium">Total Pagu Menjadi (Keseluruhan): </span>
             <span>{formatCurrency(grandTotalMenjadi)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Selisih Pagu: </span>
+            <span className="font-medium">Total Selisih Pagu (Keseluruhan): </span>
             <span className={grandTotalSelisih > 0 ? 'text-green-600' : grandTotalSelisih < 0 ? 'text-red-600' : ''}>
               {formatCurrency(grandTotalSelisih)}
             </span>
