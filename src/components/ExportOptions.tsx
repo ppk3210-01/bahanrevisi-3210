@@ -1,26 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   FileSpreadsheet, 
   FileImage, 
-  FileText 
+  FileText,
+  Loader2 
 } from 'lucide-react';
 import { BudgetItem } from '@/types/budget';
-import { formatCurrency, roundToThousands } from '@/utils/budgetCalculations';
 import { toast } from '@/hooks/use-toast';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import { exportComprehensiveExcel } from '@/utils/excelUtils';
 import { BudgetSummaryRecord } from '@/types/database';
-
-// Add type declaration for jsPDF with autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
 
 interface ExportOptionsProps {
   items: BudgetItem[];
@@ -35,7 +25,17 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
   summaryData = [],
   onClose 
 }) => {
-  const exportToExcel = () => {
+  const [isExporting, setIsExporting] = useState<{
+    excel: boolean;
+    jpeg: boolean;
+    pdf: boolean;
+  }>({
+    excel: false,
+    jpeg: false,
+    pdf: false
+  });
+
+  const exportToExcel = async () => {
     if (items.length === 0) {
       toast({
         variant: "destructive",
@@ -46,13 +46,15 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
     }
 
     try {
+      setIsExporting(prev => ({ ...prev, excel: true }));
+      
       toast({
         title: "Memproses",
         description: "Menyiapkan file Excel..."
       });
       
       const fileName = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}`;
-      exportComprehensiveExcel(items, summaryData, fileName);
+      await exportComprehensiveExcel(items, summaryData, fileName);
       
       toast({
         title: "Berhasil!",
@@ -69,6 +71,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
         title: "Gagal!",
         description: "Gagal mengunduh file. Silakan coba lagi."
       });
+    } finally {
+      setIsExporting(prev => ({ ...prev, excel: false }));
     }
   };
 
@@ -83,6 +87,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
     }
 
     try {
+      setIsExporting(prev => ({ ...prev, jpeg: true }));
+      
       toast({
         title: "Memproses",
         description: "Menyiapkan gambar..."
@@ -136,6 +142,9 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
       
       // Create tbody
       const tbody = document.createElement('tbody');
+      
+      // Import formatter from budgetCalculations
+      const { formatCurrency, roundToThousands } = await import('@/utils/budgetCalculations');
       
       // Add data rows
       items.forEach((item, index) => {
@@ -214,12 +223,25 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
       // Add the table to the container
       container.appendChild(table);
       
+      // Import html2canvas
+      const html2canvas = (await import('html2canvas')).default;
+      
       // Use html2canvas to convert the table into a canvas
       const canvas = await html2canvas(container, {
         scale: 2, // Increased scale for better quality
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false
+        logging: true,
+        onclone: (document, element) => {
+          // Make sure all elements are visible
+          const allElements = element.getElementsByTagName('*');
+          for (let i = 0; i < allElements.length; i++) {
+            const el = allElements[i] as HTMLElement;
+            if (el.style) {
+              el.style.display = window.getComputedStyle(el).display;
+            }
+          }
+        }
       });
       
       // Create a link element to trigger download
@@ -246,12 +268,14 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
       toast({
         variant: "destructive",
         title: "Gagal!",
-        description: "Gagal mengunduh file. Silakan coba lagi."
+        description: "Gagal mengunduh file. Silakan coba lagi. " + (error instanceof Error ? error.message : '')
       });
+    } finally {
+      setIsExporting(prev => ({ ...prev, jpeg: false }));
     }
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     if (items.length === 0) {
       toast({
         variant: "destructive",
@@ -262,11 +286,18 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
     }
 
     try {
+      setIsExporting(prev => ({ ...prev, pdf: true }));
+      
       toast({
         title: "Memproses",
         description: "Menyiapkan PDF..."
       });
 
+      // Import jsPDF and required modules
+      const jsPDF = (await import('jspdf')).default;
+      await import('jspdf-autotable');
+      const { formatCurrency, roundToThousands } = await import('@/utils/budgetCalculations');
+      
       // Create new jsPDF document (landscape orientation)
       const pdf = new jsPDF('landscape');
       
@@ -322,17 +353,9 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
           fontStyle: 'bold',
           halign: 'center'
         },
-        footerStyles: {
-          fillColor: [240, 240, 240],
-          textColor: [0, 0, 0],
-          fontStyle: 'bold'
-        },
-        alternateRowStyles: {
-          fillColor: [245, 245, 245]
-        },
         columnStyles: {
           0: { cellWidth: 15, halign: 'center' }, // No
-          1: { cellWidth: 70 }, // Uraian
+          1: { cellWidth: 40 }, // Uraian - reduced width to fit on page
           2: { cellWidth: 15, halign: 'center' }, // Volume Semula
           3: { cellWidth: 15, halign: 'center' }, // Satuan Semula
           4: { cellWidth: 20, halign: 'right' }, // Harga Satuan Semula
@@ -344,7 +367,13 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
           10: { cellWidth: 20, halign: 'right' }, // Selisih
           11: { cellWidth: 15, halign: 'center' } // Status
         },
-        margin: { top: 30 }
+        didDrawPage: (data) => {
+          // Add page number
+          const str = 'Page ' + pdf.getNumberOfPages();
+          pdf.setFontSize(8);
+          const pageWidth = pdf.internal.pageSize.width;
+          pdf.text(str, pageWidth - 20, pdf.internal.pageSize.height - 10);
+        }
       });
       
       // Generate and save the PDF file directly
@@ -371,23 +400,37 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
       toast({
         variant: "destructive",
         title: "Gagal!",
-        description: "Gagal mengunduh file. Silakan coba lagi."
+        description: "Gagal mengunduh file. Silakan coba lagi. " + (error instanceof Error ? error.message : '')
       });
+    } finally {
+      setIsExporting(prev => ({ ...prev, pdf: false }));
     }
   };
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button variant="outline" onClick={exportToExcel}>
-        <FileSpreadsheet className="mr-2 h-4 w-4" />
+      <Button variant="outline" onClick={exportToExcel} disabled={isExporting.excel}>
+        {isExporting.excel ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+        )}
         Excel
       </Button>
-      <Button variant="outline" onClick={exportToJPEG}>
-        <FileImage className="mr-2 h-4 w-4" />
+      <Button variant="outline" onClick={exportToJPEG} disabled={isExporting.jpeg}>
+        {isExporting.jpeg ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <FileImage className="mr-2 h-4 w-4" />
+        )}
         JPEG
       </Button>
-      <Button variant="outline" onClick={exportToPDF}>
-        <FileText className="mr-2 h-4 w-4" />
+      <Button variant="outline" onClick={exportToPDF} disabled={isExporting.pdf}>
+        {isExporting.pdf ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <FileText className="mr-2 h-4 w-4" />
+        )}
         PDF
       </Button>
     </div>

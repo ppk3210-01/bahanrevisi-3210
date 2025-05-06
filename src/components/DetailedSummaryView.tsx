@@ -40,9 +40,7 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   showSummaryBoxes = true
 }) => {
   const chartAndTableRef = useRef<HTMLDivElement>(null);
-  const {
-    isAdmin
-  } = useAuth();
+  const { isAdmin } = useAuth();
   
   const chartData = data.filter(item => item.totalMenjadi !== 0 || item.totalSemula !== 0).map(item => ({
     name: item.name.length > 20 ? `${item.name.substring(0, 20)}...` : item.name,
@@ -54,16 +52,23 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   const handleExportJPEG = async () => {
     if (!chartAndTableRef.current) return;
     try {
+      toast({
+        title: "Memproses",
+        description: "Sedang menyiapkan file JPEG..."
+      });
+      
       await exportToJpeg(chartAndTableRef.current, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
+      
       toast({
         title: "Berhasil",
         description: 'Berhasil mengekspor sebagai JPEG'
       });
     } catch (error) {
+      console.error('Error exporting to JPEG:', error);
       toast({
         variant: "destructive",
         title: "Gagal",
-        description: 'Gagal mengekspor sebagai JPEG'
+        description: 'Gagal mengekspor sebagai JPEG: ' + (error instanceof Error ? error.message : 'Unknown error')
       });
     }
   };
@@ -71,28 +76,42 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   const handleExportPDF = async () => {
     if (!chartAndTableRef.current) return;
     try {
+      toast({
+        title: "Memproses",
+        description: "Sedang menyiapkan file PDF..."
+      });
+      
       await exportToPdf(chartAndTableRef.current, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
+      
       toast({
         title: "Berhasil",
         description: 'Berhasil mengekspor sebagai PDF'
       });
     } catch (error) {
+      console.error('Error exporting to PDF:', error);
       toast({
         variant: "destructive",
         title: "Gagal",
-        description: 'Gagal mengekspor sebagai PDF'
+        description: 'Gagal mengekspor sebagai PDF: ' + (error instanceof Error ? error.message : 'Unknown error')
       });
     }
   };
   
   const handleExportExcel = async () => {
     try {
+      toast({
+        title: "Memproses",
+        description: "Sedang menyiapkan file Excel..."
+      });
+      
       await exportToExcel(data, `ringkasan-${title.toLowerCase().replace(/\s+/g, '-')}`);
+      
       toast({
         title: "Berhasil",
         description: 'Berhasil mengekspor sebagai Excel'
       });
     } catch (error) {
+      console.error('Error exporting to Excel:', error);
       toast({
         variant: "destructive",
         title: "Gagal",

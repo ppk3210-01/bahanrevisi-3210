@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableFooter } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+
 export interface BudgetChangeItem {
   id: string;
   pembebanan: string;
@@ -16,10 +18,12 @@ export interface BudgetChangeItem {
   jumlahMenjadi: number;
   selisih: number;
 }
+
 interface BudgetChangesTableProps {
   title: string;
   items: BudgetChangeItem[];
 }
+
 export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
   title,
   items
@@ -27,8 +31,14 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
   const {
     isAdmin
   } = useAuth();
+  
   const handleExportJPEG = async () => {
     try {
+      toast({
+        title: "Memproses",
+        description: "Sedang menyiapkan file JPEG..."
+      });
+      
       const element = document.getElementById('budget-changes-table');
       if (element) {
         await exportToJpeg(element, 'pagu-anggaran-berubah');
@@ -38,6 +48,7 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
         });
       }
     } catch (error) {
+      console.error('Error exporting to JPEG:', error);
       toast({
         variant: "destructive",
         title: "Gagal",
@@ -50,6 +61,7 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
   const totalJumlahSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalJumlahMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = items.reduce((sum, item) => sum + item.selisih, 0);
+
   return <Card className="bg-orange-50/50 border-orange-100">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg text-orange-700 font-bold">{title}</CardTitle>
