@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -293,8 +292,10 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
         description: "Menyiapkan PDF..."
       });
 
-      // Import jsPDF and required modules
-      const jsPDF = (await import('jspdf')).default;
+      // Import dependencies
+      const jsPDFModule = await import('jspdf');
+      const jsPDF = jsPDFModule.default;
+      // Import jsPDF-AutoTable as an ES module
       await import('jspdf-autotable');
       const { formatCurrency, roundToThousands } = await import('@/utils/budgetCalculations');
       
@@ -341,7 +342,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
       ]);
       
       // Generate the table using autoTable plugin
-      pdf.autoTable({
+      // Explicitly cast pdf to any to access the autoTable method added by the plugin
+      (pdf as any).autoTable({
         head: [headers],
         body: tableData,
         startY: 30,

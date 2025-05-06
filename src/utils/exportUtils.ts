@@ -1,6 +1,7 @@
 
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+// Ensure autoTable extension is properly imported
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { formatCurrency } from './budgetCalculations';

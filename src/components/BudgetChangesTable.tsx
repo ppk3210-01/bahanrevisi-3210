@@ -3,7 +3,7 @@ import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableFooter } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileImage } from 'lucide-react';
+import { FileImage, Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
@@ -28,12 +28,17 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
   title,
   items
 }) => {
+  const [isExporting, setIsExporting] = React.useState(false);
   const {
     isAdmin
   } = useAuth();
   
   const handleExportJPEG = async () => {
+    if (isExporting) return;
+    
     try {
+      setIsExporting(true);
+      
       toast({
         title: "Memproses",
         description: "Sedang menyiapkan file JPEG..."
@@ -54,6 +59,8 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
         title: "Gagal",
         description: 'Gagal mengekspor sebagai JPEG'
       });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -65,8 +72,12 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
   return <Card className="bg-orange-50/50 border-orange-100">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg text-orange-700 font-bold">{title}</CardTitle>
-        {isAdmin && <Button variant="outline" size="sm" onClick={handleExportJPEG} className="text-xs">
-            <FileImage className="h-4 w-4 mr-2" />
+        {isAdmin && <Button variant="outline" size="sm" onClick={handleExportJPEG} className="text-xs" disabled={isExporting}>
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <FileImage className="h-4 w-4 mr-2" />
+            )}
             Export JPEG
           </Button>}
       </CardHeader>
