@@ -1,8 +1,9 @@
+
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-// Ensure autoTable extension is properly imported
+// Import the jspdf-autotable plugin
 import 'jspdf-autotable';
-// Add the necessary type augmentation for TypeScript
+// Define the extended type for jsPDF with autoTable
 declare module 'jspdf' {
   interface jsPDF {
     autoTable: (options: any) => jsPDF;

@@ -11,8 +11,15 @@ import { toast } from '@/hooks/use-toast';
 import { exportComprehensiveExcel } from '@/utils/excelUtils';
 import { BudgetSummaryRecord } from '@/types/database';
 
-// Import type declaration to recognize the autoTable method
+// Import jsPDF and make sure the autoTable extension is properly imported
+import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+// Add the necessary type augmentation for TypeScript
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
 
 interface ExportOptionsProps {
   items: BudgetItem[];
@@ -295,19 +302,19 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
         description: "Menyiapkan PDF..."
       });
 
-      // Import dependencies
+      // Import dependencies dynamically to ensure they're properly loaded
       const jsPDFModule = await import('jspdf');
       const jsPDF = jsPDFModule.default;
-      // Import jsPDF-AutoTable as an ES module
+      // Explicitly import and load the jspdf-autotable plugin
       await import('jspdf-autotable');
       const { formatCurrency, roundToThousands } = await import('@/utils/budgetCalculations');
       
       // Create new jsPDF document (landscape orientation)
-      const pdf = new jsPDF('landscape');
+      const doc = new jsPDF('landscape');
       
       // Add title
-      pdf.setFontSize(16);
-      pdf.text(`Anggaran ${komponenOutput || ''}`, 14, 20);
+      doc.setFontSize(16);
+      doc.text(`Anggaran ${komponenOutput || ''}`, 14, 20);
       
       // Prepare table data
       const tableData = items.map((item, index) => [
@@ -345,8 +352,7 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
       ]);
       
       // Generate the table using autoTable plugin
-      // No need for explicit casting now, the type definition is available
-      pdf.autoTable({
+      doc.autoTable({
         head: [headers],
         body: tableData,
         startY: 30,
@@ -374,23 +380,15 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
         },
         didDrawPage: (data) => {
           // Add page number
-          const str = 'Page ' + pdf.getNumberOfPages();
-          pdf.setFontSize(8);
-          const pageWidth = pdf.internal.pageSize.width;
-          pdf.text(str, pageWidth - 20, pdf.internal.pageSize.height - 10);
+          const str = 'Page ' + doc.getNumberOfPages();
+          doc.setFontSize(8);
+          const pageWidth = doc.internal.pageSize.width;
+          doc.text(str, pageWidth - 20, doc.internal.pageSize.height - 10);
         }
       });
       
       // Generate and save the PDF file directly
-      const pdfOutput = pdf.output('blob');
-      const url = URL.createObjectURL(pdfOutput);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      doc.save(`Anggaran_${komponenOutput ? komponenOutput.replace(/\s+/g, '_') : 'Export'}_${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast({
         title: "Berhasil!",
