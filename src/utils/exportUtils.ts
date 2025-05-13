@@ -1,8 +1,13 @@
-
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 // Ensure autoTable extension is properly imported
 import 'jspdf-autotable';
+// Add the necessary type augmentation for TypeScript
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
 import * as XLSX from 'xlsx';
 import { formatCurrency } from './budgetCalculations';
 

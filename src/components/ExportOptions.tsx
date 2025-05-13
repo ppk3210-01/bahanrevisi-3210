@@ -11,6 +11,9 @@ import { toast } from '@/hooks/use-toast';
 import { exportComprehensiveExcel } from '@/utils/excelUtils';
 import { BudgetSummaryRecord } from '@/types/database';
 
+// Import type declaration to recognize the autoTable method
+import 'jspdf-autotable';
+
 interface ExportOptionsProps {
   items: BudgetItem[];
   komponenOutput: string;
@@ -342,8 +345,8 @@ const ExportOptions: React.FC<ExportOptionsProps> = ({
       ]);
       
       // Generate the table using autoTable plugin
-      // Explicitly cast pdf to any to access the autoTable method added by the plugin
-      (pdf as any).autoTable({
+      // No need for explicit casting now, the type definition is available
+      pdf.autoTable({
         head: [headers],
         body: tableData,
         startY: 30,
