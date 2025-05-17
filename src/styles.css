@@ -87,13 +87,35 @@
   z-index: 10;
 }
 
-/* Add spacing for budget table rows */
-.budget-changes-summary tr {
-  height: 48px; /* Set a minimum height for rows */
+/* Add spacing for all budget tables */
+/* Improved row spacing for budget tables */
+.budget-changes-summary tr,
+.budget-table tr,
+.rpd-table tr,
+.data-table tr {
+  height: 48px !important; /* Enforce minimum height for all table rows */
 }
 
-.budget-changes-summary td {
-  padding-top: 8px;
-  padding-bottom: 8px;
+.budget-changes-summary td,
+.budget-table td,
+.rpd-table td,
+.data-table td {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
 }
 
+/* Ensure the TableBody rows are properly spaced */
+.TableBody tr {
+  min-height: 48px;
+}
+
+/* Make sure shadcn table components have proper spacing */
+[role="row"] {
+  min-height: 48px;
+}
+
+/* Ensure shadcn table cells have proper padding */
+.p-4 {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}

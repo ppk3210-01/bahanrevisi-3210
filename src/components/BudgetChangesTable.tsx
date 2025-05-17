@@ -96,26 +96,26 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((item, index) => <TableRow key={item.id}>
-                  <TableCell className="text-center">{index + 1}</TableCell>
-                  <TableCell className="pembebanan-column whitespace-normal">{item.pembebanan}</TableCell>
-                  <TableCell className="uraian-column">{item.uraian}</TableCell>
+              {items.map((item, index) => <TableRow key={item.id} className="h-12">
+                  <TableCell className="text-center py-3">{index + 1}</TableCell>
+                  <TableCell className="pembebanan-column whitespace-normal py-3">{item.pembebanan}</TableCell>
+                  <TableCell className="uraian-column py-3">{item.uraian}</TableCell>
                   <TableCell style={{
                 whiteSpace: 'pre-line'
-              }} className="text-left">{item.detailPerubahan}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.jumlahSemula)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.jumlahMenjadi)}</TableCell>
-                  <TableCell className={`text-right ${item.selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+              }} className="text-left py-3">{item.detailPerubahan}</TableCell>
+                  <TableCell className="text-right py-3">{formatCurrency(item.jumlahSemula)}</TableCell>
+                  <TableCell className="text-right py-3">{formatCurrency(item.jumlahMenjadi)}</TableCell>
+                  <TableCell className={`text-right py-3 ${item.selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(item.selisih)}
                   </TableCell>
                 </TableRow>)}
             </TableBody>
             <TableFooter>
-              <TableRow>
-                <TableCell colSpan={4} className="font-bold text-center">Total Pagu Anggaran Berubah</TableCell>
-                <TableCell className="text-right font-bold">{formatCurrency(totalJumlahSemula)}</TableCell>
-                <TableCell className="text-right font-bold">{formatCurrency(totalJumlahMenjadi)}</TableCell>
-                <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <TableRow className="h-12">
+                <TableCell colSpan={4} className="font-bold text-center py-3">Total Pagu Anggaran Berubah</TableCell>
+                <TableCell className="text-right font-bold py-3">{formatCurrency(totalJumlahSemula)}</TableCell>
+                <TableCell className="text-right font-bold py-3">{formatCurrency(totalJumlahMenjadi)}</TableCell>
+                <TableCell className={`text-right font-bold py-3 ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {formatCurrency(totalSelisih)}
                 </TableCell>
               </TableRow>
