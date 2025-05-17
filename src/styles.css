@@ -1,5 +1,6 @@
 
 
+
 /* Add styling for the summary tables */
 
 /* Remove blue text color from summary tables */
@@ -84,5 +85,15 @@
 
 .rpd-table .footer-row td.fixed-column {
   z-index: 10;
+}
+
+/* Add spacing for budget table rows */
+.budget-changes-summary tr {
+  height: 48px; /* Set a minimum height for rows */
+}
+
+.budget-changes-summary td {
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableFooter } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,14 +70,14 @@ export const NewBudgetTable: React.FC<NewBudgetTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((item, index) => <TableRow key={item.id}>
-                  <TableCell className="text-center">{index + 1}</TableCell>
-                  <TableCell className="pembebanan-column whitespace-normal">{item.pembebanan}</TableCell>
-                  <TableCell className="uraian-column">{item.uraian}</TableCell>
-                  <TableCell className="text-center">{item.volume}</TableCell>
-                  <TableCell className="text-center">{item.satuan}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.hargaSatuan)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.jumlah)}</TableCell>
+              {items.map((item, index) => <TableRow key={item.id} className="h-12"> {/* Added fixed height for rows */}
+                  <TableCell className="text-center py-3">{index + 1}</TableCell> {/* Increased vertical padding */}
+                  <TableCell className="pembebanan-column whitespace-normal py-3">{item.pembebanan}</TableCell> {/* Increased vertical padding */}
+                  <TableCell className="uraian-column py-3">{item.uraian}</TableCell> {/* Increased vertical padding */}
+                  <TableCell className="text-center py-3">{item.volume}</TableCell> {/* Increased vertical padding */}
+                  <TableCell className="text-center py-3">{item.satuan}</TableCell> {/* Increased vertical padding */}
+                  <TableCell className="text-right py-3">{formatCurrency(item.hargaSatuan)}</TableCell> {/* Increased vertical padding */}
+                  <TableCell className="text-right py-3">{formatCurrency(item.jumlah)}</TableCell> {/* Increased vertical padding */}
                 </TableRow>)}
             </TableBody>
             <TableFooter>
