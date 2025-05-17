@@ -473,7 +473,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         
         <div className="overflow-x-auto w-full">
           <table className="w-full min-w-full data-table text-xs">
-            <thead className="sticky top-[64px] bg-slate-200 z-10 shadow-sm">
+            <thead className="bg-slate-200 z-10 shadow-sm">
               <tr className="text-xs">
                 <th className="py-2 px-1 w-8 text-center">#</th>
                 <th className="uraian-cell py-2 px-1 w-[250px] text-center">
@@ -547,9 +547,9 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 <td colSpan={!isViewer ? 13 : 11} className="py-4 text-center text-slate-500">
                   {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data'}
                 </td>
-              </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-9`}>
-                <td className="text-center py-3">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
-                <td className="uraian-cell my-0 mx-0 px-[6px] py-3">{renderItemField(item, 'uraian')}</td>
+              </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-12`}>
+                <td className="text-center py-4">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
+                <td className="uraian-cell my-0 mx-0 px-[6px] py-4">{renderItemField(item, 'uraian')}</td>
                 <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
                 <td className="unit-cell">{renderItemField(item, 'satuanSemula')}</td>
                 <td className="number-cell">{renderItemField(item, 'hargaSatuanSemula')}</td>
