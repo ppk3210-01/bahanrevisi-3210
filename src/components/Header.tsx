@@ -13,7 +13,7 @@ const Header: React.FC = () => {
     profile
   } = useAuth();
   const handleOpenSpreadsheet = () => {
-    window.open('https://docs.google.com/spreadsheets/d/1SgC_2TQz3AZdYTsbx-cIKg-DEvtOt3GtNl76zCzjLxU/edit?gid=1559424693#gid=1559424693', '_blank');
+    window.open('http://s.bps.go.id/kecapmaja-revisi3210', '_blank');
   };
   return <header className="bg-gradient-to-r from-slate-900 to-blue-950 py-2 px-4 fixed top-0 left-0 right-0 z-10 text-white w-full">
       <div className="flex justify-between items-center max-w-full mx-auto px-2">
