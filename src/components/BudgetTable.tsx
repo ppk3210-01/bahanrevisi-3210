@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Table,
@@ -14,7 +15,7 @@ import { Edit, Check, Trash2, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
-import { useBudgetData } from '@/hooks';
+import { useBudgetData } from '@/hooks/useBudgetData';
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -43,7 +44,7 @@ const getStatusVariant = (status: string) => {
     case 'new':
       return 'secondary';
     case 'changed':
-      return 'warning';
+      return 'destructive';
     case 'unchanged':
       return 'default';
     default:
@@ -303,3 +304,6 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
     </div>
   );
 };
+
+// Also export as default to fix the import in BudgetComparison.tsx
+export default BudgetTable;
