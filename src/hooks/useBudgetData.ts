@@ -244,7 +244,6 @@ export default function useBudgetData(filters: FilterSelection) {
         satuan_menjadi: item.satuanMenjadi,
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
         jumlah_menjadi: jumlahMenjadi,
-        sisa_anggaran: item.sisaAnggaran || 0,
         // selisih is a computed column, do not include it
         status: 'new',
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
@@ -305,7 +304,6 @@ export default function useBudgetData(filters: FilterSelection) {
           satuan_menjadi: item.satuanMenjadi,
           harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: jumlahMenjadi,
-          sisa_anggaran: item.sisaAnggaran || 0,
           // selisih is a computed column, do not include it
           status: 'new',
           program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
@@ -393,12 +391,6 @@ export default function useBudgetData(filters: FilterSelection) {
         // No need to calculate selisih as it's computed in the database
         // Just update the UI value for display
         updatedItem.selisih = roundToThousands(updatedItem.jumlahMenjadi - jumlahSemula);
-      }
-
-      // Handle sisaAnggaran updates
-      if ('sisaAnggaran' in updates) {
-        supabaseUpdates.sisa_anggaran = updates.sisaAnggaran;
-        updatedItem.sisaAnggaran = updates.sisaAnggaran;
       }
       
       if (Object.keys(updates).length > 0 && currentItem.isApproved) {

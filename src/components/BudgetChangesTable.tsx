@@ -16,7 +16,6 @@ export interface BudgetChangeItem {
   detailPerubahan: string;
   jumlahSemula: number;
   jumlahMenjadi: number;
-  sisaAnggaran?: number;
   selisih: number;
 }
 
@@ -68,7 +67,6 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
   // Calculate totals for the footer
   const totalJumlahSemula = items.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalJumlahMenjadi = items.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
-  const totalSisaAnggaran = items.reduce((sum, item) => sum + (item.sisaAnggaran || 0), 0);
   const totalSelisih = items.reduce((sum, item) => sum + item.selisih, 0);
 
   return <Card className="bg-orange-50/50 border-orange-100">
@@ -94,7 +92,6 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
                 <TableHead className="w-[200px] text-center">Detail Perubahan</TableHead>
                 <TableHead className="w-[180px] text-center">Jumlah Semula</TableHead>
                 <TableHead className="w-[180px] text-center">Jumlah Menjadi</TableHead>
-                <TableHead className="w-[180px] text-center">Sisa Anggaran</TableHead>
                 <TableHead className="w-[180px] text-center">Selisih</TableHead>
               </TableRow>
             </TableHeader>
@@ -108,7 +105,6 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
               }} className="text-left py-3">{item.detailPerubahan}</TableCell>
                   <TableCell className="text-right py-3">{formatCurrency(item.jumlahSemula)}</TableCell>
                   <TableCell className="text-right py-3">{formatCurrency(item.jumlahMenjadi)}</TableCell>
-                  <TableCell className="text-right py-3">{formatCurrency(item.sisaAnggaran || 0)}</TableCell>
                   <TableCell className={`text-right py-3 ${item.selisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(item.selisih)}
                   </TableCell>
@@ -119,7 +115,6 @@ export const BudgetChangesTable: React.FC<BudgetChangesTableProps> = ({
                 <TableCell colSpan={4} className="font-bold text-center py-3">Total Pagu Anggaran Berubah</TableCell>
                 <TableCell className="text-right font-bold py-3">{formatCurrency(totalJumlahSemula)}</TableCell>
                 <TableCell className="text-right font-bold py-3">{formatCurrency(totalJumlahMenjadi)}</TableCell>
-                <TableCell className="text-right font-bold py-3">{formatCurrency(totalSisaAnggaran)}</TableCell>
                 <TableCell className={`text-right font-bold py-3 ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {formatCurrency(totalSelisih)}
                 </TableCell>

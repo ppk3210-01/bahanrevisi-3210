@@ -56,7 +56,6 @@ export type Database = {
           satuan_menjadi: string | null
           satuan_semula: string | null
           selisih: number | null
-          sisa_anggaran: number | null
           status: string
           sub_komponen: string | null
           updated_at: string | null
@@ -80,7 +79,6 @@ export type Database = {
           satuan_menjadi?: string | null
           satuan_semula?: string | null
           selisih?: number | null
-          sisa_anggaran?: number | null
           status?: string
           sub_komponen?: string | null
           updated_at?: string | null
@@ -104,7 +102,6 @@ export type Database = {
           satuan_menjadi?: string | null
           satuan_semula?: string | null
           selisih?: number | null
-          sisa_anggaran?: number | null
           status?: string
           sub_komponen?: string | null
           updated_at?: string | null
