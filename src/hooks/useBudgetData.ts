@@ -64,9 +64,6 @@ export default function useBudgetData(filters: FilterSelection) {
             budgetItem.jumlahSemula = roundToThousands(budgetItem.jumlahSemula);
             budgetItem.jumlahMenjadi = roundToThousands(budgetItem.jumlahMenjadi);
             budgetItem.selisih = roundToThousands(budgetItem.selisih);
-            if (budgetItem.sisaAnggaran) {
-              budgetItem.sisaAnggaran = roundToThousands(budgetItem.sisaAnggaran);
-            }
             return budgetItem;
           });
 
@@ -247,7 +244,6 @@ export default function useBudgetData(filters: FilterSelection) {
         satuan_menjadi: item.satuanMenjadi,
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
         jumlah_menjadi: jumlahMenjadi,
-        sisa_anggaran: item.sisaAnggaran ? roundToThousands(item.sisaAnggaran) : null,
         // selisih is a computed column, do not include it
         status: 'new',
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
@@ -274,9 +270,6 @@ export default function useBudgetData(filters: FilterSelection) {
         savedItem.jumlahSemula = roundToThousands(savedItem.jumlahSemula);
         savedItem.jumlahMenjadi = roundToThousands(savedItem.jumlahMenjadi);
         savedItem.selisih = roundToThousands(savedItem.selisih);
-        if (savedItem.sisaAnggaran) {
-          savedItem.sisaAnggaran = roundToThousands(savedItem.sisaAnggaran);
-        }
         setBudgetItems(prev => [...prev, savedItem]);
         return savedItem;
       }
@@ -311,7 +304,6 @@ export default function useBudgetData(filters: FilterSelection) {
           satuan_menjadi: item.satuanMenjadi,
           harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: jumlahMenjadi,
-          sisa_anggaran: item.sisaAnggaran ? roundToThousands(item.sisaAnggaran) : null,
           // selisih is a computed column, do not include it
           status: 'new',
           program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
@@ -340,9 +332,6 @@ export default function useBudgetData(filters: FilterSelection) {
           budgetItem.jumlahSemula = roundToThousands(budgetItem.jumlahSemula);
           budgetItem.jumlahMenjadi = roundToThousands(budgetItem.jumlahMenjadi);
           budgetItem.selisih = roundToThousands(budgetItem.selisih);
-          if (budgetItem.sisaAnggaran) {
-            budgetItem.sisaAnggaran = roundToThousands(budgetItem.sisaAnggaran);
-          }
           return budgetItem;
         });
 
@@ -402,14 +391,6 @@ export default function useBudgetData(filters: FilterSelection) {
         // No need to calculate selisih as it's computed in the database
         // Just update the UI value for display
         updatedItem.selisih = roundToThousands(updatedItem.jumlahMenjadi - jumlahSemula);
-      }
-
-      // Handle sisa anggaran updates
-      if ('sisaAnggaran' in updates) {
-        if (updates.sisaAnggaran !== undefined) {
-          supabaseUpdates.sisa_anggaran = roundToThousands(updates.sisaAnggaran);
-          updatedItem.sisaAnggaran = roundToThousands(updates.sisaAnggaran);
-        }
       }
       
       if (Object.keys(updates).length > 0 && currentItem.isApproved) {

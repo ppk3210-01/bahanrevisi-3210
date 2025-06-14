@@ -16,7 +16,6 @@ import {
 import { createTemplateWorkbook } from '@/utils/excelUtils';
 import { useImportHandler } from './ImportHandler';
 import { BudgetSummaryRecord } from '@/types/database';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface ExcelImportExportProps {
   items: BudgetItem[];
@@ -40,7 +39,6 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { isAdmin } = useAuth();
 
   const buttonClass = smallText ? "text-xs px-2 py-1 h-8" : "";
   
@@ -61,30 +59,12 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
   };
 
   const triggerFileInput = () => {
-    if (!isAdmin) {
-      toast({
-        variant: "destructive",
-        title: "Akses Ditolak",
-        description: "Hanya admin yang dapat mengimpor data Excel."
-      });
-      return;
-    }
-    
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isAdmin) {
-      toast({
-        variant: "destructive",
-        title: "Akses Ditolak",
-        description: "Hanya admin yang dapat mengimpor data Excel."
-      });
-      return;
-    }
-    
     const file = event.target.files?.[0];
     if (!file) return;
     
@@ -95,37 +75,33 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
   return (
     <>
       <div className="flex items-center gap-2">
-        {isAdmin && (
-          <Button
-            variant="outline"
-            onClick={downloadTemplate}
-            className={`flex items-center ${buttonClass}`}
-            size={smallText ? "sm" : undefined}
-          >
-            <FileSpreadsheet className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
-            <span>Download Template</span>
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          onClick={downloadTemplate}
+          className={`flex items-center ${buttonClass}`}
+          size={smallText ? "sm" : undefined}
+        >
+          <FileSpreadsheet className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
+          <span>Download Template</span>
+        </Button>
         
-        {isAdmin && (
-          <Button 
-            variant="outline" 
-            className={`flex items-center cursor-pointer ${buttonClass}`}
-            size={smallText ? "sm" : undefined}
-            onClick={triggerFileInput}
-            disabled={isImporting}
-          >
-            <Upload className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
-            <span>Import Excel</span>
-          </Button>
-        )}
+        <Button 
+          variant="outline" 
+          className={`flex items-center cursor-pointer ${buttonClass}`}
+          size={smallText ? "sm" : undefined}
+          onClick={triggerFileInput}
+          disabled={isImporting}
+        >
+          <Upload className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
+          <span>Import Excel</span>
+        </Button>
         <input
           ref={fileInputRef}
           type="file"
           accept=".xlsx, .xls"
           onChange={handleImport}
           className="hidden"
-          disabled={isImporting || !isAdmin}
+          disabled={isImporting}
         />
 
         <Button

@@ -22,7 +22,6 @@ export const expectedColumns = {
   volumeMenjadi: ["volumemenjadi", "volume menjadi", "volume akhir", "jumlah menjadi", "volume2"],
   satuanMenjadi: ["satuanmenjadi", "satuan menjadi", "satuan akhir", "unit menjadi", "satuan2"],
   hargaSatuanMenjadi: ["hargasatuanmenjadi", "harga satuan menjadi", "harga menjadi", "harga akhir", "price menjadi", "hargasatuan2", "hargamenjadi"],
-  sisaAnggaran: ["sisaanggaran", "sisa anggaran", "budget tersisa", "anggaran tersisa", "remaining budget", "sisa budget"],
   programPembebanan: ["programpembebanan", "program pembebanan", "program"],
   kegiatan: ["kegiatan", "activity"],
   rincianOutput: ["rincianoutput", "rincian output", "output", "detail output"],
@@ -48,8 +47,7 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     "Harga Satuan Semula", 
     "Volume Menjadi", 
     "Satuan Menjadi", 
-    "Harga Satuan Menjadi",
-    "Sisa Anggaran"
+    "Harga Satuan Menjadi"
   ];
   
   const data = [headers, [
@@ -65,8 +63,7 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     1000000, 
     1, 
     "Paket", 
-    1200000,
-    500000
+    1200000
   ]];
   
   const ws = XLSX.utils.aoa_to_sheet(data);
@@ -86,7 +83,6 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     { width: 12 },  // Volume Menjadi
     { width: 15 },  // Satuan Menjadi
     { width: 20 },  // Harga Satuan Menjadi
-    { width: 20 },  // Sisa Anggaran
   ];
   
   ws["!cols"] = colWidths;
@@ -203,8 +199,7 @@ export const mapColumnIndices = (headerRow: any[]): {
   // Special handling for important columns that might have been missed
   const specialColumns = [
     { key: 'hargaSatuanSemula', patterns: ['harga', 'semula'] },
-    { key: 'hargaSatuanMenjadi', patterns: ['harga', 'menjadi'] },
-    { key: 'sisaAnggaran', patterns: ['sisa', 'anggaran'] }
+    { key: 'hargaSatuanMenjadi', patterns: ['harga', 'menjadi'] }
   ];
   
   headerRow.forEach((header: any, index: number) => {
@@ -258,14 +253,6 @@ export const processDataRows = (
         hargaSatuanMenjadi: parseFloat(row[columnIndices.hargaSatuanMenjadi]) || 0
       };
       
-      // Add sisa anggaran if available
-      if ('sisaAnggaran' in columnIndices && row[columnIndices.sisaAnggaran] !== undefined) {
-        const sisaValue = parseFloat(row[columnIndices.sisaAnggaran]);
-        if (!isNaN(sisaValue)) {
-          item.sisaAnggaran = sisaValue;
-        }
-      }
-      
       // Add optional fields if they exist in the file
       if ('programPembebanan' in columnIndices) 
         item.programPembebanan = String(row[columnIndices.programPembebanan] || '');
@@ -298,8 +285,7 @@ export const getFriendlyColumnNames = (missingColumns: string[]): string => {
     hargaSatuanSemula: "Harga Satuan Semula",
     volumeMenjadi: "Volume Menjadi",
     satuanMenjadi: "Satuan Menjadi",
-    hargaSatuanMenjadi: "Harga Satuan Menjadi",
-    sisaAnggaran: "Sisa Anggaran"
+    hargaSatuanMenjadi: "Harga Satuan Menjadi"
   };
   
   return missingColumns
@@ -685,7 +671,6 @@ export const createItemsSheet = (items: BudgetItem[]) => {
     "Satuan Menjadi",
     "Harga Satuan Menjadi",
     "Jumlah Menjadi",
-    "Sisa Anggaran",
     "Selisih",
     "Status"
   ];
@@ -703,7 +688,6 @@ export const createItemsSheet = (items: BudgetItem[]) => {
     item.satuanMenjadi,
     roundToThousands(item.hargaSatuanMenjadi),
     roundToThousands(item.jumlahMenjadi),
-    item.sisaAnggaran ? roundToThousands(item.sisaAnggaran) : '',
     roundToThousands(item.jumlahMenjadi - item.jumlahSemula),
     item.status
   ]);
@@ -724,7 +708,6 @@ export const createItemsSheet = (items: BudgetItem[]) => {
     { wch: 15 }, // Satuan Menjadi
     { wch: 20 }, // Harga Satuan Menjadi
     { wch: 20 }, // Jumlah Menjadi
-    { wch: 20 }, // Sisa Anggaran
     { wch: 20 }, // Selisih
     { wch: 15 }, // Status
   ];
@@ -736,14 +719,14 @@ export const createItemsSheet = (items: BudgetItem[]) => {
   // Apply number formatting to numeric columns
   const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
   for (let R = 1; R <= range.e.r; ++R) {
-    for (let C of [6, 7, 10, 11, 12, 13]) {
+    for (let C of [6, 7, 10, 11, 12]) {
       const cell_address = {c: C, r: R};
       const cell_ref = XLSX.utils.encode_cell(cell_address);
       applyCurrencyFormat(worksheet, cell_ref);
     }
     
     // Color-code status column
-    const statusCell = XLSX.utils.encode_cell({c: 14, r: R});
+    const statusCell = XLSX.utils.encode_cell({c: 13, r: R});
     if (worksheet[statusCell]) {
       const status = worksheet[statusCell].v;
       let fillColor;
