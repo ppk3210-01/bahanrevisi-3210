@@ -7,7 +7,9 @@ export type UserRole = 'admin' | 'user';
 // Export database types
 export type Tables = Database['public']['Tables'];
 export type Views = Database['public']['Views'];
-export type BudgetItemRecord = Tables['budget_items']['Row'];
+export type BudgetItemRecord = Tables['budget_items']['Row'] & {
+  sisa_anggaran?: number | null;
+};
 
 // These type definitions needed to be fixed - using proper type assertions
 export type KomponenOutputRecord = { id: string, name: string, code: string };

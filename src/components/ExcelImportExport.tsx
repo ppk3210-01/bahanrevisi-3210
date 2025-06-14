@@ -16,6 +16,7 @@ import {
 import { createTemplateWorkbook } from '@/utils/excelUtils';
 import { useImportHandler } from './ImportHandler';
 import { BudgetSummaryRecord } from '@/types/database';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ExcelImportExportProps {
   items: BudgetItem[];
@@ -39,6 +40,7 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isAdmin } = useAuth();
 
   const buttonClass = smallText ? "text-xs px-2 py-1 h-8" : "";
   
@@ -85,24 +87,28 @@ const ExcelImportExport: React.FC<ExcelImportExportProps> = ({
           <span>Download Template</span>
         </Button>
         
-        <Button 
-          variant="outline" 
-          className={`flex items-center cursor-pointer ${buttonClass}`}
-          size={smallText ? "sm" : undefined}
-          onClick={triggerFileInput}
-          disabled={isImporting}
-        >
-          <Upload className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
-          <span>Import Excel</span>
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleImport}
-          className="hidden"
-          disabled={isImporting}
-        />
+        {isAdmin && (
+          <>
+            <Button 
+              variant="outline" 
+              className={`flex items-center cursor-pointer ${buttonClass}`}
+              size={smallText ? "sm" : undefined}
+              onClick={triggerFileInput}
+              disabled={isImporting}
+            >
+              <Upload className={`${smallText ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
+              <span>Import Excel</span>
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx, .xls"
+              onChange={handleImport}
+              className="hidden"
+              disabled={isImporting}
+            />
+          </>
+        )}
 
         <Button
           variant="outline"

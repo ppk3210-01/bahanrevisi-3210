@@ -1,3 +1,4 @@
+
 import { BudgetItemRecord } from './database';
 
 export type BudgetItem = {
@@ -11,6 +12,7 @@ export type BudgetItem = {
   satuanMenjadi: string;
   hargaSatuanMenjadi: number;
   jumlahMenjadi: number;
+  sisaAnggaran?: number;
   selisih: number;
   status: string;
   isApproved: boolean;
@@ -43,6 +45,7 @@ export const convertToBudgetItem = (record: BudgetItemRecord) => {
     satuanMenjadi: record.satuan_menjadi || '',
     hargaSatuanMenjadi: record.harga_satuan_menjadi,
     jumlahMenjadi: record.jumlah_menjadi,
+    sisaAnggaran: record.sisa_anggaran || 0,
     selisih: record.selisih || 0,
     status: record.status,
     isApproved: record.is_approved || false,
@@ -67,6 +70,7 @@ export const convertToBudgetItemRecord = (item: Partial<any>) => {
   if ('satuanMenjadi' in item) record.satuan_menjadi = item.satuanMenjadi;
   if ('hargaSatuanMenjadi' in item) record.harga_satuan_menjadi = item.hargaSatuanMenjadi;
   if ('jumlahMenjadi' in item) record.jumlah_menjadi = item.jumlahMenjadi;
+  if ('sisaAnggaran' in item) record.sisa_anggaran = item.sisaAnggaran;
   if ('selisih' in item) record.selisih = item.selisih;
   if ('status' in item) record.status = item.status;
   if ('isApproved' in item) record.is_approved = item.isApproved;
