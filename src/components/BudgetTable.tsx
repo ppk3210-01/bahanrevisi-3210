@@ -15,17 +15,27 @@ import { Edit, Check, Trash2, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
-import { useBudgetData } from '@/hooks/useBudgetData';
+import useBudgetData from '@/hooks/useBudgetData';
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 
 interface BudgetTableProps {
   items: BudgetItem[];
-  currentPage: number;
-  itemsPerPage: number;
-  onDeleteItem: (id: string) => void;
-  onApproveItem: (id: string) => void;
-  onRejectItem: (id: string) => void;
+  komponenOutput?: string;
+  subKomponen?: string;
+  akun?: string;
+  onAdd?: (item: Omit<BudgetItem, "id" | "jumlahSemula" | "jumlahMenjadi" | "selisih" | "status">) => Promise<BudgetItem>;
+  onUpdate?: (id: string, updates: Partial<BudgetItem>) => Promise<BudgetItem>;
+  onDelete?: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+  isLoading?: boolean;
+  areFiltersComplete?: boolean;
+  currentPage?: number;
+  itemsPerPage?: number;
+  onDeleteItem?: (id: string) => void;
+  onApproveItem?: (id: string) => void;
+  onRejectItem?: (id: string) => void;
 }
 
 interface EditValues {
@@ -67,8 +77,8 @@ const getStatusText = (status: string) => {
 
 export const BudgetTable: React.FC<BudgetTableProps> = ({
   items,
-  currentPage,
-  itemsPerPage,
+  currentPage = 1,
+  itemsPerPage = 10,
   onDeleteItem,
   onApproveItem,
   onRejectItem
@@ -280,15 +290,15 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                       <Button size="icon" variant="ghost" onClick={() => handleEdit(item)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => onDeleteItem(item.id)}>
+                      <Button size="icon" variant="ghost" onClick={() => onDeleteItem?.(item.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                       {!item.isApproved && (
                         <>
-                          <Button size="icon" variant="ghost" onClick={() => onApproveItem(item.id)}>
+                          <Button size="icon" variant="ghost" onClick={() => onApproveItem?.(item.id)}>
                             <Check className="h-4 w-4 text-green-500" />
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => onRejectItem(item.id)}>
+                          <Button size="icon" variant="ghost" onClick={() => onRejectItem?.(item.id)}>
                             <X className="h-4 w-4 text-red-500" />
                           </Button>
                         </>
