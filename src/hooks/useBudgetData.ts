@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
@@ -244,6 +245,7 @@ export default function useBudgetData(filters: FilterSelection) {
         satuan_menjadi: item.satuanMenjadi,
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
         jumlah_menjadi: jumlahMenjadi,
+        sisa_anggaran: item.sisaAnggaran || 0,
         // selisih is a computed column, do not include it
         status: 'new',
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
@@ -294,6 +296,8 @@ export default function useBudgetData(filters: FilterSelection) {
         const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi || 0, item.hargaSatuanMenjadi || 0));
         // selisih is a computed column, do not include it
 
+        console.log(`Mapping sisaAnggaran for item "${item.uraian}":`, item.sisaAnggaran);
+
         return {
           uraian: item.uraian,
           volume_semula: item.volumeSemula,
@@ -304,6 +308,7 @@ export default function useBudgetData(filters: FilterSelection) {
           satuan_menjadi: item.satuanMenjadi,
           harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: jumlahMenjadi,
+          sisa_anggaran: item.sisaAnggaran || 0,
           // selisih is a computed column, do not include it
           status: 'new',
           program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
@@ -314,6 +319,8 @@ export default function useBudgetData(filters: FilterSelection) {
           akun: item.akun || (filters.akun !== 'all' ? filters.akun : null)
         };
       });
+      
+      console.log("Items to insert into database:", itemsToInsert);
       
       const { data, error: supabaseError } = await supabase
         .from('budget_items')
