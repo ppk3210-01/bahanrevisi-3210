@@ -1,3 +1,4 @@
+
 import * as XLSX from 'xlsx';
 import { BudgetItem } from '@/types/budget';
 import { BudgetSummaryRecord } from '@/types/database';
@@ -22,7 +23,7 @@ export const expectedColumns = {
   volumeMenjadi: ["volumemenjadi", "volume menjadi", "volume akhir", "jumlah menjadi", "volume2"],
   satuanMenjadi: ["satuanmenjadi", "satuan menjadi", "satuan akhir", "unit menjadi", "satuan2"],
   hargaSatuanMenjadi: ["hargasatuanmenjadi", "harga satuan menjadi", "harga menjadi", "harga akhir", "price menjadi", "hargasatuan2", "hargamenjadi"],
-  sisaAnggaran: ["sisaanggaran", "sisa anggaran", "sisa budget", "remainder budget"],
+  sisaAnggaran: ["sisaanggaran", "sisa anggaran", "sisa budget", "remainder budget", "anggaran sisa", "budget sisa"],
   programPembebanan: ["programpembebanan", "program pembebanan", "program"],
   kegiatan: ["kegiatan", "activity"],
   rincianOutput: ["rincianoutput", "rincian output", "output", "detail output"],
@@ -203,7 +204,8 @@ export const mapColumnIndices = (headerRow: any[]): {
   // Special handling for important columns that might have been missed
   const specialColumns = [
     { key: 'hargaSatuanSemula', patterns: ['harga', 'semula'] },
-    { key: 'hargaSatuanMenjadi', patterns: ['harga', 'menjadi'] }
+    { key: 'hargaSatuanMenjadi', patterns: ['harga', 'menjadi'] },
+    { key: 'sisaAnggaran', patterns: ['sisa', 'anggaran'] }
   ];
   
   headerRow.forEach((header: any, index: number) => {
@@ -255,8 +257,23 @@ export const processDataRows = (
         volumeMenjadi: parseFloat(row[columnIndices.volumeMenjadi]) || 0,
         satuanMenjadi: String(row[columnIndices.satuanMenjadi] || 'Paket'),
         hargaSatuanMenjadi: parseFloat(row[columnIndices.hargaSatuanMenjadi]) || 0,
-        sisaAnggaran: parseFloat(row[columnIndices.sisaAnggaran]) || 0
+        sisaAnggaran: 0  // Default value
       };
+      
+      // Process sisaAnggaran if the column exists in the file
+      if ('sisaAnggaran' in columnIndices && columnIndices.sisaAnggaran !== undefined) {
+        const sisaAnggaranValue = row[columnIndices.sisaAnggaran];
+        console.log(`Processing sisaAnggaran for row, raw value:`, sisaAnggaranValue);
+        
+        if (sisaAnggaranValue !== null && sisaAnggaranValue !== undefined && sisaAnggaranValue !== '') {
+          const parsedValue = parseFloat(sisaAnggaranValue);
+          item.sisaAnggaran = isNaN(parsedValue) ? 0 : parsedValue;
+        } else {
+          item.sisaAnggaran = 0;
+        }
+        
+        console.log(`Final sisaAnggaran value:`, item.sisaAnggaran);
+      }
       
       // Add optional fields if they exist in the file
       if ('programPembebanan' in columnIndices) 
@@ -290,7 +307,8 @@ export const getFriendlyColumnNames = (missingColumns: string[]): string => {
     hargaSatuanSemula: "Harga Satuan Semula",
     volumeMenjadi: "Volume Menjadi",
     satuanMenjadi: "Satuan Menjadi",
-    hargaSatuanMenjadi: "Harga Satuan Menjadi"
+    hargaSatuanMenjadi: "Harga Satuan Menjadi",
+    sisaAnggaran: "Sisa Anggaran"
   };
   
   return missingColumns

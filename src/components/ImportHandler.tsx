@@ -83,7 +83,7 @@ export const useImportHandler = ({
         // Process data rows
         const dataRows = processDataRows(rows, headerRowIndex, columnIndices, komponenOutput, subKomponen, akun);
         
-        console.log("Processed data rows:", dataRows);
+        console.log("Processed data rows with sisa anggaran:", dataRows);
         
         if (dataRows.length === 0) {
           toast({
@@ -94,6 +94,11 @@ export const useImportHandler = ({
           onComplete();
           return;
         }
+        
+        // Log each item to verify sisaAnggaran is included
+        dataRows.forEach((item, index) => {
+          console.log(`Item ${index + 1} sisaAnggaran:`, item.sisaAnggaran);
+        });
         
         // Ensure we're passing an array of items to onImport
         onImport(dataRows)
