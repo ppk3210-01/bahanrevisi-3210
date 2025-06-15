@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 import DetailDialog from './DetailDialog';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
 import { useAuth } from '@/contexts/AuthContext';
+
 interface BudgetTableProps {
   items: BudgetItem[];
   komponenOutput: string;
@@ -25,6 +26,7 @@ interface BudgetTableProps {
   akun?: string;
   areFiltersComplete: boolean;
 }
+
 const BudgetTable: React.FC<BudgetTableProps> = ({
   items,
   komponenOutput,
@@ -52,6 +54,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     volumeMenjadi: 0,
     satuanMenjadi: 'Paket',
     hargaSatuanMenjadi: 0,
+    sisaAnggaran: 0,
     komponenOutput,
     subKomponen,
     akun,
@@ -129,6 +132,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         volumeMenjadi: newItem.volumeMenjadi || 0,
         satuanMenjadi: newItem.satuanMenjadi || 'Paket',
         hargaSatuanMenjadi: newItem.hargaSatuanMenjadi || 0,
+        sisaAnggaran: newItem.sisaAnggaran || 0,
         komponenOutput,
         subKomponen: subKomponen || '',
         akun: akun || '',
@@ -146,6 +150,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         volumeMenjadi: 0,
         satuanMenjadi: 'Paket',
         hargaSatuanMenjadi: 0,
+        sisaAnggaran: 0,
         komponenOutput,
         subKomponen,
         akun,
@@ -189,7 +194,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   };
   const handleEditChange = (id: string, field: string, value: string | number) => {
     if (!isAdmin) {
-      const allowedFields = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'];
+      const allowedFields = ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'sisaAnggaran'];
       if (!allowedFields.includes(field)) {
         toast({
           variant: "destructive",
@@ -199,7 +204,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         return;
       }
     }
-    if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || field === 'volumeMenjadi') {
+    if (field === 'volumeSemula' || field === 'hargaSatuanSemula' || field === 'volumeMenjadi' || field === 'sisaAnggaran') {
       if (typeof value === 'string') {
         const numValue = Number(value.replace(/,/g, ''));
         if (isNaN(numValue)) return;
@@ -274,7 +279,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
     if (isViewer && isEditing) {
       return;
     }
-    if (isEditing && !isAdmin && !areFiltersComplete && ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi'].includes(field as string)) {
+    if (isEditing && !isAdmin && !areFiltersComplete && ['volumeMenjadi', 'satuanMenjadi', 'hargaSatuanMenjadi', 'sisaAnggaran'].includes(field as string)) {
       return;
     }
     switch (field) {
@@ -297,6 +302,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         return isEditing ? <Input type="number" value={item.hargaSatuanMenjadi} onChange={e => handleEditChange(item.id, 'hargaSatuanMenjadi', e.target.value)} className="w-full" min="0" disabled={!isAdmin && !areFiltersComplete} /> : <span className={menjadiClassName}>{formatCurrency(item.hargaSatuanMenjadi, false)}</span>;
       case 'jumlahMenjadi':
         return <span className={menjadiClassName}>{formatCurrency(item.jumlahMenjadi)}</span>;
+      case 'sisaAnggaran':
+        return isEditing ? <Input type="number" value={item.sisaAnggaran} onChange={e => handleEditChange(item.id, 'sisaAnggaran', e.target.value)} className="w-full" min="0" disabled={!isAdmin && !areFiltersComplete} /> : <span>{formatCurrency(item.sisaAnggaran)}</span>;
       case 'jumlahSemula':
         return <span>{formatCurrency(item.jumlahSemula)}</span>;
       case 'hargaSatuanSemula':
@@ -531,6 +538,12 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                   </button>
                 </th>
                 <th className="number-cell py-2 px-1 w-[110px] text-center">
+                  <button className="flex items-center justify-end w-full" onClick={() => handleSort('sisaAnggaran')}>
+                    Sisa Anggaran
+                    <ArrowUpDown className="h-3 w-3 ml-1" />
+                  </button>
+                </th>
+                <th className="number-cell py-2 px-1 w-[110px] text-center">
                   <button className="flex items-center justify-end w-full" onClick={() => handleSort('selisih')}>
                     Selisih
                     <ArrowUpDown className="h-3 w-3 ml-1" />
@@ -544,7 +557,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             
             <tbody className="text-xs">
               {paginatedItems.length === 0 ? <tr>
-                <td colSpan={!isViewer ? 13 : 11} className="py-4 text-center text-slate-500">
+                <td colSpan={!isViewer ? 14 : 12} className="py-4 text-center text-slate-500">
                   {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data'}
                 </td>
               </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-12`}>
@@ -558,6 +571,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 <td className="unit-cell">{renderItemField(item, 'satuanMenjadi')}</td>
                 <td className="number-cell">{renderItemField(item, 'hargaSatuanMenjadi')}</td>
                 <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
+                <td className="number-cell">{renderItemField(item, 'sisaAnggaran')}</td>
                 <td className="number-cell">{renderItemField(item, 'selisih')}</td>
                 
                 {!isViewer && <td>
@@ -639,11 +653,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             <span>{formatCurrency(grandTotalSemula)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Pagu Menjadi (Keseluruhan): </span>
+            <span className="font-medium">Total Pagu Menjadi (Keseluruhan): </span>
             <span>{formatCurrency(grandTotalMenjadi)}</span>
           </div>
           <div>
-            <span className="font-medium">Total Selisih Pagu (Keseluruhan): </span>
+            <span className="font-medium">Total Selisih Pagu (Keseluruhan): </span>
             <span className={grandTotalSelisih > 0 ? 'text-green-600' : grandTotalSelisih < 0 ? 'text-red-600' : ''}>
               {formatCurrency(grandTotalSelisih)}
             </span>
@@ -722,6 +736,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
               <Input type="number" value={newItem.hargaSatuanMenjadi} onChange={e => setNewItem({
             ...newItem,
             hargaSatuanMenjadi: Number(e.target.value)
+          })} className="h-8 text-xs" min="0" />
+            </div>
+            <div className="lg:col-span-2">
+              <label className="block text-xs mb-1">Sisa Anggaran</label>
+              <Input type="number" value={newItem.sisaAnggaran} onChange={e => setNewItem({
+            ...newItem,
+            sisaAnggaran: Number(e.target.value)
           })} className="h-8 text-xs" min="0" />
             </div>
 
