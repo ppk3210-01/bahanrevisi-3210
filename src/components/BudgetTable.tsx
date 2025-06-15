@@ -73,6 +73,23 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const isViewer = !user;
+
+  // Helper function to get the display status
+  const getDisplayStatus = (item: BudgetItem): string => {
+    if (item.jumlahMenjadi === 0) {
+      return 'dihapus';
+    }
+    return item.status;
+  };
+
+  // Helper function to get row style based on status
+  const getItemRowStyle = (item: BudgetItem): string => {
+    if (item.jumlahMenjadi === 0) {
+      return 'bg-red-100 opacity-70'; // Style for deleted items
+    }
+    return getRowStyle(item.status);
+  };
+
   useEffect(() => {
     setNewItem(prev => ({
       ...prev,
@@ -549,6 +566,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                     <ArrowUpDown className="h-3 w-3 ml-1" />
                   </button>
                 </th>
+                <th className="py-2 px-1 w-[60px] text-center">Status</th>
                 
                 {!isViewer && <th className="py-2 px-1 w-[80px] text-center">Aksi SM/PJK</th>}
                 {!isViewer && <th className="py-2 px-1 w-[80px] text-center">PPK</th>}
@@ -557,10 +575,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
             
             <tbody className="text-xs">
               {paginatedItems.length === 0 ? <tr>
-                <td colSpan={!isViewer ? 14 : 12} className="py-4 text-center text-slate-500">
+                <td colSpan={!isViewer ? 15 : 13} className="py-4 text-center text-slate-500">
                   {hideZeroBudget ? 'Tidak ada data dengan jumlah pagu > 0' : 'Tidak ada data'}
                 </td>
-              </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getRowStyle(item.status)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-12`}>
+              </tr> : paginatedItems.map((item, index) => <tr key={item.id} className={`${getItemRowStyle(item)} ${index % 2 === 0 ? 'bg-slate-50' : ''} h-12`}>
                 <td className="text-center py-4">{(currentPage - 1) * (pageSize === -1 ? 0 : pageSize) + index + 1}</td>
                 <td className="uraian-cell my-0 mx-0 px-[6px] py-4">{renderItemField(item, 'uraian')}</td>
                 <td className="number-cell">{renderItemField(item, 'volumeSemula')}</td>
@@ -573,6 +591,16 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
                 <td className="number-cell">{renderItemField(item, 'jumlahMenjadi')}</td>
                 <td className="number-cell">{renderItemField(item, 'sisaAnggaran')}</td>
                 <td className="number-cell">{renderItemField(item, 'selisih')}</td>
+                <td className="text-center py-4">
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    getDisplayStatus(item) === 'dihapus' ? 'bg-red-100 text-red-800' :
+                    getDisplayStatus(item) === 'new' ? 'bg-green-100 text-green-800' :
+                    getDisplayStatus(item) === 'changed' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {getDisplayStatus(item)}
+                  </span>
+                </td>
                 
                 {!isViewer && <td>
                   <div className="flex space-x-1 justify-center">
