@@ -22,6 +22,7 @@ export const expectedColumns = {
   volumeMenjadi: ["volumemenjadi", "volume menjadi", "volume akhir", "jumlah menjadi", "volume2"],
   satuanMenjadi: ["satuanmenjadi", "satuan menjadi", "satuan akhir", "unit menjadi", "satuan2"],
   hargaSatuanMenjadi: ["hargasatuanmenjadi", "harga satuan menjadi", "harga menjadi", "harga akhir", "price menjadi", "hargasatuan2", "hargamenjadi"],
+  sisaAnggaran: ["sisaanggaran", "sisa anggaran", "sisa budget", "remainder budget"],
   programPembebanan: ["programpembebanan", "program pembebanan", "program"],
   kegiatan: ["kegiatan", "activity"],
   rincianOutput: ["rincianoutput", "rincian output", "output", "detail output"],
@@ -47,7 +48,8 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     "Harga Satuan Semula", 
     "Volume Menjadi", 
     "Satuan Menjadi", 
-    "Harga Satuan Menjadi"
+    "Harga Satuan Menjadi",
+    "Sisa Anggaran"
   ];
   
   const data = [headers, [
@@ -63,7 +65,8 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     1000000, 
     1, 
     "Paket", 
-    1200000
+    1200000,
+    200000
   ]];
   
   const ws = XLSX.utils.aoa_to_sheet(data);
@@ -83,6 +86,7 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     { width: 12 },  // Volume Menjadi
     { width: 15 },  // Satuan Menjadi
     { width: 20 },  // Harga Satuan Menjadi
+    { width: 20 },  // Sisa Anggaran
   ];
   
   ws["!cols"] = colWidths;
@@ -250,7 +254,8 @@ export const processDataRows = (
         hargaSatuanSemula: parseFloat(row[columnIndices.hargaSatuanSemula]) || 0,
         volumeMenjadi: parseFloat(row[columnIndices.volumeMenjadi]) || 0,
         satuanMenjadi: String(row[columnIndices.satuanMenjadi] || 'Paket'),
-        hargaSatuanMenjadi: parseFloat(row[columnIndices.hargaSatuanMenjadi]) || 0
+        hargaSatuanMenjadi: parseFloat(row[columnIndices.hargaSatuanMenjadi]) || 0,
+        sisaAnggaran: parseFloat(row[columnIndices.sisaAnggaran]) || 0
       };
       
       // Add optional fields if they exist in the file
@@ -671,6 +676,7 @@ export const createItemsSheet = (items: BudgetItem[]) => {
     "Satuan Menjadi",
     "Harga Satuan Menjadi",
     "Jumlah Menjadi",
+    "Sisa Anggaran",
     "Selisih",
     "Status"
   ];
@@ -688,6 +694,7 @@ export const createItemsSheet = (items: BudgetItem[]) => {
     item.satuanMenjadi,
     roundToThousands(item.hargaSatuanMenjadi),
     roundToThousands(item.jumlahMenjadi),
+    roundToThousands(item.sisaAnggaran),
     roundToThousands(item.jumlahMenjadi - item.jumlahSemula),
     item.status
   ]);
@@ -708,6 +715,7 @@ export const createItemsSheet = (items: BudgetItem[]) => {
     { wch: 15 }, // Satuan Menjadi
     { wch: 20 }, // Harga Satuan Menjadi
     { wch: 20 }, // Jumlah Menjadi
+    { wch: 20 }, // Sisa Anggaran
     { wch: 20 }, // Selisih
     { wch: 15 }, // Status
   ];
@@ -719,14 +727,14 @@ export const createItemsSheet = (items: BudgetItem[]) => {
   // Apply number formatting to numeric columns
   const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
   for (let R = 1; R <= range.e.r; ++R) {
-    for (let C of [6, 7, 10, 11, 12]) {
+    for (let C of [6, 7, 10, 11, 12, 13]) {
       const cell_address = {c: C, r: R};
       const cell_ref = XLSX.utils.encode_cell(cell_address);
       applyCurrencyFormat(worksheet, cell_ref);
     }
     
     // Color-code status column
-    const statusCell = XLSX.utils.encode_cell({c: 13, r: R});
+    const statusCell = XLSX.utils.encode_cell({c: 14, r: R});
     if (worksheet[statusCell]) {
       const status = worksheet[statusCell].v;
       let fillColor;
