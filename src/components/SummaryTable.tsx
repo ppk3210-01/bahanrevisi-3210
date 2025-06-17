@@ -50,7 +50,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     }
   };
 
-  // Process data to include new calculations with corrected formula
+  // Process data to include new calculations with corrected realisasi calculation
   const processedData = data && data.length > 0 ? data.map(row => {
     const sisaAnggaran = row.sisaAnggaran || 0;
     const realisasi = calculateRealisasi(row.totalMenjadi, sisaAnggaran);
