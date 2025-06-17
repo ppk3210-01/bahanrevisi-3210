@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
@@ -83,6 +82,7 @@ export default function useBudgetData(filters: FilterSelection) {
     
     const fetchSummaryData = async () => {
       try {
+        // Create custom RPC calls that include sisa_anggaran calculations
         const [
           komponenResult, 
           akunResult,
@@ -233,7 +233,6 @@ export default function useBudgetData(filters: FilterSelection) {
     try {
       const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula, item.hargaSatuanSemula));
       const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi, item.hargaSatuanMenjadi));
-      // Let the database calculate selisih
 
       const newItemData = {
         uraian: item.uraian,
@@ -246,7 +245,6 @@ export default function useBudgetData(filters: FilterSelection) {
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
         jumlah_menjadi: jumlahMenjadi,
         sisa_anggaran: item.sisaAnggaran || 0,
-        // selisih is a computed column, do not include it
         status: 'new',
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
         kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
@@ -268,7 +266,6 @@ export default function useBudgetData(filters: FilterSelection) {
 
       if (data) {
         const savedItem = convertToBudgetItem(data);
-        // Apply rounding to the saved item
         savedItem.jumlahSemula = roundToThousands(savedItem.jumlahSemula);
         savedItem.jumlahMenjadi = roundToThousands(savedItem.jumlahMenjadi);
         savedItem.selisih = roundToThousands(savedItem.selisih);
@@ -294,7 +291,6 @@ export default function useBudgetData(filters: FilterSelection) {
       const itemsToInsert = items.map(item => {
         const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula || 0, item.hargaSatuanSemula || 0));
         const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi || 0, item.hargaSatuanMenjadi || 0));
-        // selisih is a computed column, do not include it
 
         console.log(`Mapping sisaAnggaran for item "${item.uraian}":`, item.sisaAnggaran);
 
@@ -309,7 +305,6 @@ export default function useBudgetData(filters: FilterSelection) {
           harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: jumlahMenjadi,
           sisa_anggaran: item.sisaAnggaran || 0,
-          // selisih is a computed column, do not include it
           status: 'new',
           program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
           kegiatan: item.kegiatan || (filters.kegiatan !== 'all' ? filters.kegiatan : null),
@@ -335,7 +330,6 @@ export default function useBudgetData(filters: FilterSelection) {
       if (data) {
         const savedItems: BudgetItem[] = data.map((item: BudgetItemRecord) => {
           const budgetItem = convertToBudgetItem(item);
-          // Apply rounding to each saved item
           budgetItem.jumlahSemula = roundToThousands(budgetItem.jumlahSemula);
           budgetItem.jumlahMenjadi = roundToThousands(budgetItem.jumlahMenjadi);
           budgetItem.selisih = roundToThousands(budgetItem.selisih);
@@ -382,8 +376,6 @@ export default function useBudgetData(filters: FilterSelection) {
         supabaseUpdates.jumlah_menjadi = jumlahMenjadi;
         updatedItem.jumlahMenjadi = jumlahMenjadi;
         
-        // No need to calculate selisih as it's computed in the database
-        // Just update the UI value for display
         updatedItem.selisih = roundToThousands(jumlahMenjadi - updatedItem.jumlahSemula);
       }
       
@@ -395,8 +387,6 @@ export default function useBudgetData(filters: FilterSelection) {
         supabaseUpdates.jumlah_semula = jumlahSemula;
         updatedItem.jumlahSemula = jumlahSemula;
         
-        // No need to calculate selisih as it's computed in the database
-        // Just update the UI value for display
         updatedItem.selisih = roundToThousands(updatedItem.jumlahMenjadi - jumlahSemula);
       }
       
@@ -476,7 +466,6 @@ export default function useBudgetData(filters: FilterSelection) {
           satuan_semula: item.satuanMenjadi,
           harga_satuan_semula: item.hargaSatuanMenjadi,
           jumlah_semula: roundToThousands(item.jumlahMenjadi),
-          // No need to set selisih as it's computed in the database
           status: 'unchanged'
         })
         .eq('id', id);
@@ -527,7 +516,6 @@ export default function useBudgetData(filters: FilterSelection) {
           satuan_menjadi: item.satuanSemula,
           harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: roundToThousands(item.jumlahSemula),
-          // No need to set selisih as it's computed in the database
           status: 'unchanged'
         })
         .eq('id', id);

@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -20,6 +19,7 @@ interface SummaryRow {
   newItems: number;
   changedItems: number;
   totalItems: number;
+  sisaAnggaran?: number;
 }
 
 interface DetailedSummaryViewProps {
@@ -120,8 +120,10 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
     }
   };
   
-  return <div className="space-y-4">
-      {isAdmin && <div className="flex justify-end space-x-2">
+  return (
+    <div className="space-y-4">
+      {isAdmin && (
+        <div className="flex justify-end space-x-2">
           <Button variant="outline" size="sm" onClick={handleExportJPEG} className="text-xs">
             <FileImage className="h-4 w-4 mr-2" />
             Export JPEG
@@ -134,7 +136,8 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
             <FileSpreadsheet className="h-4 w-4 mr-2" />
             Export Excel
           </Button>
-        </div>}
+        </div>
+      )}
       
       <div ref={chartAndTableRef} className="space-y-4 bg-white p-4 rounded-lg">
         <Card>
@@ -183,22 +186,25 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
                 <Bar dataKey="semula" name="Total Semula" fill="#8884d8" />
                 <Bar dataKey="menjadi" name="Total Menjadi" fill="#82ca9d" />
                 <Bar dataKey="selisih" name="Selisih" fill="#ffc658">
-                  {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.selisih === 0 ? '#4ade80' : '#ef4444'} />)}
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.selisih === 0 ? '#4ade80' : '#ef4444'} />
+                  ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
             
-            {showSummaryBoxes && <div className="grid grid-cols-3 gap-4 mt-2 text-center">
-                
-                
-                
-              </div>}
+            {showSummaryBoxes && (
+              <div className="grid grid-cols-3 gap-4 mt-2 text-center">
+                {/* Summary boxes content can be added here if needed */}
+              </div>
+            )}
           </CardContent>
         </Card>
         
         <SummaryTable title={`Tabel Perbandingan ${title}`} data={data} initialPageSize={-1} />
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default DetailedSummaryView;

@@ -71,3 +71,17 @@ export const getSelisihTextColor = (value: number): string => {
   if (value === 0) return 'selisih-zero';
   return 'selisih-non-zero';
 };
+
+// Add new calculation functions for Realisasi and Persentase Realisasi
+export const calculateRealisasi = (totalMenjadi: number, sisaAnggaran: number): number => {
+  return roundToThousands(totalMenjadi - sisaAnggaran);
+};
+
+export const calculatePersentaseRealisasi = (realisasi: number, totalMenjadi: number): number => {
+  if (totalMenjadi === 0) return 0;
+  return Math.round((realisasi / totalMenjadi) * 100 * 100) / 100; // Round to 2 decimal places
+};
+
+export const formatPercentage = (percentage: number): string => {
+  return `${percentage.toFixed(2)}%`;
+};
