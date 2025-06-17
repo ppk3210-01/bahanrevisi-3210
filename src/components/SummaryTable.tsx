@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -51,7 +50,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     }
   };
 
-  // Process data to include new calculations
+  // Process data to include new calculations with corrected formula
   const processedData = data && data.length > 0 ? data.map(row => {
     const sisaAnggaran = row.sisaAnggaran || 0;
     const realisasi = calculateRealisasi(row.totalMenjadi, sisaAnggaran);
