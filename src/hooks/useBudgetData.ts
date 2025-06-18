@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
@@ -113,13 +112,16 @@ export default function useBudgetData(filters: FilterSelection) {
           supabase.rpc('get_budget_summary_by_akun_group')
         ]);
         
-        // Helper function to aggregate sisa_anggaran by group
+        // Helper function to aggregate sisa_anggaran by group - Fixed to use proper value
         const aggregateSisaAnggaranBy = (groupField: string, items: any[]) => {
           const groupMap = new Map<string, number>();
           
           items.forEach(item => {
             const groupValue = item[groupField] || '';
+            // Use the sisa_anggaran value directly from the item, defaulting to 0 if null/undefined
             const sisaAnggaran = item.sisa_anggaran || 0;
+            
+            console.log(`Aggregating ${groupField}: ${groupValue}, sisa_anggaran: ${sisaAnggaran}`);
             
             if (groupMap.has(groupValue)) {
               groupMap.set(groupValue, groupMap.get(groupValue)! + sisaAnggaran);
@@ -128,6 +130,7 @@ export default function useBudgetData(filters: FilterSelection) {
             }
           });
           
+          console.log(`Final aggregation for ${groupField}:`, Array.from(groupMap.entries()));
           return groupMap;
         };
         
@@ -146,6 +149,7 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'komponen_output'
           }));
+          console.log('Komponen data with sisa_anggaran:', komponenData);
           allSummaryData = [...allSummaryData, ...komponenData];
         }
         
@@ -163,6 +167,7 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'akun'
           }));
+          console.log('Akun data with sisa_anggaran:', akunData);
           allSummaryData = [...allSummaryData, ...akunData];
         }
 
@@ -179,6 +184,7 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'program_pembebanan'
           }));
+          console.log('Program Pembebanan data with sisa_anggaran:', programPembebananData);
           allSummaryData = [...allSummaryData, ...programPembebananData];
         }
         
@@ -195,6 +201,7 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'kegiatan'
           }));
+          console.log('Kegiatan data with sisa_anggaran:', kegiatanData);
           allSummaryData = [...allSummaryData, ...kegiatanData];
         }
         
@@ -211,6 +218,7 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'rincian_output'
           }));
+          console.log('Rincian Output data with sisa_anggaran:', rincianOutputData);
           allSummaryData = [...allSummaryData, ...rincianOutputData];
         }
         
@@ -227,6 +235,7 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'sub_komponen'
           }));
+          console.log('Sub Komponen data with sisa_anggaran:', subKomponenData);
           allSummaryData = [...allSummaryData, ...subKomponenData];
         }
         
@@ -244,6 +253,7 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'account_group'
           }));
+          console.log('Account Group data with sisa_anggaran:', accountGroupData);
           allSummaryData = [...allSummaryData, ...accountGroupData];
         }
         
@@ -261,9 +271,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'akun_group'
           }));
+          console.log('Akun Group data with sisa_anggaran:', akunGroupData);
           allSummaryData = [...allSummaryData, ...akunGroupData];
         }
         
+        console.log('Final allSummaryData:', allSummaryData);
         setSummaryData(allSummaryData);
       } catch (err) {
         console.error('Error fetching summary data:', err);
