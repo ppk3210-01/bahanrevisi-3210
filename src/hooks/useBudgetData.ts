@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { BudgetItem, FilterSelection, convertToBudgetItem, convertToBudgetItemRecord } from '@/types/budget';
 import { calculateAmount, calculateDifference, updateItemStatus } from '@/utils/budgetCalculations';
@@ -82,6 +83,15 @@ export default function useBudgetData(filters: FilterSelection) {
     
     const fetchSummaryData = async () => {
       try {
+        // Fetch budget items to calculate sisa_anggaran aggregations
+        const { data: budgetItemsData, error: budgetItemsError } = await supabase
+          .from('budget_items')
+          .select('*');
+        
+        if (budgetItemsError) {
+          throw budgetItemsError;
+        }
+        
         // Create custom RPC calls that include sisa_anggaran calculations
         const [
           komponenResult, 
@@ -103,14 +113,34 @@ export default function useBudgetData(filters: FilterSelection) {
           supabase.rpc('get_budget_summary_by_akun_group')
         ]);
         
+        // Helper function to aggregate sisa_anggaran by group
+        const aggregateSisaAnggaranBy = (groupField: string, items: any[]) => {
+          const groupMap = new Map<string, number>();
+          
+          items.forEach(item => {
+            const groupValue = item[groupField] || '';
+            const sisaAnggaran = item.sisa_anggaran || 0;
+            
+            if (groupMap.has(groupValue)) {
+              groupMap.set(groupValue, groupMap.get(groupValue)! + sisaAnggaran);
+            } else {
+              groupMap.set(groupValue, sisaAnggaran);
+            }
+          });
+          
+          return groupMap;
+        };
+        
         let allSummaryData: BudgetSummaryRecord[] = [];
         
-        if (komponenResult.data) {
+        if (komponenResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('komponen_output', budgetItemsData);
           const komponenData: BudgetSummaryByKomponen[] = komponenResult.data.map(item => ({
             komponen_output: item.komponen_output || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.komponen_output || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -119,13 +149,15 @@ export default function useBudgetData(filters: FilterSelection) {
           allSummaryData = [...allSummaryData, ...komponenData];
         }
         
-        if (akunResult.data) {
+        if (akunResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('akun', budgetItemsData);
           const akunData: BudgetSummaryByAkun[] = akunResult.data.map(item => ({
             akun: item.akun || '',
             akun_name: item.akun_name || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.akun || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -134,12 +166,14 @@ export default function useBudgetData(filters: FilterSelection) {
           allSummaryData = [...allSummaryData, ...akunData];
         }
 
-        if (programPembebananResult.data) {
+        if (programPembebananResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('program_pembebanan', budgetItemsData);
           const programPembebananData: BudgetSummaryByProgramPembebanan[] = programPembebananResult.data.map(item => ({
             program_pembebanan: item.program_pembebanan || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.program_pembebanan || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -148,12 +182,14 @@ export default function useBudgetData(filters: FilterSelection) {
           allSummaryData = [...allSummaryData, ...programPembebananData];
         }
         
-        if (kegiatanResult.data) {
+        if (kegiatanResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('kegiatan', budgetItemsData);
           const kegiatanData: BudgetSummaryByKegiatan[] = kegiatanResult.data.map(item => ({
             kegiatan: item.kegiatan || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.kegiatan || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -162,12 +198,14 @@ export default function useBudgetData(filters: FilterSelection) {
           allSummaryData = [...allSummaryData, ...kegiatanData];
         }
         
-        if (rincianOutputResult.data) {
+        if (rincianOutputResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('rincian_output', budgetItemsData);
           const rincianOutputData: BudgetSummaryByRincianOutput[] = rincianOutputResult.data.map(item => ({
             rincian_output: item.rincian_output || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.rincian_output || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -176,12 +214,14 @@ export default function useBudgetData(filters: FilterSelection) {
           allSummaryData = [...allSummaryData, ...rincianOutputData];
         }
         
-        if (subKomponenResult.data) {
+        if (subKomponenResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('sub_komponen', budgetItemsData);
           const subKomponenData: BudgetSummaryBySubKomponen[] = subKomponenResult.data.map(item => ({
             sub_komponen: item.sub_komponen || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.sub_komponen || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -190,13 +230,15 @@ export default function useBudgetData(filters: FilterSelection) {
           allSummaryData = [...allSummaryData, ...subKomponenData];
         }
         
-        if (accountGroupResult.data) {
+        if (accountGroupResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('account_group', budgetItemsData);
           const accountGroupData: BudgetSummaryByAccountGroup[] = accountGroupResult.data.map(item => ({
             account_group: item.account_group || '',
             account_group_name: item.account_group_name || item.account_group || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.account_group || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,
@@ -205,13 +247,15 @@ export default function useBudgetData(filters: FilterSelection) {
           allSummaryData = [...allSummaryData, ...accountGroupData];
         }
         
-        if (akunGroupResult.data) {
+        if (akunGroupResult.data && budgetItemsData) {
+          const sisaAnggaranMap = aggregateSisaAnggaranBy('akun_group', budgetItemsData);
           const akunGroupData: BudgetSummaryByAkunGroup[] = akunGroupResult.data.map(item => ({
             akun_group: item.akun_group || '',
             akun_group_name: item.akun_group_name || item.akun_group || '',
             total_semula: roundToThousands(item.total_semula || 0),
             total_menjadi: roundToThousands(item.total_menjadi || 0),
             total_selisih: roundToThousands(item.total_selisih || 0),
+            total_sisa_anggaran: roundToThousands(sisaAnggaranMap.get(item.akun_group || '') || 0),
             new_items: item.new_items,
             changed_items: item.changed_items,
             total_items: item.total_items,

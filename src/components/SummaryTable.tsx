@@ -50,23 +50,59 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     }
   };
 
-  // Process data to include new calculations - Fixed realisasi calculation
+  // Process data to include new calculations - Fixed to use correct sisa_anggaran
   const processedData = data && data.length > 0 ? data.map(row => {
-    const sisaAnggaran = row.sisaAnggaran || 0;
-    // Correct: Use totalMenjadi as the jumlahMenjadi for this summary row
+    // Try to find matching summary data record to get the correct sisa_anggaran
+    let correctSisaAnggaran = row.sisaAnggaran || 0;
+    
+    if (summaryData && summaryData.length > 0) {
+      const matchingSummary = summaryData.find(summary => {
+        const summaryName = getSummaryName(summary);
+        return summaryName === row.name;
+      });
+      
+      if (matchingSummary && 'total_sisa_anggaran' in matchingSummary) {
+        correctSisaAnggaran = matchingSummary.total_sisa_anggaran || 0;
+      }
+    }
+    
     const jumlahMenjadi = row.totalMenjadi;
-    const realisasi = calculateRealisasi(jumlahMenjadi, sisaAnggaran);
+    const realisasi = calculateRealisasi(jumlahMenjadi, correctSisaAnggaran);
     const persentaseRealisasi = calculatePersentaseRealisasi(realisasi, jumlahMenjadi);
     
-    console.log(`Row: ${row.name}, JumlahMenjadi: ${jumlahMenjadi}, SisaAnggaran: ${sisaAnggaran}, Realisasi: ${realisasi}`);
+    console.log(`Row: ${row.name}, JumlahMenjadi: ${jumlahMenjadi}, SisaAnggaran: ${correctSisaAnggaran}, Realisasi: ${realisasi}`);
     
     return {
       ...row,
-      sisaAnggaran,
+      sisaAnggaran: correctSisaAnggaran,
       realisasi,
       persentaseRealisasi
     };
   }) : [];
+
+  // Helper function to get name from summary record
+  const getSummaryName = (record: BudgetSummaryRecord): string => {
+    switch (record.type) {
+      case 'komponen_output':
+        return record.komponen_output || '';
+      case 'akun':
+        return record.akun || '';
+      case 'program_pembebanan':
+        return record.program_pembebanan || '';
+      case 'kegiatan':
+        return record.kegiatan || '';
+      case 'rincian_output':
+        return record.rincian_output || '';
+      case 'sub_komponen':
+        return record.sub_komponen || '';
+      case 'account_group':
+        return record.account_group || '';
+      case 'akun_group':
+        return record.akun_group || '';
+      default:
+        return '';
+    }
+  };
 
   const sortedData = [...processedData].sort((a, b) => {
     const fieldA = a[sortField];
