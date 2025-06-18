@@ -62,7 +62,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       });
       
       if (matchingSummary && 'total_sisa_anggaran' in matchingSummary) {
-        correctSisaAnggaran = matchingSummary.total_sisa_anggaran || 0;
+        // Fix TypeScript error by properly typing the value
+        const sisaAnggaranValue = matchingSummary.total_sisa_anggaran;
+        correctSisaAnggaran = typeof sisaAnggaranValue === 'number' ? sisaAnggaranValue : 0;
       }
     }
     
