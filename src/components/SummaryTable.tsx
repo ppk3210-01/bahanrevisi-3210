@@ -50,10 +50,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     }
   };
 
-  // Process data to include new calculations - Fixed to use correct sisa_anggaran
+  // Process data to include new calculations - Use summaryData directly for sisa_anggaran
   const processedData = data && data.length > 0 ? data.map(row => {
-    // Try to find matching summary data record to get the correct sisa_anggaran
-    let correctSisaAnggaran = row.sisaAnggaran || 0;
+    // Find the matching summary data record for this row
+    let correctSisaAnggaran = 0; // Default to 0
     
     if (summaryData && summaryData.length > 0) {
       const matchingSummary = summaryData.find(summary => {
@@ -62,7 +62,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       });
       
       if (matchingSummary && 'total_sisa_anggaran' in matchingSummary) {
-        // Fix TypeScript error by properly typing the value
+        // Get the sisa anggaran value from the summary data
         const sisaAnggaranValue = matchingSummary.total_sisa_anggaran;
         correctSisaAnggaran = typeof sisaAnggaranValue === 'number' ? sisaAnggaranValue : 0;
       }
@@ -88,7 +88,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       case 'komponen_output':
         return record.komponen_output || '';
       case 'akun':
-        return record.akun || '';
+        return record.akun_name ? `${record.akun} - ${record.akun_name}` : record.akun || '';
       case 'program_pembebanan':
         return record.program_pembebanan || '';
       case 'kegiatan':
@@ -98,14 +98,15 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
       case 'sub_komponen':
         return record.sub_komponen || '';
       case 'account_group':
-        return record.account_group || '';
+        return record.account_group_name ? `${record.account_group} – ${record.account_group_name}` : record.account_group || '';
       case 'akun_group':
-        return record.akun_group || '';
+        return record.akun_group_name ? `${record.akun_group} - ${record.akun_group_name}` : record.akun_group || '';
       default:
         return '';
     }
   };
 
+  // ... keep existing code (sorting logic)
   const sortedData = [...processedData].sort((a, b) => {
     const fieldA = a[sortField];
     const fieldB = b[sortField];
