@@ -153,6 +153,7 @@ const BudgetComparison: React.FC = () => {
         totalSemula: item.total_semula || 0,
         totalMenjadi: item.total_menjadi || 0,
         totalSelisih: item.total_selisih || 0,
+        sisaAnggaran: item.total_sisa_anggaran || 0,
         newItems: item.new_items || 0,
         changedItems: item.changed_items || 0,
         totalItems: item.total_items || 0
