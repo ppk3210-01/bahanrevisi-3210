@@ -82,7 +82,7 @@ export default function useBudgetData(filters: FilterSelection) {
     
     const fetchSummaryData = async () => {
       try {
-        // Fetch budget items to calculate sisa_anggaran aggregations
+        // Fetch all budget items first for sisa_anggaran calculations
         const { data: budgetItemsData, error: budgetItemsError } = await supabase
           .from('budget_items')
           .select('*');
@@ -91,7 +91,7 @@ export default function useBudgetData(filters: FilterSelection) {
           throw budgetItemsError;
         }
         
-        // Create custom RPC calls that include sisa_anggaran calculations
+        // Fetch summary data from RPC functions
         const [
           komponenResult, 
           akunResult,
@@ -112,31 +112,35 @@ export default function useBudgetData(filters: FilterSelection) {
           supabase.rpc('get_budget_summary_by_akun_group')
         ]);
         
-        // Helper function to aggregate sisa_anggaran by group - Ensure proper handling of null values
-        const aggregateSisaAnggaranBy = (groupField: string, items: any[]) => {
-          const groupMap = new Map<string, number>();
+        // Create a comprehensive sisa_anggaran aggregation function
+        const aggregateSisaAnggaranByField = (fieldName: string, data: any[]) => {
+          const aggregation = new Map<string, number>();
           
-          items.forEach(item => {
-            const groupValue = item[groupField];
-            if (!groupValue) return; // Skip items without group value
+          if (!budgetItemsData || budgetItemsData.length === 0) {
+            console.log(`No budget items data available for ${fieldName} aggregation`);
+            return aggregation;
+          }
+          
+          budgetItemsData.forEach(item => {
+            const fieldValue = item[fieldName];
+            if (!fieldValue) return;
             
-            // Use sisa_anggaran if available, otherwise default to 0
             const sisaAnggaran = Number(item.sisa_anggaran) || 0;
+            const currentSum = aggregation.get(fieldValue) || 0;
+            aggregation.set(fieldValue, currentSum + sisaAnggaran);
             
-            console.log(`Aggregating ${groupField}: ${groupValue}, sisa_anggaran: ${sisaAnggaran}`);
-            
-            const currentTotal = groupMap.get(groupValue) || 0;
-            groupMap.set(groupValue, currentTotal + sisaAnggaran);
+            console.log(`${fieldName} aggregation: ${fieldValue} += ${sisaAnggaran} (total: ${currentSum + sisaAnggaran})`);
           });
           
-          console.log(`Final aggregation for ${groupField}:`, Array.from(groupMap.entries()));
-          return groupMap;
+          console.log(`Final ${fieldName} sisa_anggaran aggregation:`, Array.from(aggregation.entries()));
+          return aggregation;
         };
         
         let allSummaryData: BudgetSummaryRecord[] = [];
         
+        // Process each summary type with proper sisa_anggaran aggregation
         if (komponenResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('komponen_output', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('komponen_output', budgetItemsData);
           const komponenData: BudgetSummaryByKomponen[] = komponenResult.data.map(item => ({
             komponen_output: item.komponen_output || '',
             total_semula: roundToThousands(item.total_semula || 0),
@@ -148,12 +152,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'komponen_output'
           }));
-          console.log('Komponen data with sisa_anggaran:', komponenData);
           allSummaryData = [...allSummaryData, ...komponenData];
         }
         
         if (akunResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('akun', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('akun', budgetItemsData);
           const akunData: BudgetSummaryByAkun[] = akunResult.data.map(item => ({
             akun: item.akun || '',
             akun_name: item.akun_name || '',
@@ -166,12 +169,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'akun'
           }));
-          console.log('Akun data with sisa_anggaran:', akunData);
           allSummaryData = [...allSummaryData, ...akunData];
         }
 
         if (programPembebananResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('program_pembebanan', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('program_pembebanan', budgetItemsData);
           const programPembebananData: BudgetSummaryByProgramPembebanan[] = programPembebananResult.data.map(item => ({
             program_pembebanan: item.program_pembebanan || '',
             total_semula: roundToThousands(item.total_semula || 0),
@@ -183,12 +185,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'program_pembebanan'
           }));
-          console.log('Program Pembebanan data with sisa_anggaran:', programPembebananData);
           allSummaryData = [...allSummaryData, ...programPembebananData];
         }
         
         if (kegiatanResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('kegiatan', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('kegiatan', budgetItemsData);
           const kegiatanData: BudgetSummaryByKegiatan[] = kegiatanResult.data.map(item => ({
             kegiatan: item.kegiatan || '',
             total_semula: roundToThousands(item.total_semula || 0),
@@ -200,12 +201,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'kegiatan'
           }));
-          console.log('Kegiatan data with sisa_anggaran:', kegiatanData);
           allSummaryData = [...allSummaryData, ...kegiatanData];
         }
         
         if (rincianOutputResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('rincian_output', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('rincian_output', budgetItemsData);
           const rincianOutputData: BudgetSummaryByRincianOutput[] = rincianOutputResult.data.map(item => ({
             rincian_output: item.rincian_output || '',
             total_semula: roundToThousands(item.total_semula || 0),
@@ -217,12 +217,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'rincian_output'
           }));
-          console.log('Rincian Output data with sisa_anggaran:', rincianOutputData);
           allSummaryData = [...allSummaryData, ...rincianOutputData];
         }
         
         if (subKomponenResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('sub_komponen', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('sub_komponen', budgetItemsData);
           const subKomponenData: BudgetSummaryBySubKomponen[] = subKomponenResult.data.map(item => ({
             sub_komponen: item.sub_komponen || '',
             total_semula: roundToThousands(item.total_semula || 0),
@@ -234,12 +233,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'sub_komponen'
           }));
-          console.log('Sub Komponen data with sisa_anggaran:', subKomponenData);
           allSummaryData = [...allSummaryData, ...subKomponenData];
         }
         
         if (accountGroupResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('account_group', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('account_group', budgetItemsData);
           const accountGroupData: BudgetSummaryByAccountGroup[] = accountGroupResult.data.map(item => ({
             account_group: item.account_group || '',
             account_group_name: item.account_group_name || item.account_group || '',
@@ -252,12 +250,11 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'account_group'
           }));
-          console.log('Account Group data with sisa_anggaran:', accountGroupData);
           allSummaryData = [...allSummaryData, ...accountGroupData];
         }
         
         if (akunGroupResult.data && budgetItemsData) {
-          const sisaAnggaranMap = aggregateSisaAnggaranBy('akun_group', budgetItemsData);
+          const sisaAnggaranMap = aggregateSisaAnggaranByField('akun_group', budgetItemsData);
           const akunGroupData: BudgetSummaryByAkunGroup[] = akunGroupResult.data.map(item => ({
             akun_group: item.akun_group || '',
             akun_group_name: item.akun_group_name || item.akun_group || '',
@@ -270,11 +267,10 @@ export default function useBudgetData(filters: FilterSelection) {
             total_items: item.total_items,
             type: 'akun_group'
           }));
-          console.log('Akun Group data with sisa_anggaran:', akunGroupData);
           allSummaryData = [...allSummaryData, ...akunGroupData];
         }
         
-        console.log('Final allSummaryData:', allSummaryData);
+        console.log('Final processed summary data with sisa_anggaran:', allSummaryData);
         setSummaryData(allSummaryData);
       } catch (err) {
         console.error('Error fetching summary data:', err);
