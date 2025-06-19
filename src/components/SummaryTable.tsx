@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -65,6 +66,10 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
         // Get the sisa anggaran value from the summary data
         const sisaAnggaranValue = matchingSummary.total_sisa_anggaran;
         correctSisaAnggaran = typeof sisaAnggaranValue === 'number' ? sisaAnggaranValue : 0;
+        
+        console.log(`Found matching summary for ${row.name}: sisaAnggaran = ${correctSisaAnggaran}`);
+      } else {
+        console.log(`No matching summary found for ${row.name}`);
       }
     }
     

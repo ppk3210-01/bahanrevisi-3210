@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -9,6 +10,7 @@ import { formatCurrency } from '@/utils/budgetCalculations';
 import { exportToJpeg, exportToPdf, exportToExcel } from '@/utils/exportUtils';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { BudgetSummaryRecord } from '@/types/database';
 
 interface SummaryRow {
   id: string;
@@ -29,6 +31,8 @@ interface DetailedSummaryViewProps {
   totalMenjadi: number;
   totalSelisih: number;
   showSummaryBoxes?: boolean;
+  summaryData?: BudgetSummaryRecord[];
+  view?: string;
 }
 
 const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
@@ -37,7 +41,9 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
   totalSemula,
   totalMenjadi,
   totalSelisih,
-  showSummaryBoxes = true
+  showSummaryBoxes = true,
+  summaryData,
+  view
 }) => {
   const chartAndTableRef = useRef<HTMLDivElement>(null);
   const { isAdmin } = useAuth();
@@ -201,7 +207,13 @@ const DetailedSummaryView: React.FC<DetailedSummaryViewProps> = ({
           </CardContent>
         </Card>
         
-        <SummaryTable title={`Tabel Perbandingan ${title}`} data={data} initialPageSize={-1} />
+        <SummaryTable 
+          title={`Tabel Perbandingan ${title}`} 
+          data={data} 
+          summaryData={summaryData}
+          view={view}
+          initialPageSize={-1} 
+        />
       </div>
     </div>
   );
