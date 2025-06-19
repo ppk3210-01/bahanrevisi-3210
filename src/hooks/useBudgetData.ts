@@ -112,7 +112,7 @@ export default function useBudgetData(filters: FilterSelection) {
           supabase.rpc('get_budget_summary_by_akun_group')
         ]);
         
-        // Helper function to aggregate sisa_anggaran by group - Fixed to use proper aggregation logic
+        // Helper function to aggregate sisa_anggaran by group - Ensure proper handling of null values
         const aggregateSisaAnggaranBy = (groupField: string, items: any[]) => {
           const groupMap = new Map<string, number>();
           
@@ -120,6 +120,7 @@ export default function useBudgetData(filters: FilterSelection) {
             const groupValue = item[groupField];
             if (!groupValue) return; // Skip items without group value
             
+            // Use sisa_anggaran if available, otherwise default to 0
             const sisaAnggaran = Number(item.sisa_anggaran) || 0;
             
             console.log(`Aggregating ${groupField}: ${groupValue}, sisa_anggaran: ${sisaAnggaran}`);
