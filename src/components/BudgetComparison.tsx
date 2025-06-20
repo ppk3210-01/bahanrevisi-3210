@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -187,9 +186,9 @@ const BudgetComparison: React.FC = () => {
             name = '';
         }
 
-        // Make sure we're using the sisa_anggaran from the summary data
+        // Now use the total_sisa_anggaran directly from the database
         const sisaAnggaran = item.total_sisa_anggaran || 0;
-        console.log(`BudgetComparison - Processing ${name}: sisaAnggaran from summaryData = ${sisaAnggaran}`);
+        console.log(`BudgetComparison - Processing ${name}: sisaAnggaran from database = ${sisaAnggaran}`);
 
         return {
           id: item.type === 'akun' 
@@ -203,7 +202,7 @@ const BudgetComparison: React.FC = () => {
           totalSemula: item.total_semula || 0,
           totalMenjadi: item.total_menjadi || 0,
           totalSelisih: item.total_selisih || 0,
-          sisaAnggaran: sisaAnggaran, // Pass the actual sisa_anggaran value
+          sisaAnggaran: sisaAnggaran, // Use the value directly from database
           newItems: item.new_items || 0,
           changedItems: item.changed_items || 0,  
           totalItems: item.total_items || 0
@@ -303,7 +302,7 @@ const BudgetComparison: React.FC = () => {
             komponenOutput={filters.komponenOutput}
             subKomponen={filters.subKomponen}
             akun={filters.akun}
-            onAd={addBudgetItem}
+            onAdd={addBudgetItem}
             onUpdate={updateBudgetItem}
             onDelete={deleteBudgetItem}
             onApprove={approveBudgetItem}
