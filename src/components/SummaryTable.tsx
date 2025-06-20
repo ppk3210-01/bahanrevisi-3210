@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -51,65 +50,24 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     }
   };
 
-  // Process data to include new calculations - Use summaryData directly for sisa_anggaran
+  // Process data to include new calculations with proper sisa_anggaran values
   const processedData = data && data.length > 0 ? data.map(row => {
-    // Find the matching summary data record for this row
-    let correctSisaAnggaran = 0; // Default to 0
-    
-    if (summaryData && summaryData.length > 0) {
-      const matchingSummary = summaryData.find(summary => {
-        const summaryName = getSummaryName(summary);
-        return summaryName === row.name;
-      });
-      
-      if (matchingSummary && 'total_sisa_anggaran' in matchingSummary) {
-        // Get the sisa anggaran value from the summary data
-        const sisaAnggaranValue = matchingSummary.total_sisa_anggaran;
-        correctSisaAnggaran = typeof sisaAnggaranValue === 'number' ? sisaAnggaranValue : 0;
-        
-        console.log(`Found matching summary for ${row.name}: sisaAnggaran = ${correctSisaAnggaran}`);
-      } else {
-        console.log(`No matching summary found for ${row.name}`);
-      }
-    }
-    
+    // Use the sisaAnggaran that's already provided from the parent component
+    // which should come from the summaryData with proper aggregation
+    const sisaAnggaran = row.sisaAnggaran || 0;
     const jumlahMenjadi = row.totalMenjadi;
-    const realisasi = calculateRealisasi(jumlahMenjadi, correctSisaAnggaran);
+    const realisasi = calculateRealisasi(jumlahMenjadi, sisaAnggaran);
     const persentaseRealisasi = calculatePersentaseRealisasi(realisasi, jumlahMenjadi);
     
-    console.log(`Row: ${row.name}, JumlahMenjadi: ${jumlahMenjadi}, SisaAnggaran: ${correctSisaAnggaran}, Realisasi: ${realisasi}`);
+    console.log(`SummaryTable - Row: ${row.name}, JumlahMenjadi: ${jumlahMenjadi}, SisaAnggaran: ${sisaAnggaran}, Realisasi: ${realisasi}, Persentase: ${persentaseRealisasi}%`);
     
     return {
       ...row,
-      sisaAnggaran: correctSisaAnggaran,
+      sisaAnggaran,
       realisasi,
       persentaseRealisasi
     };
   }) : [];
-
-  // Helper function to get name from summary record
-  const getSummaryName = (record: BudgetSummaryRecord): string => {
-    switch (record.type) {
-      case 'komponen_output':
-        return record.komponen_output || '';
-      case 'akun':
-        return record.akun_name ? `${record.akun} - ${record.akun_name}` : record.akun || '';
-      case 'program_pembebanan':
-        return record.program_pembebanan || '';
-      case 'kegiatan':
-        return record.kegiatan || '';
-      case 'rincian_output':
-        return record.rincian_output || '';
-      case 'sub_komponen':
-        return record.sub_komponen || '';
-      case 'account_group':
-        return record.account_group_name ? `${record.account_group} – ${record.account_group_name}` : record.account_group || '';
-      case 'akun_group':
-        return record.akun_group_name ? `${record.akun_group} - ${record.akun_group_name}` : record.akun_group || '';
-      default:
-        return '';
-    }
-  };
 
   // ... keep existing code (sorting logic)
   const sortedData = [...processedData].sort((a, b) => {

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import BudgetFilter from './BudgetFilter';
 import BudgetTable from './BudgetTable';
@@ -17,6 +18,7 @@ import { BudgetItem } from '@/types/budget';
 import { BudgetChangesTable } from './BudgetChangesTable';
 import { NewBudgetTable } from './NewBudgetTable';
 import BudgetChangesConclusion from './BudgetChangesConclusion';
+
 const BudgetComparison: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('anggaran');
   const [summaryView, setSummaryView] = useState<SummaryViewType>('changes');
@@ -28,9 +30,9 @@ const BudgetComparison: React.FC = () => {
     subKomponen: 'all',
     akun: 'all'
   });
-  const {
-    isAdmin
-  } = useAuth();
+
+  const { isAdmin } = useAuth();
+  
   const {
     budgetItems,
     loading: loadingItems,
@@ -42,11 +44,13 @@ const BudgetComparison: React.FC = () => {
     rejectBudgetItem,
     summaryData
   } = useBudgetData(filters);
+
   const handleImportItems = async (items: Partial<BudgetItem>[]): Promise<void> => {
     if (items && items.length > 0) {
       await importBudgetItems(items);
     }
   };
+
   const loadingOptions = false;
   const programPembebananOptions = [];
   const kegiatanOptions = [];
@@ -54,18 +58,24 @@ const BudgetComparison: React.FC = () => {
   const komponenOutputOptions = [];
   const subKomponenOptions = [];
   const akunOptions = [];
+
   const filteredItems = budgetItems;
   const areFiltersComplete = filters.akun !== 'all' && filters.komponenOutput !== 'all';
+
   const totalSemula = filteredItems.reduce((sum, item) => sum + item.jumlahSemula, 0);
   const totalMenjadi = filteredItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
   const totalSelisih = totalMenjadi - totalSemula;
+
   const newItems = filteredItems.filter(item => item.status === 'new');
   const totalNewItems = newItems.length;
   const totalNewValue = newItems.reduce((sum, item) => sum + item.jumlahMenjadi, 0);
+
   const changedItems = filteredItems.filter(item => item.status === 'changed');
   const totalChangedItems = changedItems.length;
   const totalChangedValue = changedItems.reduce((sum, item) => sum + item.selisih, 0);
+
   const deletedItems = filteredItems.filter(item => item.status === 'deleted').length;
+
   const getChangedBudgetItems = () => {
     return filteredItems.filter(item => item.status === 'changed').map(item => ({
       id: item.id,
@@ -77,6 +87,7 @@ const BudgetComparison: React.FC = () => {
       selisih: item.selisih
     }));
   };
+
   const getNewBudgetItems = () => {
     return filteredItems.filter(item => item.status === 'new').map(item => ({
       id: item.id,
@@ -88,6 +99,7 @@ const BudgetComparison: React.FC = () => {
       jumlah: item.jumlahMenjadi
     }));
   };
+
   const getDetailPerubahan = (item: BudgetItem) => {
     const changes: string[] = [];
     if (item.volumeSemula !== item.volumeMenjadi) {
@@ -101,65 +113,104 @@ const BudgetComparison: React.FC = () => {
     }
     return changes.join('\n');
   };
+
   const getCombinedPembebananCode = (item: BudgetItem): string => {
     const codes = [item.programPembebanan, item.komponenOutput, item.subKomponen, 'A', item.akun].filter(Boolean);
     return codes.join('.');
   };
+
   const renderSummarySection = () => {
     if (summaryView === 'changes') {
-      return <div className="space-y-4">
-          <BudgetChangesConclusion totalSemula={totalSemula} totalMenjadi={totalMenjadi} totalSelisih={totalSelisih} changedItems={totalChangedItems} newItems={totalNewItems} deletedItems={deletedItems} />
-          <BudgetChangesTable title="Pagu Anggaran Berubah" items={getChangedBudgetItems()} />
+      return (
+        <div className="space-y-4">
+          <BudgetChangesConclusion 
+            totalSemula={totalSemula}
+            totalMenjadi={totalMenjadi}
+            totalSelisih={totalSelisih}
+            changedItems={totalChangedItems}
+            newItems={totalNewItems}
+            deletedItems={deletedItems}
+          />
+          <BudgetChangesTable 
+            title="Pagu Anggaran Berubah"
+            items={getChangedBudgetItems()}
+          />
           <NewBudgetTable items={getNewBudgetItems()} />
-        </div>;
+        </div>
+      );
     }
-    return <DetailedSummaryView title={getSummaryTitle()} data={getFilteredSummaryData()} totalSemula={getTotalSummaryValues().semula} totalMenjadi={getTotalSummaryValues().menjadi} totalSelisih={getTotalSummaryValues().selisih} />;
+
+    return (
+      <DetailedSummaryView
+        title={getSummaryTitle()}
+        data={getFilteredSummaryData()}
+        totalSemula={getTotalSummaryValues().semula}
+        totalMenjadi={getTotalSummaryValues().menjadi}
+        totalSelisih={getTotalSummaryValues().selisih}
+      />
+    );
   };
+
   const getFilteredSummaryData = () => {
     if (!summaryData || summaryData.length === 0) return [];
-    return summaryData.filter(item => item.type === summaryView).map(item => {
-      let name = '';
-      switch (item.type) {
-        case 'program_pembebanan':
-          name = item.program_pembebanan || '';
-          break;
-        case 'kegiatan':
-          name = item.kegiatan || '';
-          break;
-        case 'rincian_output':
-          name = item.rincian_output || '';
-          break;
-        case 'komponen_output':
-          name = item.komponen_output || '';
-          break;
-        case 'sub_komponen':
-          name = item.sub_komponen || '';
-          break;
-        case 'akun':
-          name = item.akun_name ? `${item.akun} - ${item.akun_name}` : item.akun || '';
-          break;
-        case 'account_group':
-          name = item.account_group_name ? `${item.account_group} – ${item.account_group_name}` : item.account_group || '';
-          break;
-        case 'akun_group':
-          name = item.akun_group_name ? `${item.akun_group} - ${item.akun_group_name}` : item.akun_group || '';
-          break;
-        default:
-          name = '';
-      }
-      return {
-        id: item.type === 'akun' ? item.akun || name : item.type === 'account_group' ? item.account_group || name : item.type === 'akun_group' ? item.akun_group || name : name,
-        name,
-        totalSemula: item.total_semula || 0,
-        totalMenjadi: item.total_menjadi || 0,
-        totalSelisih: item.total_selisih || 0,
-        sisaAnggaran: item.total_sisa_anggaran || 0,
-        newItems: item.new_items || 0,
-        changedItems: item.changed_items || 0,
-        totalItems: item.total_items || 0
-      };
-    });
+
+    return summaryData
+      .filter(item => item.type === summaryView)
+      .map(item => {
+        let name = '';
+        switch (item.type) {
+          case 'program_pembebanan':
+            name = item.program_pembebanan || '';
+            break;
+          case 'kegiatan':
+            name = item.kegiatan || '';
+            break;
+          case 'rincian_output':
+            name = item.rincian_output || '';
+            break;
+          case 'komponen_output':
+            name = item.komponen_output || '';
+            break;
+          case 'sub_komponen':
+            name = item.sub_komponen || '';
+            break;
+          case 'akun':
+            name = item.akun_name ? `${item.akun} - ${item.akun_name}` : item.akun || '';
+            break;
+          case 'account_group':
+            name = item.account_group_name ? `${item.account_group} – ${item.account_group_name}` : item.account_group || '';
+            break;
+          case 'akun_group':
+            name = item.akun_group_name ? `${item.akun_group} - ${item.akun_group_name}` : item.akun_group || '';
+            break;
+          default:
+            name = '';
+        }
+
+        // Make sure we're using the sisa_anggaran from the summary data
+        const sisaAnggaran = item.total_sisa_anggaran || 0;
+        console.log(`BudgetComparison - Processing ${name}: sisaAnggaran from summaryData = ${sisaAnggaran}`);
+
+        return {
+          id: item.type === 'akun' 
+            ? item.akun || name 
+            : item.type === 'account_group' 
+              ? item.account_group || name 
+              : item.type === 'akun_group' 
+                ? item.akun_group || name 
+                : name,
+          name,
+          totalSemula: item.total_semula || 0,
+          totalMenjadi: item.total_menjadi || 0,
+          totalSelisih: item.total_selisih || 0,
+          sisaAnggaran: sisaAnggaran, // Pass the actual sisa_anggaran value
+          newItems: item.new_items || 0,
+          changedItems: item.changed_items || 0,  
+          totalItems: item.total_items || 0
+        };
+      });
   };
+
   const getSummaryTitle = () => {
     switch (summaryView) {
       case 'program_pembebanan':
@@ -182,31 +233,35 @@ const BudgetComparison: React.FC = () => {
         return '';
     }
   };
+
   const getTotalSummaryValues = () => {
-    if (!summaryData || summaryData.length === 0) return {
-      semula: 0,
-      menjadi: 0,
-      selisih: 0
-    };
+    if (!summaryData || summaryData.length === 0) return { semula: 0, menjadi: 0, selisih: 0 };
+
     const filteredSummary = summaryData.filter(item => item.type === summaryView);
-    if (filteredSummary.length === 0) return {
-      semula: 0,
-      menjadi: 0,
-      selisih: 0
-    };
+    if (filteredSummary.length === 0) return { semula: 0, menjadi: 0, selisih: 0 };
+
     const totalSemula = filteredSummary.reduce((sum, item) => sum + (item.total_semula || 0), 0);
     const totalMenjadi = filteredSummary.reduce((sum, item) => sum + (item.total_menjadi || 0), 0);
     const totalSelisih = filteredSummary.reduce((sum, item) => sum + (item.total_selisih || 0), 0);
-    return {
-      semula: totalSemula,
-      menjadi: totalMenjadi,
-      selisih: totalSelisih
-    };
+
+    return { semula: totalSemula, menjadi: totalMenjadi, selisih: totalSelisih };
   };
-  return <div className="space-y-4">
+
+  return (
+    <div className="space-y-4">
       <h1 className="text-xl font-semibold text-sky-800">Bahan Revisi Anggaran BPS Kabupaten Majalengka</h1>
       
-      <BudgetFilter filters={filters} setFilters={setFilters} programPembebananOptions={programPembebananOptions} kegiatanOptions={kegiatanOptions} rincianOutputOptions={rincianOutputOptions} komponenOutputOptions={komponenOutputOptions} subKomponenOptions={subKomponenOptions} akunOptions={akunOptions} loading={loadingOptions} />
+      <BudgetFilter
+        filters={filters}
+        setFilters={setFilters}
+        programPembebananOptions={programPembebananOptions}
+        kegiatanOptions={kegiatanOptions}
+        rincianOutputOptions={rincianOutputOptions}
+        komponenOutputOptions={komponenOutputOptions}
+        subKomponenOptions={subKomponenOptions}
+        akunOptions={akunOptions}
+        loading={loadingOptions}
+      />
       
       <div className="flex flex-wrap gap-2 justify-between items-center">
         <div className="flex flex-wrap gap-2">
@@ -221,9 +276,18 @@ const BudgetComparison: React.FC = () => {
           </Badge>
         </div>
         
-        {isAdmin && <div className="flex gap-2">
-            <ExcelImportExport items={filteredItems} onImport={handleImportItems} komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined} subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined} akun={filters.akun !== 'all' ? filters.akun : undefined} smallText={true} />
-          </div>}
+        {isAdmin && (
+          <div className="flex gap-2">
+            <ExcelImportExport
+              items={filteredItems}
+              onImport={handleImportItems}
+              komponenOutput={filters.komponenOutput !== 'all' ? filters.komponenOutput : undefined}
+              subKomponen={filters.subKomponen !== 'all' ? filters.subKomponen : undefined}
+              akun={filters.akun !== 'all' ? filters.akun : undefined}
+              smallText={true}
+            />
+          </div>
+        )}
       </div>
       
       <Tabs defaultValue={selectedTab} value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
@@ -234,7 +298,19 @@ const BudgetComparison: React.FC = () => {
         </TabsList>
         
         <TabsContent value="anggaran" className="space-y-4">
-          <BudgetTable items={filteredItems} komponenOutput={filters.komponenOutput} subKomponen={filters.subKomponen} akun={filters.akun} onAdd={addBudgetItem} onUpdate={updateBudgetItem} onDelete={deleteBudgetItem} onApprove={approveBudgetItem} onReject={rejectBudgetItem} isLoading={loadingItems} areFiltersComplete={areFiltersComplete} />
+          <BudgetTable
+            items={filteredItems}
+            komponenOutput={filters.komponenOutput}
+            subKomponen={filters.subKomponen}
+            akun={filters.akun}
+            onAd={addBudgetItem}
+            onUpdate={updateBudgetItem}
+            onDelete={deleteBudgetItem}
+            onApprove={approveBudgetItem}
+            onReject={rejectBudgetItem}
+            isLoading={loadingItems}
+            areFiltersComplete={areFiltersComplete}
+          />
         </TabsContent>
         
         <TabsContent value="rpd" className="space-y-4">
@@ -245,31 +321,76 @@ const BudgetComparison: React.FC = () => {
           <div className="grid grid-cols-1 gap-4">
             <Card className="p-4">
               <div className="flex flex-wrap gap-2 mb-4">
-                <Button variant={summaryView === 'changes' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('changes')} className="text-xs">
+                <Button
+                  variant={summaryView === 'changes' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('changes')}
+                  className="text-xs"
+                >
                   Ringkasan Perubahan
                 </Button>
-                <Button variant={summaryView === 'program_pembebanan' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('program_pembebanan')} className="text-xs">
+                <Button
+                  variant={summaryView === 'program_pembebanan' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('program_pembebanan')}
+                  className="text-xs"
+                >
                   Program Pembebanan
                 </Button>
-                <Button variant={summaryView === 'kegiatan' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('kegiatan')} className="text-xs">
+                <Button
+                  variant={summaryView === 'kegiatan' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('kegiatan')}
+                  className="text-xs"
+                >
                   Kegiatan
                 </Button>
-                <Button variant={summaryView === 'rincian_output' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('rincian_output')} className="text-xs">
+                <Button
+                  variant={summaryView === 'rincian_output' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('rincian_output')}
+                  className="text-xs"
+                >
                   Rincian Output
                 </Button>
-                <Button variant={summaryView === 'komponen_output' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('komponen_output')} className="text-xs">
+                <Button
+                  variant={summaryView === 'komponen_output' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('komponen_output')}
+                  className="text-xs"
+                >
                   Komponen Output
                 </Button>
-                <Button variant={summaryView === 'sub_komponen' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('sub_komponen')} className="text-xs">
+                <Button
+                  variant={summaryView === 'sub_komponen' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('sub_komponen')}
+                  className="text-xs"
+                >
                   Sub Komponen
                 </Button>
-                <Button variant={summaryView === 'akun' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('akun')} className="text-xs">
+                <Button
+                  variant={summaryView === 'akun' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('akun')}
+                  className="text-xs"
+                >
                   Akun
                 </Button>
-                <Button variant={summaryView === 'akun_group' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('akun_group')} className="text-xs">
+                <Button
+                  variant={summaryView === 'akun_group' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('akun_group')}
+                  className="text-xs"
+                >
                   Kelompok Akun
                 </Button>
-                <Button variant={summaryView === 'account_group' ? 'default' : 'outline'} size="sm" onClick={() => setSummaryView('account_group')} className="text-xs">
+                <Button
+                  variant={summaryView === 'account_group' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSummaryView('account_group')}
+                  className="text-xs"
+                >
                   Kelompok Belanja
                 </Button>
               </div>
@@ -281,6 +402,8 @@ const BudgetComparison: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
+
 export default BudgetComparison;
