@@ -221,6 +221,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -234,6 +235,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -247,6 +249,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -259,6 +262,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -271,6 +275,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -283,6 +288,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -295,6 +301,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -307,6 +314,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }
         Relationships: []
       }
@@ -323,6 +331,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_budget_summary_by_akun: {
@@ -336,6 +345,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_budget_summary_by_akun_group: {
@@ -349,6 +359,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_budget_summary_by_kegiatan: {
@@ -361,6 +372,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_budget_summary_by_komponen: {
@@ -373,6 +385,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_budget_summary_by_program_pembebanan: {
@@ -385,6 +398,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_budget_summary_by_rincian_output: {
@@ -397,6 +411,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_budget_summary_by_sub_komponen: {
@@ -409,6 +424,7 @@ export type Database = {
           total_menjadi: number | null
           total_selisih: number | null
           total_semula: number | null
+          total_sisa_anggaran: number | null
         }[]
       }
       get_rpd_data: {

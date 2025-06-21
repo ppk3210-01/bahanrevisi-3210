@@ -1,3 +1,4 @@
+
 import { Database } from '@/integrations/supabase/types';
 
 export type BudgetItemRecord = Database['public']['Tables']['budget_items']['Row'];
@@ -30,6 +31,7 @@ export type BudgetSummaryRecord = {
   total_semula: number;
   total_menjadi: number;
   total_selisih: number;
+  total_sisa_anggaran: number;
   new_items: number;
   changed_items: number;
   total_items: number;
@@ -134,9 +136,11 @@ export type TemporaryDatabase = {
       budget_summary_by_account_group: {
         Row: {
           account_group: string | null;
+          account_group_name: string | null;
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -148,6 +152,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -156,9 +161,11 @@ export type TemporaryDatabase = {
       budget_summary_by_akun: {
         Row: {
           akun: string | null;
+          akun_name: string | null;
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -170,6 +177,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -181,6 +189,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -192,6 +201,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -203,6 +213,20 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
+      };
+      budget_summary_by_akun_group: {
+        Row: {
+          akun_group: string | null;
+          akun_group_name: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -214,9 +238,11 @@ export type TemporaryDatabase = {
         Args: Record<string, never>;
         Returns: {
           account_group: string | null;
+          account_group_name: string | null;
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -229,6 +255,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -238,9 +265,11 @@ export type TemporaryDatabase = {
         Args: Record<string, never>;
         Returns: {
           akun: string | null;
+          akun_name: string | null;
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -253,6 +282,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -265,6 +295,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -277,6 +308,7 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
@@ -289,6 +321,21 @@ export type TemporaryDatabase = {
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;
+          total_sisa_anggaran: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        }[];
+      };
+      get_budget_summary_by_akun_group: {
+        Args: Record<string, never>;
+        Returns: {
+          akun_group: string | null;
+          akun_group_name: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          total_sisa_anggaran: number | null;
           new_items: number | null;
           changed_items: number | null;
           total_items: number | null;
