@@ -17,6 +17,7 @@ interface SummaryRow {
   changedItems: number;
   totalItems: number;
   sisaAnggaran?: number;
+  blokir?: number;
   realisasi?: number;
   persentaseRealisasi?: number;
 }
@@ -55,15 +56,18 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     // Use the sisaAnggaran that's already provided from the parent component
     // which should come from the summaryData with proper aggregation
     const sisaAnggaran = row.sisaAnggaran || 0;
+    const blokir = row.blokir || 0;
     const jumlahMenjadi = row.totalMenjadi;
     const realisasi = calculateRealisasi(jumlahMenjadi, sisaAnggaran);
-    const persentaseRealisasi = calculatePersentaseRealisasi(realisasi, jumlahMenjadi);
+    // Updated calculation: (Blokir + Realisasi) / Total Menjadi
+    const persentaseRealisasi = jumlahMenjadi > 0 ? ((blokir + realisasi) / jumlahMenjadi) * 100 : 0;
     
-    console.log(`SummaryTable - Row: ${row.name}, JumlahMenjadi: ${jumlahMenjadi}, SisaAnggaran: ${sisaAnggaran}, Realisasi: ${realisasi}, Persentase: ${persentaseRealisasi}%`);
+    console.log(`SummaryTable - Row: ${row.name}, JumlahMenjadi: ${jumlahMenjadi}, SisaAnggaran: ${sisaAnggaran}, Blokir: ${blokir}, Realisasi: ${realisasi}, Persentase: ${persentaseRealisasi}%`);
     
     return {
       ...row,
       sisaAnggaran,
+      blokir,
       realisasi,
       persentaseRealisasi
     };
@@ -103,8 +107,9 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
   const totalChangedItems = sortedData.reduce((sum, item) => sum + item.changedItems, 0);
   const totalItems = sortedData.reduce((sum, item) => sum + item.totalItems, 0);
   const totalSisaAnggaran = sortedData.reduce((sum, item) => sum + (item.sisaAnggaran || 0), 0);
+  const totalBlokir = sortedData.reduce((sum, item) => sum + (item.blokir || 0), 0);
   const totalRealisasi = calculateRealisasi(totalMenjadi, totalSisaAnggaran);
-  const totalPersentaseRealisasi = calculatePersentaseRealisasi(totalRealisasi, totalMenjadi);
+  const totalPersentaseRealisasi = totalMenjadi > 0 ? ((totalBlokir + totalRealisasi) / totalMenjadi) * 100 : 0;
 
   return (
     <div>
@@ -163,6 +168,12 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
                 </button>
               </TableHead>
               <TableHead className="text-right">
+                <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('blokir')}>
+                  Blokir
+                  <ArrowUpDown className="ml-1 h-4 w-4" />
+                </button>
+              </TableHead>
+              <TableHead className="text-right">
                 <button className="flex items-center justify-end font-semibold w-full" onClick={() => handleSort('realisasi')}>
                   Realisasi
                   <ArrowUpDown className="ml-1 h-4 w-4" />
@@ -197,7 +208,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
           <TableBody>
             {currentItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} className="text-center py-4">
+                <TableCell colSpan={12} className="text-center py-4">
                   Tidak ada data
                 </TableCell>
               </TableRow>
@@ -208,12 +219,13 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
                   <TableCell className="text-left">{row.name || '-'}</TableCell>
                   <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.totalSemula))}</TableCell>
                   <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.totalMenjadi))}</TableCell>
-                  <TableCell className={`text-right ${row.totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(roundToThousands(row.totalSelisih))}
-                  </TableCell>
-                  <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.sisaAnggaran || 0))}</TableCell>
-                  <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.realisasi || 0))}</TableCell>
-                  <TableCell className="text-right px-[4px]">{formatPercentage(row.persentaseRealisasi || 0)}</TableCell>
+                   <TableCell className={`text-right ${row.totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                     {formatCurrency(roundToThousands(row.totalSelisih))}
+                   </TableCell>
+                   <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.sisaAnggaran || 0))}</TableCell>
+                   <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.blokir || 0))}</TableCell>
+                   <TableCell className="text-right px-[4px]">{formatCurrency(roundToThousands(row.realisasi || 0))}</TableCell>
+                   <TableCell className="text-right px-[4px]">{formatPercentage(row.persentaseRealisasi || 0)}</TableCell>
                   <TableCell className="text-right">{row.newItems}</TableCell>
                   <TableCell className="text-right">{row.changedItems}</TableCell>
                   <TableCell className="text-right">{row.totalItems}</TableCell>
@@ -226,12 +238,13 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
               <TableCell className="font-bold" colSpan={2}>Total Pagu</TableCell>
               <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalSemula))}</TableCell>
               <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalMenjadi))}</TableCell>
-              <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(roundToThousands(totalSelisih))}
-              </TableCell>
-              <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalSisaAnggaran))}</TableCell>
-              <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalRealisasi))}</TableCell>
-              <TableCell className="text-right font-bold px-[4px]">{formatPercentage(totalPersentaseRealisasi)}</TableCell>
+               <TableCell className={`text-right font-bold ${totalSelisih === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                 {formatCurrency(roundToThousands(totalSelisih))}
+               </TableCell>
+               <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalSisaAnggaran))}</TableCell>
+               <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalBlokir))}</TableCell>
+               <TableCell className="text-right font-bold px-[4px]">{formatCurrency(roundToThousands(totalRealisasi))}</TableCell>
+               <TableCell className="text-right font-bold px-[4px]">{formatPercentage(totalPersentaseRealisasi)}</TableCell>
               <TableCell className="text-right font-bold">{totalNewItems}</TableCell>
               <TableCell className="text-right font-bold">{totalChangedItems}</TableCell>
               <TableCell className="text-right font-bold">{totalItems}</TableCell>

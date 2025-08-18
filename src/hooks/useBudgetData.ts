@@ -103,28 +103,28 @@ export default function useBudgetData(filters: FilterSelection) {
           accountGroupResult,
           akunGroupResult
         ] = await Promise.all([
-          supabase.rpc('get_budget_summary_by_komponen'),
-          supabase.rpc('get_budget_summary_by_akun'),
-          supabase.rpc('get_budget_summary_by_program_pembebanan'),
-          supabase.rpc('get_budget_summary_by_kegiatan'),
-          supabase.rpc('get_budget_summary_by_rincian_output'),
-          supabase.rpc('get_budget_summary_by_sub_komponen'),
-          supabase.rpc('get_budget_summary_by_account_group'),
-          supabase.rpc('get_budget_summary_by_akun_group')
+          supabase.rpc('get_budget_summary_by_komponen') as any,
+          supabase.rpc('get_budget_summary_by_akun') as any,
+          supabase.rpc('get_budget_summary_by_program_pembebanan') as any,
+          supabase.rpc('get_budget_summary_by_kegiatan') as any,
+          supabase.rpc('get_budget_summary_by_rincian_output') as any,
+          supabase.rpc('get_budget_summary_by_sub_komponen') as any,
+          supabase.rpc('get_budget_summary_by_account_group') as any,
+          supabase.rpc('get_budget_summary_by_akun_group') as any
         ]);
         
         let allSummaryData: BudgetSummaryRecord[] = [];
         
         // Process komponen_output summary
         if (komponenResult.data) {
-          const komponenData: BudgetSummaryByKomponen[] = komponenResult.data.map(item => {
-            console.log(`Komponen ${item.komponen_output}: total_sisa_anggaran from DB = ${item.total_sisa_anggaran}`);
+          const komponenData: BudgetSummaryByKomponen[] = komponenResult.data.map((item: any) => {
             return {
               komponen_output: item.komponen_output || '',
               total_semula: roundToThousands(item.total_semula || 0),
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
@@ -136,8 +136,7 @@ export default function useBudgetData(filters: FilterSelection) {
         
         // Process akun summary
         if (akunResult.data) {
-          const akunData: BudgetSummaryByAkun[] = akunResult.data.map(item => {
-            console.log(`Akun ${item.akun}: total_sisa_anggaran from DB = ${item.total_sisa_anggaran}`);
+          const akunData: BudgetSummaryByAkun[] = akunResult.data.map((item: any) => {
             return {
               akun: item.akun || '',
               akun_name: item.akun_name || '',
@@ -145,6 +144,7 @@ export default function useBudgetData(filters: FilterSelection) {
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
@@ -164,6 +164,7 @@ export default function useBudgetData(filters: FilterSelection) {
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
@@ -183,6 +184,7 @@ export default function useBudgetData(filters: FilterSelection) {
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
@@ -202,6 +204,7 @@ export default function useBudgetData(filters: FilterSelection) {
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
@@ -221,6 +224,7 @@ export default function useBudgetData(filters: FilterSelection) {
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
@@ -241,6 +245,7 @@ export default function useBudgetData(filters: FilterSelection) {
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
@@ -261,6 +266,7 @@ export default function useBudgetData(filters: FilterSelection) {
               total_menjadi: roundToThousands(item.total_menjadi || 0),
               total_selisih: roundToThousands(item.total_selisih || 0),
               total_sisa_anggaran: roundToThousands(item.total_sisa_anggaran || 0),
+              total_blokir: roundToThousands(item.total_blokir || 0),
               new_items: item.new_items,
               changed_items: item.changed_items,
               total_items: item.total_items,
