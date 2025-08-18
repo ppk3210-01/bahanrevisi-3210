@@ -222,6 +222,7 @@ export type Database = {
           account_group_name: string | null
           changed_items: number | null
           new_items: number | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -236,6 +237,7 @@ export type Database = {
           akun_name: string | null
           changed_items: number | null
           new_items: number | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -250,6 +252,7 @@ export type Database = {
           akun_group_name: string | null
           changed_items: number | null
           new_items: number | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -263,6 +266,7 @@ export type Database = {
           changed_items: number | null
           kegiatan: string | null
           new_items: number | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -276,6 +280,7 @@ export type Database = {
           changed_items: number | null
           komponen_output: string | null
           new_items: number | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -289,6 +294,7 @@ export type Database = {
           changed_items: number | null
           new_items: number | null
           program_pembebanan: string | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -302,6 +308,7 @@ export type Database = {
           changed_items: number | null
           new_items: number | null
           rincian_output: string | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -315,6 +322,7 @@ export type Database = {
           changed_items: number | null
           new_items: number | null
           sub_komponen: string | null
+          total_blokir: number | null
           total_items: number | null
           total_menjadi: number | null
           total_selisih: number | null
@@ -325,113 +333,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_budget_summary_by_account_group: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          account_group: string | null
-          account_group_name: string | null
-          changed_items: number | null
-          new_items: number | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
-      get_budget_summary_by_akun: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          akun: string | null
-          akun_name: string | null
-          changed_items: number | null
-          new_items: number | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
-      get_budget_summary_by_akun_group: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          akun_group: string | null
-          akun_group_name: string | null
-          changed_items: number | null
-          new_items: number | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
-      get_budget_summary_by_kegiatan: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          changed_items: number | null
-          kegiatan: string | null
-          new_items: number | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
-      get_budget_summary_by_komponen: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          changed_items: number | null
-          komponen_output: string | null
-          new_items: number | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
-      get_budget_summary_by_program_pembebanan: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          changed_items: number | null
-          new_items: number | null
-          program_pembebanan: string | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
-      get_budget_summary_by_rincian_output: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          changed_items: number | null
-          new_items: number | null
-          rincian_output: string | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
-      get_budget_summary_by_sub_komponen: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          changed_items: number | null
-          new_items: number | null
-          sub_komponen: string | null
-          total_items: number | null
-          total_menjadi: number | null
-          total_selisih: number | null
-          total_semula: number | null
-          total_sisa_anggaran: number | null
-        }[]
-      }
       get_rpd_data: {
         Args: Record<PropertyKey, never>
         Returns: {
