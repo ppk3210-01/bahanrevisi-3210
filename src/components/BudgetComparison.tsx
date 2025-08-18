@@ -186,10 +186,9 @@ const BudgetComparison: React.FC = () => {
             name = '';
         }
 
-        // Now use the total_sisa_anggaran and total_blokir directly from the database
+        // Now use the total_sisa_anggaran directly from the database
         const sisaAnggaran = item.total_sisa_anggaran || 0;
-        const blokir = item.total_blokir || 0;
-        console.log(`BudgetComparison - Processing ${name}: sisaAnggaran = ${sisaAnggaran}, blokir = ${blokir}`);
+        console.log(`BudgetComparison - Processing ${name}: sisaAnggaran from database = ${sisaAnggaran}`);
 
         return {
           id: item.type === 'akun' 
@@ -204,7 +203,6 @@ const BudgetComparison: React.FC = () => {
           totalMenjadi: item.total_menjadi || 0,
           totalSelisih: item.total_selisih || 0,
           sisaAnggaran: sisaAnggaran, // Use the value directly from database
-          blokir: blokir, // Use the value directly from database
           newItems: item.new_items || 0,
           changedItems: item.changed_items || 0,  
           totalItems: item.total_items || 0

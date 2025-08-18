@@ -24,13 +24,12 @@ export type BudgetSummaryBySubKomponenRecord = Views['budget_summary_by_sub_komp
 export type BudgetSummaryByAccountGroupRecord = Views['budget_summary_by_account_group']['Row'];
 export type BudgetSummaryByAkunGroupRecord = Views['budget_summary_by_akun_group']['Row'];
 
-// Base type with common fields - Updated to include total_sisa_anggaran and total_blokir
+// Base type with common fields - Updated to include total_sisa_anggaran
 export type BudgetSummaryBase = {
   total_semula: number | null;
   total_menjadi: number | null;
   total_selisih: number | null;
   total_sisa_anggaran: number | null;
-  total_blokir: number | null;
   new_items: number | null;
   changed_items: number | null;
   total_items: number | null;

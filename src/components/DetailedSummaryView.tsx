@@ -22,7 +22,6 @@ interface SummaryRow {
   changedItems: number;
   totalItems: number;
   sisaAnggaran?: number;
-  blokir?: number;
 }
 
 interface DetailedSummaryViewProps {
