@@ -92,7 +92,7 @@ export default function useBudgetData(filters: FilterSelection) {
       try {
         console.log('Fetching summary data...');
         
-        // Fetch summary data from RPC functions - they now include total_sisa_anggaran
+        // Fetch summary data from views - they now include total_sisa_anggaran and total_blokir
         const [
           komponenResult, 
           akunResult,
@@ -103,14 +103,14 @@ export default function useBudgetData(filters: FilterSelection) {
           accountGroupResult,
           akunGroupResult
         ] = await Promise.all([
-          supabase.rpc('get_budget_summary_by_komponen') as any,
-          supabase.rpc('get_budget_summary_by_akun') as any,
-          supabase.rpc('get_budget_summary_by_program_pembebanan') as any,
-          supabase.rpc('get_budget_summary_by_kegiatan') as any,
-          supabase.rpc('get_budget_summary_by_rincian_output') as any,
-          supabase.rpc('get_budget_summary_by_sub_komponen') as any,
-          supabase.rpc('get_budget_summary_by_account_group') as any,
-          supabase.rpc('get_budget_summary_by_akun_group') as any
+          supabase.from('budget_summary_by_komponen').select('*'),
+          supabase.from('budget_summary_by_akun').select('*'),
+          supabase.from('budget_summary_by_program_pembebanan').select('*'),
+          supabase.from('budget_summary_by_kegiatan').select('*'),
+          supabase.from('budget_summary_by_rincian_output').select('*'),
+          supabase.from('budget_summary_by_sub_komponen').select('*'),
+          supabase.from('budget_summary_by_account_group').select('*'),
+          supabase.from('budget_summary_by_akun_group').select('*')
         ]);
         
         let allSummaryData: BudgetSummaryRecord[] = [];
