@@ -65,10 +65,8 @@ export default function useBudgetData(filters: FilterSelection) {
             budgetItem.jumlahMenjadi = roundToThousands(budgetItem.jumlahMenjadi);
             budgetItem.selisih = roundToThousands(budgetItem.selisih);
             
-            // Ensure sisa anggaran has a value - calculate if missing
-            if (!budgetItem.sisaAnggaran || budgetItem.sisaAnggaran === 0) {
-              budgetItem.sisaAnggaran = Math.round(budgetItem.jumlahMenjadi * 0.3);
-            }
+            // Use actual sisa_anggaran value from database
+            budgetItem.sisaAnggaran = budgetItem.sisaAnggaran || 0;
             
             console.log(`Budget item ${budgetItem.uraian}: sisaAnggaran = ${budgetItem.sisaAnggaran}`);
             
@@ -301,7 +299,7 @@ export default function useBudgetData(filters: FilterSelection) {
         satuan_menjadi: item.satuanMenjadi,
         harga_satuan_menjadi: item.hargaSatuanMenjadi,
         jumlah_menjadi: jumlahMenjadi,
-        sisa_anggaran: item.sisaAnggaran || Math.round(jumlahMenjadi * 0.3),
+        sisa_anggaran: item.sisaAnggaran || 0,
         status: 'new',
         program_pembebanan: filters.programPembebanan !== 'all' ? filters.programPembebanan : null,
         kegiatan: filters.kegiatan !== 'all' ? filters.kegiatan : null,
@@ -348,7 +346,7 @@ export default function useBudgetData(filters: FilterSelection) {
       const itemsToInsert = items.map(item => {
         const jumlahSemula = roundToThousands(calculateAmount(item.volumeSemula || 0, item.hargaSatuanSemula || 0));
         const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi || 0, item.hargaSatuanMenjadi || 0));
-        const sisaAnggaran = item.sisaAnggaran || Math.round(jumlahMenjadi * 0.3);
+        const sisaAnggaran = item.sisaAnggaran || 0;
 
         console.log(`Mapping sisaAnggaran for item "${item.uraian}":`, sisaAnggaran);
 
