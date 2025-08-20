@@ -59,8 +59,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
     const blokir = row.blokir || 0;
     const jumlahMenjadi = row.totalMenjadi;
     const realisasi = calculateRealisasi(jumlahMenjadi, sisaAnggaran);
-    // Updated calculation: (Blokir + Realisasi) / Total Menjadi
-    const persentaseRealisasi = jumlahMenjadi > 0 ? ((blokir + realisasi) / jumlahMenjadi) * 100 : 0;
+    const persentaseRealisasi = calculatePersentaseRealisasi(realisasi, jumlahMenjadi);
     
     console.log(`SummaryTable - Row: ${row.name}, JumlahMenjadi: ${jumlahMenjadi}, SisaAnggaran: ${sisaAnggaran}, Blokir: ${blokir}, Realisasi: ${realisasi}, Persentase: ${persentaseRealisasi}%`);
     
@@ -109,7 +108,7 @@ const SummaryTable: React.FC<SummaryTableProps> = ({
   const totalSisaAnggaran = sortedData.reduce((sum, item) => sum + (item.sisaAnggaran || 0), 0);
   const totalBlokir = sortedData.reduce((sum, item) => sum + (item.blokir || 0), 0);
   const totalRealisasi = calculateRealisasi(totalMenjadi, totalSisaAnggaran);
-  const totalPersentaseRealisasi = totalMenjadi > 0 ? ((totalBlokir + totalRealisasi) / totalMenjadi) * 100 : 0;
+  const totalPersentaseRealisasi = calculatePersentaseRealisasi(totalRealisasi, totalMenjadi);
 
   return (
     <div>
