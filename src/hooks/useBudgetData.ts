@@ -348,7 +348,20 @@ export default function useBudgetData(filters: FilterSelection) {
         const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi || 0, item.hargaSatuanMenjadi || 0));
         const sisaAnggaran = item.sisaAnggaran || 0;
 
-        console.log(`Mapping sisaAnggaran for item "${item.uraian}":`, sisaAnggaran);
+        // Determine status based on volume comparison
+        let status: string;
+        const volumeSemula = item.volumeSemula || 0;
+        const volumeMenjadi = item.volumeMenjadi || 0;
+        
+        if (volumeSemula === 0 && volumeMenjadi > 0) {
+          status = 'new';
+        } else if (volumeSemula === volumeMenjadi) {
+          status = 'unchanged';
+        } else {
+          status = 'changed';
+        }
+
+        console.log(`Item "${item.uraian}": Volume Semula=${volumeSemula}, Volume Menjadi=${volumeMenjadi}, Status=${status}, sisaAnggaran:`, sisaAnggaran);
 
         return {
           uraian: item.uraian,
@@ -361,7 +374,7 @@ export default function useBudgetData(filters: FilterSelection) {
           harga_satuan_menjadi: item.hargaSatuanMenjadi,
           jumlah_menjadi: jumlahMenjadi,
           sisa_anggaran: sisaAnggaran,
-          status: 'new',
+          status: status,
           program_pembebanan: item.programPembebanan || (filters.programPembebanan !== 'all' ? filters.programPembebanan : null),
           kegiatan: item.kegiatan || (filters.kegiatan !== 'all' ? filters.kegiatan : null),
           rincian_output: item.rincianOutput || (filters.rincianOutput !== 'all' ? filters.rincianOutput : null),
