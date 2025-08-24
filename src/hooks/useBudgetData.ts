@@ -348,16 +348,29 @@ export default function useBudgetData(filters: FilterSelection) {
         const jumlahMenjadi = roundToThousands(calculateAmount(item.volumeMenjadi || 0, item.hargaSatuanMenjadi || 0));
         const sisaAnggaran = item.sisaAnggaran || 0;
 
-        // Determine status based on volume comparison
+        // Determine status based on multiple field comparisons
         let status: string;
         const volumeSemula = item.volumeSemula || 0;
         const volumeMenjadi = item.volumeMenjadi || 0;
+        const satuanSemula = item.satuanSemula || '';
+        const satuanMenjadi = item.satuanMenjadi || '';
+        const hargaSatuanSemula = item.hargaSatuanSemula || 0;
+        const hargaSatuanMenjadi = item.hargaSatuanMenjadi || 0;
         
-        if (volumeSemula === 0 && volumeMenjadi > 0) {
+        // Check if it's a new item (any field went from 0/empty to having a value)
+        if ((volumeSemula === 0 && volumeMenjadi > 0) || 
+            (satuanSemula === '' && satuanMenjadi !== '') || 
+            (hargaSatuanSemula === 0 && hargaSatuanMenjadi > 0)) {
           status = 'new';
-        } else if (volumeSemula === volumeMenjadi) {
+        }
+        // Check if unchanged (all fields are equal)
+        else if (volumeSemula === volumeMenjadi && 
+                 satuanSemula === satuanMenjadi && 
+                 hargaSatuanSemula === hargaSatuanMenjadi) {
           status = 'unchanged';
-        } else {
+        }
+        // Otherwise it's changed
+        else {
           status = 'changed';
         }
 
