@@ -23,6 +23,7 @@ export const expectedColumns = {
   volumeMenjadi: ["volumemenjadi", "volume menjadi", "volume akhir", "jumlah menjadi", "volume2"],
   satuanMenjadi: ["satuanmenjadi", "satuan menjadi", "satuan akhir", "unit menjadi", "satuan2"],
   hargaSatuanMenjadi: ["hargasatuanmenjadi", "harga satuan menjadi", "harga menjadi", "harga akhir", "price menjadi", "hargasatuan2", "hargamenjadi"],
+  blokir: ["blokir", "blocked", "block"],
   sisaAnggaran: ["sisaanggaran", "sisa anggaran", "sisa budget", "remainder budget", "anggaran sisa", "budget sisa"],
   programPembebanan: ["programpembebanan", "program pembebanan", "program"],
   kegiatan: ["kegiatan", "activity"],
@@ -50,6 +51,7 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     "Volume Menjadi", 
     "Satuan Menjadi", 
     "Harga Satuan Menjadi",
+    "Blokir",
     "Sisa Anggaran"
   ];
   
@@ -67,6 +69,7 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     1, 
     "Paket", 
     1200000,
+    0,
     200000
   ]];
   
@@ -87,6 +90,7 @@ export const createTemplateWorkbook = (komponenOutput?: string, subKomponen?: st
     { width: 12 },  // Volume Menjadi
     { width: 15 },  // Satuan Menjadi
     { width: 20 },  // Harga Satuan Menjadi
+    { width: 15 },  // Blokir
     { width: 20 },  // Sisa Anggaran
   ];
   
@@ -257,8 +261,20 @@ export const processDataRows = (
         volumeMenjadi: parseFloat(row[columnIndices.volumeMenjadi]) || 0,
         satuanMenjadi: String(row[columnIndices.satuanMenjadi] || 'Paket'),
         hargaSatuanMenjadi: parseFloat(row[columnIndices.hargaSatuanMenjadi]) || 0,
+        blokir: 0,  // Default value
         sisaAnggaran: 0  // Default value
       };
+      
+      // Process blokir if the column exists in the file
+      if ('blokir' in columnIndices && columnIndices.blokir !== undefined) {
+        const blokirValue = row[columnIndices.blokir];
+        if (blokirValue !== null && blokirValue !== undefined && blokirValue !== '') {
+          const parsedValue = parseFloat(blokirValue);
+          item.blokir = isNaN(parsedValue) ? 0 : parsedValue;
+        } else {
+          item.blokir = 0;
+        }
+      }
       
       // Process sisaAnggaran if the column exists in the file
       if ('sisaAnggaran' in columnIndices && columnIndices.sisaAnggaran !== undefined) {
