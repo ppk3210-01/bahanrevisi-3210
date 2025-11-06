@@ -133,6 +133,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({
         satuanMenjadi: newItem.satuanMenjadi || 'Paket',
         hargaSatuanMenjadi: newItem.hargaSatuanMenjadi || 0,
         sisaAnggaran: newItem.sisaAnggaran || 0,
+        blokir: 0,
         komponenOutput,
         subKomponen: subKomponen || '',
         akun: akun || '',

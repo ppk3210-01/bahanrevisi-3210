@@ -16,6 +16,8 @@ export type Database = {
           harga_satuan_menjadi: number;
           jumlah_menjadi: number | null;
           selisih: number | null;
+          blokir: number | null;
+          sisa_anggaran: number | null;
           status: string;
           is_approved: boolean;
           komponen_output: string;
@@ -39,6 +41,8 @@ export type Database = {
           harga_satuan_menjadi: number;
           jumlah_menjadi?: number | null;
           selisih?: number | null;
+          blokir?: number | null;
+          sisa_anggaran?: number | null;
           status?: string;
           is_approved?: boolean;
           komponen_output: string;
@@ -62,6 +66,8 @@ export type Database = {
           harga_satuan_menjadi?: number;
           jumlah_menjadi?: number | null;
           selisih?: number | null;
+          blokir?: number | null;
+          sisa_anggaran?: number | null;
           status?: string;
           is_approved?: boolean;
           komponen_output?: string;
@@ -225,6 +231,17 @@ export type Database = {
       budget_summary_by_sub_komponen: {
         Row: {
           sub_komponen: string | null;
+          total_semula: number | null;
+          total_menjadi: number | null;
+          total_selisih: number | null;
+          new_items: number | null;
+          changed_items: number | null;
+          total_items: number | null;
+        };
+      };
+      budget_summary_by_akun_group: {
+        Row: {
+          akun_group: string | null;
           total_semula: number | null;
           total_menjadi: number | null;
           total_selisih: number | null;

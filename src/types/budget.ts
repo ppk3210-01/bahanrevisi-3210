@@ -14,6 +14,7 @@ export type BudgetItem = {
   jumlahMenjadi: number;
   sisaAnggaran: number;
   selisih: number;
+  blokir: number;
   status: string;
   isApproved: boolean;
   programPembebanan: string;
@@ -47,6 +48,7 @@ export const convertToBudgetItem = (record: BudgetItemRecord) => {
     jumlahMenjadi: record.jumlah_menjadi,
     sisaAnggaran: record.sisa_anggaran || 0,
     selisih: record.selisih || 0,
+    blokir: record.blokir || 0,
     status: record.status,
     isApproved: record.is_approved || false,
     programPembebanan: record.program_pembebanan || '',
@@ -72,6 +74,7 @@ export const convertToBudgetItemRecord = (item: Partial<any>) => {
   if ('jumlahMenjadi' in item) record.jumlah_menjadi = item.jumlahMenjadi;
   if ('sisaAnggaran' in item) record.sisa_anggaran = item.sisaAnggaran;
   if ('selisih' in item) record.selisih = item.selisih;
+  if ('blokir' in item) record.blokir = item.blokir;
   if ('status' in item) record.status = item.status;
   if ('isApproved' in item) record.is_approved = item.isApproved;
   if ('programPembebanan' in item) record.program_pembebanan = item.programPembebanan;
