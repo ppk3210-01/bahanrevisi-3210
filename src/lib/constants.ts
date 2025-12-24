@@ -205,6 +205,7 @@ export const HIERARCHY_DATA = {
     { id: '511619', name: 'Belanja Pembulatan Gaji PPPK (511619)' },
     { id: '511621', name: 'Belanja Tunjangan Suami/Istri PPPK (511621)' },
     { id: '511622', name: 'Belanja Tunjangan Anak PPPK (511622)' },
+    { id: '511633', name: 'Belanja Tunjangan Umum PPPK (511633)' },
     { id: '511624', name: 'Belanja Tunjangan Fungsional PPPK (511624)' },
     { id: '511625', name: 'Belanja Tunjangan Beras PPPK (511625)' },
     { id: '511628', name: 'Belanja Uang Makan PPPK (511628)' },
